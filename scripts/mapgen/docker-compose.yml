@@ -1,0 +1,76 @@
+# Orchestrates the map repository pipeline:
+#
+#   mapgen  — regeneration container (writer, one pass per start)
+#   serve   — read-only static web server (reader, long-running)
+#
+# Both share one repository volume. The mapgen container places databases
+# into <volume>/public/; the web server serves exactly that directory and
+# can never see the private part (outside the served root).
+#
+# Usage:
+#   docker compose -f scripts/mapgen/docker-compose.yml up -d
+#     -> runs one mapgen pass, starts the web server on localhost:8080
+#   docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen
+#     -> runs another pass (refresh-gated) without touching the server
+#
+# Before the first run, place imports.json and basemap.json in
+# scripts/mapgen/config/ and seed the repository volumes with the region index
+# and correct ownership:
+#   docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+#     -v <host-dir-with-names.json>:/seed:ro --entrypoint sh mapgen -c \
+#     'mkdir -p /repository /work && cp /seed/names.json /repository/public/ \
+#      && chown -R 1000:1000 /repository /work'
+# (Docker creates fresh named volumes as root; the mapgen container runs
+# as uid 1000, so ownership must be granted once.)
+#
+# Published images instead of a local build: set the image names to the
+# registry names and pull them first, so nothing is built:
+#   export MAPGEN_IMAGE=ghcr.io/framstag/libosmscout/mapgen:<tag>
+#   export MAPSERVE_IMAGE=ghcr.io/framstag/libosmscout/mapserve:<tag>
+#   docker compose -f scripts/mapgen/docker-compose.yml pull
+#   docker compose -f scripts/mapgen/docker-compose.yml up -d --no-build
+# See Documentation/MapRepository.md, section 5, for the tag semantics.
+
+services:
+  mapgen:
+    build:
+      context: ../..
+      dockerfile: scripts/mapgen/Dockerfile
+    image: ${MAPGEN_IMAGE:-osmscout-mapgen:local}
+    # The identity the pass runs as. It decides who owns what the pass writes
+    # into the mounted areas, so a repository bind-mounted from a directory
+    # owned by the operator needs no ownership change. 1000/1000 is the
+    # identity the image itself uses. The serving container keeps its own
+    # image's identity: it only reads the repository.
+    user: "${PUID:-1000}:${PGID:-1000}"
+    # One pass per start by default, then exit - an external scheduler triggers
+    # the next one. Set MAPGEN_CRON to a cron expression to let the container run
+    # the pass on that schedule instead, and MAPGEN_RESTART=unless-stopped with
+    # it, because a container that stays up has to come back after a crash.
+    # See Documentation/MapRepository.md, section 5.
+    restart: "${MAPGEN_RESTART:-no}"
+    read_only: true
+    volumes:
+      - osmscout-maps:/repository
+      - osmscout-work:/work
+      - type: bind
+        source: ./config
+        target: /config
+        read_only: true
+
+  serve:
+    build:
+      context: ../..
+      dockerfile: scripts/mapgen/Dockerfile.serve
+    image: ${MAPSERVE_IMAGE:-osmscout-mapserve:local}
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - osmscout-maps:/repository:ro
+    depends_on:
+      - mapgen
+
+volumes:
+  osmscout-maps:
+  osmscout-work:

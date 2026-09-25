@@ -58,6 +58,19 @@ namespace osmscout {
     virtual ~TagCondition() = default;
 
     virtual bool Evaluate(const TagMap& tagMap) const = 0;
+
+    /**
+     * Collects the tag keys that act as primary discriminators for this condition.
+     *
+     * If 'guaranteed' is true, at least one of the returned keys is guaranteed to be
+     * present in the tag map whenever this condition evaluates to true, i.e. the
+     * condition can only match objects that carry one of these keys.
+     * If 'guaranteed' is false, the condition may evaluate to true even if none of
+     * the returned keys is present (e.g. conditions containing negation) and the
+     * caller has to always evaluate the condition.
+     */
+    virtual void CollectTagKeys(std::vector<TagId>& keys,
+                                bool& guaranteed) const = 0;
   };
 
   /**
@@ -83,6 +96,16 @@ namespace osmscout {
     bool Evaluate(const TagMap& tagMap) const override
     {
       return !condition->Evaluate(tagMap);
+    }
+
+    void CollectTagKeys(std::vector<TagId>& keys,
+                        bool& guaranteed) const override
+    {
+      condition->CollectTagKeys(keys,
+                                guaranteed);
+
+      // A negated condition may be true even if the inner tags are not present
+      guaranteed=false;
     }
   };
 
@@ -110,6 +133,9 @@ namespace osmscout {
     void AddCondition(const TagConditionRef& condition);
 
     bool Evaluate(const TagMap& tagMap) const override;
+
+    void CollectTagKeys(std::vector<TagId>& keys,
+                        bool& guaranteed) const override;
   };
 
   /**
@@ -135,6 +161,14 @@ namespace osmscout {
     bool Evaluate(const TagMap& tagMap) const override
     {
       return tagMap.find(tag)!=tagMap.end();
+    }
+
+    void CollectTagKeys(std::vector<TagId>& keys,
+                        bool& guaranteed) const override
+    {
+      keys.clear();
+      keys.push_back(tag);
+      guaranteed=true;
     }
   };
 
@@ -168,6 +202,14 @@ namespace osmscout {
                        const size_t& tagValue);
 
     bool Evaluate(const TagMap& tagMap) const override;
+
+    void CollectTagKeys(std::vector<TagId>& keys,
+                        bool& guaranteed) const override
+    {
+      keys.clear();
+      keys.push_back(tag);
+      guaranteed=true;
+    }
   };
 
   /**
@@ -188,6 +230,14 @@ namespace osmscout {
     void AddTagValue(const std::string& tagValue);
 
     bool Evaluate(const TagMap& tagMap) const override;
+
+    void CollectTagKeys(std::vector<TagId>& keys,
+                        bool& guaranteed) const override
+    {
+      keys.clear();
+      keys.push_back(tag);
+      guaranteed=true;
+    }
   };
 
   /**

@@ -27,6 +27,7 @@
 
 #include <osmscoutmap/MapImportExport.h>
 
+#include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/StyleConfig.h>
 #include <osmscoutmap/LabelPath.h>
 #include <osmscout/system/Math.h>
@@ -187,6 +188,52 @@ namespace osmscout {
     void AddMask(const ScreenRectMask& mask);
     bool HasCollision(const ScreenRectMask& mask) const;
   };
+
+  /**
+   * Number of words of a text, i.e. the number of sequences of characters separated by
+   * whitespace. Used together with GetLabelExtentBound to bound the height of a wrapped
+   * label, because text is wrapped at word boundaries.
+   */
+  OSMSCOUT_MAP_API size_t CountLabelWords(const std::string_view& text);
+
+  /**
+   * The widest padding [pixels] the label layout adds around a label element when it marks the
+   * element in the overlap canvases of a frame. An element that lies outside the view can still
+   * suppress a label inside the view through this padding, so a decision that removes a label
+   * from the frame has to leave room for the widest padding of the frame.
+   */
+  OSMSCOUT_MAP_API double GetMaxLabelPaddingPixel(const Projection& projection,
+                                                  const MapParameter& parameter);
+
+  /**
+   * The margin [pixels] outside the visible view in which a label element can still take part in
+   * a frame: the label layout marks elements in a view that is enlarged by the layouter overlap,
+   * and it marks them with a padding around their rectangle. An element outside the visible view
+   * can therefore still suppress a label inside it, and a decision taken against the visible view
+   * has to leave room for this margin.
+   */
+  OSMSCOUT_MAP_API double GetLabelLayoutMarginPixel(const Projection& projection,
+                                                    const MapParameter& parameter);
+
+  /**
+   * Conservative upper bound [pixels] of half of the larger side of the rectangle a label
+   * can occupy after layout, derived from the number of characters and words of its text and
+   * from the pixel size of its font.
+   *
+   * The bound is conservative: a glyph advance is assumed to be at most
+   * maxLabelAdvanceFactor times the font size (an em box is 1.0 times the font size), and
+   * because text is wrapped at word boundaries a label carries at most one line more than it
+   * has words. Callers may therefore use this value to reject a label that provably cannot
+   * reach the viewport, but must not use it to accept a label.
+   *
+   * @param characterCount number of characters of the label text
+   * @param wordCount number of words of the label text (see CountLabelWords)
+   * @param fontSizePixel size of the font in pixels
+   * @return the half extent [pixels], 0.0 for an empty text or a non-positive font size
+   */
+  OSMSCOUT_MAP_API double GetLabelExtentBound(size_t characterCount,
+                                              size_t wordCount,
+                                              double fontSizePixel);
 }
 
 #endif

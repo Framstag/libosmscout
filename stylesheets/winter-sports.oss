@@ -189,8 +189,8 @@ CONST
   COLOR cyclewayColor              = #ec47c7;
 
   IF daylight {
-    COLOR motorwayColor            = #4440ec; // dark blue
-    COLOR trunkColor               = #7674ec; // lighther blue
+    COLOR motorwayColor            = #7d7af5; // blue
+    COLOR trunkColor               = #a3a1f5; // lighter blue
     COLOR primaryColor             = #f38689; // red
     COLOR secondaryColor           = #fecb8b; // orange
     COLOR tertiaryColor            = #fef7ae; // yelow
@@ -216,16 +216,16 @@ CONST
   }
 
   COLOR thinRoadColor              = #a08080;
-  COLOR thinMotorwayColor          = lighten(@motorwayColor,0.3);
-  COLOR thinTrunkColor             = lighten(@trunkColor,0.3);
-  COLOR thinPrimaryColor           = lighten(@primaryColor,0.3);
+  COLOR thinMotorwayColor          = lighten(@motorwayColor,0.2);
+  COLOR thinTrunkColor             = lighten(@trunkColor,0.2);
+  COLOR thinPrimaryColor           = lighten(@primaryColor,0.2);
   COLOR thinSecondaryColor         = #fdd654;
   COLOR thinTertiaryColor          = #fefe73;
 
-  COLOR motorwayShieldColor        = @motorwayColor;
-  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
-  COLOR trunkShieldColor           = @trunkColor;
-  COLOR primaryShieldColor         = @primaryColor;
+  COLOR motorwayShieldColor        = darken(@motorwayColor, 0.45);
+  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.3);
+  COLOR trunkShieldColor           = darken(@trunkColor, 0.45);
+  COLOR primaryShieldColor         = darken(@primaryColor, 0.45);
 
   // Buildings
   IF daylight {

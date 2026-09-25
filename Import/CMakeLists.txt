@@ -8,6 +8,8 @@ add_executable(Import ${SOURCE_FILES} ${HEADER_FILES})
 
 set_target_properties(Import PROPERTIES VERSION ${OSMSCOUT_LIBRARY_VERSION} SOVERSION ${OSMSCOUT_LIBRARY_VERSION} FOLDER "Tools")
 
+target_compile_definitions(Import PRIVATE OSMSCOUT_IMPORT_VERSION="${OSMSCOUT_LIBRARY_VERSION}")
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/Config.h)
 
 target_include_directories(Import PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include)

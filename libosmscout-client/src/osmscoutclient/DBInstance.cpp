@@ -27,7 +27,8 @@ namespace osmscout {
 
 bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
                            std::unordered_map<std::string,bool> stylesheetFlags,
-                           std::list<StyleError> &errors)
+                           std::list<StyleError> &errors,
+                           const osmscout::StyleConfigRef &fallback)
 {
   std::scoped_lock lock(mutex);
 
@@ -64,7 +65,23 @@ bool DBInstance::LoadStyle(const std::string &stylesheetFilename,
       log.Warn() << "Style error:" << err.GetDescription();
     }
 
-    styleConfig=nullptr;
+    // The stylesheet is rejected, so it never becomes the active style: the
+    // configuration installed before this attempt stays (releasing it would
+    // leave the database without a style and fault the renderer).
+    if (!styleConfig && fallback) {
+      styleConfig=fallback;
+
+      log.Warn() << "No style was loaded before for " << path
+                 << ", using the empty style configuration";
+    }
+    else if (styleConfig) {
+      log.Warn() << "Style " << stylesheetFilename << " rejected for " << path
+                 << ", keeping the previously active style";
+    }
+    else {
+      log.Warn() << "Style " << stylesheetFilename << " rejected for " << path
+                 << " and no fallback style is available";
+    }
 
     return false;
   }

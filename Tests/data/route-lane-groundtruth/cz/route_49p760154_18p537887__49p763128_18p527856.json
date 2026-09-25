@@ -1,0 +1,664 @@
+{
+  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.760154930950364,
+      "lon": 18.53788791997647,
+      "name": "Ostravská",
+      "nodeIndex": 0,
+      "ref": "11",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.3033718735147546,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.759662745592465,
+      "lon": 18.53374658922661,
+      "name": "Ostravská",
+      "nodeIndex": 1,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.49837284263394926,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7593422216128,
+      "lon": 18.531085837864026,
+      "name": "Ostravská",
+      "nodeIndex": 2,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6682911519231833,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75906863629123,
+      "lon": 18.528765727048864,
+      "name": "Těšínská",
+      "nodeIndex": 3,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6780946381415455,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.759045837514435,
+      "lon": 18.52863429880614,
+      "name": "Těšínská",
+      "nodeIndex": 4,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6870580354110241,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75902035652862,
+      "lon": 18.528516281608603,
+      "name": "Těšínská",
+      "nodeIndex": 5,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.704150043901453,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7589586657208,
+      "lon": 18.528299022676777,
+      "name": "Těšínská",
+      "nodeIndex": 6,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.7178827566259022,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7589050215401,
+      "lon": 18.528127361298544,
+      "name": "Těšínská",
+      "nodeIndex": 7,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8573016404568486,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.758347122060854,
+      "lon": 18.52639465426202,
+      "name": "Těšínská",
+      "nodeIndex": 8,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.917208948220246,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75811242877032,
+      "lon": 18.525646317941295,
+      "name": "Těšínská",
+      "nodeIndex": 9,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9628411660271523,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.757935402974,
+      "lon": 18.52507500741686,
+      "name": "Těšínská",
+      "nodeIndex": 10,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9720677308697195,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75790321646559,
+      "lon": 18.524956990219323,
+      "name": "Těšínská",
+      "nodeIndex": 11,
+      "ref": "11",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9771704063110794,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7578884643159,
+      "lon": 18.524889934993467,
+      "name": "Farní",
+      "nodeIndex": 12,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 0.9833704997699787,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75793942628755,
+      "lon": 18.524855066276018,
+      "name": "Farní",
+      "nodeIndex": 13,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 0.9880454366203896,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.757979659423086,
+      "lon": 18.52483629081277,
+      "name": "Farní",
+      "nodeIndex": 14,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 0.9979714039595706,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75806683121672,
+      "lon": 18.52480678651338,
+      "name": "Farní",
+      "nodeIndex": 15,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.0075880402004267,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.758152661905825,
+      "lon": 18.524790693259177,
+      "name": "Farní",
+      "nodeIndex": 16,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.0796359827683701,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75879773317871,
+      "lon": 18.52469949815199,
+      "name": "Farní",
+      "nodeIndex": 17,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.113116183336968,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.75909814059062,
+      "lon": 18.524669993852598,
+      "name": "Farní",
+      "nodeIndex": 18,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.2040938654923121,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7599121910327,
+      "lon": 18.524546612237003,
+      "name": "U Památníku",
+      "nodeIndex": 19,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.2208013055830513,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76006239473867,
+      "lon": 18.524549294446018,
+      "name": "U Památníku",
+      "nodeIndex": 20,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.2339972280288436,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.760180411936204,
+      "lon": 18.524568069909265,
+      "name": "U Památníku",
+      "nodeIndex": 21,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.2526422380275535,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.760344026687335,
+      "lon": 18.524624396299004,
+      "name": "U Památníku",
+      "nodeIndex": 22,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.2750604314983174,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.760534463528785,
+      "lon": 18.524726320242337,
+      "name": "U Památníku",
+      "nodeIndex": 23,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.2990701994428981,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7607342881019,
+      "lon": 18.524852384066975,
+      "name": "U Památníku",
+      "nodeIndex": 24,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.3361851574085832,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76103603661832,
+      "lon": 18.525072325207816,
+      "name": "U Památníku",
+      "nodeIndex": 25,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.3488312545554368,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.761137960561655,
+      "lon": 18.525150109269845,
+      "name": "U Památníku",
+      "nodeIndex": 26,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.4323448933872795,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76182058276103,
+      "lon": 18.525632906896107,
+      "name": "U Památníku",
+      "nodeIndex": 27,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.4584394819941398,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.762040523901874,
+      "lon": 18.525758970720744,
+      "name": "U Památníku",
+      "nodeIndex": 28,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.4846853977997778,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76226985277435,
+      "lon": 18.525844801409875,
+      "name": "U Památníku",
+      "nodeIndex": 29,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.4914227521199885,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76233020247764,
+      "lon": 18.525852848036976,
+      "name": "U Památníku",
+      "nodeIndex": 30,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.5018659960629535,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.762424079793874,
+      "lon": 18.52585553024602,
+      "name": "U Památníku",
+      "nodeIndex": 31,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_unclassified"
+    },
+    {
+      "distanceKm": 1.5064071785831066,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76246431292938,
+      "lon": 18.525844801409875,
+      "name": "",
+      "nodeIndex": 32,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.5077924256061142,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76246163072037,
+      "lon": 18.52586357687312,
+      "name": "",
+      "nodeIndex": 33,
+      "ref": "",
+      "turn": "Turn left",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.5141345737542642,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76250052275137,
+      "lon": 18.52592794988996,
+      "name": "",
+      "nodeIndex": 34,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.5210954132805885,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76255953135012,
+      "lon": 18.525960136398368,
+      "name": "",
+      "nodeIndex": 35,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.5354268555739516,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7626882773838,
+      "lon": 18.52596818302547,
+      "name": "",
+      "nodeIndex": 36,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.557652241602331,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76288810195689,
+      "lon": 18.52596818302547,
+      "name": "",
+      "nodeIndex": 37,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.572916842183923,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76302087130412,
+      "lon": 18.526021827206165,
+      "name": "",
+      "nodeIndex": 38,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.5839122763185494,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76309597315711,
+      "lon": 18.526121068940455,
+      "name": "",
+      "nodeIndex": 39,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.6020287869720955,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7631415707107,
+      "lon": 18.526362467753614,
+      "name": "",
+      "nodeIndex": 40,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.645440115373206,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.76317107501009,
+      "lon": 18.526963282577412,
+      "name": "",
+      "nodeIndex": 41,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.6990697687045346,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 49.7631415707107,
+      "lon": 18.52770625448008,
+      "name": "",
+      "nodeIndex": 42,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 1.6990697687045346,
+      "lat": 49.7631415707107,
+      "lon": 18.52770625448008,
+      "nodeIndex": 43
+    }
+  ],
+  "start": {
+    "lat": 49.760154930950364,
+    "lon": 18.53788791997647
+  },
+  "target": {
+    "lat": 49.76312815966551,
+    "lon": 18.527856458186022
+  },
+  "version": 1
+}

@@ -41,6 +41,13 @@ constexpr bool debugGroundTiles = true;
 constexpr bool debugGroundTiles = false;
 #endif
 
+  /**
+   * The `width` feature of an object stores a width in meters in a byte (see
+   * WidthFeatureValue), so this is the widest width a data carried width value can
+   * contribute to the width of a line style.
+   */
+  constexpr double maxWidthFeatureWidth=255.0;
+
   static std::set<GeoCoord> GetGridPoints(const std::vector<Point>& nodes,
                                           double gridSizeHoriz,
                                           double gridSizeVert)
@@ -290,6 +297,73 @@ constexpr bool debugGroundTiles = false;
     return width;
   }
 
+  void MapPainter::UpdateVisibilityBounds(const Projection& projection)
+  {
+    for (auto& entry : databaseCache) {
+      entry.visibilityBounds=entry.styleConfig->GetVisibilityBounds(projection.GetMagnification());
+
+      const VisibilityBounds& bounds=entry.visibilityBounds;
+
+      entry.wayReachPixel=0.0;
+
+      // A line style is the sum of the widths of its matching partial styles, and its width
+      // is either the width of the style or the width of the object (see CalculateLineWith).
+      // The width feature stores a width in a byte, so its value range bounds the width an
+      // object can contribute.
+      if (bounds.maxWayLineWidth>0.0) {
+        entry.wayReachPixel+=GetProjectedWidth(projection,
+                                               std::max(bounds.maxWayLineWidth,
+                                                        maxWidthFeatureWidth));
+      }
+
+      entry.wayReachPixel+=projection.ConvertWidthToPixel(bounds.maxWayDisplayWidth);
+
+      // A point object draws its icon, its symbol or both at its position, so the widest of
+      // them is the reach of the object itself; the extent of its labels is added where the
+      // labels are built, because a label extent depends on its text.
+      entry.pointReachPixel=std::max(bounds.maxIconWidth,
+                                     bounds.maxIconHeight);
+
+      for (const auto& symbol : bounds.symbols) {
+        entry.pointReachPixel=std::max(entry.pointReachPixel,
+                                       std::max(symbol->GetWidth(projection)+symbol->GetMaxBorderWidth(projection),
+                                                symbol->GetHeight(projection)+symbol->GetMaxBorderWidth(projection)));
+      }
+    }
+  }
+
+  bool MapPainter::IsPointVisible(const Projection& projection,
+                                  const Vertex2D& screenPos,
+                                  double reachPixel) const
+  {
+    ScreenVectorRectangle element(screenPos.GetX()-reachPixel,
+                                  screenPos.GetY()-reachPixel,
+                                  2.0*reachPixel,
+                                  2.0*reachPixel);
+
+    ScreenVectorRectangle viewport(0.0,
+                                   0.0,
+                                   projection.GetWidth(),
+                                   projection.GetHeight());
+
+    return element.Intersects(viewport);
+  }
+
+  bool MapPainter::CanWayBeVisible(size_t dbIndex,
+                                   const Projection& projection,
+                                   const Way& way,
+                                   double additionalOffsetPixel) const
+  {
+    assert(dbIndex<databaseCache.size());
+
+    double pixelOffset=databaseCache[dbIndex].wayReachPixel/2.0+
+                       additionalOffsetPixel;
+
+    return IsVisibleWay(projection,
+                        way.GetBoundingBox(),
+                        pixelOffset);
+  }
+
   void MapPainter::StyleSheetChanged([[maybe_unused]] const Projection& projection,
                                      [[maybe_unused]] const MapParameter& parameter,
                                      [[maybe_unused]] const std::vector<MapData>& data)
@@ -386,7 +460,8 @@ constexpr bool debugGroundTiles = false;
                                      const IconStyleRef& iconStyle,
                                      const std::vector<TextStyleRef>& textStyles,
                                      const Vertex2D& screenPos,
-                                     const ScreenBox& objectBox)
+                                     const ScreenBox& objectBox,
+                                     double objectReachPixel)
   {
     std::vector<LabelData> labelLayoutData;
 
@@ -484,6 +559,32 @@ constexpr bool debugGroundTiles = false;
                      labelLayoutData.end(),
                      LabelLayoutDataSorter);
 
+    // Early decision: an object whose icon, symbol and labels cannot reach the view is not
+    // registered, so its label elements are neither stored, nor measured, nor laid out for
+    // overlaps. The extent of a label is set by its text, so the decision is taken here, where
+    // the text of the elements is known. The elements of an object are stacked at its position,
+    // so the sum of their extents bounds the distance the object can reach beyond it.
+    double fontSizePixel=projection.ConvertWidthToPixel(parameter.GetFontSize());
+    double elementExtent=0.0;
+
+    for (const auto& data : labelLayoutData) {
+      if (data.type==LabelData::Type::Text) {
+        elementExtent+=2.0*GetLabelExtentBound(data.text.size(),
+                                               CountLabelWords(data.text),
+                                               data.fontSize*fontSizePixel);
+      }
+      else {
+        elementExtent+=std::max(data.iconWidth,data.iconHeight);
+      }
+    }
+
+    if (!IsPointVisible(projection,
+                        screenPos,
+                        std::max(objectReachPixel,elementExtent)+
+                        GetLabelLayoutMarginPixel(projection,parameter))) {
+      return;
+    }
+
     RegisterRegularLabel(projection,
                          parameter,
                          basemap,
@@ -535,6 +636,7 @@ constexpr bool debugGroundTiles = false;
                   projection,
                   parameter,
                   basemap,
+                  databaseCache[dbIndex].pointReachPixel,
                   node);
     }
 
@@ -543,6 +645,7 @@ constexpr bool debugGroundTiles = false;
                   projection,
                   parameter,
                   basemap,
+                  databaseCache[dbIndex].pointReachPixel,
                   node);
     }
   }
@@ -591,7 +694,8 @@ constexpr bool debugGroundTiles = false;
                       iconStyle,
                       textStyles,
                       areaCenter,
-                      areaScreenBox);
+                      areaScreenBox,
+                      databaseCache[areaData.dbIndex].pointReachPixel);
   }
 
   bool MapPainter::DrawAreaBorderLabel(const Projection& projection,
@@ -707,19 +811,33 @@ constexpr bool debugGroundTiles = false;
                                const Projection& projection,
                                const MapParameter& parameter,
                                bool basemap,
+                               double objectReachPixel,
                                const NodeRef& node)
   {
+    Vertex2D screenPos;
+
+    projection.GeoToPixel(node->GetCoords(),
+                          screenPos);
+
+    // Fast path: an object of a type that has no label style at this level draws only its icon
+    // or symbol, whose reach is known from the style sheet, so it can be rejected here, before
+    // any style of it is resolved. An object whose type has label styles cannot be decided here:
+    // the extent of its labels is set by their text, which only the resolved styles produce.
+    if (!styleConfig.HasNodeTextStyles(node->GetType(),
+                                       projection.GetMagnification()) &&
+        !IsPointVisible(projection,
+                        screenPos,
+                        objectReachPixel+
+                        GetLabelLayoutMarginPixel(projection,parameter))) {
+      return;
+    }
+
     IconStyleRef iconStyle=styleConfig.GetNodeIconStyle(node->GetFeatureValueBuffer(),
                                                         projection);
 
     styleConfig.GetNodeTextStyles(node->GetFeatureValueBuffer(),
                                  projection,
                                  textStyles);
-
-    Vertex2D screenPos;
-
-    projection.GeoToPixel(node->GetCoords(),
-                          screenPos);
 
     LayoutPointLabels(styleConfig,
                       projection,
@@ -730,7 +848,8 @@ constexpr bool debugGroundTiles = false;
                       iconStyle,
                       textStyles,
                       screenPos,
-                      ScreenBox::EMPTY);
+                      ScreenBox::EMPTY,
+                      objectReachPixel);
   }
 
   void MapPainter::DrawWay(const Projection& projection,
@@ -903,6 +1022,23 @@ constexpr bool debugGroundTiles = false;
                                                               way.GetFeatureValueBuffer());
 
     if (shieldLabel.empty()) {
+      return false;
+    }
+
+    // The label of a shield is placed relative to the way and can reach into the view even
+    // when the way itself cannot, so the decision has to leave room for the label and for the
+    // shield geometry drawn around it. The label text and its style are known here, before the
+    // grid positions are built and before the label is registered.
+    double shieldFontSizePixel=shieldStyle->GetShieldStyle()->GetSize()*
+                               projection.ConvertWidthToPixel(parameter.GetFontSize());
+    double shieldLabelExtent=GetLabelExtentBound(shieldLabel.size(),
+                                                 CountLabelWords(shieldLabel),
+                                                 shieldFontSizePixel);
+
+    if (!IsVisibleWay(projection,
+                      way.GetBoundingBox(),
+                      shieldLabelExtent+ShieldBorderInset+ShieldBackgroundClearance+
+                      GetLabelLayoutMarginPixel(projection,parameter))) {
       return false;
     }
 
@@ -1086,29 +1222,72 @@ constexpr bool debugGroundTiles = false;
     }
   }
 
+  void MapPainter::TransformAreaRing(const Projection& projection,
+                                     const MapParameter& parameter,
+                                     const Area::Ring& ring,
+                                     size_t index)
+  {
+    if (ring.segments.size() <= 1) {
+      ringCoordRanges[index]=TransformArea(ring.nodes,
+                                           transBuffer,
+                                           coordBuffer,
+                                           projection,
+                                           parameter.GetOptimizeAreaNodes(),
+                                           errorTolerancePixel);
+
+      return;
+    }
+
+    // A ring stored as segments is transformed as one polygon, dropping the parts
+    // that are outside of the current view
+    ringNodes.clear();
+
+    for (const auto &segment:ring.segments) {
+      if (projection.GetDimensions().Intersects(segment.bbox, false)) {
+        // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
+        ringNodes.insert(ringNodes.end(), ring.nodes.data() + segment.from, ring.nodes.data() + segment.to);
+      }
+      else {
+        ringNodes.push_back(ring.nodes[segment.from]);
+        ringNodes.push_back(ring.nodes[segment.to-1]);
+      }
+    }
+
+    ringCoordRanges[index]=TransformArea(ringNodes,
+                                         transBuffer,
+                                         coordBuffer,
+                                         projection,
+                                         parameter.GetOptimizeAreaNodes(),
+                                         errorTolerancePixel);
+  }
+
   bool MapPainter::PrepareAreaRing(size_t dbIndex,
                                    const StyleConfig& styleConfig,
                                    const Projection& projection,
                                    const MapParameter& parameter,
-                                   const std::vector<CoordBufferRange>& coordRanges,
+                                   std::vector<CoordBufferRange>& coordRanges,
                                    const Area& area,
                                    const Area::Ring& ring,
                                    size_t i,
                                    const TypeInfoRef& type)
   {
+    // The master ring does not have any nodes, so we skip it.
+    // Rings with less than 3 nodes should be skipped, too (no area)
+    bool hasGeometry=!ring.IsMaster() && ring.nodes.size() >= 3;
+
     if (type->GetIgnore()) {
       // clipping inner ring, we will not render it, but still go deeper,
-      // there may be nested outer rings
+      // there may be nested outer rings. Its geometry was already transformed
+      // in PrepareArea, because the ring it clips is prepared before it is visited.
       return true;
     }
 
-    if (!coordRanges[i].IsValid()) {
-      return false; // ring was skipped or reduced to single point
+    if (!hasGeometry) {
+      return false; // ring was skipped
     }
 
-    FillStyleRef                fillStyle;
-    std::vector<BorderStyleRef> borderStyles;
-    BorderStyleRef              borderStyle;
+    FillStyleRef   fillStyle;
+    BorderStyleRef borderStyle;
 
     fillStyle=styleConfig.GetAreaFillStyle(type,
                                            ring.GetFeatureValueBuffer(),
@@ -1127,7 +1306,7 @@ constexpr bool debugGroundTiles = false;
                                     borderStyles);
 
     if (!fillStyle && borderStyles.empty()) {
-      // Nothing to draw
+      // Nothing to draw, so there is no need to transform the ring
       return false;
     }
 
@@ -1141,29 +1320,56 @@ constexpr bool debugGroundTiles = false;
       ++borderStyleIndex;
     }
 
+    double borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
+
+    // The early decision of ProcessAreas rejects an area that no ring of it could keep visible. It
+    // therefore has to extend an area at least as far as this per-ring decision extends a ring. Both
+    // tolerances are half of a border width of the same style sheet, converted from millimetres to
+    // pixels with the same projection, so the invariant below cannot be violated by a style sheet -
+    // only by a logic error in deriving the bound. The assert compares the two widths before the
+    // conversion, i.e. in the unit the style sheet declares them in.
+    assert(borderWidth<=styleConfig.GetMaxAreaBorderWidthMM(projection.GetMagnification()));
+
+    // IsVisibleArea expects a screen offset, so the width of the style sheet has to be converted
+    if (!IsVisibleArea(projection,
+                       ring.GetBoundingBox(),
+                       projection.ConvertWidthToPixel(borderWidth/2.0))) {
+      // Outside of the current view, so there is no need to transform the ring
+      return false;
+    }
+
+    // The ring takes part in the frame, so it is transformed now. This is the only
+    // place where the geometry of a drawn ring is transformed.
+    TransformAreaRing(projection,
+                      parameter,
+                      ring,
+                      i);
+
     AreaData a;
-    double   borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
 
     a.boundingBox=ring.GetBoundingBox();
     a.isOuter=ring.IsOuter();
-
-    if (!IsVisibleArea(projection,
-                       a.boundingBox,
-                       borderWidth/2.0)) {
-      return false;
-    }
 
     // Collect possible clippings. We only take into account inner rings of the next level
     // that do not have a type and thus act as a clipping region. If a inner ring has a type,
     // we currently assume that it does not have alpha and paints over its region and clipping is
     // not required.
-    area.VisitClippingRings(i, [&a, &coordRanges](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
-      if (type->GetIgnore() && coordRanges[j].IsValid()) {
-        a.clippings.push_back(coordRanges[j]);
-      }
+    struct ClippingContext
+    {
+      AreaData                           *areaData;
+      const std::vector<CoordBufferRange>*coordRanges;
+    };
 
-      return true;
-    });
+    ClippingContext clippingContext{.areaData=&a,.coordRanges=&coordRanges};
+
+    area.VisitClippingRings(i,
+                            [&clippingContext](size_t j, const Area::Ring &, const TypeInfoRef &type) -> bool {
+                              if (type->GetIgnore() && clippingContext.coordRanges->at(j).IsValid()) {
+                                clippingContext.areaData->clippings.push_back(clippingContext.coordRanges->at(j));
+                              }
+
+                              return true;
+                            });
 
     a.dbIndex=dbIndex;
     a.ref=area.GetObjectFileRef();
@@ -1221,61 +1427,64 @@ constexpr bool debugGroundTiles = false;
                                const MapParameter& parameter,
                                const AreaRef &area)
   {
-    std::vector<CoordBufferRange> td(area->rings.size()); // Polygon information for each ring
+    // One coordinate range per ring of this area, invalid until the geometry of that ring
+    // is actually transformed. The store is reused across the areas of the frame and only
+    // grows to the ring count of the largest area seen so far, so preparing an area does
+    // not allocate per loaded area.
+    ringCoordRanges.assign(area->rings.size(),
+                           CoordBufferRange());
 
+    // Inner rings without a type are not drawn, but the ring they clip needs their
+    // coordinate range as clipping region. The ring visit is breadth first by nesting
+    // depth, so a clipping ring is visited after the ring it clips; its geometry is
+    // therefore transformed here, up front.
     for (size_t i=0; i<area->rings.size(); i++) {
-      const Area::Ring &ring = area->rings[i];
-      // The master ring does not have any nodes, so we skip it
-      // Rings with less than 3 nodes should be skipped, too (no area)
+      const Area::Ring &ring=area->rings[i];
+
       if (ring.IsMaster() || ring.nodes.size() < 3) {
-        // td is initialized to empty by default
         continue;
       }
 
-      if (ring.segments.size() <= 1){
-        td[i]=TransformArea(ring.nodes,
-                            transBuffer,
-                            coordBuffer,
-                            projection,
-                            parameter.GetOptimizeAreaNodes(),
-                            errorTolerancePixel);
-      }
-      else {
-        std::vector<Point> nodes;
-
-        for (const auto &segment:ring.segments){
-          if (projection.GetDimensions().Intersects(segment.bbox, false)){
-            // TODO: add TransBuffer::Transform* methods with vector subrange (begin/end)
-            nodes.insert(nodes.end(), ring.nodes.data() + segment.from, ring.nodes.data() + segment.to);
-          }
-          else {
-            nodes.push_back(ring.nodes[segment.from]);
-            nodes.push_back(ring.nodes[segment.to-1]);
-          }
-        }
-
-        td[i]=TransformArea(nodes,
-                            transBuffer,
-                            coordBuffer,
-                            projection,
-                            parameter.GetOptimizeAreaNodes(),
-                            errorTolerancePixel);
+      if (area->GetRingType(ring)->GetIgnore()) {
+        TransformAreaRing(projection,
+                          parameter,
+                          ring,
+                          i);
       }
     }
 
-    area->VisitRings([this,&styleConfig,&projection,&parameter,&td,&area, &dbIndex](size_t i,
-                         const Area::Ring& ring,
-                         const TypeInfoRef& type)->bool {
-      return PrepareAreaRing(dbIndex,
-                             styleConfig,
-                             projection,
-                             parameter,
-                             td,
-                             *area,
-                             ring,
-                             i,
-                             type);
-    });
+    // The context makes the visitor capture a single pointer, so the closure fits into
+    // the small buffer of std::function and the ring visit does not allocate per area.
+    struct RingContext
+    {
+      MapPainter        *painter;
+      const StyleConfig *styleConfig;
+      const Projection  *projection;
+      const MapParameter*parameter;
+      const Area        *area;
+      size_t            dbIndex;
+    };
+
+    RingContext context{.painter=this,
+                        .styleConfig=&styleConfig,
+                        .projection=&projection,
+                        .parameter=&parameter,
+                        .area=area.get(),
+                        .dbIndex=dbIndex};
+
+    area->VisitRings([&context](size_t i,
+                                const Area::Ring& ring,
+                                const TypeInfoRef& type)->bool {
+                       return context.painter->PrepareAreaRing(context.dbIndex,
+                                                               *context.styleConfig,
+                                                               *context.projection,
+                                                               *context.parameter,
+                                                               context.painter->ringCoordRanges,
+                                                               *context.area,
+                                                               ring,
+                                                               i,
+                                                               type);
+                     });
   }
 
   void MapPainter::ProcessAreas(const Projection& projection,
@@ -1284,12 +1493,37 @@ constexpr bool debugGroundTiles = false;
   {
     areaData.clear();
 
+    size_t areaCount=0;
+    for (const auto& mapData : data) {
+      areaCount+=mapData.areas.size()+mapData.poiAreas.size();
+    }
+
+    // An area prepares one entry per drawn ring, so this is a lower bound that
+    // avoids the first growth steps of the store
+    areaData.reserve(areaData.size()+areaCount);
+
     for (size_t dbIndex=0; dbIndex<data.size(); ++dbIndex) {
       const auto& mapData = data[dbIndex];
+      const auto& styleConfig=*mapData.styleConfig;
+
+      // An area is only prepared ring by ring if it can contribute to the frame at all. The tolerance
+      // is half of the widest area border style the style sheet can resolve at this level, converted
+      // from millimetres to pixels, which is the same expression the per-ring visibility decision uses
+      // for one border style, so a rejected area cannot have a ring that decision would keep.
+      constexpr double borderWidthToTolerance=0.5;
+      double           maxAreaBorderWidthMM=styleConfig.GetMaxAreaBorderWidthMM(projection.GetMagnification());
+      double           earlyOffset=projection.ConvertWidthToPixel(maxAreaBorderWidthMM*borderWidthToTolerance);
+
       //Areas
       for (const auto& area : mapData.areas) {
+        if (!IsVisibleArea(projection,
+                           area->GetBoundingBox(),
+                           earlyOffset)) {
+          continue;
+        }
+
         PrepareArea(dbIndex,
-                    *mapData.styleConfig,
+                    styleConfig,
                     projection,
                     parameter,
                     area);
@@ -1297,8 +1531,14 @@ constexpr bool debugGroundTiles = false;
 
       // POI Areas
       for (const auto& area : mapData.poiAreas) {
+        if (!IsVisibleArea(projection,
+                           area->GetBoundingBox(),
+                           earlyOffset)) {
+          continue;
+        }
+
         PrepareArea(dbIndex,
-                    *mapData.styleConfig,
+                    styleConfig,
                     projection,
                     parameter,
                     area);
@@ -1505,6 +1745,13 @@ constexpr bool debugGroundTiles = false;
     FileOffset ref=way.GetFileOffset();
     const FeatureValueBuffer& buffer=way.GetFeatureValueBuffer();
 
+    if (!CanWayBeVisible(dbIndex,
+                         projection,
+                         way,
+                         /* additionalOffsetPixel */ 0.0)) {
+      return;
+    }
+
     styleConfig.GetWayLineStyles(buffer,
                                  projection,
                                  lineStyles);
@@ -1670,6 +1917,19 @@ constexpr bool debugGroundTiles = false;
     wayPathData.clear();
     routeLabelData.clear();
 
+    size_t wayCount=0;
+    for (const auto& mapData : data) {
+      wayCount+=mapData.ways.size()+mapData.poiWays.size();
+    }
+
+    // A way prepares one entry per drawn line style, so this is a lower bound that
+    // avoids the first growth steps of the store
+    wayData.reserve(wayData.size()+wayCount);
+
+    // A route can add prepared way paths while it is processed, so the prepared
+    // way paths are referenced by index instead of by iterator
+    wayPathData.reserve(wayPathData.size()+wayCount);
+
     assert(data.size() == databaseCache.size());
     for (size_t dbIndex = 0; dbIndex < data.size(); ++dbIndex) {
       const auto& mapData = data[dbIndex];
@@ -1768,7 +2028,7 @@ constexpr bool debugGroundTiles = false;
 
     struct WayRoutes
     {
-      WayPathDataIt wayData;
+      WayPathDataIndex                                 wayData;
       std::set<Color> colors; // collapse "sidecar" routes with same color
       double rightSideCarPos=0;
       double leftSideCarPos=0;
@@ -1781,11 +2041,12 @@ constexpr bool debugGroundTiles = false;
                                                     projection.ConvertWidthToPixel(parameter.GetSidecarMinDistanceMM())));
 
     std::map<FileOffset,WayRoutes> wayDataMap;
-    for (auto it=wayPathData.begin(); it != wayPathData.end(); ++it){
-      auto &wayRoute=wayDataMap[it->ref];
-      wayRoute.wayData=it;
-      wayRoute.rightSideCarPos=(it->mainSlotWidth/2)+sidecarOffset;
-      wayRoute.leftSideCarPos=wayRoute.rightSideCarPos*-1;
+    for (size_t i=0; i<wayPathData.size(); i++){
+      const auto & pathData=wayPathData[i];
+      auto       &wayRoute=wayDataMap[pathData.ref];
+      wayRoute.wayData=i;
+      wayRoute.rightSideCarPos=(pathData.mainSlotWidth/2)+sidecarOffset;
+      wayRoute.leftSideCarPos=wayRoute.rightSideCarPos* -1;
     }
 
     for (const auto &route:data.routes){
@@ -1880,7 +2141,7 @@ constexpr bool debugGroundTiles = false;
               wayPathData.push_back(pathData);
 
               auto &wayRoute=wayDataMap[member.way];
-              wayRoute.wayData=std::prev(wayPathData.end());
+              wayRoute.wayData=wayPathData.size()-1;
               wayRoute.rightSideCarPos=0;
               wayRoute.leftSideCarPos=0;
               memberWay=wayDataMap.find(member.way);
@@ -1902,7 +2163,7 @@ constexpr bool debugGroundTiles = false;
           }
 
           // collapse colors
-          const auto& pathData=memberWay->second.wayData;
+          const auto & pathData=wayPathData[memberWay->second.wayData];
           if (memberWay->second.colors.contains(color)){
             FlushRouteData();
             continue;
@@ -1931,11 +2192,11 @@ constexpr bool debugGroundTiles = false;
           size_t transEnd;
 
           if (lineOffset==0) {
-            transStart=pathData->coordRange.GetStart();
-            transEnd=pathData->coordRange.GetEnd();
+            transStart=pathData.coordRange.GetStart();
+            transEnd=pathData.coordRange.GetEnd();
           }
           else {
-            CoordBufferRange range=coordBuffer.GenerateParallelWay(pathData->coordRange,
+            CoordBufferRange range=coordBuffer.GenerateParallelWay(pathData.coordRange,
                                                                     lineOffset);
 
             transStart=range.GetStart();
@@ -2076,6 +2337,8 @@ constexpr bool debugGroundTiles = false;
     if (styleSheetShanged) {
       StyleSheetChanged(projection, parameter, data);
     }
+
+    UpdateVisibilityBounds(projection);
   }
 
   void MapPainter::DumpStatistics(const Projection& projection,
@@ -2093,8 +2356,11 @@ constexpr bool debugGroundTiles = false;
                                       const MapParameter& parameter,
                                       const std::vector<MapData>& data)
   {
-    wayData.sort();
-    areaData.sort(AreaSorter);
+    std::stable_sort(wayData.begin(),
+                     wayData.end());
+    std::stable_sort(areaData.begin(),
+                     areaData.end(),
+                     AreaSorter);
 
     // Optional callback after preprocessing data
     AfterPreprocessingCallback(projection,
@@ -2677,7 +2943,7 @@ constexpr bool debugGroundTiles = false;
 
         if (DrawWayContourLabel(projection,
                                 parameter,
-                                *(routeLabel.wayData),
+                                wayPathData[routeLabel.wayData],
                                 labelEntry.first,
                                 labels.str())) {
           ++drawnCount;

@@ -156,6 +156,16 @@ namespace osmscout {
       ColorFeatureValueReader      colorReader;        //!< Value reader for the 'color' feature
       //@}
 
+      /**
+       * Conservative visual reach of the styles of this database for the level of the
+       * current frame, used for the early rejection of objects that cannot be visible.
+       */
+      //@{
+      VisibilityBounds             visibilityBounds;       //!< Style reach of the level of the current frame
+      double                       wayReachPixel{0.0};     //!< Widest line reach a way of this database can draw [pixels]
+      double                       pointReachPixel{0.0};   //!< Widest icon and symbol extent a point object of this database can draw [pixels]
+      //@}
+
     public:
       explicit DatabaseCacheEntry(const TypeConfig &typeConfig,
                                   const StyleConfigRef &styleConfig,
@@ -245,14 +255,14 @@ namespace osmscout {
       std::list<CoordBufferRange> clippings;       //!< Clipping polygons to be used during drawing of this area
     };
 
-    using WayPathDataIt=std::list<WayPathData>::iterator;
+    using WayPathDataIndex=size_t;
 
     /**
      * Data structure for holding temporary data route labels
      */
     struct OSMSCOUT_MAP_API RouteLabelData
     {
-      WayPathDataIt wayData;
+      WayPathDataIndex                                 wayData;
       std::map<PathTextStyleRef,std::set<std::string>> labels;
     };
 
@@ -289,14 +299,18 @@ namespace osmscout {
     std::vector<StepMethod>      stepMethods;        //!< Jump table render step methods
     double                       errorTolerancePixel;
 
-    std::list<AreaData>          areaData;           //!< Internal processing list for area rendering
-    std::list<WayData>           wayData;            //!< Internal processing list for way rendering
-    std::list<WayPathData>       wayPathData;
-    std::list<RouteLabelData>    routeLabelData;
+    std::vector<AreaData>           areaData;        //!< Internal processing store for area rendering
+    std::vector<WayData>            wayData;         //!< Internal processing store for way rendering
+    std::vector<WayPathData>        wayPathData;
+    std::list<RouteLabelData>       routeLabelData;
 
-    std::vector<TextStyleRef>    textStyles;         //!< Temporary storage for StyleConfig return value
-    std::vector<LineStyleRef>    lineStyles;         //!< Temporary storage for StyleConfig return value
+    std::vector<TextStyleRef>       textStyles;      //!< Temporary storage for StyleConfig return value
+    std::vector<LineStyleRef>       lineStyles;      //!< Temporary storage for StyleConfig return value
     std::vector<PathSymbolStyleRef> symbolStyles;    //!< Temporary storage for StyleConfig return value
+    std::vector<BorderStyleRef>     borderStyles;    //!< Temporary storage for StyleConfig return value
+
+    std::vector<CoordBufferRange>   ringCoordRanges; //!< Reused coordinate ranges of the rings of the area currently prepared
+    std::vector<Point>              ringNodes;       //!< Reused node store for a ring that is stored as segments
 
     /**                           L
      Precalculations
@@ -335,6 +349,7 @@ namespace osmscout {
                      const Projection& projection,
                      const MapParameter& parameter,
                      bool basemap,
+                     double objectReachPixel,
                      const NodeRef& node);
 
     void PrepareNodes(size_t dbIndex,
@@ -369,11 +384,24 @@ namespace osmscout {
                            const MapParameter& parameter,
                            const Way& way);
 
+    /**
+     * Transform the geometry of one ring of the area currently prepared and store the
+     * resulting coordinate range in the reused ring coordinate range store.
+     *
+     * Only rings that take part in the frame are transformed: a ring whose styling and
+     * visibility have been checked and rejected is never transformed, and a ring that is
+     * needed as clipping region of a drawn ring is transformed when that ring is prepared.
+     */
+    void TransformAreaRing(const Projection& projection,
+                           const MapParameter& parameter,
+                           const Area::Ring& ring,
+                           size_t index);
+
     bool PrepareAreaRing(size_t dbIndex,
                          const StyleConfig& styleConfig,
                          const Projection& projection,
                          const MapParameter& parameter,
-                         const std::vector<CoordBufferRange>& coordRanges,
+                         std::vector<CoordBufferRange>& coordRanges,
                          const Area& area,
                          const Area::Ring& ring,
                          size_t i,
@@ -404,7 +432,8 @@ namespace osmscout {
                            const IconStyleRef& iconStyle,
                            const std::vector<TextStyleRef>& textStyles,
                            const Vertex2D& screenPos,
-                           const ScreenBox& objectBox);
+                           const ScreenBox& objectBox,
+                           double objectReachPixel);
 
     bool DrawWayDecoration(const Projection& projection,
                            const MapParameter& parameter,
@@ -580,13 +609,56 @@ namespace osmscout {
        Useful global helper functions.
      */
     //@{
+    /**
+     * Visibility test for an area's bounding box: the box is transformed to the frame's screen
+     * space, enlarged by pixelOffset screen pixels and intersected with the screen box. A width
+     * that a style sheet declares is a length in millimetres and has to be converted with the
+     * frame's projection (Projection::ConvertWidthToPixel) before it is passed as the offset, the
+     * same way the backends convert it before drawing.
+     */
     bool IsVisibleArea(const Projection& projection,
                        const GeoBox& boundingBox,
                        double pixelOffset) const;
 
+    /**
+     * Visibility test for a way's bounding box, using the same screen offset in pixels as
+     * IsVisibleArea.
+     */
     bool IsVisibleWay(const Projection& projection,
                       const GeoBox& boundingBox,
                       double pixelOffset) const;
+
+    /**
+     * Conservative early decision for ways: returns true when a way of the given database can
+     * contribute a pixel to the current frame.
+     *
+     * The decision uses the widest line reach a way of the level can draw, so it returns
+     * false only for ways that no line style of the level could bring into the view; it is
+     * therefore safe to skip the whole preparation of a way it rejects. The additional pixel
+     * offset leaves room for geometry that is placed relative to the way, such as the label
+     * of a shield.
+     */
+    bool CanWayBeVisible(size_t dbIndex,
+                         const Projection& projection,
+                         const Way& way,
+                         double additionalOffsetPixel) const;
+
+    /**
+     * Conservative early decision for point objects: returns true when an object that is drawn
+     * at the given screen position with the given reach can contribute a pixel to the current
+     * frame. The reach is the distance the icon, the symbol and the labels of the object can
+     * extend beyond its position, so the decision returns false only for objects that provably
+     * cannot be visible.
+     */
+    bool IsPointVisible(const Projection& projection,
+                        const Vertex2D& screenPos,
+                        double reachPixel) const;
+
+    /**
+     * Updates the conservative style reach of all databases for the level of the given
+     * frame. Called once per frame, before the objects of the frame are prepared.
+     */
+    void UpdateVisibilityBounds(const Projection& projection);
 
     double GetProjectedWidth(const Projection& projection,
                              double minPixel,
@@ -624,12 +696,18 @@ namespace osmscout {
     }
     //@}
 
-    const std::list<WayData>& GetWayData() const
+    /**
+     * Return the prepared ways of the current frame in draw order.
+     */
+    const std::vector<WayData>& GetWayData() const
     {
       return wayData;
     }
 
-    const std::list<AreaData>& GetAreaData() const
+    /**
+     * Return the prepared areas of the current frame in draw order.
+     */
+    const std::vector<AreaData>& GetAreaData() const
     {
       return areaData;
     }

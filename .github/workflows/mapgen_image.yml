@@ -1,0 +1,597 @@
+name: Mapgen image
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'scripts/mapgen/**'
+      - 'Import/**'
+      - 'libosmscout-import/**'
+      - 'libosmscout/**'
+      - 'stylesheets/map.ost'
+      - 'stylesheets/basemap.ost'
+      - 'BasemapImport/**'
+      - '.dockerignore'
+      - '.github/workflows/mapgen_image.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'scripts/mapgen/**'
+      - 'Import/**'
+      - 'libosmscout-import/**'
+      - 'libosmscout/**'
+      - 'stylesheets/map.ost'
+      - 'stylesheets/basemap.ost'
+      - 'BasemapImport/**'
+      - '.dockerignore'
+      - '.github/workflows/mapgen_image.yml'
+  workflow_dispatch:
+    inputs:
+      push:
+        description: 'Publish the images to the container registry (the tags come from the source)'
+        type: boolean
+        default: false
+
+env:
+  REGISTRY: ghcr.io
+  # How many builds of each image to keep; older ones are pruned after a
+  # publication, so a build stamp stays pullable for this many publications.
+  KEEP_BUILDS: '20'
+
+# Runs for the same ref are serialized; a published tag is never moved by an
+# overlapping run.
+concurrency:
+  group: mapgen-image-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Build mapgen image and smoke test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      library_version: ${{ steps.versions.outputs.library_version }}
+      created: ${{ steps.versions.outputs.created }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read and cross-check the library version
+        id: versions
+        run: |
+          set -euo pipefail
+          # The library version is what the import tool reports, what db.json
+          # records as import.version and what the images are tagged with. It is
+          # declared once per build system, and both declarations must agree or
+          # the two build systems would report different versions.
+          cmake_version=$(sed -nE 's/^set\(OSMSCOUT_LIBRARY_VERSION ([^)]*)\).*/\1/p' CMakeLists.txt)
+          meson_version=$(sed -nE "s/^libraryVersion='([^']*)'.*/\1/p" meson.build)
+          if [ -z "${cmake_version}" ] || [ -z "${meson_version}" ]; then
+            echo "cannot read the library version from CMakeLists.txt or meson.build" >&2
+            exit 1
+          fi
+          if [ "${cmake_version}" != "${meson_version}" ]; then
+            echo "library version mismatch: CMakeLists.txt declares '${cmake_version}', meson.build declares '${meson_version}'" >&2
+            exit 1
+          fi
+          {
+            echo "library_version=${cmake_version}"
+            echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_OUTPUT"
+          echo "library version: ${cmake_version}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: scripts/mapgen/Dockerfile
+          load: true
+          tags: osmscout-mapgen:test
+          build-args: |
+            OSMSCOUT_REVISION=${{ github.sha }}
+            OSMSCOUT_VERSION=${{ steps.versions.outputs.library_version }}
+            OSMSCOUT_CREATED=${{ steps.versions.outputs.created }}
+          cache-from: type=gha,scope=mapgen
+          cache-to: type=gha,mode=max,scope=mapgen
+
+      - name: Smoke test (the bundled type configuration loads)
+        run: |
+          # The type file the image bundles pulls in modules that are looked up
+          # beside it; shipping the file alone made every import fail with
+          # "Cannot load type configuration!" at the first real run.
+          out=$(docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:test \
+            --typefile /usr/local/share/osmscout/map.ost 2>&1) || true
+          echo "${out}"
+          if echo "${out}" | grep -q "Cannot load"; then
+            echo "the bundled type configuration does not load" >&2
+            exit 1
+          fi
+          # every module the type file names has to be present, derived from the
+          # file itself so a new module is covered too
+          docker run --rm --entrypoint sh osmscout-mapgen:test -c '
+            set -e
+            modules=$(grep -oE "MODULE \"[^\"]+\"" /usr/local/share/osmscout/map.ost | sed "s/MODULE \"//; s/\"//")
+            test -n "${modules}"
+            for module in ${modules}; do
+              test -f "/usr/local/share/osmscout/${module}.ost" || { echo "missing module: ${module}" >&2; exit 1; }
+              echo "module present: ${module}"
+            done'
+
+      - name: Smoke test (the basemap tooling and type configuration are present)
+        run: |
+          # The basemap needs its own import tool, its own type definitions (which
+          # include no modules, so the single file is the complete set) and the
+          # unpack utility for the coastline archive.
+          docker run --rm --entrypoint sh osmscout-mapgen:test -c '
+            set -e
+            test -x /usr/local/bin/BasemapImport || { echo "BasemapImport is missing" >&2; exit 1; }
+            test -f /usr/local/share/osmscout/basemap.ost || { echo "basemap.ost is missing" >&2; exit 1; }
+            command -v unzip >/dev/null || { echo "unzip is missing" >&2; exit 1; }
+            test -x /usr/local/bin/mapgen-basemap.sh || { echo "mapgen-basemap.sh is missing" >&2; exit 1; }
+            echo "basemap tooling present"'
+          out=$(docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:test \
+            --typefile /usr/local/share/osmscout/basemap.ost 2>&1) || true
+          echo "${out}"
+          if echo "${out}" | grep -q "Cannot load"; then
+            echo "the bundled basemap type configuration does not load" >&2
+            exit 1
+          fi
+
+      - name: Verify the runtime identity
+        run: |
+          test "$(docker run --rm --entrypoint id osmscout-mapgen:test -u)" = "1000"
+          test "$(docker run --rm --entrypoint id osmscout-mapgen:test -g)" = "1000"
+
+      - name: Verify the image reports the version it was built from
+        env:
+          LIBRARY_VERSION: ${{ steps.versions.outputs.library_version }}
+        run: |
+          reported=$(docker run --rm --entrypoint /usr/local/bin/Import osmscout-mapgen:test --tool-version)
+          if [ "${reported}" != "${LIBRARY_VERSION}" ]; then
+            echo "the image reports version '${reported}' but the source declares '${LIBRARY_VERSION}'" >&2
+            exit 1
+          fi
+          echo "the image reports library version ${reported}"
+
+      - name: Smoke test (config check)
+        run: |
+          mkdir -p /tmp/mapgen-config
+          cat > /tmp/mapgen-config/imports.json <<'EOF'
+          {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"}]}
+          EOF
+          cat > /tmp/mapgen-config/basemap.json <<'EOF'
+          {"schema":1,"refresh":7,"coastlinesRefresh":90,"history":2,"extract":"/config/planet_extract.osm.pbf","importOptions":{"waterIndexMinMag":6,"waterIndexMaxMag":6}}
+          EOF
+          mkdir -p /tmp/mapgen-repo/public
+          cat > /tmp/mapgen-repo/public/names.json <<'EOF'
+          {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
+          EOF
+          docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test --check-config
+
+      - name: Smoke test (the basemap configuration is required)
+        run: |
+          # A pass without a basemap configuration is a configuration failure,
+          # not a pass that silently serves no basemap.
+          cp -a /tmp/mapgen-config /tmp/mapgen-config-nobasemap
+          rm /tmp/mapgen-config-nobasemap/basemap.json
+          if out=$(docker run --rm --read-only \
+               -v /tmp/mapgen-config-nobasemap:/config:ro \
+               -v /tmp/mapgen-work:/work \
+               -v /tmp/mapgen-repo:/repository \
+               osmscout-mapgen:test --check-config 2>&1); then
+            echo "a missing basemap configuration was accepted" >&2
+            exit 1
+          fi
+          echo "${out}"
+          echo "${out}" | grep -q "basemap configuration"
+
+      - name: Smoke test (single pass, refresh gate, no network)
+        run: |
+          mkdir -p /tmp/mapgen-repo/private/admin /tmp/mapgen-work
+          echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-repo/private/admin/berlin_check.json
+          # The basemap is gated the same way: a state file that says the inputs
+          # were just checked keeps this run offline, like the regional gate.
+          echo '{"lastCheckedAt":'$(date +%s)',"lastAdoptedAt":'$(date +%s)'}' > /tmp/mapgen-repo/private/admin/basemap_check.json
+          # The container runs as uid 1000 by default while host-mounted volumes
+          # are owned by the runner user; grant ownership here or the mapgen
+          # pass cannot create private/staging or write to /work.
+          sudo chown -R 1000:1000 /tmp/mapgen-repo /tmp/mapgen-work /tmp/mapgen-config
+          docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test
+
+      - name: Smoke test (single pass as an overridden uid/gid)
+        run: |
+          # The identity is configurable (PUID/PGID in the compose file, --user on
+          # the command line). This run proves a pass works as an identity that has
+          # no entry in the image's /etc/passwd, and that what it writes carries
+          # that identity.
+          mkdir -p /tmp/mapgen-config-alt /tmp/mapgen-work-alt /tmp/mapgen-repo-alt/public /tmp/mapgen-repo-alt/private/admin
+          cp /tmp/mapgen-config/imports.json /tmp/mapgen-config-alt/
+          cp /tmp/mapgen-config/basemap.json /tmp/mapgen-config-alt/
+          cp /tmp/mapgen-repo/public/names.json /tmp/mapgen-repo-alt/public/
+          echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-repo-alt/private/admin/berlin_check.json
+          echo '{"lastCheckedAt":'$(date +%s)',"lastAdoptedAt":'$(date +%s)'}' > /tmp/mapgen-repo-alt/private/admin/basemap_check.json
+          sudo chown -R 1234:1234 /tmp/mapgen-config-alt /tmp/mapgen-work-alt /tmp/mapgen-repo-alt
+          docker run --rm --read-only --user 1234:1234 \
+            -v /tmp/mapgen-config-alt:/config:ro \
+            -v /tmp/mapgen-work-alt:/work \
+            -v /tmp/mapgen-repo-alt:/repository \
+            osmscout-mapgen:test
+          # staging is created by the pass itself, so its owner is the identity the
+          # pass actually ran as
+          test "$(stat -c '%u:%g' /tmp/mapgen-repo-alt/private/staging)" = "1234:1234"
+          echo "the pass wrote with the identity it was given"
+
+      - name: Smoke test (overlapping passes are skipped)
+        run: |
+          # A pass assumes it is the only writer of the repository, so a second
+          # one has to be refused while the first is running. Holding the lock
+          # with a sleeping container makes that deterministic.
+          docker run -d --name mapgen-lock-holder --read-only --user 1000:1000 \
+            -v /tmp/mapgen-work:/work \
+            --entrypoint sh osmscout-mapgen:test \
+            -c 'flock /work/mapgen.lock sleep 30'
+          sleep 2
+          out=$(docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test 2>&1)
+          echo "${out}"
+          docker rm -f mapgen-lock-holder >/dev/null
+          echo "${out}" | grep -q "another pass holds"
+
+      - name: Smoke test (scheduled mode)
+        run: |
+          # The seven-field form carries the seconds field (seconds first, year
+          # last); a six-field expression keeps the minute-first order and adds
+          # a year instead, so it would mean "every five minutes" here and the
+          # check would wait in vain.
+          docker run -d --name mapgen-schedule-check --read-only \
+            -e MAPGEN_CRON='*/5 * * * * * *' \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test
+          for _ in $(seq 1 30); do
+            if docker logs mapgen-schedule-check 2>&1 | grep -q '\[mapgen\] done'; then
+              break
+            fi
+            sleep 2
+          done
+          docker logs mapgen-schedule-check 2>&1 | tail -20
+          # the pass ran and the container is still up for the next occurrence
+          docker logs mapgen-schedule-check 2>&1 | grep -q '\[mapgen\] done'
+          docker inspect -f '{{.State.Running}}' mapgen-schedule-check | grep -q true
+          docker rm -f mapgen-schedule-check >/dev/null
+
+      - name: Smoke test (unusable schedule)
+        run: |
+          docker run -d --name mapgen-bad-schedule --read-only \
+            -e MAPGEN_CRON='not a cron expression' \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test
+          status=running
+          for _ in $(seq 1 15); do
+            status=$(docker inspect -f '{{.State.Status}}' mapgen-bad-schedule 2>/dev/null || echo gone)
+            [ "${status}" = "exited" ] && break
+            sleep 1
+          done
+          docker logs mapgen-bad-schedule 2>&1 | tail -10
+          code=$(docker inspect -f '{{.State.ExitCode}}' mapgen-bad-schedule)
+          docker rm -f mapgen-bad-schedule >/dev/null
+          test "${status}" = "exited"
+          test "${code}" != "0"
+          echo "the container refused the unusable schedule with exit ${code}"
+
+      - name: Smoke test (an unseeded work area is reported)
+        run: |
+          # Docker creates a named volume owned by root while the container runs
+          # as its non-root identity, so a first run against a fresh volume has
+          # to be told what is wrong instead of failing at its first write.
+          mkdir -p /tmp/mapgen-unwritable-work
+          sudo chown root:root /tmp/mapgen-unwritable-work
+          sudo chmod 755 /tmp/mapgen-unwritable-work
+          status=0
+          out=$(docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-unwritable-work:/work \
+            -v /tmp/mapgen-repo:/repository \
+            -e MAPGEN_CRON='0 */6 * * *' \
+            osmscout-mapgen:test 2>&1) || status=$?
+          echo "${out}"
+          sudo rm -rf /tmp/mapgen-unwritable-work
+          test "${status}" != "0"
+          echo "${out}" | grep -q "the work area (/work) is not writable by uid"
+          echo "${out}" | grep -q "chown -R"
+
+      - name: Smoke test (a read-only run is not blocked by an unseeded area)
+        run: |
+          mkdir -p /tmp/mapgen-unwritable-work-ro
+          sudo chown root:root /tmp/mapgen-unwritable-work-ro
+          sudo chmod 755 /tmp/mapgen-unwritable-work-ro
+          docker run --rm --read-only \
+            -v /tmp/mapgen-config:/config:ro \
+            -v /tmp/mapgen-unwritable-work-ro:/work \
+            -v /tmp/mapgen-repo:/repository \
+            osmscout-mapgen:test --check-config
+          sudo rm -rf /tmp/mapgen-unwritable-work-ro
+
+      - name: Smoke test (recovery of failed runs)
+        run: |
+          # The check runs inside the image and prepares its own fixture in the
+          # writable work area: the import tool is stubbed, so a failing and a
+          # successful import can both be produced without source data or network.
+          # It is a script of its own (scripts/mapgen/recovery-check-test.sh) so
+          # that it can be run outside the image as well - what CI exercises is the
+          # same file, not a shell string assembled here. It is bash syntax, so it
+          # is started with bash rather than with the container's sh.
+          t=/tmp/mapgen-recovery
+          rm -rf "${t}"
+          mkdir -p "${t}/work"
+          sudo chown -R 1000:1000 "${t}"
+          docker run --rm --read-only \
+            -v "${t}/work":/work \
+            -v "${GITHUB_WORKSPACE}/scripts/mapgen/recovery-check-test.sh":/check/recovery-check-test.sh:ro \
+            --entrypoint bash osmscout-mapgen:test /check/recovery-check-test.sh
+
+  publish:
+    name: Publish images
+    runs-on: ubuntu-24.04
+    needs: verify
+    # A pull request never publishes; a commit on the main branch and a manual
+    # run do. There is no release-specific publication: the commit that sets a
+    # new release version publishes like any other.
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_dispatch' && inputs.push)
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Runs before the login: it only reads the source.
+      - name: Read the release version
+        id: release
+        run: |
+          set -euo pipefail
+          # The release version names the release and the distribution archives,
+          # and it is the version the images are tagged with. A milestone sets it
+          # in the tree (see Documentation/MapRepository.md, section 5); while it
+          # still holds the literal 'latest' the images carry only the build
+          # stamp and the latest tag.
+          declared=$(sed -nE "s/^ *version: *'([^']*)',.*/\1/p" meson.build | head -1)
+          release_version=""
+          if echo "${declared}" | grep -qE '^[0-9]+[.][0-9]+[.][0-9]+([.][0-9]+)?(-[A-Za-z0-9.-]+)?$'; then
+            release_version="${declared}"
+          else
+            echo "the source declares no release version ('${declared}'): publishing the latest tag and the build stamp only"
+          fi
+          echo "release_version=${release_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to the container registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Determine the image tags
+        id: tags
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          # A container registry requires a lower case name; GitHub expressions
+          # cannot lower case, so the namespace is normalized here.
+          namespace=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')
+          # A stamp identifies this one publication: it never moves, so it is the
+          # tag to pin when a deployment has to be reproducible. It is pruned
+          # after KEEP_BUILDS publications, which the documentation states.
+          stamp=$(date -u +%Y%m%dT%H%M%SZ)
+          if [ -n "${RELEASE_VERSION}" ]; then
+            tags=$(printf '%s\n%s\n%s' "${RELEASE_VERSION}" "latest" "${stamp}")
+          else
+            tags=$(printf '%s\n%s' "latest" "${stamp}")
+          fi
+          mapgen_tags=""
+          mapserve_tags=""
+          while IFS= read -r tag; do
+            [ -z "${tag}" ] && continue
+            mapgen_tags="${mapgen_tags}${REGISTRY}/${namespace}/mapgen:${tag}"$'\n'
+            mapserve_tags="${mapserve_tags}${REGISTRY}/${namespace}/mapserve:${tag}"$'\n'
+          done <<< "${tags}"
+          {
+            echo "mapgen_tags<<TAGS"
+            echo "${mapgen_tags}"
+            echo "TAGS"
+            echo "mapserve_tags<<TAGS"
+            echo "${mapserve_tags}"
+            echo "TAGS"
+            echo "stamp=${stamp}"
+          } >> "$GITHUB_OUTPUT"
+          echo "publishing:"
+          echo "${mapgen_tags}"
+          echo "${mapserve_tags}"
+
+      - name: Publish mapgen image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: scripts/mapgen/Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.mapgen_tags }}
+          build-args: |
+            OSMSCOUT_REVISION=${{ github.sha }}
+            OSMSCOUT_VERSION=${{ steps.release.outputs.release_version || needs.verify.outputs.library_version }}
+            OSMSCOUT_CREATED=${{ needs.verify.outputs.created }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=mapgen
+          cache-to: type=gha,mode=max,scope=mapgen
+
+      - name: Publish mapserve image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: scripts/mapgen/Dockerfile.serve
+          push: true
+          tags: ${{ steps.tags.outputs.mapserve_tags }}
+          build-args: |
+            OSMSCOUT_REVISION=${{ github.sha }}
+            OSMSCOUT_VERSION=${{ steps.release.outputs.release_version || needs.verify.outputs.library_version }}
+            OSMSCOUT_CREATED=${{ needs.verify.outputs.created }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=mapserve
+          cache-to: type=gha,mode=max,scope=mapserve
+
+      # Keeps the number of published builds bounded: the newest KEEP_BUILDS
+      # package versions of each image survive, older ones - and with them their
+      # build stamps - are deleted. `latest` and the release version tag always
+      # point at the newest publication, which is never a candidate.
+      # The package name is the image path below the registry host, so it
+      # includes the repository: ghcr.io/framstag/libosmscout/mapgen is the
+      # package "libosmscout/mapgen". Naming it just "mapgen" fails with
+      # "Package not found".
+      - name: Prune older mapgen builds
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: libosmscout/mapgen
+          package-type: container
+          min-versions-to-keep: ${{ env.KEEP_BUILDS }}
+
+      - name: Prune older mapserve builds
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: libosmscout/mapserve
+          package-type: container
+          min-versions-to-keep: ${{ env.KEEP_BUILDS }}
+
+      - name: Report the published packages
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
+          STAMP: ${{ steps.tags.outputs.stamp }}
+          KEEP: ${{ env.KEEP_BUILDS }}
+        run: |
+          {
+            echo "### Published images"
+            echo
+            echo '```'
+            echo "${{ steps.tags.outputs.mapgen_tags }}"
+            echo "${{ steps.tags.outputs.mapserve_tags }}"
+            echo '```'
+            echo
+            echo "Pin a build with \`${STAMP}\`. It stays pullable for the next ${KEEP} publications;"
+            echo "\`latest\` and the release version tag follow the newest publication."
+            echo
+            if [ -z "${RELEASE_VERSION}" ]; then
+              echo "The source declares no release version, so no version tag was published."
+              echo "Set one in \`meson.build\` when the next milestone is prepared."
+              echo
+            fi
+            echo "A newly published package is private. Make it public once in its"
+            echo "settings so that anonymous pulls work:"
+            echo "- https://github.com/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/mapgen/settings"
+            echo "- https://github.com/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/mapserve/settings"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  compose:
+    name: Compose smoke (mapgen + serve)
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Verify the configured runtime identity is rendered
+        run: |
+          default_user=$(docker compose -f scripts/mapgen/docker-compose.yml config --format json | jq -r '.services.mapgen.user')
+          test "${default_user}" = "1000:1000"
+          configured_user=$(PUID=1234 PGID=1234 docker compose -f scripts/mapgen/docker-compose.yml config --format json | jq -r '.services.mapgen.user')
+          test "${configured_user}" = "1234:1234"
+          serve_user=$(docker compose -f scripts/mapgen/docker-compose.yml config --format json | jq -r '.services.serve.user // "unset"')
+          test "${serve_user}" = "unset"
+          echo "mapgen renders ${default_user} by default and ${configured_user} with PUID/PGID set; serve keeps its image's identity"
+
+      - name: Build images
+        run: docker compose -f scripts/mapgen/docker-compose.yml build
+
+      - name: Prepare config and seed repository volume
+        run: |
+          mkdir -p scripts/mapgen/config /tmp/mapgen-seed/public/europe/germany/berlin/v9 /tmp/mapgen-seed/public/basemap/v27 /tmp/mapgen-seed/private/admin
+          cat > scripts/mapgen/config/imports.json <<'EOF'
+          {"schema":1,"history":2,"refresh":7,"imports":[{"id":"berlin","url":"https://download.geofabrik.de/europe/germany/berlin-latest.osm.pbf"}]}
+          EOF
+          cat > scripts/mapgen/config/basemap.json <<'EOF'
+          {"schema":1,"refresh":7,"coastlinesRefresh":90,"history":2,"extract":"/config/planet_extract.osm.pbf"}
+          EOF
+          cat > /tmp/mapgen-seed/public/names.json <<'EOF'
+          {"schema":1,"regions":[{"id":"europe","names":{"en":"Europe"},"children":[{"id":"germany","names":{"en":"Germany"},"children":[{"id":"berlin","names":{"en":"Berlin"}}]}]}]}
+          EOF
+          cat > /tmp/mapgen-seed/public/europe/germany/berlin/v9/db.json <<'EOF'
+          {"schema":1,"typeConfigVersion":9,"generatedAt":"2026-01-01T00:00:00Z","output":{"files":{"map.lib":{"size":1,"crc32":2363233923}}}}
+          EOF
+          printf 'x' > /tmp/mapgen-seed/public/europe/germany/berlin/v9/map.lib
+          cat > /tmp/mapgen-seed/public/basemap/index.json <<'EOF'
+          {"schema":1,"versions":[{"typeConfigVersion":27,"changedAt":"2026-09-07T10:00:00Z"}]}
+          EOF
+          printf 'basemap-types' > /tmp/mapgen-seed/public/basemap/v27/types.dat
+          cat > /tmp/mapgen-seed/public/basemap/v27/db.json <<'EOF'
+          {"schema":1,"typeConfigVersion":27,"generatedAt":"2026-09-07T10:00:00Z","output":{"files":{"types.dat":{"size":13,"crc32":1}}}}
+          EOF
+          echo '{"lastCheckedAt":'$(date +%s)',"lastAdoptedAt":'$(date +%s)'}' > /tmp/mapgen-seed/private/admin/basemap_check.json
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+            -v /tmp/mapgen-seed:/seed:ro --entrypoint sh mapgen -c \
+            'mkdir -p /repository /work && cp -r /seed/public /repository/ && mkdir -p /repository/private/admin && cp /seed/private/admin/basemap_check.json /repository/private/admin/ && chown -R 1000:1000 /repository /work'
+
+      - name: Start web server and verify HTTP behavior
+        run: |
+          docker compose -f scripts/mapgen/docker-compose.yml up -d serve
+          sleep 3
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/names.json)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/germany/berlin/v9/db.json)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/germany/berlin/v9/map.lib)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/private/admin/x)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/staging/x)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/europe/)" = "404"
+          # The basemap manifest is what clients read; it is served as JSON, and
+          # the slot tree is served like any other database directory. Directory
+          # listings stay off, so the bare directory paths are refused.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/index.json)" = "200"
+          curl -sI http://localhost:8080/basemap/index.json | grep -qi "content-type: application/json"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/v27/db.json)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/v27/types.dat)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/basemap/v27/)" = "404"
+          echo "the manifest and the basemap slot are served, listings stay off"
+
+      - name: Config check and refresh-gated pass via mapgen container
+        run: |
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen --check-config
+          echo '{"lastCheckedAt":'$(date +%s)',"lastSeenSourceMd5":""}' > /tmp/mapgen-seed/check.json
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm --user root \
+            -v /tmp/mapgen-seed:/seed:ro --entrypoint sh mapgen -c \
+            'mkdir -p /repository/private/admin && cp /seed/check.json /repository/private/admin/berlin_check.json && chown -R 1000:1000 /repository'
+          docker compose -f scripts/mapgen/docker-compose.yml run --rm mapgen

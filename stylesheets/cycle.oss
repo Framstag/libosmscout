@@ -155,7 +155,8 @@ CONST
   }
 
   // Pseudo types
-  COLOR routeColor                 = #ae00ff88;
+  // (the active route paint comes from include/route, shared with every other style sheet
+  // that draws a route — see the daylight branch in route.oss)
 
   // Ground tiles
 
@@ -335,6 +336,7 @@ CONST
 
   COLOR wallColor                  = #663e1b;
 
+MODULE "include/route"
 MODULE "include/land_sea"
 
 MODULE "include/place"
@@ -373,7 +375,9 @@ STYLE
     ICON { name: target;} */
 
   [MAG world-] {
-    [TYPE _route] WAY {color: @routeColor; displayWidth: 1.5mm; width: 6m; priority: 100;}
+    // The active route polyline is drawn by include/route (shared daylight / dark
+    // presentation colors, with the casing that keeps it visible on red primary roads),
+    // replacing this style sheet's own single-color semi-transparent rule.
 
     //[TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
     //[TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }

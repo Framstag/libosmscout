@@ -141,6 +141,7 @@ public:
 private:
   MapManagerRef                      mapManager;
   std::string                        basemapLookupDirectory;
+  std::string                        basemapStyleFilename; // absolute path; empty = use main style
   SettingsRef                        settings;
 
   double                             mapDpi;
@@ -155,6 +156,18 @@ private:
   StyleConfigRef                     emptyStyleConfig;
 
   std::string                        stylesheetFilename;
+  /**
+   * File name of the stylesheet that is actually installed (empty until a
+   * stylesheet was loaded successfully). Differs from \ref stylesheetFilename
+   * while a failed load is being reported: the requested style is not the
+   * active one.
+   */
+  std::string                        activeStyleSheetFilename;
+  /**
+   * Result of the last stylesheet load attempt (initial load, style switch,
+   * style flag change, basemap style, stylesheet refresh).
+   */
+  bool                               lastStyleLoadSucceeded;
   std::string                        iconDirectory;
   std::unordered_map<std::string,bool>
                                      stylesheetFlags;
@@ -192,7 +205,9 @@ protected:
 
   void registerCustomPoiTypes(TypeConfigRef typeConfig) const;
 
-  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings=false) const;
+  StyleConfigRef makeStyleConfig(TypeConfigRef typeConfig,
+                                  bool suppressWarnings=false,
+                                  const std::string &styleFilename="") const;
 
   /**
    * Load basemap database, write lock needs to be hold
@@ -204,7 +219,8 @@ public:
            const std::string &iconDirectory,
            SettingsRef settings,
            MapManagerRef mapManager,
-           const std::vector<std::string> &customPoiTypes);
+           const std::vector<std::string> &customPoiTypes,
+           const std::string &basemapStyleFilename="");
 
   ~DBThread() override;
 
@@ -243,6 +259,28 @@ public:
   std::string GetStylesheetFilename() const
   {
     return stylesheetFilename;
+  }
+
+  /**
+   * File name of the stylesheet that is actually active (the last one that
+   * loaded successfully), empty when none ever loaded.
+   */
+  std::string GetActiveStyleSheetFilename() const
+  {
+    ReadLock locker(latch);
+    return activeStyleSheetFilename;
+  }
+
+  /**
+   * Whether the last stylesheet load attempt (initial load, style switch, style
+   * flag change, basemap style, stylesheet refresh) succeeded. A failed load
+   * keeps the previously active style and is reported through this flag and
+   * \ref GetStyleErrors.
+   */
+  bool WasLastStyleLoadSuccessful() const
+  {
+    ReadLock locker(latch);
+    return lastStyleLoadSucceeded;
   }
 
   const std::list<StyleError> &GetStyleErrors() const
@@ -297,6 +335,16 @@ public:
    * Runs asynchronously on the DBThread worker.
    */
   void ReloadBasemap();
+
+  /**
+   * Set the basemap lookup directory at runtime and reload the basemap.
+   *
+   * Pass an empty string to unload any installed basemap. Replaces the
+   * directory configured at construction, so a basemap downloaded or
+   * removed while the app runs takes effect without a restart. Runs
+   * asynchronously on the DBThread worker.
+   */
+  CancelableFuture<bool> SetBasemapLookupDirectory(const std::string &basemapLookupDirectory);
 
   CancelableFuture<bool> FlushCaches(const std::chrono::milliseconds &idleMs);
   CancelableFuture<bool> OnDatabaseListChanged(const std::vector<std::filesystem::path> &databaseDirectories);

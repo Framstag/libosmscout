@@ -201,11 +201,11 @@ CONST
   }
 
   IF daylight {
-    COLOR motorwayColor            = #4440ec; // dark blue
-    COLOR trunkColor               = #7674ec; // lighther blue
-    COLOR primaryColor             = #ec4044; // red
-    COLOR secondaryColor           = #fdac44; // orange
-    COLOR tertiaryColor            = #fef271; // yelow
+    COLOR motorwayColor            = #7d7af5; // blue
+    COLOR trunkColor               = #a3a1f5; // lighter blue
+    COLOR primaryColor             = #f58b8b; // red
+    COLOR secondaryColor           = #fdd08a; // orange
+    COLOR tertiaryColor            = #fef271; // yellow
     COLOR roadColor                = #ffffff; // white
     COLOR roadBColor               = #bfbfbf;
     COLOR livingStreetColor        = #bababa; // grey
@@ -228,22 +228,23 @@ CONST
   }
 
   COLOR thinRoadColor              = #999999;
-  COLOR thinMotorwayColor          = lighten(@motorwayColor,0.3);
-  COLOR thinTrunkColor             = lighten(@trunkColor,0.3);
-  COLOR thinPrimaryColor           = lighten(@primaryColor,0.3);
-  IF daylight {
-    COLOR thinSecondaryColor         = #fdd654;
-    COLOR thinTertiaryColor          = #fefe73;
-  }
-  ELSE {
-    COLOR thinSecondaryColor         = darken(#fdd654, 0.5);
-    COLOR thinTertiaryColor          = darken(#fefe73, 0.5);
-  }
+  // `thinRoadColor` and its siblings are drawn only below full road width, on
+  // light land, so they need their own visibility on land and must stay lighter
+  // than the full-width fill of the same class. 0.3 washed them out once the
+  // daylight fills lightened.
+  COLOR thinMotorwayColor          = lighten(@motorwayColor,0.2);
+  COLOR thinTrunkColor             = lighten(@trunkColor,0.2);
+  COLOR thinPrimaryColor           = lighten(@primaryColor,0.2);
+  COLOR thinSecondaryColor         = #fdd654;
+  COLOR thinTertiaryColor          = #fefe73;
 
-  COLOR motorwayShieldColor        = @motorwayColor;
-  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.5);
-  COLOR trunkShieldColor           = @trunkColor;
-  COLOR primaryShieldColor         = @primaryColor;
+  // Highway shields draw WHITE text, so they cannot simply reuse the road fill:
+  // a lighter fill would make the shield text unreadable. They get their own
+  // darker constant instead.
+  COLOR motorwayShieldColor        = darken(@motorwayColor, 0.45);
+  COLOR motorwayJunctionLabelColor = lighten(@motorwayColor, 0.3);
+  COLOR trunkShieldColor           = darken(@trunkColor, 0.45);
+  COLOR primaryShieldColor         = darken(@primaryColor, 0.45);
 
   // Buildings
   IF daylight {

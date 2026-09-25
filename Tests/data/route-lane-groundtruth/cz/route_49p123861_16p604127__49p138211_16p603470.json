@@ -1,0 +1,251 @@
+{
+  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.123861187129165,
+      "lon": 16.6041278586099,
+      "name": "Vídeňská",
+      "nodeIndex": 0,
+      "ref": "52",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.1665754849987182,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.12535651866611,
+      "lon": 16.603996430367204,
+      "name": "Vídeňská",
+      "nodeIndex": 1,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.27076133856526147,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.1262926096193,
+      "lon": 16.603940103977465,
+      "name": "Vídeňská",
+      "nodeIndex": 2,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.4080271457493765,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.12752642577533,
+      "lon": 16.603889142005812,
+      "name": "Vídeňská",
+      "nodeIndex": 3,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.4406956613741975,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.12782012766465,
+      "lon": 16.60388109537871,
+      "name": "Vídeňská",
+      "nodeIndex": 4,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.55912259577229,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.12888496465149,
+      "lon": 16.603867684333522,
+      "name": "Vídeňská",
+      "nodeIndex": 5,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.6111753492085004,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.129353010128085,
+      "lon": 16.603870366542566,
+      "name": "Vídeňská",
+      "nodeIndex": 6,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.6262404926728578,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.12948846168436,
+      "lon": 16.60387304875161,
+      "name": "Vídeňská",
+      "nodeIndex": 7,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 0.8945685106577096,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.13190110871122,
+      "lon": 16.60390791746906,
+      "name": "Vídeňská",
+      "nodeIndex": 8,
+      "ref": "52",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 1.0960669361123379,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.13371294091428,
+      "lon": 16.603902553050972,
+      "name": "Vídeňská",
+      "nodeIndex": 9,
+      "ref": "52",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 1.3369186765367862,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.135876142500905,
+      "lon": 16.603744302717928,
+      "name": "Vídeňská",
+      "nodeIndex": 10,
+      "ref": "52",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 1.3857091224765603,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 49.13631468367811,
+      "lon": 16.60372552725468,
+      "name": "Vídeňská",
+      "nodeIndex": 11,
+      "ref": "52",
+      "turn": "Straight on",
+      "type": "highway_trunk"
+    },
+    {
+      "distanceKm": 1.3857091224765603,
+      "lat": 49.13631468367811,
+      "lon": 16.60372552725468,
+      "nodeIndex": 12
+    }
+  ],
+  "start": {
+    "lat": 49.123861187129165,
+    "lon": 16.6041278586099
+  },
+  "target": {
+    "lat": 49.13821100546576,
+    "lon": 16.603470717396362
+  },
+  "version": 1
+}

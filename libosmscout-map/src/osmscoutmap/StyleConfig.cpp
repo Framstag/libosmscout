@@ -345,6 +345,7 @@ namespace osmscout {
     wayTypeSets.clear();
     wayTextFlags.clear();
     wayShieldFlags.clear();
+    visibilityBounds.clear();
 
     areaFillStyleConditionals.clear();
     areaBorderStyleConditionals.clear();
@@ -360,6 +361,7 @@ namespace osmscout {
     areaBorderTextStyleSelectors.clear();
     areaBorderSymbolStyleSelectors.clear();
     areaTypeSets.clear();
+    maxAreaBorderWidthMM.clear();
 
     routeTypeSets.clear();
     routeLineStyleSelectors.clear();
@@ -777,6 +779,30 @@ namespace osmscout {
                              maxLevel,
                              areaBorderStyleSelectors);
 
+    // The painter's early visibility decision has to extend an area by at least as much as any per-ring
+    // visibility decision can, so collect the widest area border style per level. Iterating the built
+    // selectors rather than the conditionals guarantees that the bound covers exactly the styles the
+    // per-ring decision can read.
+    maxAreaBorderWidthMM.assign(maxLevel,0.0);
+
+    for (const auto& ruleSelectors : areaBorderStyleSelectors) {
+      for (const auto& typeSelectors : ruleSelectors) {
+        size_t levelCount=std::min(typeSelectors.size(),
+                                   maxLevel);
+
+        for (size_t level=0; level<levelCount; level++) {
+          double & maxWidth=maxAreaBorderWidthMM.at(level);
+
+          for (const auto& selector : typeSelectors.at(level)) {
+            if (selector.style &&
+                selector.style->GetWidth()>maxWidth) {
+              maxWidth=selector.style->GetWidth();
+            }
+          }
+        }
+      }
+    }
+
     SortInConditionalsBySlot(*typeConfig,
                              areaTextStyleConditionals,
                              maxLevel,
@@ -950,6 +976,110 @@ namespace osmscout {
     }
   }
 
+  namespace {
+    /**
+     * Widest visual reach of the line styles of one level. The attributes of all styles of
+     * one type of that level are summed, because a resolved line style is the sum of the
+     * matching partial styles; the maximum over the types is the bound of the level.
+     */
+    void UpdateLineReach(const std::vector<std::vector<LineStyleSelectorList>>& selectors,
+                         size_t level,
+                         VisibilityBounds& bounds)
+    {
+      for (const auto& selectorsForType : selectors) {
+        if (selectorsForType.empty()) {
+          continue;
+        }
+
+        double lineWidth=0.0;
+        double displayWidth=0.0;
+
+        for (const auto& selector : selectorsForType[std::min(level,selectorsForType.size()-1)]) {
+          lineWidth+=selector.style->GetWidth();
+          displayWidth+=selector.style->GetDisplayWidth();
+        }
+
+        bounds.maxWayLineWidth=std::max(bounds.maxWayLineWidth,lineWidth);
+        bounds.maxWayDisplayWidth=std::max(bounds.maxWayDisplayWidth,displayWidth);
+      }
+    }
+
+    /**
+     * Widest icon and symbol reach of the icon styles of one level
+     */
+    void UpdateIconReach(const IconStyleLookupTable& selectors,
+                         size_t level,
+                         VisibilityBounds& bounds)
+    {
+      for (const auto& selectorsForType : selectors) {
+        if (selectorsForType.empty()) {
+          continue;
+        }
+
+        for (const auto& selector : selectorsForType[std::min(level,selectorsForType.size()-1)]) {
+          const IconStyle& style=*selector.style;
+
+          bounds.maxIconWidth=std::max(bounds.maxIconWidth,static_cast<double>(style.GetWidth()));
+          bounds.maxIconHeight=std::max(bounds.maxIconHeight,static_cast<double>(style.GetHeight()));
+
+          const SymbolRef& symbol=style.GetSymbol();
+
+          if (symbol &&
+              std::find(bounds.symbols.begin(),bounds.symbols.end(),symbol)==bounds.symbols.end()) {
+            bounds.symbols.push_back(symbol);
+          }
+        }
+      }
+    }
+  }
+
+  void StyleConfig::PostprocessVisibilityBounds()
+  {
+    size_t levelCount=0;
+
+    for (const auto& selectorsBySlot : wayLineStyleSelectors) {
+      for (const auto& selectorsForType : selectorsBySlot) {
+        levelCount=std::max(levelCount,selectorsForType.size());
+      }
+    }
+
+    for (const auto& selectorsForType : nodeIconStyleSelectors) {
+      levelCount=std::max(levelCount,selectorsForType.size());
+    }
+
+    visibilityBounds.clear();
+    visibilityBounds.resize(levelCount);
+
+    for (size_t level=0; level<levelCount; level++) {
+      VisibilityBounds& bounds=visibilityBounds[level];
+
+      for (const auto& selectorsBySlot : wayLineStyleSelectors) {
+        UpdateLineReach(selectorsBySlot,
+                        level,
+                        bounds);
+      }
+
+      UpdateIconReach(nodeIconStyleSelectors,
+                      level,
+                      bounds);
+    }
+  }
+
+  VisibilityBounds StyleConfig::GetVisibilityBounds(const Magnification& magnification) const
+  {
+    if (visibilityBounds.empty()) {
+      return {};
+    }
+
+    size_t level=magnification.GetLevel();
+
+    if (level>=visibilityBounds.size()) {
+      level=visibilityBounds.size()-1;
+    }
+
+    return visibilityBounds[level];
+  }
+
   void StyleConfig::Postprocess()
   {
     PostprocessNodes();
@@ -959,6 +1089,8 @@ namespace osmscout {
 
     PostprocessIconId();
     PostprocessPatternId();
+
+    PostprocessVisibilityBounds();
   }
 
   TypeConfigRef StyleConfig::GetTypeConfig() const
@@ -1383,6 +1515,21 @@ namespace osmscout {
     size_t level = projection.GetMagnification().GetLevel();
 
     return wayShieldFlags[std::min(level, wayTextFlags.size()-1)];
+  }
+
+  double StyleConfig::GetMaxAreaBorderWidthMM(const Magnification& magnification) const
+  {
+    if (maxAreaBorderWidthMM.empty()) {
+      return 0.0;
+    }
+
+    size_t level=magnification.GetLevel();
+
+    if (level>=maxAreaBorderWidthMM.size()) {
+      level=maxAreaBorderWidthMM.size()-1;
+    }
+
+    return maxAreaBorderWidthMM.at(level);
   }
 
   FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,

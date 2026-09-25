@@ -35,12 +35,15 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
                    const std::string &iconDirectory,
                    SettingsRef settings,
                    MapManagerRef mapManager,
-                   const std::vector<std::string> &customPoiTypes)
+                   const std::vector<std::string> &customPoiTypes,
+                   const std::string &basemapStyleFilename)
   : AsyncWorker("DBThread"),
     mapManager(mapManager),
     basemapLookupDirectory(basemapLookupDirectory),
+    basemapStyleFilename(basemapStyleFilename),
     settings(settings),
     mapDpi(-1),
+    lastStyleLoadSucceeded(true),
     iconDirectory(iconDirectory),
     daylight(true),
     customPoiTypes(customPoiTypes)
@@ -286,10 +289,20 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
         if (typeConfig) {
           registerCustomPoiTypes(typeConfig);
           styleConfig=makeStyleConfig(typeConfig);
+          // A rejected stylesheet never leaves the database without a style
+          // configuration: rendering would otherwise run without one.
+          if (!styleConfig) {
+            styleConfig=emptyStyleConfig;
+            lastStyleLoadSucceeded=false;
+          }
+          else if (activeStyleSheetFilename.empty()) {
+            activeStyleSheetFilename=stylesheetFilename;
+          }
         }
         else {
           log.Warn() << "TypeConfig invalid!";
-          styleConfig=nullptr;
+          styleConfig=emptyStyleConfig;
+          lastStyleLoadSucceeded=false;
         }
       }
       else {
@@ -340,7 +353,9 @@ void DBThread::registerCustomPoiTypes(osmscout::TypeConfigRef typeConfig) const
   }
 }
 
-StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppressWarnings) const
+StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig,
+                                         bool suppressWarnings,
+                                         const std::string &styleFilename) const
 {
   osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
@@ -354,8 +369,12 @@ StyleConfigRef DBThread::makeStyleConfig(TypeConfigRef typeConfig, bool suppress
     log.Warn(false);
   }
 
-  if (!styleConfig->Load(stylesheetFilename, nullptr, false, log)) {
-    log.Warn() << "Cannot load style sheet '" << stylesheetFilename << "'!";
+  // The basemap database has its own type config (basemap.ost) with only a
+  // few types; use its dedicated stylesheet when configured, else the main one.
+  std::string file = styleFilename.empty() ? stylesheetFilename : styleFilename;
+
+  if (!styleConfig->Load(file, nullptr, false, log)) {
+    log.Warn() << "Cannot load style sheet '" << file << "'!";
     styleConfig=nullptr;
   }
 
@@ -441,17 +460,36 @@ void DBThread::LoadStyleInternal(const std::string &stylesheetFilename,
   bool prevErrs = !styleErrors.empty();
   styleErrors.clear();
   std::string file = stylesheetFilename+suffix;
+  bool succeeded=true;
   for (const auto& db: databases){
     log.Debug() << "Loading style " << file << " for database " << db->path << "...";
-    db->LoadStyle(file, stylesheetFlags, styleErrors);
+    // A rejected stylesheet never becomes the active style: the database keeps
+    // its previously installed configuration (the empty one when it never had
+    // one), so a render can never run without a style configuration.
+    if (!db->LoadStyle(file, stylesheetFlags, styleErrors, emptyStyleConfig)) {
+      succeeded=false;
+    }
     log.Debug() << "Loading style done";
   }
   if (basemapDatabase) {
-    log.Debug() << "Loading style " << file << " for database " << basemapDatabase->path << "...";
-    basemapDatabase->LoadStyle(file, stylesheetFlags, styleErrors);
+    // The basemap database has its own type config (basemap.ost) with only a
+    // few types; load its dedicated stylesheet (e.g. basemap-render.oss) so
+    // the main style's unknown-type warnings do not apply. Falls back to the
+    // main style when no basemap style is configured.
+    std::string basemapFile = basemapStyleFilename.empty()
+      ? file
+      : basemapStyleFilename + suffix;
+    log.Debug() << "Loading style " << basemapFile << " for database " << basemapDatabase->path << "...";
+    if (!basemapDatabase->LoadStyle(basemapFile, stylesheetFlags, styleErrors, emptyStyleConfig)) {
+      succeeded=false;
+    }
     log.Debug() << "Loading style done";
   }
-  if (prevErrs || (!styleErrors.empty())){
+  lastStyleLoadSucceeded=succeeded && styleErrors.empty();
+  if (succeeded) {
+    activeStyleSheetFilename=file;
+  }
+  if (prevErrs || !styleErrors.empty() || !succeeded){
     log.Warn() << "Failed to load stylesheet" << file;
     styleErrorsChanged.Emit();
   }
@@ -565,11 +603,19 @@ void DBThread::LoadBasemap()
       osmscout::StyleConfigRef styleConfig;
       if (typeConfig) {
         registerCustomPoiTypes(typeConfig);
-        styleConfig=makeStyleConfig(typeConfig);
+        styleConfig=makeStyleConfig(typeConfig, false, basemapStyleFilename);
+        // Same rule as for the regular databases: a rejected basemap stylesheet
+        // keeps the map rendering, it only drops the basemap layer.
+        if (!styleConfig) {
+          styleConfig=emptyStyleConfig;
+          lastStyleLoadSucceeded=false;
+          log.Warn() << "Basemap stylesheet rejected, basemap layer is not drawn";
+        }
       }
       else {
         log.Warn() << "TypeConfig invalid!";
-        styleConfig=nullptr;
+        styleConfig=emptyStyleConfig;
+        lastStyleLoadSucceeded=false;
       }
 
       log.Debug() << "Basemap loaded from '" << basemapLookupDirectory << "'...";
@@ -590,6 +636,16 @@ void DBThread::ReloadBasemap()
 {
   Async<bool>([this](const Breaker& /*breaker*/) {
     WriteLock locker(latch);
+    LoadBasemap();
+    return true;
+  });
+}
+
+CancelableFuture<bool> DBThread::SetBasemapLookupDirectory(const std::string &basemapLookupDirectory)
+{
+  return Async<bool>([this, basemapLookupDirectory](const Breaker& /*breaker*/) {
+    WriteLock locker(latch);
+    this->basemapLookupDirectory = basemapLookupDirectory;
     LoadBasemap();
     return true;
   });

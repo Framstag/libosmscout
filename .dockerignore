@@ -1,0 +1,19 @@
+# heavy local artifacts — not needed for any Docker build context
+maps/
+build/
+build-*/
+debug/
+tmp/
+symbols-out/
+c/
+include-patch/
+vcpkg_installed/
+
+# repository history: not read by any image build (nothing in the image builds
+# uses git), and it dominates the context otherwise
+.git/
+
+# the Dockerfile is read separately by docker build -f; keeping it out of
+# the context prevents every Dockerfile edit from invalidating COPY layers
+Dockerfile
+scripts/mapgen/Dockerfile

@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y \
           git make libtool pkg-config \
           doxygen \
+          nlohmann-json3-dev \
           locales \
     && rm -rf /var/lib/apt/lists/*
 

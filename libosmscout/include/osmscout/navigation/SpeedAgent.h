@@ -56,7 +56,7 @@ private:
       distance(distance), duration(duration)
     {}
   };
-  std::list<TrackSegment> segmentFifo; // buffer of segments for 5 seconds used for speed computation
+  std::list<TrackSegment> segmentFifo; // buffer of segments used for the speed computation
 
   struct Position
   {
@@ -68,6 +68,7 @@ private:
       return time.time_since_epoch()!=Timestamp::duration::zero();
     }
   };
+  std::list<Position> recentFixes; // fixes of the stationary gate window
   Position lastPosition;
 
   double lastReportedMaxSpeed{-1};

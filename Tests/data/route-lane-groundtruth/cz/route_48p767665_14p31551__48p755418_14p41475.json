@@ -1,0 +1,1608 @@
+{
+  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76766516840209,
+      "lon": 14.031551435824866,
+      "name": "",
+      "nodeIndex": 0,
+      "ref": "",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 0.09922297676677444,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76769199049244,
+      "lon": 14.030202284680314,
+      "name": "Na Výsluní",
+      "nodeIndex": 1,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.11432328459704358,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.7675578800407,
+      "lon": 14.030170098171908,
+      "name": "Na Výsluní",
+      "nodeIndex": 2,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.1427848535816609,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76730441128689,
+      "lon": 14.030116453991212,
+      "name": "Na Výsluní",
+      "nodeIndex": 3,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.16057164304089128,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76714481984931,
+      "lon": 14.03010036073701,
+      "name": "Na Výsluní",
+      "nodeIndex": 4,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.17046398882190938,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76705630695116,
+      "lon": 14.030086949691821,
+      "name": "Na Výsluní",
+      "nodeIndex": 5,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.18563108191663352,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766920855394915,
+      "lon": 14.030062809810516,
+      "name": "Na Výsluní",
+      "nodeIndex": 6,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.1890838459589122,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766890009991016,
+      "lon": 14.03005744539243,
+      "name": "Na Výsluní",
+      "nodeIndex": 7,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.19212469166335364,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76686318790067,
+      "lon": 14.030049398765328,
+      "name": "Na Výsluní",
+      "nodeIndex": 8,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.19681475618388833,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766821613660625,
+      "lon": 14.030038669929183,
+      "name": "Na Výsluní",
+      "nodeIndex": 9,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.20253433762328893,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76677333389799,
+      "lon": 14.030011847838836,
+      "name": "Na Výsluní",
+      "nodeIndex": 10,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.2055163402273833,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76675321733023,
+      "lon": 14.029985025748488,
+      "name": "Na Výsluní",
+      "nodeIndex": 11,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.20872749614017816,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76673846518054,
+      "lon": 14.029947474821995,
+      "name": "Na Výsluní",
+      "nodeIndex": 12,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.216754338556353,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76672505413535,
+      "lon": 14.029840186460603,
+      "name": "Na Výsluní",
+      "nodeIndex": 13,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.22642061252412146,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76672773634439,
+      "lon": 14.029708758217907,
+      "name": "Na Výsluní",
+      "nodeIndex": 14,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.24106040364814996,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76673846518054,
+      "lon": 14.029510274749327,
+      "name": "Na Výsluní",
+      "nodeIndex": 15,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.2475740747698732,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766735782971494,
+      "lon": 14.029421761851182,
+      "name": "Na Výsluní",
+      "nodeIndex": 16,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.25348349403080533,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766722371926335,
+      "lon": 14.029343977789154,
+      "name": "Na Výsluní",
+      "nodeIndex": 17,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.2577723967324224,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76670359646309,
+      "lon": 14.029293015817501,
+      "name": "Na Výsluní",
+      "nodeIndex": 18,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.2627169248782455,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76667677437274,
+      "lon": 14.029239371636805,
+      "name": "Na Výsluní",
+      "nodeIndex": 19,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.26713426709726296,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76664727007335,
+      "lon": 14.02919913850127,
+      "name": "Na Výsluní",
+      "nodeIndex": 20,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.27183981108194344,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76660971914686,
+      "lon": 14.029169634201907,
+      "name": "Na Výsluní",
+      "nodeIndex": 21,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.2838293483262478,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766502430785465,
+      "lon": 14.029153540947675,
+      "name": "Na Výsluní",
+      "nodeIndex": 22,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.2881543448514728,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766463538754465,
+      "lon": 14.029153540947675,
+      "name": "Volarská",
+      "nodeIndex": 23,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn left",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.30053216565754304,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766446104395726,
+      "lon": 14.029319837907849,
+      "name": "Volarská",
+      "nodeIndex": 24,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.3235984923256147,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76641928230538,
+      "lon": 14.029630974155879,
+      "name": "Volarská",
+      "nodeIndex": 25,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.34159183997754927,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766407212364726,
+      "lon": 14.029875055178053,
+      "name": "Volarská",
+      "nodeIndex": 26,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.34595277277583586,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766403189051175,
+      "lon": 14.029934063776835,
+      "name": "Volarská",
+      "nodeIndex": 27,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.37497631790509817,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76638977800599,
+      "lon": 14.030328348504952,
+      "name": "Volarská",
+      "nodeIndex": 28,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.39331935550949654,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766385754692436,
+      "lon": 14.030577793945213,
+      "name": "Volarská",
+      "nodeIndex": 29,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.3980539839943784,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76638441358793,
+      "lon": 14.030642166962053,
+      "name": "Volarská",
+      "nodeIndex": 30,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4424914752860545,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766407212364726,
+      "lon": 14.031245663994895,
+      "name": "Volarská",
+      "nodeIndex": 31,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4576749298291678,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76640587126022,
+      "lon": 14.031452194090576,
+      "name": "Volarská",
+      "nodeIndex": 32,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4650674391527977,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766395142424074,
+      "lon": 14.031551435824866,
+      "name": "Volarská",
+      "nodeIndex": 33,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.47303580353227487,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76637636696083,
+      "lon": 14.031656041977214,
+      "name": "Náměstí",
+      "nodeIndex": 34,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4808562239268745,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76634015713884,
+      "lon": 14.031747237084403,
+      "name": "Náměstí",
+      "nodeIndex": 35,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5031322442830573,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76621677552325,
+      "lon": 14.031985953688519,
+      "name": "Náměstí",
+      "nodeIndex": 36,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5252864994790629,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76609071169861,
+      "lon": 14.032219305874548,
+      "name": "Náměstí",
+      "nodeIndex": 37,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5345919711502847,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.766041090831465,
+      "lon": 14.032321229817882,
+      "name": "Náměstí",
+      "nodeIndex": 38,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5390374177730568,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76601292763661,
+      "lon": 14.032364145162433,
+      "name": "Náměstí",
+      "nodeIndex": 39,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5445506584421616,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76596598897848,
+      "lon": 14.032388285043737,
+      "name": "Náměstí",
+      "nodeIndex": 40,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5617569554988567,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.765811761958986,
+      "lon": 14.03236950958049,
+      "name": "Náměstí",
+      "nodeIndex": 41,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5651871247462262,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76578091655509,
+      "lon": 14.03236950958049,
+      "name": "Náměstí",
+      "nodeIndex": 42,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5677689803787989,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 48.7657594588828,
+      "lon": 14.032382920625679,
+      "name": "Palackého",
+      "nodeIndex": 43,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5727616855771496,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 48.76574068341955,
+      "lon": 14.032444611433476,
+      "name": "Palackého",
+      "nodeIndex": 44,
+      "ref": "39",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6030731902483814,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.765673628193696,
+      "lon": 14.03284426057968,
+      "name": "Palackého",
+      "nodeIndex": 45,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6134816211654474,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.765657534939464,
+      "lon": 14.032983735449477,
+      "name": "Palackého",
+      "nodeIndex": 46,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.628920210272162,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76564546499881,
+      "lon": 14.033192947754202,
+      "name": "Palackého",
+      "nodeIndex": 47,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.645746835752349,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76563205395365,
+      "lon": 14.033420935522173,
+      "name": "Palackého",
+      "nodeIndex": 48,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6922858478195225,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76559316192265,
+      "lon": 14.034051254645362,
+      "name": "Palackého",
+      "nodeIndex": 49,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.7257131126141533,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.765552928787116,
+      "lon": 14.034501865763218,
+      "name": "Palackého",
+      "nodeIndex": 50,
+      "ref": "39",
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.7377420611876953,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.765519401174174,
+      "lon": 14.034657433887247,
+      "name": "Palackého",
+      "nodeIndex": 51,
+      "ref": "39",
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.745413261949882,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76548587356123,
+      "lon": 14.034748628994436,
+      "name": "Palackého",
+      "nodeIndex": 52,
+      "ref": "39",
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.7586779189374891,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76540808949923,
+      "lon": 14.034885421655218,
+      "name": "Palackého",
+      "nodeIndex": 53,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.782032667786064,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.765256544688754,
+      "lon": 14.035105362796088,
+      "name": "Palackého",
+      "nodeIndex": 54,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8743969533083374,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.764658412074,
+      "lon": 14.035977080732408,
+      "name": "Palackého",
+      "nodeIndex": 55,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8847457425486788,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76458465132552,
+      "lon": 14.036062911421539,
+      "name": "Palackého",
+      "nodeIndex": 56,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8936317711621292,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76451491389062,
+      "lon": 14.036121920020292,
+      "name": "Palackého",
+      "nodeIndex": 57,
+      "ref": "39",
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9013977177543361,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76444785866474,
+      "lon": 14.036151424319684,
+      "name": "Palackého",
+      "nodeIndex": 58,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9080070116607564,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.764388850065984,
+      "lon": 14.036162153155828,
+      "name": "Palackého",
+      "nodeIndex": 59,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9263520152669091,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.764223894210346,
+      "lon": 14.036159470946785,
+      "name": "Palackého",
+      "nodeIndex": 60,
+      "ref": "39",
+      "turn": "Turn slightly right",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9455132196118591,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76405491504113,
+      "lon": 14.036108508975133,
+      "name": "Palackého",
+      "nodeIndex": 61,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9523651489182706,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.763995906442375,
+      "lon": 14.036081686884785,
+      "name": "Palackého",
+      "nodeIndex": 62,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9702408933823329,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76384302052739,
+      "lon": 14.0360065850318,
+      "name": "Palackého",
+      "nodeIndex": 63,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.978052699727163,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76377730640604,
+      "lon": 14.035969034105307,
+      "name": "Palackého",
+      "nodeIndex": 64,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9878913795945312,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76369549903046,
+      "lon": 14.035918072133654,
+      "name": "Palackého",
+      "nodeIndex": 65,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0093603507224973,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76352786096578,
+      "lon": 14.03577323284577,
+      "name": "Palackého",
+      "nodeIndex": 66,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0915747900074713,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.762888154110954,
+      "lon": 14.03521265115748,
+      "name": "Palackého",
+      "nodeIndex": 67,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.158543842303908,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76236378224465,
+      "lon": 14.034764722248639,
+      "name": "Palackého",
+      "nodeIndex": 68,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.1930826182598633,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.762094220236634,
+      "lon": 14.03453137006261,
+      "name": "Palackého",
+      "nodeIndex": 69,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2096399654673444,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76196145088943,
+      "lon": 14.034429446119276,
+      "name": "Palackého",
+      "nodeIndex": 70,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2255430249841726,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76182734043766,
+      "lon": 14.034354344266319,
+      "name": "Palackého",
+      "nodeIndex": 71,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.241836159882639,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76168518335882,
+      "lon": 14.034300700085623,
+      "name": "Palackého",
+      "nodeIndex": 72,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2589108901487345,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.761532297443836,
+      "lon": 14.034279242413334,
+      "name": "Palackého",
+      "nodeIndex": 73,
+      "ref": "39",
+      "turn": "Turn slightly left",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2808849895309729,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.7613364961843,
+      "lon": 14.03431947554887,
+      "name": "Palackého",
+      "nodeIndex": 74,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.3010127906136362,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76116349370153,
+      "lon": 14.034399941819913,
+      "name": "Palackého",
+      "nodeIndex": 75,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.364454596768756,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.76064985067137,
+      "lon": 14.034775451084784,
+      "name": "Palackého",
+      "nodeIndex": 76,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.4216460616022168,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.760208627285124,
+      "lon": 14.035175100230987,
+      "name": "Palackého",
+      "nodeIndex": 77,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.466506684183216,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.759893467723515,
+      "lon": 14.035555973913944,
+      "name": "Palackého",
+      "nodeIndex": 78,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.5730370051283857,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75918402343379,
+      "lon": 14.036529615793597,
+      "name": "",
+      "nodeIndex": 79,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.6061302160582258,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.758939942411615,
+      "lon": 14.036787107860931,
+      "name": "",
+      "nodeIndex": 80,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.641297487164149,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75866903929909,
+      "lon": 14.037033871092149,
+      "name": "",
+      "nodeIndex": 81,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.688679453044454,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75829889445228,
+      "lon": 14.037353053967308,
+      "name": "",
+      "nodeIndex": 82,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.7337869353634274,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75795691280035,
+      "lon": 14.037682965678584,
+      "name": "",
+      "nodeIndex": 83,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.84031326648551,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75713347462664,
+      "lon": 14.038423255372209,
+      "name": "",
+      "nodeIndex": 84,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8954764371976565,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75675528315273,
+      "lon": 14.038908735207542,
+      "name": "",
+      "nodeIndex": 85,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9236225011965797,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75657825735641,
+      "lon": 14.039182320529079,
+      "name": "",
+      "nodeIndex": 86,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.95213406330342,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75640391376916,
+      "lon": 14.03946663468679,
+      "name": "",
+      "nodeIndex": 87,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.028326319577848,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75594525602418,
+      "lon": 14.040236428679805,
+      "name": "",
+      "nodeIndex": 88,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.066863039394185,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.755725314883335,
+      "lon": 14.040641442244066,
+      "name": "",
+      "nodeIndex": 89,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.1056129120354137,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 48.75553890135541,
+      "lon": 14.041086688943864,
+      "name": "",
+      "nodeIndex": 90,
+      "ref": "39",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.1056129120354137,
+      "lat": 48.75553890135541,
+      "lon": 14.041086688943864,
+      "nodeIndex": 91
+    }
+  ],
+  "start": {
+    "lat": 48.76766516840209,
+    "lon": 14.031551435824866
+  },
+  "target": {
+    "lat": 48.75541820194883,
+    "lon": 14.041475609253894
+  },
+  "version": 1
+}

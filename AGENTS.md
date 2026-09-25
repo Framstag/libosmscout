@@ -47,9 +47,9 @@ Each directory is a standalone CMake/Meson subproject:
 | `DumpData/` | Data debug/dump tool |
 | `Java/` | Java examples (location lookup, routing, renderer, open db) |
 | `stylesheets/` | `.oss` (styles) and `.ost` (type defs) style definitions |
-| `Documentation/` | Build guides, style syntax docs, notes per platform |
+| `Documentation/` | Build guides, style syntax docs, notes per platform; `MapRepository.md` documents the map repository pipeline (imports manifest, region index, basemap configuration, db.json metadata, regeneration script including the basemap step, container, client update check) |
 | `setup/` | (empty — reserved for dev setup scripts) |
-| `scripts/` | cppcheck.sh, etc. |
+| `scripts/` | cppcheck.sh, etc.; `mapgen/` holds the map regeneration script (`mapgen.sh`), the basemap step (`mapgen-basemap.sh`), example configs (`imports.example.json`, `names.example.json`, `basemap.example.json`), nginx example, the client-check and basemap-check test harnesses, and the mapgen Dockerfile |
 | `ci/` | Docker build configs |
 | `packaging/` | Platform packaging |
 | `webpage/` | Project website source |
@@ -128,6 +128,7 @@ Notes:
 - **vcpkg**: Three profiles — `vcpkg_full.json`, `vcpkg_medium.json`, `vcpkg_minimum.json`
 - **Subprojects** (Meson): wraps in `subprojects/`
 - **System**: Standard OSM dependencies (libxml2, protobuf, libpng, zlib, etc.)
+- **`nlohmann_json`**: required by `libosmscout-import` (it reads and writes the `db.json` database metadata). The requirement lives in that library's build description, so configurations that turn the import library off (`OSMSCOUT_BUILD_IMPORT=OFF`, e.g. iOS, Android, JavaScout) do not need it. The MCPServer still finds it optionally.
 
 ## CI/CD
 
@@ -143,10 +144,13 @@ GitHub Actions in `.github/workflows/`:
 | `build_on_ubuntu_22_04_qt_android.yml` | Android NDK |
 | `sanitize_on_ubuntu_24_04.yml` | Sanitizer builds |
 | `sonar.yml` | SonarQube analysis |
+| `mapgen_image.yml` | Map repository container images — build, smoke test, publish to GitHub Packages on main-branch commits, prune old builds |
 | `release.yml` / `release_latest.yml` | Release automation |
 | `webpage.yml` | Website build |
 
 Note: `build_and_test_on_vs2025.yml` caches vcpkg-built dependencies as NuGet packages in the GitHub Packages feed (`nuget.pkg.github.com/Framstag`), versioned by vcpkg ABI hash. The cache self-heals after runner image/toolchain updates; the workflow needs `packages: write` permission for the `GITHUB_TOKEN`.
+
+Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, and both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`). The font-dependent tests themselves take the family out of the bundled font file (`Tests/include/TestFontSupport.h`) and select the fontconfig based Pango font map, because Pango's default font map on Windows resolves families through the Win32 font collection and ignores fontconfig (MSYS2 issue 4293).
 
 ## Code Conventions
 
@@ -187,6 +191,7 @@ libosmscout/
 ## C++ Coding Style
 
 See [CodeStyles.md](guidelines/CodeStyles.md) for full guide derived from actual code.
+See [FileFormatVersion.md](guidelines/FileFormatVersion.md) for when a type config / database file format version bump is required.
 Covers naming, indentation, braces, classes, methods, pointers, enums,
 include order, comments, formatting, header guards, templates, and error handling.
 ## Architecture Overview
@@ -228,7 +233,7 @@ include order, comments, formatting, header guards, templates, and error handlin
 | `db/` | Database I/O — type registry, tile storage, area/way/node indexes |
 | `routing/` | Routing algorithm, data structures, cost functions |
 | `location/` | Location lookup, reverse geocoding, address search |
-| `io/` | Low-level file I/O — MD5, CRC, file readers/writers, compression |
+| `io/` | Low-level file I/O — file readers/writers, compression, CRC-32 checksums (`osmscout::Crc32`, `osmscout::ComputeFileCrc32`) |
 | `util/` | Geometry (GeoCoord, Pixel, Point), projections, math helpers |
 | `feature/` | OSM feature definitions mapped to rendering |
 | `system/` | Platform abstractions (clock, thread, memory mapped files) |
