@@ -498,15 +498,20 @@ STYLE
 
    [TYPE highway_bus_guideway] WAY {color: #90570c; displayWidth: 0.1mm; }
 
-   [TYPE highway_busway] WAY {color: #90570c; displayWidth: 0.1mm; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_busway] WAY {color: #90570c; displayWidth: 0.1mm; }
 
-   [TYPE highway_raceway] WAY {color: #808080; displayWidth: 0.1mm; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_raceway] WAY {color: #808080; displayWidth: 0.1mm; }
 
-   [TYPE highway_escape] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
+   // PARKED-NEW-TYPE
+   // [TYPE highway_escape] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m;}
 
-   [TYPE highway_proposed] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m; dash: 2,2;}
+   // PARKED-NEW-TYPE
+   // [TYPE highway_proposed] WAY {color: #99cccc; displayWidth: 0.1mm; width: 2m; dash: 2,2;}
 
-   [TYPE highway_corridor] WAY {color: #f64762; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.2mm; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_corridor] WAY {color: #f64762; dash: 1,1; joinCap: butt; endCap: butt; displayWidth: 0.2mm; }
 
    [TYPE highway_motorway, highway_motorway_link SIZE @motorwayWidth 0.45mm:3px<] {
      [FEATURE Tunnel] {
@@ -793,7 +798,8 @@ STYLE
 
  [MAG close-] {
    [TYPE highway_services] NODE.TEXT {label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayServices; }
-   [TYPE highway_construction, highway_proposed] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighway; }
+   // PARKED-NEW-TYPE: highway_proposed parked, removed from the selector below
+   [TYPE highway_construction] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighway; }
  }
 
  [MAG veryClose-] {
@@ -814,10 +820,8 @@ STYLE
  [MAG @labelPathsMag-] {
    [TYPE highway_pedestrian] WAY.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioOtherWays; }
 
+   // PARKED-NEW-TYPE: highway_busway, highway_raceway, highway_corridor parked, removed from the selector below
    [TYPE highway_bus_guideway,
-         highway_busway,
-         highway_raceway,
-         highway_corridor,
          highway_path,
          highway_cycleway,
          highway_footway,
@@ -834,10 +838,10 @@ STYLE
          highway_via_ferrata_difficult,
          highway_via_ferrata_extreme] WAY.TEXT { displayOffset: 2mm;}
 
+   // PARKED-NEW-TYPE: highway_rest_area parked, removed from the selector below
    [TYPE highway_pedestrian,
          highway_services,
-         highway_footway,
-         highway_rest_area] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayArea; }
+         highway_footway] AREA.TEXT { label: Name.name; color: @wayLabelColor; priority: @labelPrioHighwayArea; }
 
  }
 
@@ -863,26 +867,46 @@ STYLE
      NODE.TEXT { label: Name.name; color: @wayLabelColor; size: 0.8; priority: @labelPrioHighway; }
    }
 
-   [TYPE highway_stop] NODE.ICON { symbol: highway_stop; }
-   [TYPE highway_give_way] NODE.ICON { symbol: highway_give_way; }
-   [TYPE highway_crossing] NODE.ICON { symbol: highway_crossing; }
-   [TYPE highway_turning_circle] NODE.ICON { symbol: highway_turning_circle; }
-   [TYPE highway_turning_loop] NODE.ICON { symbol: highway_turning_loop; }
-   [TYPE highway_passing_place] NODE.ICON { symbol: highway_passing_place; }
-   [TYPE highway_priority] NODE.ICON { symbol: highway_priority; }
-   [TYPE highway_elevator] NODE.ICON { symbol: highway_elevator; }
-   [TYPE highway_emergency_access_point] NODE.ICON { symbol: highway_emergency_access_point; }
-   [TYPE highway_trailhead] NODE.ICON { symbol: highway_trailhead; }
-   [TYPE highway_rest_area] NODE.ICON { symbol: highway_rest_area; }
-   [TYPE highway_toll_gantry] NODE.ICON { symbol: highway_toll_gantry; }
-   [TYPE highway_traffic_mirror] NODE.ICON { symbol: highway_traffic_mirror; }
-   [TYPE highway_speed_display] NODE.ICON { symbol: highway_speed_display; }
-   [TYPE highway_ladder] NODE.ICON { symbol: highway_ladder; }
-   [TYPE highway_hitchhiking] NODE.ICON { symbol: highway_hitchhiking; }
-   [TYPE highway_cyclist_waiting_aid] NODE.ICON { symbol: highway_cyclist_waiting_aid; }
-   [TYPE highway_emergency_bay] NODE.ICON { symbol: highway_emergency_bay; }
-   [TYPE highway_traffic_sign] NODE.ICON { symbol: highway_traffic_sign; }
-   [TYPE highway_platform] NODE.ICON { symbol: highway_platform; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_stop] NODE.ICON { symbol: highway_stop; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_give_way] NODE.ICON { symbol: highway_give_way; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_crossing] NODE.ICON { symbol: highway_crossing; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_turning_circle] NODE.ICON { symbol: highway_turning_circle; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_turning_loop] NODE.ICON { symbol: highway_turning_loop; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_passing_place] NODE.ICON { symbol: highway_passing_place; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_priority] NODE.ICON { symbol: highway_priority; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_elevator] NODE.ICON { symbol: highway_elevator; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_emergency_access_point] NODE.ICON { symbol: highway_emergency_access_point; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_trailhead] NODE.ICON { symbol: highway_trailhead; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_rest_area] NODE.ICON { symbol: highway_rest_area; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_toll_gantry] NODE.ICON { symbol: highway_toll_gantry; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_traffic_mirror] NODE.ICON { symbol: highway_traffic_mirror; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_speed_display] NODE.ICON { symbol: highway_speed_display; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_ladder] NODE.ICON { symbol: highway_ladder; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_hitchhiking] NODE.ICON { symbol: highway_hitchhiking; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_cyclist_waiting_aid] NODE.ICON { symbol: highway_cyclist_waiting_aid; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_emergency_bay] NODE.ICON { symbol: highway_emergency_bay; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_traffic_sign] NODE.ICON { symbol: highway_traffic_sign; }
+   // PARKED-NEW-TYPE
+   // [TYPE highway_platform] NODE.ICON { symbol: highway_platform; }
  }
 
  [MAG detail-] {

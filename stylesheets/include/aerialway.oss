@@ -42,29 +42,32 @@ OSS
         WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
         WAY#drag {color: #101010; dash: 0.2,5; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
       }
-      [TYPE aerialway_zip_line]{
-        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
-        WAY#zip {color: #101010; dash: 0.5,3; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
-      }
-      [TYPE aerialway_goods]{
-        WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
-        WAY#goods {color: #101010; dash: 0.2,8; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
-      }
-      [TYPE aerialway_station] {
-        NODE.ICON { symbol: aerialway_station; }
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @airwayLabelColor; priority: @labelPrioRailwayStation; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE aerialway_zip_line]{
+        // WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        // WAY#zip {color: #101010; dash: 0.5,3; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
+      // }
+      // PARKED-NEW-TYPE
+      // [TYPE aerialway_goods]{
+        // WAY {color: #606060; displayWidth: 0.03mm; width: 0.5m;}
+        // WAY#goods {color: #101010; dash: 0.2,8; joinCap: round; endCap: round; displayWidth: 0.1mm; width: 4m;}
+      // }
+      // PARKED-NEW-TYPE
+      // [TYPE aerialway_station] {
+        // NODE.ICON { symbol: aerialway_station; }
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @airwayLabelColor; priority: @labelPrioRailwayStation; }
+      // }
     }
 
     [MAG veryClose-] {
-      [TYPE aerialway_pylon] NODE.ICON { symbol: aerialway_pylon; }
+      // PARKED-NEW-TYPE
+      // [TYPE aerialway_pylon] NODE.ICON { symbol: aerialway_pylon; }
     }
 
     [MAG @labelPathsMag-] {
+      // PARKED-NEW-TYPE: aerialway_zip_line, aerialway_goods parked, removed from the selector below
       [TYPE aerialway_gondola,
             aerialway_chair_lift,
-            aerialway_drag_lift,
-            aerialway_zip_line,
-            aerialway_goods] WAY.TEXT { label: Name.name; size: 1.0; color: @airwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
+            aerialway_drag_lift] WAY.TEXT { label: Name.name; size: 1.0; color: @airwayLabelColor; displayOffset: 2.5mm; priority: @labelPrioPublicTransportWay;}
     }
 END

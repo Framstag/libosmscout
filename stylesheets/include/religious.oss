@@ -201,60 +201,67 @@ OSS
         NODE.ICON {symbol: religion_christian_church_cross; }
       }
 
-      [TYPE religion_jewish] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_jewish_star_of_david; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_jewish] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_jewish_star_of_david; }
+      // }
 
-      [TYPE religion_muslim] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_muslim_crescent; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_muslim] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_muslim_crescent; }
+      // }
 
-      [TYPE religion_buddhist] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_buddhist_dharma_wheel; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_buddhist] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_buddhist_dharma_wheel; }
+      // }
 
-      [TYPE religion_taoist] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_taoist_yin_yang; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_taoist] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_taoist_yin_yang; }
+      // }
 
-      [TYPE religion_shinto] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_shinto_torii; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_shinto] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_shinto_torii; }
+      // }
 
-      [TYPE religion_pagan] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_pagan_pentagram; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_pagan] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_pagan_pentagram; }
+      // }
 
-      [TYPE religion_hindu,
-            religion_sikh,
-            religion_jain,
-            religion_zoroastrian,
-            religion_chinese_folk,
-            religion_multifaith,
-            religion_bahai,
-            religion_confucian,
-            religion_vietnamese_folk,
-            religion_ancestor,
-            religion_animist,
-            religion_antoinist,
-            religion_benzhu,
-            religion_caodaism,
-            religion_shamanic,
-            religion_scientologist,
-            religion_self_realization_fellowship,
-            religion_spiritualist,
-            religion_tenrikyo,
-            religion_unitarian_universalist,
-            religion_voodoo,
-            religion_yazidi] {
-        NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
-        NODE.ICON {symbol: religion_place_of_worship; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE religion_hindu,
+            // religion_sikh,
+            // religion_jain,
+            // religion_zoroastrian,
+            // religion_chinese_folk,
+            // religion_multifaith,
+            // religion_bahai,
+            // religion_confucian,
+            // religion_vietnamese_folk,
+            // religion_ancestor,
+            // religion_animist,
+            // religion_antoinist,
+            // religion_benzhu,
+            // religion_caodaism,
+            // religion_shamanic,
+            // religion_scientologist,
+            // religion_self_realization_fellowship,
+            // religion_spiritualist,
+            // religion_tenrikyo,
+            // religion_unitarian_universalist,
+            // religion_voodoo,
+            // religion_yazidi] {
+        // NODE.TEXT {label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @religiousLabelColor; size: 0.9; priority: @labelPrioSpecialBuilding;}
+        // NODE.ICON {symbol: religion_place_of_worship; }
+      // }
     }
 END

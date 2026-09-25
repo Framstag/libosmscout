@@ -310,12 +310,12 @@ OSS
           AREA.BORDER { color: #887b7b; width: 0.1mm; }
         }
 
-        [TYPE leisure_park,
-              leisure_dog_park,
-              leisure_recreation_ground] AREA { color: #c6f0cf; }
+        // PARKED-NEW-TYPE: leisure_dog_park, leisure_recreation_ground parked, removed from the selector below
+        [TYPE leisure_park] AREA { color: #c6f0cf; }
         [TYPE leisure_common] AREA { color: #bde3cb; }
 
-        [TYPE leisure_beach_resort] AREA { color: @sandColor; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_beach_resort] AREA { color: @sandColor; }
 
         [TYPE leisure_marina,
               leisure_fishing] AREA.BORDER { color: #b5d6f1; width: 0.3mm; dash: 6,6; }
@@ -323,9 +323,8 @@ OSS
         [TYPE leisure_marina,
               leisure_fishing] AREA { color: #b5d6f180; }
 
-        [TYPE leisure_ice_rink,
-              leisure_swimming_area,
-              leisure_bathing_place] AREA { color: #b5d6f1; }
+        // PARKED-NEW-TYPE: leisure_swimming_area, leisure_bathing_place parked, removed from the selector below
+        [TYPE leisure_ice_rink] AREA { color: #b5d6f1; }
       }
 
       [MAG veryClose-] {
@@ -334,71 +333,70 @@ OSS
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
         }
 
-        [TYPE leisure_picnic_table] NODE.ICON { symbol: leisure_picnic_table; }
-        [TYPE leisure_outdoor_seating] NODE.ICON { symbol: leisure_outdoor_seating; }
-        [TYPE leisure_firepit] NODE.ICON { symbol: leisure_firepit; }
-        [TYPE leisure_dog_park] NODE.ICON { symbol: leisure_dog_park; }
-        [TYPE leisure_beach_resort] NODE.ICON { symbol: leisure_beach_resort; }
-        [TYPE leisure_recreation_ground] NODE.ICON { symbol: leisure_recreation_ground; }
-        [TYPE leisure_bathing_place] NODE.ICON { symbol: leisure_bathing_place; }
-        [TYPE leisure_resort] NODE.ICON { symbol: leisure_resort; }
-        [TYPE leisure_summer_camp] NODE.ICON { symbol: leisure_summer_camp; }
-        [TYPE leisure_schoolyard] NODE.ICON { symbol: leisure_schoolyard; }
-        [TYPE leisure_fitness_centre] NODE.ICON { symbol: leisure_fitness_centre; }
-        [TYPE leisure_sports_hall] NODE.ICON { symbol: leisure_sports_hall; }
-        [TYPE leisure_miniature_golf] NODE.ICON { symbol: leisure_miniature_golf; }
-        [TYPE leisure_bowling_alley] NODE.ICON { symbol: leisure_bowling_alley; }
-        [TYPE leisure_disc_golf_course] NODE.ICON { symbol: leisure_disc_golf_course; }
-        [TYPE leisure_climbing] NODE.ICON { symbol: leisure_climbing; }
-        [TYPE leisure_horse_riding] NODE.ICON { symbol: leisure_horse_riding; }
-        [TYPE leisure_trampoline_park] NODE.ICON { symbol: leisure_trampoline_park; }
-        [TYPE leisure_dance] NODE.ICON { symbol: leisure_dance; }
-        [TYPE leisure_amusement_arcade] NODE.ICON { symbol: leisure_amusement_arcade; }
-        [TYPE leisure_adult_gaming_centre] NODE.ICON { symbol: leisure_adult_gaming_centre; }
-        [TYPE leisure_bandstand] NODE.ICON { symbol: leisure_bandstand; }
-        [TYPE leisure_escape_game] NODE.ICON { symbol: leisure_escape_game; }
-        [TYPE leisure_indoor_play] NODE.ICON { symbol: leisure_indoor_play; }
-        [TYPE leisure_hackerspace] NODE.ICON { symbol: leisure_hackerspace; }
-        [TYPE leisure_sauna] NODE.ICON { symbol: leisure_sauna; }
-        [TYPE leisure_hot_tub] NODE.ICON { symbol: leisure_hot_tub; }
-        [TYPE leisure_tanning_salon] NODE.ICON { symbol: leisure_tanning_salon; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_picnic_table] NODE.ICON { symbol: leisure_picnic_table; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_outdoor_seating] NODE.ICON { symbol: leisure_outdoor_seating; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_firepit] NODE.ICON { symbol: leisure_firepit; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_dog_park] NODE.ICON { symbol: leisure_dog_park; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_beach_resort] NODE.ICON { symbol: leisure_beach_resort; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_recreation_ground] NODE.ICON { symbol: leisure_recreation_ground; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_bathing_place] NODE.ICON { symbol: leisure_bathing_place; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_resort] NODE.ICON { symbol: leisure_resort; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_summer_camp] NODE.ICON { symbol: leisure_summer_camp; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_schoolyard] NODE.ICON { symbol: leisure_schoolyard; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_fitness_centre] NODE.ICON { symbol: leisure_fitness_centre; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_sports_hall] NODE.ICON { symbol: leisure_sports_hall; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_miniature_golf] NODE.ICON { symbol: leisure_miniature_golf; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_bowling_alley] NODE.ICON { symbol: leisure_bowling_alley; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_disc_golf_course] NODE.ICON { symbol: leisure_disc_golf_course; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_climbing] NODE.ICON { symbol: leisure_climbing; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_horse_riding] NODE.ICON { symbol: leisure_horse_riding; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_trampoline_park] NODE.ICON { symbol: leisure_trampoline_park; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_dance] NODE.ICON { symbol: leisure_dance; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_amusement_arcade] NODE.ICON { symbol: leisure_amusement_arcade; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_adult_gaming_centre] NODE.ICON { symbol: leisure_adult_gaming_centre; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_bandstand] NODE.ICON { symbol: leisure_bandstand; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_escape_game] NODE.ICON { symbol: leisure_escape_game; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_indoor_play] NODE.ICON { symbol: leisure_indoor_play; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_hackerspace] NODE.ICON { symbol: leisure_hackerspace; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_sauna] NODE.ICON { symbol: leisure_sauna; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_hot_tub] NODE.ICON { symbol: leisure_hot_tub; }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_tanning_salon] NODE.ICON { symbol: leisure_tanning_salon; }
 
+        // PARKED-NEW-TYPE: leisure_picnic_table, leisure_outdoor_seating, leisure_firepit, leisure_dog_park, leisure_beach_resort, leisure_recreation_ground, leisure_bathing_place, leisure_swimming_area, leisure_resort, leisure_summer_camp, leisure_schoolyard, leisure_fitness_centre, leisure_sports_hall, leisure_bleachers, leisure_miniature_golf, leisure_bowling_alley, leisure_disc_golf_course, leisure_climbing, leisure_horse_riding, leisure_trampoline_park, leisure_dance, leisure_amusement_arcade, leisure_adult_gaming_centre, leisure_bandstand, leisure_escape_game, leisure_indoor_play, leisure_hackerspace, leisure_sauna, leisure_hot_tub, leisure_tanning_salon parked, removed from the selector below
         [TYPE leisure_track,
               leisure_nature_reserve,
               leisure_playground,
               leisure_garden,
               leisure_common,
-              leisure_ice_rink,
-              leisure_picnic_table,
-              leisure_outdoor_seating,
-              leisure_firepit,
-              leisure_dog_park,
-              leisure_beach_resort,
-              leisure_recreation_ground,
-              leisure_bathing_place,
-              leisure_swimming_area,
-              leisure_resort,
-              leisure_summer_camp,
-              leisure_schoolyard,
-              leisure_fitness_centre,
-              leisure_sports_hall,
-              leisure_bleachers,
-              leisure_miniature_golf,
-              leisure_bowling_alley,
-              leisure_disc_golf_course,
-              leisure_climbing,
-              leisure_horse_riding,
-              leisure_trampoline_park,
-              leisure_dance,
-              leisure_amusement_arcade,
-              leisure_adult_gaming_centre,
-              leisure_bandstand,
-              leisure_escape_game,
-              leisure_indoor_play,
-              leisure_hackerspace,
-              leisure_sauna,
-              leisure_hot_tub,
-              leisure_tanning_salon] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioLeisure; size: 0.9; }
+              leisure_ice_rink] NODE.TEXT { label: Name.name; color: @labelColor; priority: @labelPrioLeisure; size: 0.9; }
       }
 
       [MAG city-] {
@@ -408,16 +406,15 @@ OSS
           AREA.BORDER { color: @natureReserveBorderColor; width: 0.2mm;}
           AREA.TEXT { label: Name.name; priority: @labelPrioNatural; color: @natureReserveLabelColor; autoSize: true;}
         }
-        [TYPE leisure_swimming_pool,
-              leisure_hot_tub] {
+        // PARKED-NEW-TYPE: leisure_hot_tub parked, removed from the selector below
+        [TYPE leisure_swimming_pool] {
           AREA { color: #74daff;}
         }
       }
 
       [MAG cityOver-] {
-        [TYPE leisure_golf_course,
-              leisure_disc_golf_course,
-              leisure_miniature_golf] AREA { color: #c7f1a3; }
+        // PARKED-NEW-TYPE: leisure_disc_golf_course, leisure_miniature_golf parked, removed from the selector below
+        [TYPE leisure_golf_course] AREA { color: #c7f1a3; }
       }
 
       [MAG detail-] {
@@ -431,36 +428,38 @@ OSS
         }
         [TYPE leisure_garden] AREA { color: #ceeca8; pattern: "leisure_garden"; patternMinMag: detail;}
 
-        [TYPE leisure_fitness_centre,
-              leisure_sports_hall,
-              leisure_bleachers,
-              leisure_bowling_alley,
-              leisure_climbing,
-              leisure_horse_riding,
-              leisure_trampoline_park,
-              leisure_dance,
-              leisure_amusement_arcade,
-              leisure_adult_gaming_centre,
-              leisure_bandstand,
-              leisure_escape_game,
-              leisure_indoor_play,
-              leisure_hackerspace,
-              leisure_sauna,
-              leisure_tanning_salon,
-              leisure_resort,
-              leisure_summer_camp,
-              leisure_schoolyard,
-              leisure_picnic_table,
-              leisure_outdoor_seating,
-              leisure_firepit] {
-          AREA { color: #f1eee8;}
-          AREA.BORDER { color: #887b7b; width: 0.1mm; }
-        }
+        // PARKED-NEW-TYPE
+        // [TYPE leisure_fitness_centre,
+              // leisure_sports_hall,
+              // leisure_bleachers,
+              // leisure_bowling_alley,
+              // leisure_climbing,
+              // leisure_horse_riding,
+              // leisure_trampoline_park,
+              // leisure_dance,
+              // leisure_amusement_arcade,
+              // leisure_adult_gaming_centre,
+              // leisure_bandstand,
+              // leisure_escape_game,
+              // leisure_indoor_play,
+              // leisure_hackerspace,
+              // leisure_sauna,
+              // leisure_tanning_salon,
+              // leisure_resort,
+              // leisure_summer_camp,
+              // leisure_schoolyard,
+              // leisure_picnic_table,
+              // leisure_outdoor_seating,
+              // leisure_firepit] {
+          // AREA { color: #f1eee8;}
+          // AREA.BORDER { color: #887b7b; width: 0.1mm; }
+        // }
       }
 
       // Labels
 
       [MAG close-] {
+        // PARKED-NEW-TYPE: leisure_picnic_table, leisure_outdoor_seating, leisure_firepit, leisure_dog_park, leisure_beach_resort, leisure_recreation_ground, leisure_bathing_place, leisure_swimming_area, leisure_resort, leisure_summer_camp, leisure_schoolyard, leisure_fitness_centre, leisure_sports_hall, leisure_bleachers, leisure_miniature_golf, leisure_bowling_alley, leisure_disc_golf_course, leisure_climbing, leisure_horse_riding, leisure_trampoline_park, leisure_dance, leisure_amusement_arcade, leisure_adult_gaming_centre, leisure_bandstand, leisure_escape_game, leisure_indoor_play, leisure_hackerspace, leisure_sauna, leisure_hot_tub, leisure_tanning_salon parked, removed from the selector below
         [TYPE leisure_sports_centre,
               leisure_golf_course,
               leisure_stadium,
@@ -472,37 +471,7 @@ OSS
               leisure_playground,
               leisure_garden,
               leisure_common,
-              leisure_ice_rink,
-              leisure_picnic_table,
-              leisure_outdoor_seating,
-              leisure_firepit,
-              leisure_dog_park,
-              leisure_beach_resort,
-              leisure_recreation_ground,
-              leisure_bathing_place,
-              leisure_swimming_area,
-              leisure_resort,
-              leisure_summer_camp,
-              leisure_schoolyard,
-              leisure_fitness_centre,
-              leisure_sports_hall,
-              leisure_bleachers,
-              leisure_miniature_golf,
-              leisure_bowling_alley,
-              leisure_disc_golf_course,
-              leisure_climbing,
-              leisure_horse_riding,
-              leisure_trampoline_park,
-              leisure_dance,
-              leisure_amusement_arcade,
-              leisure_adult_gaming_centre,
-              leisure_bandstand,
-              leisure_escape_game,
-              leisure_indoor_play,
-              leisure_hackerspace,
-              leisure_sauna,
-              leisure_hot_tub,
-              leisure_tanning_salon] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
+              leisure_ice_rink] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
       }
     }
 

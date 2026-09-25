@@ -98,28 +98,36 @@ STYLE
   [TYPE place_sea]             AREA.TEXT {label: IName; priority: @labelPrioSea; size: 0; }
 
   // Archipelago
-  [TYPE place_archipelago]     AREA.TEXT {label: IName; priority: @labelPrioArchipelago; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_archipelago]     AREA.TEXT {label: IName; priority: @labelPrioArchipelago; size: 0; }
   [TYPE place_island]          NODE.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
   [TYPE place_island]          AREA.TEXT {label: IName; priority: @labelPrioIsland; size: 0; }
   [TYPE place_islet]           NODE.TEXT {label: IName; priority: @labelPrioIslet; size: 0; }
   [TYPE place_islet]           AREA.TEXT {label: IName; priority: @labelPrioIslet; size: 0; }
   // Square
-  [TYPE place_square]          NODE.TEXT {label: IName; priority: @labelPrioSquare; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_square]          NODE.TEXT {label: IName; priority: @labelPrioSquare; size: 0; }
   [TYPE place_locality]        NODE.TEXT {label: IName; priority: @labelPrioLocality; size: 0; }
   // Polder
-  [TYPE place_polder]          NODE.TEXT {label: IName; priority: @labelPrioPolder; size: 0; }
-  [TYPE place_polder]          AREA.TEXT {label: IName; priority: @labelPrioPolder; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_polder]          NODE.TEXT {label: IName; priority: @labelPrioPolder; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_polder]          AREA.TEXT {label: IName; priority: @labelPrioPolder; size: 0; }
 
   // Administratively declared places
   [TYPE place_country]         NODE.TEXT {label: IName; priority: @labelPrioCounty; size: 0; }
   [TYPE place_state]           NODE.TEXT {label: IName; priority: @labelPrioState; size: 0;  }
   [TYPE place_region]          NODE.TEXT {label: IName; priority: @labelPrioRegion; size: 0; }
-  [TYPE place_province]        NODE.TEXT {label: IName; priority: @labelPrioProvince; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_province]        NODE.TEXT {label: IName; priority: @labelPrioProvince; size: 0; }
   // District
   [TYPE place_county]          NODE.TEXT {label: IName; priority: @labelPrioCounty; size: 0; }
-  [TYPE place_district]        NODE.TEXT {label: IName; priority: @labelPrioDistrict; size: 0; }
-  [TYPE place_subdistrict]     NODE.TEXT {label: IName; priority: @labelPrioSubdistrict; size: 0; }
-  [TYPE place_municipality]    NODE.TEXT {label: IName; priority: @labelPrioMunicipality; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_district]        NODE.TEXT {label: IName; priority: @labelPrioDistrict; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_subdistrict]     NODE.TEXT {label: IName; priority: @labelPrioSubdistrict; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_municipality]    NODE.TEXT {label: IName; priority: @labelPrioMunicipality; size: 0; }
 
   // Populated settlements, urban
   [TYPE place_capitalcity]     NODE.TEXT {label: IName; priority: @labelPrioMillionCity; size: 0;  }
@@ -128,27 +136,35 @@ STYLE
   [TYPE place_bigcity]         NODE.TEXT {label: IName; priority: @labelPrioBigCity; size: 0; }
   [TYPE place_city]            NODE.TEXT {label: IName; priority: @labelPrioCity; size: 0;  }
   // Borough
-  [TYPE place_borough]         NODE.TEXT {label: IName; priority: @labelPrioBorough; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_borough]         NODE.TEXT {label: IName; priority: @labelPrioBorough; size: 0; }
   [TYPE place_suburb]          NODE.TEXT {label: IName; priority: @labelPrioSuburb; size: 0; }
   // Quarter
-  [TYPE place_quarter]         NODE.TEXT {label: IName; priority: @labelPrioQuarter; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_quarter]         NODE.TEXT {label: IName; priority: @labelPrioQuarter; size: 0; }
   // Neighbourhood
-  [TYPE place_neighbourhood]   NODE.TEXT {label: IName; priority: @labelPrioNeighbourhood; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_neighbourhood]   NODE.TEXT {label: IName; priority: @labelPrioNeighbourhood; size: 0; }
   // City_Block
-  [TYPE place_city_block]      NODE.TEXT {label: IName; priority: @labelPrioCityBlock; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_city_block]      NODE.TEXT {label: IName; priority: @labelPrioCityBlock; size: 0; }
   // Plot
-  [TYPE place_plot]            NODE.TEXT {label: IName; priority: @labelPrioPlot; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_plot]            NODE.TEXT {label: IName; priority: @labelPrioPlot; size: 0; }
 
   // Populated settlements, urban and rural
   [TYPE place_town]            NODE.TEXT {label: IName; priority: @labelPrioTown; size: 0; }
   [TYPE place_village]         NODE.TEXT {label: IName; priority: @labelPrioVillage; size: 0; }
   [TYPE place_hamlet]          NODE.TEXT {label: IName; priority: @labelPrioHamlet; size: 0; }
   // Isolated dwelling
-  [TYPE place_isolated_dwelling] NODE.TEXT {label: IName; priority: @labelPrioIsolatedDwelling; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_isolated_dwelling] NODE.TEXT {label: IName; priority: @labelPrioIsolatedDwelling; size: 0; }
   // Farm
-  [TYPE place_farm]              NODE.TEXT {label: IName; priority: @labelPrioFarm; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_farm]              NODE.TEXT {label: IName; priority: @labelPrioFarm; size: 0; }
   // Allotments
-  [TYPE place_allotments]        NODE.TEXT {label: IName; priority: @labelPrioAllotments; size: 0; }
+  // PARKED-NEW-TYPE
+  // [TYPE place_allotments]        NODE.TEXT {label: IName; priority: @labelPrioAllotments; size: 0; }
 
   [TYPE place_continent] {
     [MAG world-continent] NODE.TEXT {size: 0.8; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: alpha(@placeLabelColor, 0.5); }
@@ -191,16 +207,17 @@ STYLE
   // TODO: overlay
   [MAG region-city] {
     [TYPE place_region] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
-    [TYPE place_province] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_province] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
   }
 
   // TODO: overlay
   [MAG county-] {
+    // PARKED-NEW-TYPE: place_municipality, place_isolated_dwelling, place_farm, place_allotments, place_borough, place_quarter, place_neighbourhood, place_city_block, place_plot parked, removed from the selector below
     [TYPE place_continent,
           place_state,
           place_region,
           place_county,
-          place_municipality,
           place_capitalcity,
           place_millioncity,
           place_halfmillioncity,
@@ -209,24 +226,21 @@ STYLE
           place_town,
           place_village,
           place_hamlet,
-          place_isolated_dwelling,
-          place_farm,
-          place_allotments,
-          place_suburb,
-          place_borough,
-          place_quarter,
-          place_neighbourhood,
-          place_city_block,
-          place_plot] AREA.TEXT { label: IName; color: @placeLabelColor; autoSize: true; }
+          place_suburb] AREA.TEXT { label: IName; color: @placeLabelColor; autoSize: true; }
   }
 
   [MAG county-city] {
     [TYPE place_county] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
-    [TYPE place_district] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
-    [TYPE place_subdistrict] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
-    [TYPE place_municipality] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
-    [TYPE place_cadastral_community] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
-    [TYPE place_subcounty] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_district] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_subdistrict] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_municipality] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_cadastral_community] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_subcounty] NODE.TEXT {size: 1.0; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
   }
 
   // City names are rendered up to city level and then disappear again
@@ -274,10 +288,9 @@ STYLE
   }
 
   [MAG region-veryClose] {
+    // PARKED-NEW-TYPE: place_archipelago, place_polder parked, removed from the selector below
     [TYPE place_island,
-         place_islet,
-         place_archipelago,
-         place_polder] {
+         place_islet] {
      NODE.TEXT {size: 1.3; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor;}
      AREA.TEXT {size: 1.3; style: emphasize; emphasizeColor: @placeEmphasizeColor; color: @placeLabelColor; autoSize: true; }
     }
@@ -291,8 +304,10 @@ STYLE
   }
 
   [MAG suburb-veryClose] {
-    [TYPE place_suburb, place_borough] NODE.TEXT {size: 1.0; scaleMag: city; color: @placeLabelColor;}
-    [TYPE place_quarter, place_neighbourhood] NODE.TEXT {size: 0.9; scaleMag: suburb; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE: place_borough parked, removed from the selector below
+    [TYPE place_suburb] NODE.TEXT {size: 1.0; scaleMag: city; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE
+    // [TYPE place_quarter, place_neighbourhood] NODE.TEXT {size: 0.9; scaleMag: suburb; color: @placeLabelColor;}
   }
 
   [MAG city-veryClose] {
@@ -302,17 +317,12 @@ STYLE
 
   [MAG suburb-suburb] {
     [TYPE place_village] NODE.TEXT {size: 0.9; scaleMag: suburb; color: @placeLabelColor; }
-    [TYPE place_hamlet,
-          place_isolated_dwelling,
-          place_farm,
-          place_allotments] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE: place_isolated_dwelling, place_farm, place_allotments parked, removed from the selector below
+    [TYPE place_hamlet] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
   }
 
   [MAG closer-] {
-    [TYPE place_locality,
-          place_square,
-          place_city_block,
-          place_plot,
-          place_building_complex] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
+    // PARKED-NEW-TYPE: place_square, place_city_block, place_plot, place_building_complex parked, removed from the selector below
+    [TYPE place_locality] NODE.TEXT {size: 0.8; color: @placeLabelColor;}
   }
 END

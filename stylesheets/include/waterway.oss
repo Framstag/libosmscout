@@ -115,10 +115,8 @@ OSS
         [TYPE waterway_dock,
               waterway_riverbank] AREA { color: @waterColor; }
 
-        [TYPE waterway_stream,
-              waterway_flowline,
-              waterway_tidal_channel,
-              waterway_drystream] {
+        // PARKED-NEW-TYPE: waterway_flowline, waterway_tidal_channel, waterway_drystream parked, removed from the selector below
+        [TYPE waterway_stream] {
           [SIZE 2m 0.25mm:3px<] WAY {color: @waterColor; width: 2m;}
           [SIZE 2m <0.25mm:3px] WAY {color: @waterColor; displayWidth: 0.25mm;}
 
@@ -129,27 +127,17 @@ OSS
       }
 
       [MAG detail-] {
+        // PARKED-NEW-TYPE: waterway_link, waterway_pressurised, waterway_fairway, waterway_drainage_channel, waterway_derelict_canal parked, removed from the selector below
         [TYPE waterway_drain,
-              waterway_ditch,
-              waterway_link,
-              waterway_pressurised,
-              waterway_fairway,
-              waterway_drainage_channel,
-              waterway_derelict_canal] {
+              waterway_ditch] {
           [SIZE 3m 0.1mm:3px<] WAY {color: @waterColor; width: 3m;}
           [SIZE 3m <0.1mm:3px] WAY {color: @waterColor; displayWidth: 0.1mm; }
 
           AREA { color: @waterColor;}
         }
+        // PARKED-NEW-TYPE: waterway_fish_pass, waterway_rapids, waterway_sluice_gate, waterway_floodgate, waterway_check_dam, waterway_floating_barrier, waterway_flow_control parked, removed from the selector below
         [TYPE waterway_weir,
-              waterway_waterfall,
-              waterway_fish_pass,
-              waterway_rapids,
-              waterway_sluice_gate,
-              waterway_floodgate,
-              waterway_check_dam,
-              waterway_floating_barrier,
-              waterway_flow_control] {
+              waterway_waterfall] {
           WAY {color: lighten(@waterColor, 0.3); width: 3m; dash: 0.5,2;}
 
           AREA { color: lighten(@waterColor, 0.3);}
@@ -159,9 +147,8 @@ OSS
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; size: 0.9; }
         }
 
-        [TYPE waterway_boatyard,
-              waterway_fuel,
-              waterway_sanitary_dump_station] AREA { color: #d3cec4; }
+        // PARKED-NEW-TYPE: waterway_fuel, waterway_sanitary_dump_station parked, removed from the selector below
+        [TYPE waterway_boatyard] AREA { color: #d3cec4; }
       }
 
       [MAG closer-] {
@@ -181,29 +168,36 @@ OSS
               NODE.ICON { symbol: waterway_boatyard;}
               AREA.ICON { symbol: waterway_boatyard;}
             }
-            [TYPE waterway_access_point] {
-              NODE.ICON { symbol: waterway_access_point;}
-            }
-            [TYPE waterway_soakhole] {
-              NODE.ICON { symbol: waterway_soakhole;}
-            }
-            [TYPE waterway_water_point] {
-              NODE.ICON { symbol: waterway_water_point;}
-            }
-            [TYPE waterway_milestone] {
-              NODE.ICON { symbol: waterway_milestone;}
-            }
-            [TYPE waterway_stream_end] {
-              NODE.ICON { symbol: waterway_stream_end;}
-            }
-            [TYPE waterway_fuel] {
-              NODE.ICON { symbol: waterway_fuel;}
-              AREA.ICON { symbol: waterway_fuel;}
-            }
-            [TYPE waterway_sanitary_dump_station] {
-              NODE.ICON { symbol: waterway_sanitary_dump_station;}
-              AREA.ICON { symbol: waterway_sanitary_dump_station;}
-            }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_access_point] {
+              // NODE.ICON { symbol: waterway_access_point;}
+            // }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_soakhole] {
+              // NODE.ICON { symbol: waterway_soakhole;}
+            // }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_water_point] {
+              // NODE.ICON { symbol: waterway_water_point;}
+            // }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_milestone] {
+              // NODE.ICON { symbol: waterway_milestone;}
+            // }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_stream_end] {
+              // NODE.ICON { symbol: waterway_stream_end;}
+            // }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_fuel] {
+              // NODE.ICON { symbol: waterway_fuel;}
+              // AREA.ICON { symbol: waterway_fuel;}
+            // }
+            // PARKED-NEW-TYPE
+            // [TYPE waterway_sanitary_dump_station] {
+              // NODE.ICON { symbol: waterway_sanitary_dump_station;}
+              // AREA.ICON { symbol: waterway_sanitary_dump_station;}
+            // }
       }
 
       // Labels
@@ -213,61 +207,39 @@ OSS
       }
 
       [MAG veryClose-] {
+        // PARKED-NEW-TYPE: waterway_flowline, waterway_tidal_channel, waterway_drystream, waterway_pressurised, waterway_derelict_canal, waterway_drainage_channel, waterway_link, waterway_fairway, waterway_fish_pass, waterway_rapids, waterway_sluice_gate, waterway_floodgate, waterway_check_dam, waterway_floating_barrier, waterway_flow_control parked, removed from the selector below
         [TYPE waterway_stream,
               waterway_drain,
               waterway_ditch,
               waterway_weir,
               waterway_waterfall,
               waterway_river,
-              waterway_canal,
-              waterway_flowline,
-              waterway_tidal_channel,
-              waterway_drystream,
-              waterway_pressurised,
-              waterway_derelict_canal,
-              waterway_drainage_channel,
-              waterway_link,
-              waterway_fairway,
-              waterway_fish_pass,
-              waterway_rapids,
-              waterway_sluice_gate,
-              waterway_floodgate,
-              waterway_check_dam,
-              waterway_floating_barrier,
-              waterway_flow_control]
+              waterway_canal]
           WAY.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
+        // PARKED-NEW-TYPE: waterway_rapids, waterway_sluice_gate, waterway_floodgate, waterway_check_dam, waterway_floating_barrier, waterway_flow_control parked, removed from the selector below
         [TYPE waterway_weir,
-              waterway_waterfall,
-              waterway_rapids,
-              waterway_sluice_gate,
-              waterway_floodgate,
-              waterway_check_dam,
-              waterway_floating_barrier,
-              waterway_flow_control]
+              waterway_waterfall]
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
-        [TYPE waterway_boatyard,
-              waterway_fuel,
-              waterway_sanitary_dump_station]
+        // PARKED-NEW-TYPE: waterway_fuel, waterway_sanitary_dump_station parked, removed from the selector below
+        [TYPE waterway_boatyard]
           NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
-        [TYPE waterway_boatyard,
-              waterway_fuel,
-              waterway_sanitary_dump_station] AREA.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
+        // PARKED-NEW-TYPE: waterway_fuel, waterway_sanitary_dump_station parked, removed from the selector below
+        [TYPE waterway_boatyard] AREA.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
-        [TYPE waterway_access_point,
-              waterway_water_point,
-              waterway_milestone,
-              waterway_stream_end,
-              waterway_soakhole]
-          NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
+        // PARKED-NEW-TYPE
+        // [TYPE waterway_access_point,
+              // waterway_water_point,
+              // waterway_milestone,
+              // waterway_stream_end,
+              // waterway_soakhole]
+          // NODE.TEXT { label: Name.name; color: @waterLabelColor; priority: @labelPrioNatural; }
 
+        // PARKED-NEW-TYPE: waterway_flowline, waterway_tidal_channel, waterway_drystream parked, removed from the selector below
         [TYPE waterway_stream,
               waterway_river,
-              waterway_canal,
-              waterway_flowline,
-              waterway_tidal_channel,
-              waterway_drystream]
+              waterway_canal]
           WAY.SYMBOL {symbol: stream_arrow; symbolSpace: 50mm;}
 
         [TYPE waterway_riverbank] AREA.TEXT { label: Name.name; priority: 25; color: @waterLabelColor;}

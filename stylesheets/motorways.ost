@@ -2,6 +2,11 @@ OST
 
 TYPES
 
+  // Types marked PARKED-NEW-TYPE are inactive. They are kept here, commented, so
+  // enabling them later is a local edit instead of a restore from history.
+  // See TODO.md and openspec/changes/park-new-types-and-styles/ for the reason,
+  // the name list and the analysis that has to exist before they are enabled.
+
   //
   // Motorways and motorways-like: Areas (see https://wiki.openstreetmap.org/wiki/Key:area:highway?uselang=de)
   //
@@ -137,45 +142,50 @@ TYPES
         en: "service"
         de: "Erschließungsweg"
 
-  TYPE highway_busway
-    = WAY ("highway"=="busway")
-      {Name, NameAlt, Ref}
-      PATH LOCATION PIN_WAY
-      DESC
-        en: "busway"
-        de: "Busfahrbahn"
+  // PARKED-NEW-TYPE
+  // TYPE highway_busway
+  //   = WAY ("highway"=="busway")
+  //     {Name, NameAlt, Ref}
+  //     PATH LOCATION PIN_WAY
+  //     DESC
+  //       en: "busway"
+  //       de: "Busfahrbahn"
 
-  TYPE highway_raceway
-    = WAY ("highway"=="raceway")
-      {Name, NameAlt}
-      PATH[CAR] LOCATION PIN_WAY
-      DESC
-        en: "raceway"
-        de: "Rennstrecke"
+  // PARKED-NEW-TYPE
+  // TYPE highway_raceway
+  //   = WAY ("highway"=="raceway")
+  //     {Name, NameAlt}
+  //     PATH[CAR] LOCATION PIN_WAY
+  //     DESC
+  //       en: "raceway"
+  //       de: "Rennstrecke"
 
-  TYPE highway_escape
-    = WAY ("highway"=="escape")
-      {Name, NameAlt}
-      PIN_WAY
-      DESC
-        en: "escape lane"
-        de: "Notbremsweg"
+  // PARKED-NEW-TYPE
+  // TYPE highway_escape
+  //   = WAY ("highway"=="escape")
+  //     {Name, NameAlt}
+  //     PIN_WAY
+  //     DESC
+  //       en: "escape lane"
+  //       de: "Notbremsweg"
 
-  TYPE highway_proposed
-    = WAY ("highway"=="proposed")
-      {Name, NameAlt, Ref}
-      PIN_WAY
-      DESC
-        en: "proposed road"
-        de: "geplante Straße"
+  // PARKED-NEW-TYPE
+  // TYPE highway_proposed
+  //   = WAY ("highway"=="proposed")
+  //     {Name, NameAlt, Ref}
+  //     PIN_WAY
+  //     DESC
+  //       en: "proposed road"
+  //       de: "geplante Straße"
 
-  TYPE highway_corridor
-    = WAY ("highway"=="corridor")
-      {Name, NameAlt}
-      PATH[FOOT] PIN_WAY
-      DESC
-        en: "corridor"
-        de: "Flur"
+  // PARKED-NEW-TYPE
+  // TYPE highway_corridor
+  //   = WAY ("highway"=="corridor")
+  //     {Name, NameAlt}
+  //     PATH[FOOT] PIN_WAY
+  //     DESC
+  //       en: "corridor"
+  //       de: "Flur"
 
   TYPE highway_milestone
     = NODE ("highway"=="milestone")

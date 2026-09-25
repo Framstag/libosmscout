@@ -74,14 +74,11 @@ OSS
     }
 
     [MAG city-] {
+      // PARKED-NEW-TYPE: military_ammunition, military_base, military_nuclear_explosion_site, military_training_area parked, removed from the selector below
       [TYPE military_airfield,
-            military_ammunition,
-            military_base,
             military_danger_area,
-            military_nuclear_explosion_site,
             military_range,
-            military_naval_base,
-            military_training_area] AREA { color: #f59897; }
+            military_naval_base] AREA { color: #f59897; }
     }
 
     [MAG suburb-] {
@@ -102,43 +99,48 @@ OSS
     }
 
     [MAG close-] {
+      // PARKED-NEW-TYPE: military_ammunition, military_base, military_nuclear_explosion_site, military_training_area parked, removed from the selector below
       [TYPE military_airfield,
-            military_ammunition,
-            military_base,
             military_danger_area,
-            military_nuclear_explosion_site,
             military_range,
-            military_naval_base,
-            military_training_area] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
+            military_naval_base] AREA.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; autoSize: true; }
 
-      [TYPE military_trench,
-            military_cordon,
-            military_road,
-            military_shelter] WAY { color: @militaryBorderColor; displayWidth: 0.1mm; dash: 2,2; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_trench,
+            // military_cordon,
+            // military_road,
+            // military_shelter] WAY { color: @militaryBorderColor; displayWidth: 0.1mm; dash: 2,2; }
     }
 
     [MAG detail-] {
-      [TYPE military_obstacle_course] AREA { color: @militaryColor; }
-      [TYPE military_obstacle_course] WAY { color: @militaryBorderColor; displayWidth: 0.1mm; dash: 2,2; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_obstacle_course] AREA { color: @militaryColor; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_obstacle_course] WAY { color: @militaryBorderColor; displayWidth: 0.1mm; dash: 2,2; }
     }
 
     [MAG veryClose-] {
+      // PARKED-NEW-TYPE: military_training_area, military_nuclear_explosion_site, military_ammunition parked, removed from the selector below
       [TYPE military_danger_area,
             military_range,
-            military_training_area,
-            military_nuclear_explosion_site,
-            military_ammunition,
             landuse_military] {
         NODE.ICON { symbol: military; }
         NODE.TEXT { label: Name.name; priority: @labelPrioLeisure; color: @labelColor; size: 0.9; }
       }
 
-      [TYPE military_checkpoint] NODE.ICON { symbol: military_checkpoint; }
-      [TYPE military_cannon] NODE.ICON { symbol: military_cannon; }
-      [TYPE military_radar] NODE.ICON { symbol: military_radar; }
-      [TYPE military_embrasure] NODE.ICON { symbol: military_embrasure; }
-      [TYPE military_shelter] NODE.ICON { symbol: military_shelter; }
-      [TYPE military_police] NODE.ICON { symbol: military_police; }
-      [TYPE military_trench] NODE.ICON { symbol: military_trench; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_checkpoint] NODE.ICON { symbol: military_checkpoint; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_cannon] NODE.ICON { symbol: military_cannon; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_radar] NODE.ICON { symbol: military_radar; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_embrasure] NODE.ICON { symbol: military_embrasure; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_shelter] NODE.ICON { symbol: military_shelter; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_police] NODE.ICON { symbol: military_police; }
+      // PARKED-NEW-TYPE
+      // [TYPE military_trench] NODE.ICON { symbol: military_trench; }
     }
 END

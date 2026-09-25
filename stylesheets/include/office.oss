@@ -258,184 +258,214 @@ OSS
     // These override the generic office icon at closer zoom.
 
     [MAG closer-] {
-      [TYPE office_government,
-            office_government_building] {
-        NODE.ICON { symbol: office_government; }
-        AREA.ICON { symbol: office_government; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_government,
+            // office_government_building] {
+        // NODE.ICON { symbol: office_government; }
+        // AREA.ICON { symbol: office_government; }
+      // }
 
-      [TYPE office_estate_agent,
-            office_estate_agent_building] {
-        NODE.ICON { symbol: office_estate_agent; }
-        AREA.ICON { symbol: office_estate_agent; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_estate_agent,
+            // office_estate_agent_building] {
+        // NODE.ICON { symbol: office_estate_agent; }
+        // AREA.ICON { symbol: office_estate_agent; }
+      // }
 
-      [TYPE office_insurance,
-            office_insurance_building] {
-        NODE.ICON { symbol: office_insurance; }
-        AREA.ICON { symbol: office_insurance; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_insurance,
+            // office_insurance_building] {
+        // NODE.ICON { symbol: office_insurance; }
+        // AREA.ICON { symbol: office_insurance; }
+      // }
 
-      [TYPE office_lawyer,
-            office_lawyer_building] {
-        NODE.ICON { symbol: office_lawyer; }
-        AREA.ICON { symbol: office_lawyer; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_lawyer,
+            // office_lawyer_building] {
+        // NODE.ICON { symbol: office_lawyer; }
+        // AREA.ICON { symbol: office_lawyer; }
+      // }
 
-      [TYPE office_educational_institution,
-            office_educational_institution_building] {
-        NODE.ICON { symbol: office_educational_institution; }
-        AREA.ICON { symbol: office_educational_institution; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_educational_institution,
+            // office_educational_institution_building] {
+        // NODE.ICON { symbol: office_educational_institution; }
+        // AREA.ICON { symbol: office_educational_institution; }
+      // }
 
-      [TYPE office_telecommunication,
-            office_telecommunication_building] {
-        NODE.ICON { symbol: office_telecommunication; }
-        AREA.ICON { symbol: office_telecommunication; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_telecommunication,
+            // office_telecommunication_building] {
+        // NODE.ICON { symbol: office_telecommunication; }
+        // AREA.ICON { symbol: office_telecommunication; }
+      // }
 
-      [TYPE office_it,
-            office_it_building] {
-        NODE.ICON { symbol: office_it; }
-        AREA.ICON { symbol: office_it; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_it,
+            // office_it_building] {
+        // NODE.ICON { symbol: office_it; }
+        // AREA.ICON { symbol: office_it; }
+      // }
 
-      [TYPE office_accountant,
-            office_accountant_building] {
-        NODE.ICON { symbol: office_accountant; }
-        AREA.ICON { symbol: office_accountant; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_accountant,
+            // office_accountant_building] {
+        // NODE.ICON { symbol: office_accountant; }
+        // AREA.ICON { symbol: office_accountant; }
+      // }
 
-      [TYPE office_diplomatic,
-            office_diplomatic_building] {
-        NODE.ICON { symbol: office_diplomatic; }
-        AREA.ICON { symbol: office_diplomatic; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_diplomatic,
+            // office_diplomatic_building] {
+        // NODE.ICON { symbol: office_diplomatic; }
+        // AREA.ICON { symbol: office_diplomatic; }
+      // }
 
-      [TYPE office_employment_agency,
-            office_employment_agency_building] {
-        NODE.ICON { symbol: office_employment_agency; }
-        AREA.ICON { symbol: office_employment_agency; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_employment_agency,
+            // office_employment_agency_building] {
+        // NODE.ICON { symbol: office_employment_agency; }
+        // AREA.ICON { symbol: office_employment_agency; }
+      // }
 
-      [TYPE office_research,
-            office_research_building] {
-        NODE.ICON { symbol: office_research; }
-        AREA.ICON { symbol: office_research; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_research,
+            // office_research_building] {
+        // NODE.ICON { symbol: office_research; }
+        // AREA.ICON { symbol: office_research; }
+      // }
 
-      [TYPE office_architect,
-            office_architect_building] {
-        NODE.ICON { symbol: office_architect; }
-        AREA.ICON { symbol: office_architect; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_architect,
+            // office_architect_building] {
+        // NODE.ICON { symbol: office_architect; }
+        // AREA.ICON { symbol: office_architect; }
+      // }
 
-      [TYPE office_tax_advisor,
-            office_tax_advisor_building] {
-        NODE.ICON { symbol: office_tax_advisor; }
-        AREA.ICON { symbol: office_tax_advisor; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_tax_advisor,
+            // office_tax_advisor_building] {
+        // NODE.ICON { symbol: office_tax_advisor; }
+        // AREA.ICON { symbol: office_tax_advisor; }
+      // }
 
-      [TYPE office_financial,
-            office_financial_building] {
-        NODE.ICON { symbol: office_financial; }
-        AREA.ICON { symbol: office_financial; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_financial,
+            // office_financial_building] {
+        // NODE.ICON { symbol: office_financial; }
+        // AREA.ICON { symbol: office_financial; }
+      // }
 
-      [TYPE office_logistics,
-            office_logistics_building] {
-        NODE.ICON { symbol: office_logistics; }
-        AREA.ICON { symbol: office_logistics; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_logistics,
+            // office_logistics_building] {
+        // NODE.ICON { symbol: office_logistics; }
+        // AREA.ICON { symbol: office_logistics; }
+      // }
 
-      [TYPE office_advertising_agency,
-            office_advertising_agency_building] {
-        NODE.ICON { symbol: office_advertising_agency; }
-        AREA.ICON { symbol: office_advertising_agency; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_advertising_agency,
+            // office_advertising_agency_building] {
+        // NODE.ICON { symbol: office_advertising_agency; }
+        // AREA.ICON { symbol: office_advertising_agency; }
+      // }
 
-      [TYPE office_notary,
-            office_notary_building] {
-        NODE.ICON { symbol: office_notary; }
-        AREA.ICON { symbol: office_notary; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_notary,
+            // office_notary_building] {
+        // NODE.ICON { symbol: office_notary; }
+        // AREA.ICON { symbol: office_notary; }
+      // }
 
-      [TYPE office_energy_supplier,
-            office_energy_supplier_building] {
-        NODE.ICON { symbol: office_energy_supplier; }
-        AREA.ICON { symbol: office_energy_supplier; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_energy_supplier,
+            // office_energy_supplier_building] {
+        // NODE.ICON { symbol: office_energy_supplier; }
+        // AREA.ICON { symbol: office_energy_supplier; }
+      // }
 
-      [TYPE office_security,
-            office_security_building] {
-        NODE.ICON { symbol: office_security; }
-        AREA.ICON { symbol: office_security; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_security,
+            // office_security_building] {
+        // NODE.ICON { symbol: office_security; }
+        // AREA.ICON { symbol: office_security; }
+      // }
 
-      [TYPE office_newspaper,
-            office_newspaper_building] {
-        NODE.ICON { symbol: office_newspaper; }
-        AREA.ICON { symbol: office_newspaper; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_newspaper,
+            // office_newspaper_building] {
+        // NODE.ICON { symbol: office_newspaper; }
+        // AREA.ICON { symbol: office_newspaper; }
+      // }
 
-      [TYPE office_water_utility,
-            office_water_utility_building] {
-        NODE.ICON { symbol: office_water_utility; }
-        AREA.ICON { symbol: office_water_utility; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_water_utility,
+            // office_water_utility_building] {
+        // NODE.ICON { symbol: office_water_utility; }
+        // AREA.ICON { symbol: office_water_utility; }
+      // }
 
-      [TYPE office_construction_company,
-            office_construction_company_building] {
-        NODE.ICON { symbol: office_construction_company; }
-        AREA.ICON { symbol: office_construction_company; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_construction_company,
+            // office_construction_company_building] {
+        // NODE.ICON { symbol: office_construction_company; }
+        // AREA.ICON { symbol: office_construction_company; }
+      // }
 
-      [TYPE office_forestry,
-            office_forestry_building] {
-        NODE.ICON { symbol: office_forestry; }
-        AREA.ICON { symbol: office_forestry; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_forestry,
+            // office_forestry_building] {
+        // NODE.ICON { symbol: office_forestry; }
+        // AREA.ICON { symbol: office_forestry; }
+      // }
 
-      [TYPE office_charity,
-            office_charity_building] {
-        NODE.ICON { symbol: office_charity; }
-        AREA.ICON { symbol: office_charity; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_charity,
+            // office_charity_building] {
+        // NODE.ICON { symbol: office_charity; }
+        // AREA.ICON { symbol: office_charity; }
+      // }
 
-      [TYPE office_physician,
-            office_physician_building] {
-        NODE.ICON { symbol: office_physician; }
-        AREA.ICON { symbol: office_physician; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_physician,
+            // office_physician_building] {
+        // NODE.ICON { symbol: office_physician; }
+        // AREA.ICON { symbol: office_physician; }
+      // }
 
-      [TYPE office_university,
-            office_university_building] {
-        NODE.ICON { symbol: office_educational_institution; }
-        AREA.ICON { symbol: office_educational_institution; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_university,
+            // office_university_building] {
+        // NODE.ICON { symbol: office_educational_institution; }
+        // AREA.ICON { symbol: office_educational_institution; }
+      // }
 
-      [TYPE office_publisher,
-            office_publisher_building] {
-        NODE.ICON { symbol: office_publisher; }
-        AREA.ICON { symbol: office_publisher; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_publisher,
+            // office_publisher_building] {
+        // NODE.ICON { symbol: office_publisher; }
+        // AREA.ICON { symbol: office_publisher; }
+      // }
 
-      [TYPE office_translator,
-            office_translator_building] {
-        NODE.ICON { symbol: office_translator; }
-        AREA.ICON { symbol: office_translator; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_translator,
+            // office_translator_building] {
+        // NODE.ICON { symbol: office_translator; }
+        // AREA.ICON { symbol: office_translator; }
+      // }
 
-      [TYPE office_courier,
-            office_courier_building] {
-        NODE.ICON { symbol: office_courier; }
-        AREA.ICON { symbol: office_courier; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_courier,
+            // office_courier_building] {
+        // NODE.ICON { symbol: office_courier; }
+        // AREA.ICON { symbol: office_courier; }
+      // }
 
-      [TYPE office_travel_agent,
-            office_travel_agent_building] {
-        NODE.ICON { symbol: office_travel_agent; }
-        AREA.ICON { symbol: office_travel_agent; }
-      }
+      // PARKED-NEW-TYPE
+      // [TYPE office_travel_agent,
+            // office_travel_agent_building] {
+        // NODE.ICON { symbol: office_travel_agent; }
+        // AREA.ICON { symbol: office_travel_agent; }
+      // }
     }
 END

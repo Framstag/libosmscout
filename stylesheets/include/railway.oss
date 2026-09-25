@@ -103,25 +103,31 @@ STYLE
 
      [TYPE railway_tram] WAY {color: #444444; displayWidth: 0.25mm; width: 2.5m;}
      [TYPE railway_light_rail] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.25mm; width: 5m;}
-     [TYPE railway_narrow_gauge, railway_preserved, railway_miniature] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.20mm; width: 4m;}
+     // PARKED-NEW-TYPE: railway_miniature parked, removed from the selector below
+     [TYPE railway_narrow_gauge,
+     railway_preserved] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.20mm; width: 4m;}
      [TYPE railway_funicular] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.20mm; width: 4m;}
 
      [TYPE railway_subway] {
        WAY {color: @railwayTrackOutlineColor; dash: 1.5,1.5; displayWidth: 0.4mm; joinCap: butt; endCap: butt; }
      }
 
-     [TYPE railway_construction] WAY {color: @railwayTrackColor; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
-     [TYPE railway_proposed] WAY {color: @railwayTrackOutlineColor; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
-     [TYPE railway_platform_edge] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.1mm; width: 1m;}
-     [TYPE railway_yard] AREA { color: #dcdcc8; }
+     // PARKED-NEW-TYPE
+     // [TYPE railway_construction] WAY {color: @railwayTrackColor; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.2mm; width: 4m;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_proposed] WAY {color: @railwayTrackOutlineColor; dash: 2,2; joinCap: butt; endCap: butt; displayWidth: 0.15mm; width: 3m;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_platform_edge] WAY {color: @railwayTrackOutlineColor; displayWidth: 0.1mm; width: 1m;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_yard] AREA { color: #dcdcc8; }
    }
 
    [MAG closer-] {
+     // PARKED-NEW-TYPE: railway_miniature parked, removed from the selector below
      [TYPE railway_tram,
            railway_light_rail,
            railway_narrow_gauge,
            railway_preserved,
-           railway_miniature,
            railway_funicular
          SIZE 5m 0.25mm:3px<] {
        [FEATURE Tunnel] {
@@ -154,15 +160,24 @@ STYLE
      [TYPE railway_level_crossing] NODE.ICON { symbol: railway_level_crossing;}
      [TYPE railway_turntable] NODE.ICON { symbol: railway_turntable;}
 
-     [TYPE railway_switch] NODE.ICON { symbol: railway_switch;}
-     [TYPE railway_signal] NODE.ICON { symbol: railway_signal;}
-     [TYPE railway_buffer_stop] NODE.ICON { symbol: railway_buffer_stop;}
-     [TYPE railway_milestone] NODE.ICON { symbol: railway_milestone;}
-     [TYPE railway_stop] NODE.ICON { symbol: railway_stop;}
-     [TYPE railway_tram_crossing] NODE.ICON { symbol: railway_crossing;}
-     [TYPE railway_tram_level_crossing] NODE.ICON { symbol: railway_level_crossing;}
-     [TYPE railway_railway_crossing] NODE.ICON { symbol: railway_crossing;}
-     [TYPE railway_train_station_entrance] NODE.ICON { symbol: railway_subway_entrance;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_switch] NODE.ICON { symbol: railway_switch;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_signal] NODE.ICON { symbol: railway_signal;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_buffer_stop] NODE.ICON { symbol: railway_buffer_stop;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_milestone] NODE.ICON { symbol: railway_milestone;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_stop] NODE.ICON { symbol: railway_stop;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_tram_crossing] NODE.ICON { symbol: railway_crossing;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_tram_level_crossing] NODE.ICON { symbol: railway_level_crossing;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_railway_crossing] NODE.ICON { symbol: railway_crossing;}
+     // PARKED-NEW-TYPE
+     // [TYPE railway_train_station_entrance] NODE.ICON { symbol: railway_subway_entrance;}
    }
 
    // Labels
@@ -173,12 +188,12 @@ STYLE
    }
 
    [MAG @labelPathsMag-] {
+     // PARKED-NEW-TYPE: railway_miniature parked, removed from the selector below
      [TYPE railway_rail,
            railway_tram,
            railway_light_rail,
            railway_narrow_gauge,
            railway_preserved,
-           railway_miniature,
            railway_funicular,
            public_transport_platform] WAY.TEXT { label: Name.name; size: 0.8; color: @railwayLabelColor; priority: @labelPrioPublicTransportWay; }
 
@@ -208,11 +223,13 @@ IF _building {
    }
 
    [MAG @specialBuildingMag-] {
-     [TYPE railway_station, railway_workshop, railway_signal_box] AREA { color: @railwayStationColor; }
+     // PARKED-NEW-TYPE: railway_workshop, railway_signal_box parked, removed from the selector below
+     [TYPE railway_station] AREA { color: @railwayStationColor; }
    }
 
    [MAG @labelSpecialBuildingMag-] {
-     [TYPE railway_station, railway_workshop, railway_signal_box] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor;}
+     // PARKED-NEW-TYPE: railway_workshop, railway_signal_box parked, removed from the selector below
+     [TYPE railway_station] AREA.TEXT { label: Name.name; style: emphasize; emphasizeColor: @emphasizeColor; color: @railwayLabelColor;}
    }
 }
 
