@@ -20,6 +20,11 @@
 #include <osmscout/async/AsyncWorker.h>
 
 #include <osmscout/async/Thread.h>
+#include <osmscout/log/Logger.h>
+
+#include <exception>
+#include <string>
+#include <thread>
 
 namespace osmscout {
 
@@ -34,10 +39,22 @@ AsyncWorker::AsyncWorker(const std::string &name):
 
 AsyncWorker::~AsyncWorker()
 {
+  Stop();
+}
+
+void AsyncWorker::Stop()
+{
   queue.Stop();
-  if (thread.joinable() && thread.get_id() != std::this_thread::get_id()) {
+
+  if (!thread.joinable()) {
+    // Already stopped, or never started: nothing to wait for.
+    return;
+  }
+
+  if (thread.get_id() != std::this_thread::get_id()) {
     thread.join();
   } else {
+    // Called from the worker thread itself, which cannot wait for itself.
     thread.detach();
   }
 }
@@ -50,7 +67,16 @@ void AsyncWorker::Loop()
       continue;
     }
 
-    taskOpt.value()();
+    // Backstop for jobs that are not submitted through Async<T>: a job must never be able to
+    // escape this thread, because an escaping exception terminates the process (and with it a
+    // host JVM) instead of failing a single job.
+    try {
+      taskOpt.value()();
+    } catch (const std::exception &e) {
+      log.Error() << "Async job failed: " << e.what();
+    } catch (...) {
+      log.Error() << "Async job failed with an unknown exception";
+    }
   }
 
   if (deleteOnExit) {

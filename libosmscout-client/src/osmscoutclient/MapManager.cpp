@@ -102,6 +102,13 @@ CancelableFuture<bool> MapManager::LookupDatabases()
   });
 }
 
+MapManager::~MapManager()
+{
+  // Stop the worker before the members go: the jobs of this class lock lookupMutex and walk
+  // databaseLookupDirs, and the base class is destroyed only after the members.
+  Stop();
+}
+
 void MapManager::AddLookupDirectory(const std::filesystem::path &dir)
 {
   bool alreadyRegistered = false;

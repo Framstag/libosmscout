@@ -57,6 +57,17 @@ namespace osmscout {
 
     void Loop();
 
+    /**
+     * Stops the worker: the queue stops accepting jobs and the job that is currently running is
+     * waited for. Harmless when called more than once.
+     *
+     * A derived class whose jobs read or write its members must call this at the beginning of its
+     * own destructor: the base class is destroyed after the derived members, so the worker thread
+     * would otherwise keep running a job against state that is already gone. When the call comes
+     * from the worker thread itself there is nothing to wait for, so the thread is detached.
+     */
+    void Stop();
+
     void DeleteLater();
 
     std::thread::id GetThreadId() const
@@ -76,7 +87,18 @@ namespace osmscout {
       typename CancelableFuture<T>::Promise promise;
       queue.PushTask([promise, task]() mutable {
         typename CancelableFuture<T>::FutureBreaker breaker=promise.Breaker();
-        T result = task(breaker);
+        T result{};
+        try {
+          result=task(breaker);
+        } catch (const std::exception &e) {
+          // A job must not be able to take the process down. The failure is reported here (and
+          // again by the worker loop), and the promise is resolved with the default value of the
+          // result type so that a caller waiting for the job is released instead of waiting
+          // forever - which means such a caller cannot treat the value as a result.
+          log.Error() << "Async job failed: " << e.what();
+        } catch (...) {
+          log.Error() << "Async job failed with an unknown exception";
+        }
         promise.SetValue(result);
       });
       return promise.Future();
