@@ -141,8 +141,8 @@ CONST
   }
 
   // Pseudo types
-  // (the active route colors come from include/route, shared with every other
-  // stylesheet that draws a route — see the daylight branch in route.oss)
+  // (the active route paint comes from include/route, shared with every other style sheet
+  // that draws a route — see the daylight branch in route.oss)
 
   // Ground tiles
 
@@ -349,9 +349,9 @@ STYLE
     ICON { name: target;} */
 
   [MAG world-] {
-    // The active route polyline is drawn by include/route (shared daylight /
-    // dark presentation colors), replacing this stylesheet's own single-color
-    // semi-transparent rule.
+    // The active route polyline is drawn by include/route (shared daylight / dark
+    // presentation colors, with the casing that keeps it visible on red primary roads),
+    // replacing this style sheet's own single-color semi-transparent rule.
 
     //[TYPE _osm_tile_border] WAY {color: #222222; displayWidth: 0.2mm; }
     //[TYPE _osm_subtile_border] WAY {color: #444444; displayWidth: 0.1mm; }

@@ -776,6 +776,20 @@ styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
 
+RouteStyleColorsTest = executable('RouteStyleColorsTest',
+                               'src/RouteStyleColorsTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+routeStyleColorsEnv = environment()
+routeStyleColorsEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+routeStyleColorsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check route style colours', RouteStyleColorsTest, env: routeStyleColorsEnv)
+
 MapPainterFrameBuffersTest = executable('MapPainterFrameBuffersTest',
                                'src/MapPainterFrameBuffersTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
