@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <osmscout/lib/CoreImportExport.h>
 
@@ -85,6 +86,44 @@ namespace osmscout {
   };
 
   class OSMSCOUT_API StringMatcherTransliterateFactory : public StringMatcherFactory
+  {
+  public:
+    StringMatcherRef CreateMatcher(const std::string& pattern) const override;
+  };
+
+  /**
+   * Matches like StringMatcherTransliterate and, in addition, matches the
+   * pattern's consecutive words against a consecutive run of the candidate's
+   * words, so a candidate whose name joins words with a separator is found by a
+   * pattern that spells those words apart (and the other way round).
+   *
+   * Separators are whitespace, comma, hyphen, slash, backslash and the en/em
+   * dash. Only a run of words that appears in the candidate in the same order as
+   * in the pattern matches; a pattern whose words are reordered, or interrupted
+   * by a candidate word the pattern does not carry, does not match by this rule.
+   * A run covering the whole candidate is reported as `match`, a run covering
+   * only part of it as `partialMatch`.
+   *
+   * The transliterating substring match is evaluated first and its result is
+   * returned unchanged, so this matcher only adds matches; it never removes one
+   * and never reports a different quality for an existing match.
+   */
+  class OSMSCOUT_API StringMatcherTransliterateToken : public StringMatcher
+  {
+  private:
+    StringMatcherRef          base;
+    std::vector<std::string>  patternWords;
+
+  public:
+    explicit StringMatcherTransliterateToken(const std::string& pattern);
+
+    Result Match(const std::string& text) const override;
+  };
+
+  /**
+   * Creates StringMatcherTransliterateToken matchers.
+   */
+  class OSMSCOUT_API StringMatcherTransliterateTokenFactory : public StringMatcherFactory
   {
   public:
     StringMatcherRef CreateMatcher(const std::string& pattern) const override;

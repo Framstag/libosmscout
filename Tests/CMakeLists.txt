@@ -224,6 +224,9 @@ endif()
 #---- StringUtils
 osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
 
+#---- StringMatcher
+osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 

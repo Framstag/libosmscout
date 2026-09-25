@@ -2975,6 +2975,15 @@ struct ResultWithDb {
 // regions coarser than this, keeping search data and result volume manageable.
 static constexpr uint8_t kMaxSearchRegionLevel = naviveylin::kMaxSearchRegionLevel;
 
+// The name matcher every search parameter below uses: transliterating substring
+// matching plus word matching across separators, so a query that spells words
+// apart finds names whose words are joined (e.g. "Hilpert Theater Lünen" for
+// "Heinz-Hilpert-Theater Lünen").
+static osmscout::StringMatcherFactoryRef CreateNameMatcherFactory()
+{
+  return std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>();
+}
+
 // Returns the level of an admin region: the OSM admin_level feature value when
 // the region object carries it, else the hierarchy depth normalized to the
 // admin_level scale (root=0, country=2, state=4, county=6, city=8, suburb=10).
@@ -3637,7 +3646,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         // caller can resolve to the street.
         param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
-            std::make_shared<osmscout::StringMatcherTransliterateFactory>());
+            CreateNameMatcherFactory());
 
         osmscout::LocationSearchResult searchResult;
         if (locationService->SearchForLocationByForm(param, searchResult)) {
@@ -3792,7 +3801,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
           regionParam.SetLimit(1);
           regionParam.SetAdminRegionOnlyMatch(true);
           regionParam.SetStringMatcherFactory(
-              std::make_shared<osmscout::StringMatcherTransliterateFactory>());
+              CreateNameMatcherFactory());
           osmscout::LocationSearchResult regionResult;
           if (locationService->SearchForLocationByString(regionParam, regionResult) &&
               !regionResult.results.empty() &&
@@ -3836,7 +3845,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
           // code still resolve.
           param.SetPartialMatch(true);
           param.SetStringMatcherFactory(
-              std::make_shared<osmscout::StringMatcherTransliterateFactory>());
+              CreateNameMatcherFactory());
           if (breaker) {
             param.SetBreaker(breaker);
           }
