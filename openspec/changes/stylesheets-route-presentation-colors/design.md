@@ -43,16 +43,21 @@ Alternatives:
 
 Reasoning: the flag-driven `IF`/`ELSE` in `CONST` is the construct the style sheets already use for presentation differences, and the flag precedence makes the client's daylight toggle the authority.
 
-### D2: The daylight route is violet with a dark violet casing
+### D2: The daylight route is violet with an opaque, wider violet casing
 
-Chosen: daylight fill `#7b1fa2` (opaque violet) with casing `#311b92` (dark violet); the dark presentation keeps the current fill `#ff000088` and casing `#ffffff`.
+Chosen: daylight fill `#ba68c8d9` (translucent violet, 85 percent alpha) with casing `#6a1b9a` (opaque
+violet, 2.2mm against the fill's 1.5mm); the dark presentation keeps the current fill `#ff000088` and
+casing `#ffffff`. The casing is opaque *and* wider than the fill on purpose: it covers the whole fill
+footprint, so the composited centre of the route is "fill over casing" and does not take the colour of
+the road underneath.
 
 Alternatives:
 1. Keep the red fill in both presentations and only change the casing - rejected: the surrounding map in the dark presentation is where the red already appears, so the two presentations would stay hard to tell apart, and the daylight white casing is the part that disappears on light road fills.
-2. A dark or black daylight casing with the current red fill - rejected: a neutral casing reads as a generic outline and fights with the road borders; the dark violet keeps the casing recognisably part of the route.
+2. A dark or black daylight casing with the current red fill - rejected: a neutral casing reads as a generic outline and fights with the road borders; the violet casing keeps the casing recognisably part of the route.
 3. A brighter violet or a fully saturated daylight fill - rejected: the route has to stay readable over the whole road palette; the chosen violet is in the same value range as the road fills it is drawn over, and the darker casing gives the contrast.
+4. An opaque daylight fill with a dark violet casing - rejected: way labels are drawn after the way fills and carry no halo, so the black street label sits directly on the route centre. On the opaque `#7b1fa2` centre that measured 2.56:1; the translucent `#ba68c8d9` fill reads at 5.14:1 over the opaque casing, and the wider casing is what makes that value independent of the road underneath. A translucent fill over a *dark* casing would darken the centre instead and re-break the label.
 
-Reasoning: a violet is unused by the road class fills of these style sheets, so the route cannot be confused with a road class, and a dark casing stays visible over the lightest fills (white residential roads) where the former white casing vanished.
+Reasoning: a violet is unused by the road class fills of these style sheets, so the route cannot be confused with a road class, and a violet casing stays visible over the lightest fills (white residential roads) where the former white casing vanished. The composited centre under the label is the constraint that fixes the pair.
 
 ### D3: The cycle style sheet adopts the module and loses its own route rule
 
@@ -93,8 +98,8 @@ AddFlag("daylight", true/false) --> StyleConfig::flags
 Load(standard.oss)              --> FLAG daylight = true   (skipped: flag exists)
                                     MODULE "include/route" -->  CONST
                                                                   IF daylight
-                                                                    routeColor       = #7b1fa2
-                                                                    routeCasingColor = #311b92
+                                                                    routeColor       = #ba68c8d9
+                                                                    routeCasingColor = #6a1b9a
                                                                   ELSE
                                                                     routeColor       = #ff000088
                                                                     routeCasingColor = #ffffff

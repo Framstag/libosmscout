@@ -2,7 +2,7 @@
 
 ## 1. Shared route paint per presentation (spec: route-visualization)
 
-- [x] 1.1 In `stylesheets/include/route.oss`, define `routeColor` and a new `routeCasingColor` inside `IF daylight { ... } ELSE { ... }` (daylight: opaque violet fill, dark violet casing; dark: the current fill and a white casing) and use `@routeCasingColor` in the route outline rule instead of the literal white. Verify: `OSTAndOSSTest --warning-as-error map.ost standard.oss` and `... winter-sports.oss` still pass.
+- [x] 1.1 In `stylesheets/include/route.oss`, define `routeColor` and a new `routeCasingColor` inside `IF daylight { ... } ELSE { ... }` (daylight: a translucent violet fill over an opaque, wider violet casing; dark: the current fill and a white casing) and use `@routeCasingColor` in the route outline rule instead of the literal white. Verify: `OSTAndOSSTest --warning-as-error map.ost standard.oss` and `... winter-sports.oss` still pass.
 - [x] 1.2 Check that no daylight road class of the style sheets uses the daylight route colour, so the route cannot be confused with a road. Verify: a search over `stylesheets/include/` and `stylesheets/*.oss` for the chosen colour literal finds it only in `include/route.oss`.
 
 ## 2. Cycle style sheet adopts the shared paint (spec: route-visualization)
@@ -11,7 +11,7 @@
 
 ## 3. Test (spec: route-visualization)
 
-- [x] 3.1 Add `Tests/src/RouteStyleColorsTest.cpp`: load `map.ost` plus a style sheet, resolve the `_route` line styles through `StyleConfig::GetRouteLineStyles` with a mercator projection, and assert for the daylight presentation (opaque violet fill over a dark violet casing), for the dark presentation (the dark variant) and for the casing/fill stacking (the outline style first, by slot and by display width). Verify: the test passes for `standard.oss`.
+- [x] 3.1 Add `Tests/src/RouteStyleColorsTest.cpp`: load `map.ost` plus a style sheet, resolve the `_route` line styles through `StyleConfig::GetRouteLineStyles` with a mercator projection, and assert for the daylight presentation (a translucent violet fill over an opaque, wider violet casing), for the dark presentation (the dark variant) and for the casing/fill stacking (the outline style first, by slot and by display width). Verify: the test passes for `standard.oss`.
 - [x] 3.2 Extend the test to every style sheet that can draw a route (`standard.oss`, `winter-sports.oss`, `cycle.oss`): each of them resolves the same casing and fill colours, and the cycle style sheet resolves the shared casing and fill rather than a single rule of its own. Verify: the test passes for all three style sheets.
 - [x] 3.3 Register the test in both build systems. Verify: `Tests/CMakeLists.txt` and `Tests/meson.build` both reference `RouteStyleColorsTest`, and the CMake build builds and runs it.
 

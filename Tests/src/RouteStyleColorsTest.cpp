@@ -61,15 +61,15 @@ namespace {
   constexpr size_t PROJECTION_WIDTH = 300;
   constexpr size_t PROJECTION_HEIGHT = 400;
 
-  /** Daylight: an opaque violet fill over a dark violet casing. */
+  /** Daylight: a translucent violet fill over an opaque, wider violet casing. */
   Color RouteFillDaylight()
   {
-    return Color::FromHexString("#7b1fa2");
+    return Color::FromHexString("#ba68c8d9");
   }
 
   Color RouteCasingDaylight()
   {
-    return Color::FromHexString("#311b92");
+    return Color::FromHexString("#6a1b9a");
   }
 
   /** Dark presentation: the fill and casing the route carried before the daylight variant. */

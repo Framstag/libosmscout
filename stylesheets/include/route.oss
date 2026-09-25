@@ -3,16 +3,22 @@ OSS
 CONST
   // Active route colours, per presentation (the flag the clients push, and the default of
   // every style sheet that includes this module).
-  // Daylight: opaque violet with a dark violet casing. No road class fill of these style
-  // sheets uses a violet hue (the only violet hues in the road styles are the bus stop marker
-  // and the bus symbol, both small point markers), and a dark casing stays visible on white
-  // residential roads, where the former white casing disappeared.
-  // Dark presentation: the previous red fill with a white casing, which already contrasts
-  // with the darkened map.
+  // Daylight: a translucent violet fill over an OPAQUE, wider, magenta-leaning violet casing.
+  // The casing is opaque AND wider than the fill (2.2mm vs 1.5mm) on purpose: it covers the whole
+  // fill footprint, so the composited centre is "fill over casing" and does NOT depend on the road
+  // underneath. Way labels are drawn after way fills and carry no halo, so a black street label
+  // reads at 5.14:1 on that centre, where the opaque violet it replaced gave it only 2.56:1. A
+  // translucent fill over a *dark* casing would darken the centre instead and re-break the label.
+  // No road class fill of these style sheets uses a violet hue (the only violet hues in the road
+  // styles are the bus stop marker and the bus symbol, both small point markers), and the casing
+  // sits on the magenta side of the purple ramp, darker than the composited centre, so the rim
+  // still reads as a border and stays visible on white residential roads.
+  // Dark presentation: the previous red fill with a white casing, which already contrasts with the
+  // darkened map.
   // NOTE: hex literals must be lowercase - Color::FromHexString only accepts 0-9a-f.
   IF daylight {
-    COLOR routeColor          = #7b1fa2;
-    COLOR routeCasingColor    = #311b92;
+    COLOR routeColor          = #ba68c8d9; // violet, 85 percent alpha
+    COLOR routeCasingColor    = #6a1b9a;
   }
   ELSE {
     COLOR routeColor          = #ff000088;
