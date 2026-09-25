@@ -790,6 +790,20 @@ routeStyleColorsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check route style colours', RouteStyleColorsTest, env: routeStyleColorsEnv)
 
+RoadStyleColorsTest = executable('RoadStyleColorsTest',
+                               'src/RoadStyleColorsTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+roadStyleColorsEnv = environment()
+roadStyleColorsEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+roadStyleColorsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check road style colours', RoadStyleColorsTest, env: roadStyleColorsEnv)
+
 MapPainterFrameBuffersTest = executable('MapPainterFrameBuffersTest',
                                'src/MapPainterFrameBuffersTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
