@@ -738,6 +738,15 @@ StringUtilsTest = executable('StringUtilsTest',
 
 test('Check string utils', StringUtilsTest)
 
+SearchScopeTest = executable('SearchScopeTest',
+             'src/SearchScopeTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check search scope', SearchScopeTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
@@ -873,6 +882,16 @@ MapPainterLabelCullingTest = executable('MapPainterLabelCullingTest',
                                install_dir: testInstallDir)
 
 test('Check MapPainterLabelCulling compilation', MapPainterLabelCullingTest)
+
+MapPainterLabelReuseTest = executable('MapPainterLabelReuseTest',
+                               'src/MapPainterLabelReuseTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterLabelReuse compilation', MapPainterLabelReuseTest)
 
 SunriseSunsetTest = executable('SunriseSunsetTest',
                            'src/SunriseSunsetTest.cpp',

@@ -224,6 +224,9 @@ endif()
 #---- StringUtils
 osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
 
+#---- SearchScope
+osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
@@ -534,6 +537,13 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME MapPainterLabelCullingTest SOURCES src/MapPainterLabelCullingTest.cpp TARGET OSMScout::Map)
 else()
   message("Skip MapPainterLabelCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterLabelReuseTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterLabelReuseTest SOURCES src/MapPainterLabelReuseTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterLabelReuse test, libosmscout-map is missing.")
 endif()
 
 #---- TextMetricsTest

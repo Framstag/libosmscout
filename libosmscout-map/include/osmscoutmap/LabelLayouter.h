@@ -20,9 +20,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <array>
+#include <cstddef>
+#include <iterator>
+#include <list>
 #include <memory>
 #include <set>
-#include <array>
+#include <string>
+#include <unordered_map>
 
 #include <osmscoutmap/MapImportExport.h>
 
@@ -237,6 +242,62 @@ constexpr bool debugLabelLayouter = false;
   }
 
   /**
+   * Key of a label measurement: the arguments a backend's Layout() call receives and the
+   * parameters that backend's Layout() reads on top of them. Two labels with the same key
+   * measure the same, so the second one can reuse the first measurement.
+   *
+   * The parameters of the line wrapping (`LabelLineMinCharCount`, `LabelLineMaxCharCount`,
+   * `LabelLineFitToArea`, `LabelLineFitToWidth`) are no argument of Layout(), but the backends
+   * that wrap a label ask MapPainter::GetProposedLabelWidth for the width they wrap with, and
+   * that call reads them. A frame that sees them changed therefore measures again.
+   */
+  class LabelMeasurementKey
+  {
+  public:
+    std::string text;
+    double      fontSize{0.0};
+    double      objectWidth{0.0};
+    bool        enableWrapping{false};
+    bool        contourLabel{false};
+    size_t      labelLineMinCharCount{0};
+    size_t      labelLineMaxCharCount{0};
+    bool        labelLineFitToArea{false};
+    double      labelLineFitToWidth{0.0};
+
+    bool operator==(const LabelMeasurementKey& other) const
+    {
+      return fontSize==other.fontSize &&
+             objectWidth==other.objectWidth &&
+             enableWrapping==other.enableWrapping &&
+             contourLabel==other.contourLabel &&
+             labelLineMinCharCount==other.labelLineMinCharCount &&
+             labelLineMaxCharCount==other.labelLineMaxCharCount &&
+             labelLineFitToArea==other.labelLineFitToArea &&
+             labelLineFitToWidth==other.labelLineFitToWidth &&
+             text==other.text;
+    }
+  };
+
+  struct LabelMeasurementKeyHash
+  {
+    size_t operator()(const LabelMeasurementKey& key) const
+    {
+      size_t hash=std::hash<std::string>()(key.text);
+
+      hash=hash*31u+std::hash<double>()(key.fontSize);
+      hash=hash*31u+std::hash<double>()(key.objectWidth);
+      hash=hash*31u+std::hash<bool>()(key.enableWrapping);
+      hash=hash*31u+std::hash<bool>()(key.contourLabel);
+      hash=hash*31u+std::hash<size_t>()(key.labelLineMinCharCount);
+      hash=hash*31u+std::hash<size_t>()(key.labelLineMaxCharCount);
+      hash=hash*31u+std::hash<bool>()(key.labelLineFitToArea);
+      hash=hash*31u+std::hash<double>()(key.labelLineFitToWidth);
+
+      return hash;
+    }
+  };
+
+  /**
    *
    * @tparam NativeGlyph
    * @tparam NativeLabel
@@ -268,9 +329,18 @@ constexpr bool debugLabelLayouter = false;
     using LabelInstanceType = LabelInstance<NativeGlyph, NativeLabel>;
 
   public:
-    explicit LabelLayouter(TextLayouter *textLayouter):
-        textLayouter(textLayouter)
-    {};
+    /**
+     * Number of label measurements a layouter remembers by default. The bound exists so that a
+     * long pan session does not accumulate the measurements of every label ever seen; it is
+     * far above the label count of a typical view.
+     */
+    static constexpr size_t defaultMeasurementCount=4096;
+
+    explicit LabelLayouter(TextLayouter* textLayouter,
+                           size_t maxMeasurementCount=defaultMeasurementCount)
+    : textLayouter(textLayouter),
+      maxMeasurementCount(maxMeasurementCount)
+    {}
 
     void SetViewport(const ScreenVectorRectangle& v)
     {
@@ -288,6 +358,28 @@ constexpr bool debugLabelLayouter = false;
       layoutViewport.y = visibleViewport.y - overlap;
     }
 
+    /**
+     * Set the measurement environment the measurements of the following frame are made in:
+     * the state a backend's measurements depend on that is not an argument of Layout() - the
+     * resolved font, the resolution of the drawing target, its font settings. A backend calls
+     * this once per frame, before it registers labels. While the environment is unchanged the
+     * measurements of earlier frames stay valid; when it changes they are dropped, because the
+     * backend would measure them differently now.
+     *
+     * A backend that never sets an environment has an empty one, which means that its
+     * measurements depend on the arguments of Layout() alone.
+     */
+    void SetMeasurementEnvironment(const std::string& environment)
+    {
+      if (environment==measurementEnvironment) {
+        return;
+      }
+
+      measurements.clear();
+      measurementOrder.clear();
+      measurementEnvironment=environment;
+    }
+
     void Reset()
     {
       contourLabelInstances.clear();
@@ -297,6 +389,10 @@ constexpr bool debugLabelLayouter = false;
       // are registered before the drawing target of that frame reports its viewport, so they
       // cannot be decided against a viewport until it has been set again
       layoutViewportValid=false;
+
+      // A layouter without a measurement cache holds the measurement of the frame that has just
+      // been drawn; the frame is over, so it is dropped with the rest of the frame's state
+      notRememberedMeasurement=LabelMeasurement();
     }
 
     // Something is an overlay, if its alpha is <0.8
@@ -431,33 +527,24 @@ constexpr bool debugLabelLayouter = false;
     struct LayoutJob {
       ScreenVectorRectangle layoutViewport;
 
-      double iconPadding;
-      double labelPadding;
-      double shieldLabelPadding;
-      double contourLabelPadding;
-      double overlayLabelPadding;
+      double iconPadding=0.0;
+      double labelPadding=0.0;
+      double shieldLabelPadding=0.0;
+      double contourLabelPadding=0.0;
+      double overlayLabelPadding=0.0;
 
       std::vector<ContourLabelType> allSortedContourLabels;
       std::vector<LabelInstanceType> allSortedLabels;
 
-      ScreenMask iconCanvas;
-      ScreenMask labelCanvas;
-      ScreenMask overlayCanvas;
+      ScreenMask                     iconCanvas;
+      ScreenMask                     labelCanvas;
+      ScreenMask                     overlayCanvas;
 
-      LayoutJob(const ScreenVectorRectangle &layoutViewport,
-                const Projection& projection,
-                const MapParameter& parameter):
-              layoutViewport(layoutViewport),
-              iconPadding(projection.ConvertWidthToPixel(parameter.GetIconPadding())),
-              labelPadding(projection.ConvertWidthToPixel(parameter.GetLabelPadding())),
-              shieldLabelPadding(projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding())),
-              contourLabelPadding(projection.ConvertWidthToPixel(parameter.GetContourLabelPadding())),
-              overlayLabelPadding(projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding())),
-              iconCanvas(layoutViewport.width,layoutViewport.height),
-              labelCanvas(layoutViewport.width,layoutViewport.height),
-              overlayCanvas(layoutViewport.width,layoutViewport.height)
-      {
-      }
+      std::vector<ScreenRectMask>    instanceMasks; //!< Reused masks of the label instance in flight
+      std::vector<ScreenMask*>       instanceCanvases; //!< Reused canvas of each element of the instance
+      std::vector<ScreenRectMask>    contourMasks; //!< Reused masks of the path label in flight
+
+      LayoutJob() = default;
 
       LayoutJob(const LayoutJob&) = delete;
       LayoutJob(LayoutJob&&) = delete;
@@ -465,11 +552,41 @@ constexpr bool debugLabelLayouter = false;
       LayoutJob& operator=(const LayoutJob&) = delete;
       LayoutJob& operator=(LayoutJob&&) = delete;
 
-      void Swap(std::vector<LabelInstanceType> &labelInstances,
-                std::vector<ContourLabelType> &contourLabelInstances)
+      /**
+       * Prepare the job for a frame: adopt the layout viewport, recompute the paddings and reset
+       * the canvases in place, so that a repeated frame of the same size does not allocate the
+       * canvases again.
+       */
+      void Reset(const ScreenVectorRectangle &newLayoutViewport,
+                 const Projection& projection,
+                 const MapParameter& parameter)
       {
-        std::swap(allSortedLabels, labelInstances);
-        std::swap(allSortedContourLabels, contourLabelInstances);
+        layoutViewport=newLayoutViewport;
+
+        iconPadding=projection.ConvertWidthToPixel(parameter.GetIconPadding());
+        labelPadding=projection.ConvertWidthToPixel(parameter.GetLabelPadding());
+        shieldLabelPadding=projection.ConvertWidthToPixel(parameter.GetPlateLabelPadding());
+        contourLabelPadding=projection.ConvertWidthToPixel(parameter.GetContourLabelPadding());
+        overlayLabelPadding=projection.ConvertWidthToPixel(parameter.GetOverlayLabelPadding());
+
+        iconCanvas.Reset(layoutViewport.width,layoutViewport.height);
+        labelCanvas.Reset(layoutViewport.width,layoutViewport.height);
+        overlayCanvas.Reset(layoutViewport.width,layoutViewport.height);
+      }
+
+      /**
+       * Take the registered labels of the frame and prepare the output stores of the frame: the
+       * registered labels move into the job, the output stores are cleared but keep their
+       * capacity, because the resolution is expected to add the resolved labels to them.
+       */
+      void PrepareFrame(std::vector<LabelInstanceType> &newLabelInstances,
+                        std::vector<ContourLabelType> &newContourLabelInstances)
+      {
+        std::swap(allSortedLabels, newLabelInstances);
+        std::swap(allSortedContourLabels, newContourLabelInstances);
+
+        newLabelInstances.clear();
+        newContourLabelInstances.clear();
       }
 
       void SortLabels()
@@ -517,17 +634,26 @@ constexpr bool debugLabelLayouter = false;
 
       {
         size_t elementCount = currentLabel.elements.size();       // Number of elements in label
-        std::vector<ScreenRectMask> masks(elementCount);          // Vector of masks of each individual object
-        std::vector<ScreenMask*> canvases(elementCount, nullptr); // Corresponding canvas for each label or null (if collision)
 
-        // List of elements to be rendered (no collision)
-        std::vector<typename LabelInstance<NativeGlyph, NativeLabel>::Element> visibleElements;
+        // Reused scratch storage: the mask of every element of the instance and the canvas each
+        // of them collides with. A mask reuses its bitmask, so a repeated frame does not
+        // allocate it again.
+        instanceMasks.resize(elementCount);
+        instanceCanvases.assign(elementCount, nullptr);
+
+        // The resolved instance is built in place in the output store: the visible elements are
+        // appended to it and the instance is dropped again when none of them is visible
+        labelInstances.emplace_back();
+
+        LabelInstanceType &instance=labelInstances.back();
+
+        instance.priority=currentLabel.priority;
 
         for (size_t eli=0; eli < elementCount; eli++) {
-          const typename LabelInstance<NativeGlyph, NativeLabel>::Element& element = currentLabel.elements[eli];
-          ScreenRectMask &mask=masks[eli];
-          ScreenMask     *canvas=GetCanvas(element.labelData);
-          double         padding=GetLabelPadding(element.labelData);
+          const typename LabelInstance<NativeGlyph, NativeLabel>::Element &element = currentLabel.elements[eli];
+          ScreenRectMask                                                  &mask=instanceMasks[eli];
+          ScreenMask                                                      *canvas=GetCanvas(element.labelData);
+          double                                                          padding=GetLabelPadding(element.labelData);
 
           ScreenPixelRectangle rectangle{(int)(element.x - layoutViewport.x - padding),
                                          (int)(element.y - layoutViewport.y - padding),
@@ -564,14 +690,14 @@ constexpr bool debugLabelLayouter = false;
             rectangle.height = element.label->height + 2*padding;
           }
 
-          mask=ScreenRectMask(layoutViewport.width,
-                              rectangle);
+          mask.Reset(layoutViewport.width,
+                     rectangle);
 
           bool collision = canvas->HasCollision(mask);
 
           if (!collision) {
-            visibleElements.push_back(element);
-            canvases[eli]=canvas;
+            instance.elements.push_back(element);
+            instanceCanvases[eli]=canvas;
           }
 
           if constexpr (debugLabelLayouter) {
@@ -582,16 +708,17 @@ constexpr bool debugLabelLayouter = false;
           }
         }
 
-        if (!visibleElements.empty()) {
-          LabelInstanceType instanceCopy{currentLabel.priority, visibleElements};
-          labelInstances.push_back(instanceCopy);
+        if (instance.elements.empty()) {
+          labelInstances.pop_back();
 
-          // mark all labels at once (elements of single label may have no padding)
+          return;
+        }
 
-          for (size_t eli=0; eli < elementCount; eli++) {
-            if (canvases[eli] != nullptr) {
-              canvases[eli]->AddMask(masks[eli]);
-            }
+        // mark all labels at once (elements of single label may have no padding)
+
+        for (size_t eli=0; eli < elementCount; eli++) {
+          if (instanceCanvases[eli] != nullptr) {
+            instanceCanvases[eli]->AddMask(instanceMasks[eli]);
           }
         }
       }
@@ -605,7 +732,7 @@ constexpr bool debugLabelLayouter = false;
           std::cout << "Test contour label prio " << currentContourLabel.priority << ": " << currentContourLabel.text;
         }
 
-        std::vector<ScreenRectMask> masks(glyphCnt);
+        contourMasks.resize(glyphCnt);
 
         bool collision=false;
         for (int gi=0; gi<glyphCnt; gi++) {
@@ -617,10 +744,10 @@ constexpr bool debugLabelLayouter = false;
             (int)(glyph.trHeight + 2*contourLabelPadding)
           };
 
-          masks[gi]=ScreenRectMask(layoutViewport.width,
-                                   rect);
+          contourMasks[gi].Reset(layoutViewport.width,
+                                 rect);
 
-          if (labelCanvas.HasCollision(masks[gi])) {
+          if (labelCanvas.HasCollision(contourMasks[gi])) {
             collision=true;
             break;
           }
@@ -628,7 +755,7 @@ constexpr bool debugLabelLayouter = false;
 
         if (!collision) {
           for (int gi=0; gi<glyphCnt; gi++) {
-            labelCanvas.AddMask(masks[gi]);
+            labelCanvas.AddMask(contourMasks[gi]);
           }
 
           contourLabelInstances.push_back(currentContourLabel);
@@ -685,10 +812,12 @@ constexpr bool debugLabelLayouter = false;
                 const MapParameter& parameter)
     {
       // compute collisions, hide some labels
-      LayoutJob job(layoutViewport, projection, parameter);
-      job.Swap(labelInstances, contourLabelInstances);
-      job.SortLabels();
-      job.ProcessLabels(labelInstances, contourLabelInstances);
+      layoutJob.Reset(layoutViewport,
+                      projection,
+                      parameter);
+      layoutJob.PrepareFrame(labelInstances, contourLabelInstances);
+      layoutJob.SortLabels();
+      layoutJob.ProcessLabels(labelInstances, contourLabelInstances);
     }
 
     template<class Painter>
@@ -830,11 +959,15 @@ constexpr bool debugLabelLayouter = false;
           instance.priority);
         // TODO: should we take style into account?
         // Qt allows to split text layout and style setup
-        element.label = textLayouter->Layout(projection, parameter,
-                                             data.text, data.fontSize,
-                                             objectWidth,
-                                             /*enable wrapping*/ true,
-                                             /*contour label*/ false);
+        LabelMeasurement & measurement=MeasureLabel(projection,
+                                                    parameter,
+                                                    data.text,
+                                                    data.fontSize,
+                                                    objectWidth,
+                                                    /*enable wrapping*/ true,
+                                                    /*contour label*/ false);
+
+        element.label = measurement.label;
         element.x = point.GetX() - element.label->width / 2;
         if (offset<0){
           element.y = point.GetY() - element.label->height / 2;
@@ -934,20 +1067,21 @@ constexpr bool debugLabelLayouter = false;
                               const PathLabelData &labelData,
                               const LabelPath &labelPath)
     {
-      // TODO: cache label for string and font parameters
-      LabelPtr label=textLayouter->Layout(projection,
-                                          parameter,
-                                          labelData.text,
-                                          labelData.height,
-                                          /* object width */ 0.0,
-                                          /*enable wrapping*/ false,
-                                          /*contour label*/ true);
+      LabelMeasurement & measurement=MeasureLabel(projection,
+                                                  parameter,
+                                                  labelData.text,
+                                                  labelData.height,
+                                                  /* object width */ 0.0,
+                                                  /*enable wrapping*/ false,
+                                                  /*contour label*/ true);
+
+      LabelPtr label=measurement.label;
 
       // text should be rendered with 0x0 coordinate as left baseline
       // we want to move label a bit to the bottom, near to line center
       double                           textBaselineOffset = label->height * 0.25;
 
-      std::vector<Glyph<NativeGlyph>>  glyphs = label->ToGlyphs();
+      const std::vector<Glyph<NativeGlyph>> &glyphs = GetLabelGlyphs(measurement);
       double                           pathLength=labelPath.GetLength();
       ContourLabelPositioner           positioner;
       ContourLabelPositioner::Position position=positioner.calculatePositions(projection,
@@ -1076,8 +1210,168 @@ constexpr bool debugLabelLayouter = false;
       return contourLabelInstances;
     }
 
+    /**
+     * Return the number of label measurements that are remembered at the moment.
+     */
+    size_t GetMeasurementCount() const
+    {
+      return measurements.size();
+    }
+
+    /**
+     * Return the number of label measurements that are remembered at most.
+     */
+    size_t GetMaxMeasurementCount() const
+    {
+      return maxMeasurementCount;
+    }
+
+    /**
+     * Return the number of remembered measurements whose glyph data has been derived.
+     */
+    size_t GetGlyphCount() const
+    {
+      size_t count=0;
+
+      for (const auto& entry : measurements) {
+        if (entry.second.glyphsDerived) {
+          count++;
+        }
+      }
+
+      return count;
+    }
+
   private:
-    TextLayouter *textLayouter;
+    /**
+     * A remembered label measurement: the layouted label and the glyph data derived from it.
+     *
+     * The glyph data is owned here, together with the label it was derived from. A label whose
+     * measurement is dropped therefore drops its glyph data as well, and no glyph data can
+     * outlive the label it was derived from.
+     */
+    struct LabelMeasurement
+    {
+      LabelPtr                                 label;
+      std::vector<Glyph<NativeGlyph>>          glyphs;
+      bool                                     glyphsDerived{false};
+      std::list<LabelMeasurementKey>::iterator order; //!< Position of the measurement in measurementOrder
+    };
+
+    using MeasurementOrder = std::list<LabelMeasurementKey>;
+
+    using MeasurementIndex = std::unordered_map<LabelMeasurementKey,LabelMeasurement,LabelMeasurementKeyHash>;
+
+    TextLayouter     *textLayouter;
+    size_t           maxMeasurementCount;
+
+    std::string      measurementEnvironment;
+    MeasurementIndex measurements;
+    MeasurementOrder measurementOrder;
+    LayoutJob        layoutJob;                                                         //!< Reused state of the frame's overlap resolution
+
+    /**
+     * Measurement of a layouter that does not remember measurements (see maxMeasurementCount);
+     * it holds the measurement of the label that was measured last.
+     */
+    LabelMeasurement notRememberedMeasurement;
+
+    /**
+     * Measure a label, reusing the measurement of an earlier frame while the measurement
+     * inputs and the measurement environment are unchanged.
+     *
+     * The returned reference stays valid until the measurement is dropped, which happens when
+     * the environment changes or when the measurement is the oldest one of a full cache. It is
+     * therefore only valid for the label stage's current step, not for the whole frame.
+     */
+    LabelMeasurement& MeasureLabel(const Projection& projection,
+                                   const MapParameter& parameter,
+                                   const std::string& text,
+                                   double fontSize,
+                                   double objectWidth,
+                                   bool enableWrapping,
+                                   bool contourLabel)
+    {
+      LabelMeasurementKey key;
+
+      key.text=text;
+      key.fontSize=fontSize;
+      key.objectWidth=objectWidth;
+      key.enableWrapping=enableWrapping;
+      key.contourLabel=contourLabel;
+      key.labelLineMinCharCount=parameter.GetLabelLineMinCharCount();
+      key.labelLineMaxCharCount=parameter.GetLabelLineMaxCharCount();
+      key.labelLineFitToArea=parameter.GetLabelLineFitToArea();
+      key.labelLineFitToWidth=parameter.GetLabelLineFitToWidth();
+
+      // A bound of 0 disables the reuse of measurements
+      if (maxMeasurementCount>0) {
+        auto entry=measurements.find(key);
+
+        if (entry!=measurements.end()) {
+          // The measurement has just been used, so it is the most recent one and the measurement
+          // at the front of the order is the one that has not been used for the longest time
+          measurementOrder.splice(measurementOrder.end(),
+                                  measurementOrder,
+                                  entry->second.order);
+
+          return entry->second;
+        }
+      }
+
+      LabelMeasurement measurement;
+
+      measurement.label=textLayouter->Layout(projection,
+                                             parameter,
+                                             text,
+                                             fontSize,
+                                             objectWidth,
+                                             enableWrapping,
+                                             contourLabel);
+
+      if (maxMeasurementCount==0) {
+        // The measurement is used by the caller and dropped afterwards, so it is not remembered
+        // and no glyph data is keyed on its label
+        notRememberedMeasurement=std::move(measurement);
+
+        return notRememberedMeasurement;
+      }
+
+      while (measurements.size()>=maxMeasurementCount &&
+             !measurementOrder.empty()) {
+        auto oldest=measurements.find(measurementOrder.front());
+
+        if (oldest!=measurements.end()) {
+          measurements.erase(oldest);
+        }
+
+        measurementOrder.pop_front();
+      }
+
+      measurementOrder.push_back(key);
+
+      auto inserted=measurements.emplace(std::move(key),
+                                         std::move(measurement));
+
+      inserted.first->second.order=std::prev(measurementOrder.end());
+
+      return inserted.first->second;
+    }
+
+    /**
+     * Return the glyph data of a measured label, deriving it once per remembered measurement.
+     */
+    const std::vector<Glyph<NativeGlyph>>& GetLabelGlyphs(LabelMeasurement& measurement)
+    {
+      if (!measurement.glyphsDerived) {
+        measurement.glyphs=measurement.label->ToGlyphs();
+        measurement.glyphsDerived=true;
+      }
+
+      return measurement.glyphs;
+    }
+
+  private:
     std::vector<ContourLabelType> contourLabelInstances;
     std::vector<LabelInstanceType> labelInstances;
     ScreenVectorRectangle visibleViewport{0,0,0,0};
