@@ -40,7 +40,9 @@ MapDownloadService::MapDownloadService(MapManagerRef mapManager,
 
 MapDownloadService::~MapDownloadService()
 {
-  // AsyncWorker base destructor handles queue.Stop() and thread.join()
+  // Stop the worker before the members go: its jobs use the provider and the download state of
+  // this object, and the AsyncWorker base class is destroyed only after the members.
+  Stop();
 }
 
 CancelableFuture<std::vector<AvailableMapEntry>> MapDownloadService::FetchMapList(

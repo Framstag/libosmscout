@@ -56,7 +56,7 @@ public:
   MapManager& operator=(const MapManager&) = delete;
   MapManager& operator=(MapManager&&) = delete;
 
-  ~MapManager() override = default;
+  ~MapManager() override;
 
   std::vector<std::filesystem::path> GetLookupDirectories() const
   {
