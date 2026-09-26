@@ -274,6 +274,16 @@ test('Check MapDownloadService APIs',
      MapDownloadServiceTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
+MapManagerTest = executable('MapManagerTest',
+                               'src/MapManagerTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutclient],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check map manager', MapManagerTest)
+
 FileScannerWriterTest = executable('FileScannerWriterTest',
                                'src/FileScannerWriterTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir],
