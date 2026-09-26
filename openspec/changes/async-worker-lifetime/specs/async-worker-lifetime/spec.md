@@ -2,13 +2,13 @@
 
 ## Purpose
 
-Defines how a worker that owns a job queue shuts down and what happens to the work that is in flight or queued when it does, so that destroying an object can never leave a job running against state that no longer exists, and so that a job which fails is reported instead of ending the process.
+Defines how a worker that owns a job queue shuts down and what happens to the work that is in flight or queued when it does, so that destroying an object can never leave a job running against state that no longer exists, so that a job which fails is reported instead of ending the process, and so that a teardown of a long job is bounded by the stop request the job received.
 
 ## ADDED Requirements
 
 ### Requirement: A worker stops its job thread before the state its jobs use is destroyed
 
-Destroying a worker SHALL stop its job thread and wait for the job that is currently running, and it SHALL do so before the state that its jobs read is destroyed. This SHALL hold when the job is reading a member of the object being destroyed and when the job holds a lock on one of its members. A job that was already queued when the worker is stopped SHALL still run before the worker exits - stopping the queue accepts no new jobs but drains what it holds - and it SHALL also run while the state that the jobs use is still alive.
+Destroying a worker SHALL stop its job thread and wait for the job that is currently running, and it SHALL do so before the state that its jobs read is destroyed. This SHALL hold when the job is reading a member of the object being destroyed and when the job holds a lock on one of its members. Stopping a worker SHALL stop the queue and drop the jobs that have not started in one step, so that a job which is returning at that moment cannot pick one of them up: such a job SHALL NOT run, and the caller waiting for it SHALL be released instead of waiting forever. A job that polls the `Breaker` it was given SHALL stop at its next check, which SHALL bound the wait; a job that does not poll SHALL still be waited for.
 
 #### Scenario: Destroying a worker with a job in progress
 
@@ -22,9 +22,23 @@ Destroying a worker SHALL stop its job thread and wait for the job that is curre
 
 - **GIVEN** a worker with a job that was submitted and has not started
 - **WHEN** the worker is destroyed
-- **THEN** that job SHALL still run before the worker exits
-- **AND** it SHALL run while the state that the jobs use is still alive
-- **AND** the destruction SHALL complete
+- **THEN** that job SHALL NOT run
+- **AND** the destruction SHALL complete without waiting for it
+- **AND** its caller SHALL be released, so that it does not wait for a job that never runs
+
+#### Scenario: A job that observes the stop request does not delay the teardown
+
+- **GIVEN** a worker whose job polls the `Breaker` it received and would otherwise keep running
+- **WHEN** the worker is destroyed
+- **THEN** the job SHALL end at its next check
+- **AND** the destruction SHALL not wait for the remaining work of that job
+
+#### Scenario: A job that ignores the stop request is still waited for
+
+- **GIVEN** a worker whose job does not poll its `Breaker`
+- **WHEN** the worker is destroyed
+- **THEN** the destruction SHALL wait for that job to finish
+- **AND** the state the job uses SHALL still be alive while it runs
 
 #### Scenario: A worker that is destroyed from its own job thread
 
