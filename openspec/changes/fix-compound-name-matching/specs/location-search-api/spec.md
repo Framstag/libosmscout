@@ -68,7 +68,7 @@
 
 ### Requirement: JNI bridge for location search
 
-Native C++ code in `libosmscout-client-java/src/` SHALL bridge `LocationService::SearchForLocationByString()` and the form-based address search to the Java search methods. Both bridge paths SHALL use the same name matching, so a hyphen-joined name is found identically whether it is queried as a free-text string or as parsed address components (city, street, house number).
+Native C++ code in `libosmscout-client-java/src/` SHALL bridge `LocationService::SearchForLocationByString()` and the form-based address search to the Java search methods. Both bridge paths SHALL use the same name matching, so a hyphen-joined name is found identically whether it is queried as a free-text string or as parsed address components (city, street, house number). Every name comparison on the search path SHALL use that matching: the query-string search, the admin-region resolution, the form search and the classification of a free-text text-index hit as a match or a candidate. The text-index classification SHALL be additive: it SHALL NOT change which entries the search returns, and it SHALL NOT turn a match into a candidate.
 
 #### Scenario: Native search delegation
 - **WHEN** Java `searchLocations` is called
@@ -86,3 +86,14 @@ Native C++ code in `libosmscout-client-java/src/` SHALL bridge `LocationService:
 - **GIVEN** a database whose index contains the location "August-Warkner-Platz"
 - **WHEN** Java `searchLocationByForm` is called with the city and the street spelled "August Warkner Platz"
 - **THEN** the result array SHALL contain that location
+
+#### Scenario: A free-text hit is classified with the same matching
+- **GIVEN** a database whose text index returns a named object whose stored name joins its words with a separator
+- **WHEN** user calls `searchLocations` with a query whose words spell that stored name completely apart
+- **THEN** that entry's match quality SHALL be match, not candidate
+- **AND** the entry SHALL be returned whether or not its match quality changed
+
+#### Scenario: A free-text hit keeps its quality when the matching does not apply
+- **GIVEN** a database whose text index returns a named object for a query that is only a prefix of the stored name
+- **WHEN** user calls `searchLocations` with that query
+- **THEN** that entry's match quality SHALL be candidate, as it was before

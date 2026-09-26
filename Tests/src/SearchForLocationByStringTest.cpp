@@ -2,9 +2,11 @@
 #include <string>
 #include <vector>
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <osmscout/location/LocationService.h>
+#include <osmscout/util/StringMatcher.h>
 
 extern osmscout::LocationServiceRef locationService;
 
@@ -13,14 +15,21 @@ namespace {
    * Run one string search and return its result, asserting the invariants every
    * matching section shares: the search succeeds and does not hit the candidate
    * limit. The section asserts its own expectations on the returned result —
-   * one place for the boilerplate instead of a copy per section.
+   * one place for the boilerplate instead of a copy per section. A matcher is
+   * set only when the section asks for one, so a section that exercises the
+   * word-aware matcher is one call.
    */
   osmscout::LocationSearchResult SearchForString(const std::string& query,
-                                                 bool partialMatch=false)
+                                                 bool partialMatch=false,
+                                                 const osmscout::StringMatcherFactoryRef& matcherFactory={})
   {
     osmscout::LocationStringSearchParameter parameter(query);
 
     parameter.SetPartialMatch(partialMatch);
+
+    if (matcherFactory) {
+      parameter.SetStringMatcherFactory(matcherFactory);
+    }
 
     osmscout::LocationSearchResult result;
 
@@ -28,6 +37,17 @@ namespace {
     REQUIRE_FALSE(result.limitReached);
 
     return result;
+  }
+
+  /*
+   * The matcher the search bridge installs: the transliterating substring match
+   * plus word matching across separators. Sections that check what the bridge
+   * finds ask for this matcher explicitly, because a parameter without one keeps
+   * the plain case-insensitive matcher of its own default.
+   */
+  osmscout::StringMatcherFactoryRef WordMatchingMatcher()
+  {
+    return std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>();
   }
 
   /*
@@ -237,17 +257,10 @@ TEST_CASE("String search for city and location")
    */
   SECTION("Search for hyphen-joined location: 'August Warkner Platz Eving' (match)")
   {
-    osmscout::LocationStringSearchParameter parameter("August Warkner Platz Eving");
-    osmscout::LocationSearchResult          result;
+    auto result=SearchForString("August Warkner Platz Eving",
+                                false,
+                                WordMatchingMatcher());
 
-    parameter.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
-
-    bool success=locationService->SearchForLocationByString(parameter,
-                                                            result);
-
-    REQUIRE(success);
-    REQUIRE_FALSE(result.limitReached);
     REQUIRE(result.results.size()==1);
     REQUIRE(result.results.front().location!=nullptr);
     REQUIRE(result.results.front().location->name=="August-Warkner-Platz");
@@ -260,17 +273,10 @@ TEST_CASE("String search for city and location")
    */
   SECTION("Search for hyphen-joined location: 'August Platz Dortmund' (interrupted word run, no match)")
   {
-    osmscout::LocationStringSearchParameter parameter("August Platz Dortmund");
-    osmscout::LocationSearchResult          result;
+    auto result=SearchForString("August Platz Dortmund",
+                                false,
+                                WordMatchingMatcher());
 
-    parameter.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
-
-    bool success=locationService->SearchForLocationByString(parameter,
-                                                            result);
-
-    REQUIRE(success);
-    REQUIRE_FALSE(result.limitReached);
     REQUIRE(result.results.empty());
   }
 }
@@ -282,51 +288,30 @@ TEST_CASE("String search for city and location")
 TEST_CASE("String search for POI")
 {
   /*
-   * The hyphen in the query keeps the name's first word a substring of the
-   * indexed name, so the POI is reached even without word matching. It also
-   * proves the test data's POI is indexed at all.
+   * Both spellings reach the test data's POI, by two different routes: with the
+   * hyphen the name's first word is already a substring of the indexed name, so
+   * it is found even without word matching, and without it only the word
+   * matching finds the joined name (fix-compound-name-matching). The name
+   * carries a third word the query does not, so the POI stays a candidate and
+   * not a full match.
    */
-  SECTION("Search for POI: 'Test-Theater Eving' (hyphen in name and query)")
+  SECTION("Search for POI: 'Test-Theater Eving' and 'Test Theater Eving' (candidate)")
   {
-    osmscout::LocationStringSearchParameter parameter("Test-Theater Eving");
-    osmscout::LocationSearchResult          result;
+    const std::vector<std::string> queries{"Test-Theater Eving",
+                                           "Test Theater Eving"};
 
-    parameter.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
+    for (const auto& query : queries) {
+      auto result=SearchForString(query,
+                                  false,
+                                  WordMatchingMatcher());
 
-    bool success=locationService->SearchForLocationByString(parameter,
-                                                            result);
+      INFO("query: " << query);
 
-    REQUIRE(success);
-    REQUIRE_FALSE(result.limitReached);
-    REQUIRE(result.results.size()==1);
-    REQUIRE(result.results.front().poi!=nullptr);
-    REQUIRE(result.results.front().poi->name=="Test-Theater Eving");
-    REQUIRE(result.results.front().poiMatchQuality==osmscout::LocationSearchResult::candidate);
-  }
-
-  /*
-   * Words that the index joins with a hyphen are matched when the query spells
-   * them apart (fix-compound-name-matching). The name carries a third word the
-   * query does not, so the POI is a candidate, not a full match.
-   */
-  SECTION("Search for POI: 'Test Theater Eving' (words spelled apart)")
-  {
-    osmscout::LocationStringSearchParameter parameter("Test Theater Eving");
-    osmscout::LocationSearchResult          result;
-
-    parameter.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
-
-    bool success=locationService->SearchForLocationByString(parameter,
-                                                            result);
-
-    REQUIRE(success);
-    REQUIRE_FALSE(result.limitReached);
-    REQUIRE(result.results.size()==1);
-    REQUIRE(result.results.front().poi!=nullptr);
-    REQUIRE(result.results.front().poi->name=="Test-Theater Eving");
-    REQUIRE(result.results.front().poiMatchQuality==osmscout::LocationSearchResult::candidate);
+      REQUIRE(result.results.size()==1);
+      REQUIRE(result.results.front().poi!=nullptr);
+      REQUIRE(result.results.front().poi->name=="Test-Theater Eving");
+      REQUIRE(result.results.front().poiMatchQuality==osmscout::LocationSearchResult::candidate);
+    }
   }
 
   /*
@@ -335,17 +320,10 @@ TEST_CASE("String search for POI")
    */
   SECTION("Search for POI: 'Theater Test Eving' (reordered words, no match)")
   {
-    osmscout::LocationStringSearchParameter parameter("Theater Test Eving");
-    osmscout::LocationSearchResult          result;
+    auto result=SearchForString("Theater Test Eving",
+                                false,
+                                WordMatchingMatcher());
 
-    parameter.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
-
-    bool success=locationService->SearchForLocationByString(parameter,
-                                                            result);
-
-    REQUIRE(success);
-    REQUIRE_FALSE(result.limitReached);
     REQUIRE(result.results.empty());
   }
 }

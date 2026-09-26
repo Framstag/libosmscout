@@ -9,6 +9,11 @@ hit only when the pattern covers the whole remaining word list. A name that join
 separator therefore hides from a query that spells those words apart: the multi-word pattern is not
 a substring, and the single-word patterns leave words uncovered.
 
+The same search also reads a free-text text index, whose lookup normalizes the whole query and
+compares it as a byte prefix of the whole stored name. A separator inside the name is preserved by
+that normalization (only whitespace-like characters collapse to a space), so a separator-joined name
+hides from the index as well and the index contributes nothing for such a query.
+
 ## Decisions
 
 ### D1 — Extend the matcher, not the search visitors
@@ -34,21 +39,52 @@ narrow (no reordering, no gaps, no word-internal splitting); the candidate quali
 entries below exact matches in every consumer's ranking. Periods are deliberately not separators,
 so dot-spelled names do not start matching in this change.
 
-### D3 — Every search parameter uses the same rule
+The "unchanged" half of that rationale is asserted: the cases below include inputs the word matching
+alone cannot match, so a matcher that consulted the words first would fail them. The
+"allocation-free" half is not asserted — see the risks.
+
+### D3 — Every name comparison on the search path uses the same rule
 
 The query-string search, the admin-region resolution and the form-based address search are all
 driven by the same query words, so all three get the new matcher. Otherwise a hyphen-joined city,
 street or postal area would match in one path and not in another — and typed full addresses (which
 use the form search) would stay broken.
 
+The fourth comparison on the same path decides whether a hit that came from the free-text text index
+is reported as a match or a candidate. It compares the same query against the same kind of name, so
+it uses the same matcher and the two paths agree on match quality. Swapping it is safe in both
+directions: the word-aware matcher returns the substring result unchanged whenever that result is
+not a non-match, so a hit can only gain the quality it deserves and never lose one. Membership of
+the result set is unaffected — that site classifies an entry the index has already returned.
+
+The index itself keeps its reach in this change (see D4).
+
+### D4 — Leave the text index format alone
+
+Making the text index find a separator-joined name means keying it by word or by name suffix instead
+of by whole name. The index is built by the importer and shipped inside the database, so that change
+forces every database to be re-imported and redistributed. It is therefore rejected for this change:
+the search paths that compare a query against a name at query time are fixed, the index keys are not.
+A query whose word run sits in the middle of a stored name still relies on the query-time paths (and,
+for the index, on a region qualifier that narrows the candidate set).
+
 ## Verification
 
 - Unit tests for the matcher: separator variants on either side, transliteration and sharp-s across
   the separator, reordered/interrupted runs, full versus partial coverage, unchanged substring
-  cases, and the fast path taken for single-word patterns.
+  cases, and the fast path taken for single-word patterns. Two of the substring cases are
+  discriminating: the word matching alone would report a non-match for them, so they pin the
+  evaluation order without measuring anything.
 - Search-level tests against the committed test data (`Tests/LocationTest.olt`): a hyphen-joined
   location (already present as `August-Warkner-Platz`) and a hyphen-joined POI, queried as words
-  spelled apart, through the string search and the form search.
+  spelled apart, through the string search and the form search. The sections that exercise the
+  word-aware matcher run through one `SearchForString()` helper and one `WordMatchingMatcher()`
+  helper, so a section states its query and its expectations and nothing else.
+- The four comparison sites in `libosmscout-client-java/src/OSMScoutClient.cpp` are checked by
+  inspection: no search parameter and no match-quality classification still builds the previous
+  factory (grep for the previous factory type returns no hit). These sites cannot be covered by a
+  unit test — they need the JNI bridge, a real database and, for the index, marisa — so the
+  capability itself is pinned by the search-level tests above and the wiring by this check.
 - Full test suite on the host build (Tests, Import, marisa enabled) green, and no regression in the
   existing search sections whose names are space-separated.
 
@@ -60,3 +96,6 @@ use the form search) would stay broken.
 | rule too lenient | consecutive, ordered, whole-word runs only; negative tests pin the boundary |
 | cost on the query path | substring fast path first, word path only on a miss, split performed once per candidate comparison and abandoned on the first non-matching word |
 | upstream merge conflicts | additive class plus factory, no behavioral edit to existing matchers, single-purpose commit |
+| recall via the text index unchanged | documented as out of scope (D4); the query-time paths return such an object as a candidate, which is what the user sees |
+| match quality changes for a text-index hit | only upward, only for a query that matches the whole stored name modulo separators; membership is untouched |
+| the fast path's cost is claimed but not asserted | Observing it means replacing the global allocation functions of the test binary. That replacement fails to link against the memory sanitizer runtime, which defines the same six operators (`multiple definition of operator delete[]` against `libclang_rt.msan_cxx`), and on MinGW the counter stays at zero for both paths, so the comparison asserted `0 < 0`. The assertion was therefore dropped: the matcher's own comment states the order, the design states the cost, and the ordering is pinned behaviourally instead. Re-adding it would need an allocation hook the library offers, not a test-local `operator new`. |

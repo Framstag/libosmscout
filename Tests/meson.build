@@ -748,6 +748,16 @@ StringUtilsTest = executable('StringUtilsTest',
 
 test('Check string utils', StringUtilsTest)
 
+StringMatcherTest = executable('StringMatcherTest',
+             'src/StringMatcherTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check string matcher', StringMatcherTest)
+
 SearchScopeTest = executable('SearchScopeTest',
              'src/SearchScopeTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
@@ -756,16 +766,6 @@ SearchScopeTest = executable('SearchScopeTest',
              install_dir: testInstallDir)
 
 test('Check search scope', SearchScopeTest)
-
-StringMatcherTest = executable('StringMatcherTest',
-             'src/StringMatcherTest.cpp',
-             include_directories: [testIncDir, osmscoutIncDir],
-             dependencies: [mathDep, openmpDep, catch2MainDep],
-             link_with: [osmscout],
-             install: true,
-             install_dir: testInstallDir)
-
-test('Check string matcher', StringMatcherTest)
 
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',

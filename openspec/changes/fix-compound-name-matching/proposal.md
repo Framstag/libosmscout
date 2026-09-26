@@ -7,7 +7,10 @@ the query spells those words apart. Searching "Hilpert Theater Lünen" yields no
 POI "Heinz-Hilpert-Theater Lünen" is present in the index; the same holds for streets
 ("August Warkner Platz" vs. "August-Warkner-Platz"), postal areas and administrative regions. The
 query's words are only ever compared against the stored name as one contiguous string, so a
-separator inside the name — or in the query — hides the object from the search.
+separator inside the name — or in the query — hides the object from the search. The free-text text
+index of the same search behaves the same way from the other side: it compares the whole normalized
+query as a prefix of the whole stored name, so a name that joins its words with a separator is
+invisible to a query that spells them apart.
 
 ## What Changes
 
@@ -22,8 +25,13 @@ separator inside the name — or in the query — hides the object from the sear
 - Behavior is only extended: queries that already matched return exactly the same results.
 
 Out of scope for this change (documented for follow-up work): names whose words are joined without
-any separator, and reaching a word in the middle of a stored name when the query carries no region
-qualifier.
+any separator; reaching a word in the middle of a stored name when the query carries no region
+qualifier; and the free-text text index, which still misses a separator-joined name because its
+prefix comparison is over whole stored names. Widening the index would key it by word or by name
+suffix, which changes the index format and requires every database to be re-imported and
+redistributed. This change therefore makes separator-insensitive matching apply to the search paths
+that compare a query against a name at query time, including how a hit from the text index is
+classified as a match or a candidate.
 
 ## Capabilities
 
@@ -45,9 +53,10 @@ Affected files and modules:
   — the comparison used for name matching (existing matcher behavior stays unchanged for its
   current callers).
 - `libosmscout-client-java/src/OSMScoutClient.cpp` — the search parameters that carry the query
-  string, the form-based address search and the admin-region resolution.
+  string, the form-based address search, the admin-region resolution and the classification of a
+  text-index hit as a match or a candidate.
 - `Tests/LocationTest.olt`, `Tests/src/SearchForLocationByStringTest.cpp`,
   `Tests/src/SearchForLocationByFormTest.cpp`, `Tests/src/StringMatcherTest.cpp` — test data and
-  regression coverage.
+  regression coverage, registered in both `Tests/CMakeLists.txt` and `Tests/meson.build`.
 - No index or file-format change: matching happens at query time, so existing databases stay usable
   without re-import.
