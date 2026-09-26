@@ -33,6 +33,11 @@ POILookupModule::POILookupModule(DBThreadRef dbThread):
 
 POILookupModule::~POILookupModule()
 {
+  // Stop the worker before the state its lookups read is destroyed. On the worker
+  // thread (the DeleteLater() path) this is already done, otherwise it waits for a
+  // running lookup here.
+  Stop();
+
   ThreadAssert();
 }
 

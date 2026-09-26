@@ -7613,10 +7613,28 @@ Java_com_framstag_libosmscout_client_MapDownloadManager_nativeRegisterMapDirecto
   if (ok) {
     // Wait for the database lookup to finish so the installed map list is
     // fresh when onComplete fires (fix-download: async lookup race).
+    //
+    // The lookup is cancelled when the client is closed while it runs
+    // (spec map-database-scan), in which case the completion callback never fires - so
+    // the cancel callback releases the wait as well, and the promise is shared
+    // because a callback may still run after this call returned.
     auto future = data->mapManager->LookupDatabases();
-    std::promise<bool> lookupDone;
-    future.OnComplete([&lookupDone](bool result) { lookupDone.set_value(result); });
-    auto status = lookupDone.get_future().wait_for(std::chrono::seconds(30));
+    auto lookupDone = std::make_shared<std::promise<bool>>();
+    auto lookupHandled = std::make_shared<std::atomic<bool>>(false);
+    auto lookupFuture = lookupDone->get_future();
+
+    future.OnComplete([lookupDone, lookupHandled](bool result) {
+      if (!lookupHandled->exchange(true)) {
+        lookupDone->set_value(result);
+      }
+    });
+    future.OnCancel([lookupDone, lookupHandled]() {
+      if (!lookupHandled->exchange(true)) {
+        lookupDone->set_value(false);
+      }
+    });
+
+    auto status = lookupFuture.wait_for(std::chrono::seconds(30));
     if (status != std::future_status::ready) {
       osmscout::log.Warn() << "Timed out waiting for map lookup after registering "
                            << targetDir;

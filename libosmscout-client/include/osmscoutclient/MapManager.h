@@ -35,6 +35,9 @@ namespace osmscout {
  * \ingroup ClientAPI
  *
  * Manager of map databases. It provide db lookup (in databaseDirectories).
+ *
+ * The lookup runs asynchronously; the manager stops it before its own state is
+ * destroyed, so a client may be closed while a lookup is running.
  */
 class OSMSCOUT_CLIENT_API MapManager: public AsyncWorker
 {
@@ -84,7 +87,12 @@ public:
 
   /** Lookup map databases
    *
-   * @return future, always true
+   * The scan works on the directories that are registered when it starts and publishes
+   * the databases it found as one set. Destroying the manager stops a scan that is
+   * running, and a scan that was stopped publishes nothing.
+   *
+   * @return future with true when the scan completed and published its result, false
+   *         when it was stopped before it completed
    */
   CancelableFuture<bool> LookupDatabases();
 

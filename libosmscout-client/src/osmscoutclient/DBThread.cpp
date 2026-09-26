@@ -67,8 +67,8 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
 
 DBThread::~DBThread()
 {
-  // Stop the worker before the members go: the jobs of this class use latch, databases, the
-  // basemap state and the settings, and the base class is destroyed only after the members.
+  // Stop the database thread before the members its tasks read (the databases and
+  // the latch) are destroyed.
   Stop();
 
   WriteLock locker(latch);

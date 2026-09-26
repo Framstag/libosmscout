@@ -77,6 +77,13 @@ namespace osmscout {
 
     void Stop();
 
+    /**
+     * Stop the queue and drop the data that has not been popped yet, in one step, so that a consumer
+     * returning from its current item cannot pick up one of the dropped items. Meant for shutdown;
+     * Stop() alone keeps the data that is already queued.
+     */
+    void StopAndDiscard();
+
     bool Finished();
   };
 
@@ -188,6 +195,26 @@ namespace osmscout {
     lock.unlock();
 
     popCondition.notify_all();
+  }
+
+  /**
+   * Discard all data that has not been popped yet, so that work that did not
+   * start does not run. Meant for shutdown, next to Stop().
+   *
+   * @tparam R
+   */
+  template<class R>
+  void ProcessingQueue<R>::StopAndDiscard()
+  {
+    std::unique_lock lock(mutex);
+
+    running=false;
+    tasks.clear();
+
+    lock.unlock();
+
+    popCondition.notify_all();
+    pushCondition.notify_all();
   }
 
   /**

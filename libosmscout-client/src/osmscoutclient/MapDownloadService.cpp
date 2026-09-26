@@ -40,8 +40,8 @@ MapDownloadService::MapDownloadService(MapManagerRef mapManager,
 
 MapDownloadService::~MapDownloadService()
 {
-  // Stop the worker before the members go: its jobs use the provider and the download state of
-  // this object, and the AsyncWorker base class is destroyed only after the members.
+  // Stop the service before the members its tasks read (the jobs and the map
+  // manager) are destroyed.
   Stop();
 }
 
@@ -337,11 +337,11 @@ bool MapDownloadService::DownloadMapInternal(std::vector<DownloadJobState> &jobs
     return false;
   }
 
-  // Register the new map directory with MapManager
+  // Register the new map directory with MapManager. The registration triggers a
+  // rescan of the lookup directories; destroying the manager stops an in-flight
+  // rescan instead of racing with it, so no caller has to avoid the rescan.
   if (mapManager) {
     mapManager->AddLookupDirectory(targetDir);
-    // Don't trigger LookupDatabases here — it runs async on MapManager's thread
-    // and would race with test teardown. Callers should trigger it explicitly.
   }
 
   osmscout::log.Info() << "Successfully downloaded map " << entry.GetName()
