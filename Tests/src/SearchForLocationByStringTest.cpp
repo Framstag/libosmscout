@@ -423,19 +423,20 @@ TEST_CASE("Name matching with and without word matching")
    * (spec: search-name-matching).
    */
   const std::vector<std::string> queries{
-      "Dortmund",
-      "Brechten",
-      "Am Birkenbaum Dortmund",
-      "Am Birken Dortmund",
-      "Am Birkenbaum 1 Dortmund",
-      "Am Birkenbaum 1 44339 Dortmund",
-      "August-Warkner-Platz"};
+    "Dortmund",
+    "Brechten",
+    "Am Birkenbaum Dortmund",
+    "Am Birken Dortmund",
+    "Am Birkenbaum 1 Dortmund",
+    "Am Birkenbaum 1 44339 Dortmund",
+    "August-Warkner-Platz"};
 
   for (const auto& query : queries) {
     osmscout::LocationStringSearchParameter previousMatcher(query);
+
     previousMatcher.SetPartialMatch(true);
     previousMatcher.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateFactory>());
+      std::make_shared<osmscout::StringMatcherTransliterateFactory>());
 
     osmscout::LocationSearchResult previousResult;
 
@@ -443,9 +444,10 @@ TEST_CASE("Name matching with and without word matching")
                                                        previousResult));
 
     osmscout::LocationStringSearchParameter wordMatcher(query);
+
     wordMatcher.SetPartialMatch(true);
     wordMatcher.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
+      std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
 
     osmscout::LocationSearchResult wordResult;
 
@@ -460,7 +462,7 @@ TEST_CASE("Name matching with and without word matching")
     auto wordEntry=wordResult.results.begin();
 
     for (; previousEntry!=previousResult.results.end() && wordEntry!=wordResult.results.end();
-           ++previousEntry,++wordEntry) {
+         ++previousEntry,++wordEntry) {
       REQUIRE(EntrySignature(*previousEntry)==EntrySignature(*wordEntry));
       REQUIRE(previousEntry->adminRegionMatchQuality==wordEntry->adminRegionMatchQuality);
       REQUIRE(previousEntry->locationMatchQuality==wordEntry->locationMatchQuality);

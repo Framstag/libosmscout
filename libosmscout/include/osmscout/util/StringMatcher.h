@@ -111,8 +111,8 @@ namespace osmscout {
   class OSMSCOUT_API StringMatcherTransliterateToken : public StringMatcher
   {
   private:
-    StringMatcherRef          base;
-    std::vector<std::string>  patternWords;
+    StringMatcherRef         base;
+    std::vector<std::string> patternWords;
 
   public:
     explicit StringMatcherTransliterateToken(const std::string& pattern);

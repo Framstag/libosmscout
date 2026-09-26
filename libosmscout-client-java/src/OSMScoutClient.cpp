@@ -3994,7 +3994,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   // name whose words are joined by a separator is recognized as an exact match;
   // the matcher is additive, so no hit loses the quality it had before.
   osmscout::StringMatcherFactoryRef freeTextMatcherFactory = CreateNameMatcherFactory();
-  osmscout::StringMatcherRef freeTextMatcher = freeTextMatcherFactory->CreateMatcher(query);
+  osmscout::StringMatcherRef        freeTextMatcher = freeTextMatcherFactory->CreateMatcher(query);
 
   for (jsize i = 0; i < static_cast<jsize>(freeTextEntries.size()); i++) {
     const auto &entry = freeTextEntries[static_cast<size_t>(i)];
