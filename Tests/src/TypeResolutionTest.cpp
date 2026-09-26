@@ -18,6 +18,7 @@
 */
 
 #include <cstdlib>
+#include <fstream>
 #include <random>
 #include <set>
 #include <string>
@@ -734,6 +735,93 @@ TEST_CASE("Index is built from real map.ost", "[TypeResolution]")
     CheckNodeEquivalence(*config,tagMap);
     CheckWayAreaEquivalence(*config,tagMap);
     CheckRelationEquivalence(*config,tagMap);
+  }
+}
+
+TEST_CASE("Parked type definitions stay out of the shipped type config", "[TypeResolution]")
+{
+  const char* topDir=std::getenv("TESTS_TOP_DIR");
+
+  if (!topDir || !*topDir) {
+    SKIP("TESTS_TOP_DIR not set, cannot locate the type definition files");
+  }
+
+  // A parked definition is a type definition commented out below a
+  // PARKED-NEW-TYPE marker line. The marker is the contract: what is marked is
+  // retained in the repository but is not part of the shipped type config.
+  std::vector<std::string> parked;
+
+  for (const auto& fileName : {"map.ost","motorways.ost"}) {
+    std::string   ostFile=std::string(topDir)+"/../stylesheets/"+fileName;
+    std::ifstream file(ostFile);
+
+    if (!file.is_open()) {
+      FAIL("Cannot read OST file " << ostFile);
+    }
+
+    bool        expectDefinition=false;
+    std::string line;
+
+    while (std::getline(file,line)) {
+      if (line.find("// PARKED-NEW-TYPE")!=std::string::npos) {
+        expectDefinition=true;
+        continue;
+      }
+
+      if (!expectDefinition) {
+        continue;
+      }
+
+      expectDefinition=false;
+
+      const std::string prefix="// TYPE ";
+      size_t            pos=line.find(prefix);
+
+      if (pos==std::string::npos) {
+        FAIL("A PARKED-NEW-TYPE marker in " << ostFile
+                                            << " is not followed by a commented type definition: '" << line << "'");
+      }
+
+      parked.push_back(line.substr(pos+prefix.size()));
+    }
+  }
+
+  REQUIRE(!parked.empty());
+
+  TypeConfigRef config=std::make_shared<TypeConfig>();
+
+  if (!config->LoadFromOSTFile(std::string(topDir)+"/../stylesheets/map.ost")) {
+    FAIL("Cannot load map.ost");
+  }
+
+  // Nothing marked may be part of the shipped type config
+  for (const auto& name : parked) {
+    INFO("parked type: " << name);
+
+    REQUIRE(config->GetTypeInfo(name)==nullptr);
+  }
+
+  // Released types stay active, including the renamed worship types
+  for (const auto& name : {"highway_motorway",
+                           "amenity_restaurant",
+                           "shop_supermarket",
+                           "leisure_park",
+                           "historic_castle",
+                           "religion_christian",
+                           "religion_temple_building",
+                           "religion_building"}) {
+    INFO("released type: " << name);
+
+    REQUIRE(config->GetTypeInfo(name)!=nullptr);
+  }
+
+  // The renamed worship types answer to their new names only
+  for (const auto& name : {"christian_worship",
+                           "temple_building",
+                           "worship_building"}) {
+    INFO("former type name: " << name);
+
+    REQUIRE(config->GetTypeInfo(name)==nullptr);
   }
 }
 
