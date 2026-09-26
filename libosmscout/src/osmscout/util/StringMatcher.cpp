@@ -99,6 +99,7 @@ namespace osmscout {
   }
 
   namespace {
+
     /**
      * Appends the words of [text] to [words], separated by whitespace, comma,
      * hyphen, slash, backslash and the en/em dash. Repeated, leading and trailing
@@ -116,9 +117,9 @@ namespace osmscout {
       size_t      pos=0;
 
       while (pos<text.length()) {
-        auto          byte=static_cast<unsigned char>(text[pos]);
-        size_t        width=1;
-        bool          separator=false;
+        auto   byte=static_cast<unsigned char>(text[pos]);
+        size_t width=1;
+        bool   separator=false;
 
         if ((byte&0xe0)==0xc0) {
           width=2;
@@ -132,10 +133,10 @@ namespace osmscout {
 
         if (width==1) {
           separator=byte<=' ' ||
-                    byte==',' ||
-                    byte=='-' ||
-                    byte=='/' ||
-                    byte=='\\';
+                     byte==',' ||
+                     byte=='-' ||
+                     byte=='/' ||
+                     byte=='\\';
         }
         else if (width==3 && byte==0xe2 && pos+2<text.length() &&
                  static_cast<unsigned char>(text[pos+1])==0x80 &&
@@ -165,7 +166,7 @@ namespace osmscout {
   }
 
   StringMatcherTransliterateToken::StringMatcherTransliterateToken(const std::string& patternArg)
-    : base(StringMatcherTransliterateFactory().CreateMatcher(patternArg))
+  : base(StringMatcherTransliterateFactory().CreateMatcher(patternArg))
   {
     SplitIntoWords(UTF8StringToUpper(UTF8Transliterate(patternArg)),
                    patternWords);

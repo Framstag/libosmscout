@@ -320,7 +320,7 @@ TEST_CASE("Form location search for city, location and address")
     parameter.SetAdminRegionSearchString("Dortmund");
     parameter.SetLocationSearchString("August Warkner Platz");
     parameter.SetStringMatcherFactory(
-        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
+      std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
 
     bool success=locationService->SearchForLocationByForm(parameter,
                                                           result);
