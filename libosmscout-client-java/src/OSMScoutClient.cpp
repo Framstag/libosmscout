@@ -3074,8 +3074,6 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
   // Parent chain (includes the region itself); no parent -> no expansion.
   std::map<osmscout::FileOffset, osmscout::AdminRegionRef> chain;
   if (!locationService->ResolveAdminRegionHierachie(region, chain)) {
-    osmscout::log.Info() << "ResolveSearchScope: parent chain resolution failed for '"
-                         << region->name << "'";
     return;
   }
 
@@ -3097,9 +3095,6 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
     }
     const osmscout::AdminRegionRef &parent = parentIt->second;
     const uint8_t parentLevel = GetRegionLevel(db, parent);
-    osmscout::log.Info() << "ResolveSearchScope: '" << current->name << "' -> parent '"
-                         << parent->name << "' (level " << static_cast<int>(parentLevel)
-                         << ", cap " << static_cast<int>(kMaxSearchRegionLevel) << ")";
     if (!naviveylin::ShouldExpandScope(parentLevel, kMaxSearchRegionLevel)) {
       break; // parent coarser than the cap: stop here
     }
@@ -3820,17 +3815,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         std::vector<osmscout::AdminRegionRef> scope;
         if (effectiveRegion && db == adminRegionDb) {
           ResolveSearchScope(db, effectiveRegion, scope);
-        } else if (effectiveRegion && adminRegionDb) {
-          scope.push_back(nullptr); // foreign region: unconstrained here
-        } else if (effectiveRegion) {
+        } else if (effectiveRegion && !adminRegionDb) {
           scope.push_back(effectiveRegion);
         } else {
-          scope.push_back(nullptr); // unconstrained search
+          // Foreign region (belongs to another database) or no region at all:
+          // search unconstrained here.
+          scope.push_back(nullptr);
         }
-        osmscout::log.Info() << "searchLocations: scope for db has " << scope.size()
-                             << " region(s), first='"
-                             << (scope.empty() || !scope.front() ? "<unconstrained>" : scope.front()->name)
-                             << "'";
 
         for (const auto &scopeRegion : scope) {
           if (breaker && breaker->IsAborted()) {
@@ -4084,8 +4075,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
-      osmscout::log.Info() << "resolveAdminRegion(" << lat << ", " << lon
-                           << "): " << databases.size() << " database(s)";
       for (const auto &db : databases) {
         osmscout::DatabaseRef database = db->GetDatabase();
         if (!database) {
@@ -4095,14 +4084,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
         // Skip databases whose bounding box does not contain the coordinate
         osmscout::GeoBox dbBox = db->GetDBGeoBox();
         if (!dbBox.Includes(osmscout::GeoCoord(lat, lon))) {
-          osmscout::log.Info() << "resolveAdminRegion: db bbox " << dbBox.GetDisplayText()
-                               << " does not contain coordinate";
           continue;
         }
 
         osmscout::LocationDescriptionServiceRef descriptionService = db->GetLocationDescriptionService();
         if (!descriptionService) {
-          osmscout::log.Info() << "resolveAdminRegion: no LocationDescriptionService";
           continue;
         }
 
@@ -4110,11 +4096,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
         // containing the coordinate (country → state → … → city).
         std::list<osmscout::LocationDescriptionService::ReverseLookupResult> lookupResult;
         if (!descriptionService->ReverseLookupRegion(osmscout::GeoCoord(lat, lon), lookupResult)) {
-          osmscout::log.Info() << "resolveAdminRegion: ReverseLookupRegion failed";
           continue;
         }
-        osmscout::log.Info() << "resolveAdminRegion: ReverseLookupRegion returned "
-                             << lookupResult.size() << " region(s)";
 
         // Pick the deepest region in the chain (longest parent hierarchy).
         osmscout::LocationServiceRef locationService = db->GetLocationService();
@@ -4138,8 +4121,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
         }
 
         if (best) {
-          osmscout::log.Info() << "resolveAdminRegion: picked region '" << best->name
-                               << "' (depth " << bestDepth << ")";
           resolvedRegion = best;
           resolvedDb = db;
           break;
@@ -4149,7 +4130,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_resolveAdminRegion(JNIEnv *e
   );
 
   if (!resolvedRegion) {
-    osmscout::log.Info() << "resolveAdminRegion: no region found, returning 0";
     return 0;
   }
 
@@ -4217,12 +4197,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionScopeName(JNIE
   }
 
   if (!region) {
-    osmscout::log.Info() << "getAdminRegionScopeName: unknown handle " << handle;
     return nullptr;
   }
 
-  // The scope region: the parent when sibling expansion applies (mirrors the
-  // scope used by searchLocations), else the region itself.
+  // The scope region: the highest fine ancestor when the scope expands
+  // (mirrors the scope searchLocations uses), else the region itself.
   std::vector<osmscout::AdminRegionRef> scope;
   if (db) {
     ResolveSearchScope(db, region, scope);
@@ -4230,16 +4209,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionScopeName(JNIE
     scope.push_back(region);
   }
   if (scope.empty() || !scope.front() || scope.front()->name.empty()) {
-    osmscout::log.Info() << "getAdminRegionScopeName: no scope name for handle " << handle
-                         << " (region '" << (region ? region->name : "?") << "')";
     return nullptr;
   }
-  osmscout::log.Info() << "getAdminRegionScopeName: handle " << handle << " -> '"
-                       << scope.front()->name << "'";
   return env->NewStringUTF(scope.front()->name.c_str());
 }
-
-// --------------------------------------------------------------------------
 // --------------------------------------------------------------------------
 // OSMScoutClient::cancelSearch()
 // --------------------------------------------------------------------------
@@ -7768,8 +7741,7 @@ namespace {
 
   // Fill a PoiEntry from a node/way/area object. The label falls back from
   // the name feature to the operator and ref features (same as POILookupModule).
-  // operatorName and brand are filled independently so the UI can show them
-  // alongside the label.
+  // The operator and the brand are filled independently of the label.
   template<class T>
   bool BuildPoiEntry(const T& obj, const osmscout::GeoCoord& center, PoiEntry& entry)
   {
