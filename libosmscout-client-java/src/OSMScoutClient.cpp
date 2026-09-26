@@ -6667,7 +6667,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_cancelRoute(JNIEnv *env, job
 // Favorite Location JNI methods
 // --------------------------------------------------------------------------
 
-static jobject toJavaFavLocation(JNIEnv *env, const osmscout::FavLocation &fav)
+namespace {
+
+jobject toJavaFavLocation(JNIEnv *env, const osmscout::FavLocation &fav)
 {
   jclass cls = env->FindClass("com/framstag/libosmscout/client/FavoriteLocation");
   jmethodID ctor = env->GetMethodID(cls, "<init>", "()V");
@@ -6698,7 +6700,7 @@ static jobject toJavaFavLocation(JNIEnv *env, const osmscout::FavLocation &fav)
   return obj;
 }
 
-static jobject toJavaFavGroup(JNIEnv *env, const osmscout::FavLocationGroup &group)
+jobject toJavaFavGroup(JNIEnv *env, const osmscout::FavLocationGroup &group)
 {
   jclass cls = env->FindClass("com/framstag/libosmscout/client/FavoriteLocationGroup");
   jmethodID ctor = env->GetMethodID(cls, "<init>", "()V");
@@ -6740,6 +6742,26 @@ static jobject toJavaFavGroup(JNIEnv *env, const osmscout::FavLocationGroup &gro
 
   return obj;
 }
+
+jobject toJavaStarredEntry(JNIEnv *env, const osmscout::FavLocationStarredEntry &entry)
+{
+  jclass cls = env->FindClass("com/framstag/libosmscout/client/StarredFavoriteLocation");
+  jmethodID ctor = env->GetMethodID(cls, "<init>", "()V");
+  jobject obj = env->NewObject(cls, ctor);
+
+  jfieldID groupNameField = env->GetFieldID(cls, "groupName", "Ljava/lang/String;");
+  jfieldID favoriteField = env->GetFieldID(cls, "favorite", "Lcom/framstag/libosmscout/client/FavoriteLocation;");
+
+  env->SetObjectField(obj, groupNameField, env->NewStringUTF(entry.groupName.c_str()));
+
+  jobject favObj = toJavaFavLocation(env, entry.favorite);
+  env->SetObjectField(obj, favoriteField, favObj);
+  env->DeleteLocalRef(favObj);
+
+  return obj;
+}
+
+} // namespace
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_loadFavoriteLocations(JNIEnv *env, jobject self, jstring filePath)
@@ -7069,6 +7091,129 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavorite(JNIEnv *env, jo
   env->ReleaseStringUTFChars(favName, favCStr);
 
   return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveGroup(JNIEnv *env, jobject self,
+                                                               jstring groupName, jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the order
+  // are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favoriteStore.MoveGroup(groupCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavoriteToGroup(JNIEnv *env, jobject self,
+                                                                        jstring groupName,
+                                                                        jstring favName,
+                                                                        jstring targetGroupName,
+                                                                        jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+  const char *targetGroupCStr = env->GetStringUTFChars(targetGroupName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the
+  // destination group are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favoriteStore.MoveFavoriteToGroup(groupCStr, favCStr, targetGroupCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(targetGroupName, targetGroupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveStarredFavorite(JNIEnv *env, jobject self,
+                                                                         jstring groupName,
+                                                                         jstring favName,
+                                                                         jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the
+  // starred order are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favoriteStore.MoveStarred(groupCStr, favCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getStarredFavorites(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+
+  // Without a loaded store the starred order is empty, and an unsupported file
+  // reports no groups, so the order is empty for it as well.
+  std::vector<osmscout::FavLocationStarredEntry> starred;
+  if (data != nullptr) {
+    starred = data->favoriteStore.GetStarred();
+  }
+
+  jclass entryCls = env->FindClass("com/framstag/libosmscout/client/StarredFavoriteLocation");
+  jobjectArray result = env->NewObjectArray((jsize)starred.size(), entryCls, nullptr);
+
+  for (size_t i = 0; i < starred.size(); i++) {
+    jobject entryObj = toJavaStarredEntry(env, starred[i]);
+    env->SetObjectArrayElement(result, (jsize)i, entryObj);
+    env->DeleteLocalRef(entryObj);
+  }
+
+  return result;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getFavoriteFileFormatVersion(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return static_cast<jint>(osmscout::FavoriteLocationService::UnknownFileFormatVersion);
+  }
+
+  return static_cast<jint>(data->favoriteStore.GetFileFormatVersion());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_isFavoriteFileFormatSupported(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  return data->favoriteStore.IsFileFormatSupported() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

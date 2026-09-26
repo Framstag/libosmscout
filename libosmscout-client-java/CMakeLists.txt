@@ -36,6 +36,7 @@ set(JAVA_SOURCES
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteEntry.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteInstruction.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RoutingProfile.java
+  ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/StarredFavoriteLocation.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/TrackPoint.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/TurnType.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/Vehicle.java
