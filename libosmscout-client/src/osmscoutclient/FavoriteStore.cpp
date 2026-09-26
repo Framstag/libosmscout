@@ -19,6 +19,14 @@
 
 #include <osmscoutclient/FavoriteStore.h>
 
+#include <osmscoutclient/FavoriteLocationService.h>
+
+#include <cstddef>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <vector>
+
 namespace osmscout {
 
 FavoriteStore::~FavoriteStore()
@@ -90,6 +98,35 @@ std::vector<FavLocationGroup> FavoriteStore::GetGroups() const
   return service_->GetGroups();
 }
 
+std::vector<FavLocationStarredEntry> FavoriteStore::GetStarred() const
+{
+  std::scoped_lock lock(mutex_);
+
+  if (service_ == nullptr) {
+    return {};
+  }
+
+  return service_->GetStarred();
+}
+
+int FavoriteStore::GetFileFormatVersion() const
+{
+  std::scoped_lock lock(mutex_);
+
+  if (service_ == nullptr) {
+    return FavoriteLocationService::UnknownFileFormatVersion;
+  }
+
+  return service_->GetFileFormatVersion();
+}
+
+bool FavoriteStore::IsFileFormatSupported() const
+{
+  std::scoped_lock lock(mutex_);
+
+  return service_ != nullptr && service_->IsFileFormatSupported();
+}
+
 bool FavoriteStore::AddGroup(const std::string &name)
 {
   std::scoped_lock lock(mutex_);
@@ -110,6 +147,14 @@ bool FavoriteStore::RenameGroup(const std::string &oldName,
   std::scoped_lock lock(mutex_);
 
   return service_ != nullptr && service_->RenameGroup(oldName, newName);
+}
+
+bool FavoriteStore::MoveGroup(const std::string &name,
+                              size_t newIndex)
+{
+  std::scoped_lock lock(mutex_);
+
+  return service_ != nullptr && service_->MoveGroup(name, newIndex);
 }
 
 bool FavoriteStore::AddFavorite(const std::string &groupName,
@@ -144,6 +189,25 @@ bool FavoriteStore::MoveFavorite(const std::string &groupName,
   std::scoped_lock lock(mutex_);
 
   return service_ != nullptr && service_->MoveFavorite(groupName, favName, newIndex);
+}
+
+bool FavoriteStore::MoveFavoriteToGroup(const std::string &srcGroup,
+                                        const std::string &favName,
+                                        const std::string &dstGroup,
+                                        size_t newIndex)
+{
+  std::scoped_lock lock(mutex_);
+
+  return service_ != nullptr && service_->MoveFavoriteToGroup(srcGroup, favName, dstGroup, newIndex);
+}
+
+bool FavoriteStore::MoveStarred(const std::string &groupName,
+                                const std::string &favName,
+                                size_t newIndex)
+{
+  std::scoped_lock lock(mutex_);
+
+  return service_ != nullptr && service_->MoveStarred(groupName, favName, newIndex);
 }
 
 bool FavoriteStore::SetStarred(const std::string &groupName,

@@ -59,18 +59,58 @@ struct OSMSCOUT_CLIENT_API FavLocationGroup
 /**
  * \ingroup ClientAPI
  *
+ * A starred favorite together with the group that holds it. The starred order
+ * spans groups, so a caller presenting it needs to know for each entry which
+ * group the favorite lives in (for example to select that group, or to show the
+ * owning group next to the entry).
+ */
+struct OSMSCOUT_CLIENT_API FavLocationStarredEntry
+{
+  std::string groupName;
+  FavLocation favorite;
+};
+
+/**
+ * \ingroup ClientAPI
+ *
  * Service for managing favorite locations persisted to a JSON file.
  *
- * Provides CRUD operations on groups and favorites within groups.
+ * Provides CRUD operations on groups and favorites within groups. The groups
+ * have a user-defined order: it is the order a reader observes, the order a
+ * positional operation changes and the order that is saved.
+ *
  * Thread-safe: read operations use shared locks, write operations
  * use exclusive locks.
  *
  * The JSON file is created on first construction if it does not exist.
  * Call Save() to persist in-memory state to disk.
+ *
+ * The layout of that file, every version it can carry and the compatibility
+ * policy are documented in `Documentation/FavoritesFileFormat.md`.
  */
 class OSMSCOUT_CLIENT_API FavoriteLocationService
 {
 public:
+  /**
+   * The format version this client writes, and the highest version it can read.
+   */
+  static constexpr int CurrentFileFormatVersion = 1;
+
+  /**
+   * The format version of a favorites file written before the file carried a
+   * version: the groups are keyed by name and there is no stored group order.
+   * Such a file is still read, and is written back in the current form on the
+   * next save. Support for reading it is a compatibility path with a planned
+   * end (see the file format document).
+   */
+  static constexpr int LegacyFileFormatVersion = 0;
+
+  /**
+   * The version of the format of the file this service is opened on, or -1 when
+   * no version is known because nothing could be read.
+   */
+  static constexpr int UnknownFileFormatVersion = -1;
+
   /**
    * Construct the service and load data from the given file path.
    * If the file does not exist, an empty store is initialised.
@@ -82,20 +122,48 @@ public:
   /**
    * Load/reload data from the JSON file.
    *
-   * @return true on success, false on parse error
+   * A file without a version is read as the pre-version form. A file whose
+   * version is newer than CurrentFileFormatVersion is not read as groups: the
+   * state reports that version and that it is unsupported, and Save() refuses to
+   * overwrite that file. Use GetFileFormatVersion() and IsFileFormatSupported()
+   * to tell an unsupported file apart from an empty one.
+   *
+   * @return true on success, false on parse error or unsupported version
    */
   bool Load();
 
   /**
    * Save current in-memory state to the JSON file.
-   * Writes to a temp file first, then atomically renames.
+   * Writes to a temp file first, then atomically renames. The written document
+   * carries CurrentFileFormatVersion and the groups in their stored order.
    *
-   * @return true on success, false on write error
+   * Refuses to write when the file this service was opened on carries a version
+   * newer than CurrentFileFormatVersion, so content this client does not
+   * understand is never overwritten.
+   *
+   * @return true on success, false on write error or unsupported file version
    */
   bool Save();
 
   /**
-   * Return all groups.
+   * The format version of the file this service is opened on, or
+   * UnknownFileFormatVersion when no version is known.
+   */
+  int GetFileFormatVersion() const;
+
+  /**
+   * Whether the file this service is opened on carries a version this client can
+   * read and write. False for an unsupported (newer) version and when no version
+   * is known.
+   */
+  bool IsFileFormatSupported() const;
+
+  /**
+   * Return all groups, in the user-defined group order.
+   *
+   * The order is the stored order: it is what this reader reports, what
+   * MoveGroup() changes and what a save persists. A group that is added is
+   * appended at the end.
    */
   std::vector<FavLocationGroup> GetGroups() const;
 
@@ -124,6 +192,26 @@ public:
    */
   bool RenameGroup(const std::string &oldName,
                    const std::string &newName);
+
+  /**
+   * Move a group to another position in the group order.
+   *
+   * The target index is 0-based and refers to the group order after the group
+   * has been removed from its current position. An index outside the order
+   * bounds is clamped to the first/last position, so moving a group to the
+   * front or to the end does not depend on the caller knowing how many groups
+   * there are. Moving a group to the position it already occupies succeeds
+   * without changing anything.
+   *
+   * Only the position changes: the group keeps its name, its attributes and its
+   * favorites, and the relative order of the other groups is unchanged.
+   *
+   * @param name      group name
+   * @param newIndex  0-based target position in the group order
+   * @return true if moved (or already at that position), false if the group is not found
+   */
+  bool MoveGroup(const std::string &name,
+                 size_t newIndex);
 
   /**
    * Return all favorites in a group.
@@ -192,6 +280,67 @@ public:
    * @param starred    true to star, false to unstar
    * @return true if updated, false if group or fav not found
    */
+  /**
+   * Move a favorite from one group into another group, at a target position.
+   *
+   * The target index is 0-based and refers to the destination group's favorite
+   * list after the favorite has been taken out of its own group. An index
+   * outside that list bounds is clamped to the first/last position. Moving a
+   * favorite into the group it already belongs to succeeds and leaves both
+   * positions unchanged.
+   *
+   * The favorite keeps its data: name, coordinates and all attributes, including
+   * a star and its place in the starred order. A favorite name is unique inside a
+   * group, so when the destination group already holds a favorite of that name
+   * the move fails and both groups are left unchanged: the destination favorite
+   * is not replaced, removed or renamed.
+   *
+   * @param srcGroup      group the favorite currently belongs to
+   * @param favName       favorite name to move
+   * @param dstGroup      group to move the favorite into
+   * @param newIndex      0-based target position in the destination group
+   * @return true if moved (or already in that group), false if either group or the favorite is not
+   *         found, or if the destination group already holds a favorite of that name
+   */
+  bool MoveFavoriteToGroup(const std::string &srcGroup,
+                           const std::string &favName,
+                           const std::string &dstGroup,
+                           size_t newIndex);
+
+  /**
+   * Return the starred favorites in their user-defined order.
+   *
+   * The order spans groups: it is not derived from the group order, from the
+   * position of a favorite inside its group, or from any name. Only starred
+   * favorites appear, and each entry names the group that holds it.
+   *
+   * The values that hold the order are owned by the service and are not part of
+   * this contract; a caller arranges stars with MoveStarred().
+   */
+  std::vector<FavLocationStarredEntry> GetStarred() const;
+
+  /**
+   * Move a starred favorite to another position in the starred order.
+   *
+   * The target index is 0-based and refers to the starred order after the
+   * favorite has been removed from its current position. An index outside the
+   * order bounds is clamped to the first/last position. Moving a starred
+   * favorite to the position it already occupies succeeds without changing
+   * anything.
+   *
+   * Only the position in the starred order changes: the favorite's data, its
+   * group and its position inside that group are untouched.
+   *
+   * @param groupName  group the favorite belongs to
+   * @param favName    favorite name
+   * @param newIndex   0-based target position in the starred order
+   * @return true if moved (or already at that position), false if the group or the favorite is not
+   *         found, or if the favorite is not starred
+   */
+  bool MoveStarred(const std::string &groupName,
+                   const std::string &favName,
+                   size_t newIndex);
+
   bool SetStarred(const std::string &groupName,
                   const std::string &favName,
                   bool starred);
@@ -233,9 +382,36 @@ public:
   void ClearAll();
 
 private:
+  /**
+   * Find a group by name. A scan over the ordered group collection, because the
+   * collection's sequence is the user-defined group order and a map keyed by
+   * name cannot express that order. Group counts are small, so the scan costs
+   * nothing next to keeping one order instead of two structures.
+   */
+  FavLocationGroup *FindGroup(const std::string &name);
+
+  const FavLocationGroup *FindGroup(const std::string &name) const;
+
   mutable std::shared_mutex mutex_;
   std::string filePath_;
-  std::map<std::string, FavLocationGroup> groups_;
+
+  /**
+   * The format version of the file this service is opened on, and whether that
+   * version may be read and written. Both are updated by Load() and Save().
+   *
+   * The supported flag starts as true because nothing has been read yet that
+   * could refuse a write: a file that does not exist is created by the
+   * constructor through Save().
+   */
+  int fileVersion_ = UnknownFileFormatVersion;
+  bool fileVersionSupported_ = true;
+
+  /**
+   * The groups, in the user-defined order. The sequence is the order: adding a
+   * group appends at the end, renaming a group keeps its position, and the
+   * positional operation moves an entry within this sequence.
+   */
+  std::vector<FavLocationGroup> groups_;
 };
 
 }

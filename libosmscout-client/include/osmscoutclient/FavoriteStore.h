@@ -80,7 +80,10 @@ public:
    * Replace the store with the given groups and persist it to the given file.
    *
    * The caller's snapshot is applied as one atomic replacement: no reader can
-   * observe the store while it is being rebuilt. Group attributes are applied
+   * observe the store while it is being rebuilt. The group order and the starred
+   * order of the snapshot are kept: the groups are applied in the order given,
+   * and the starred favorites carry their place with them. Group attributes are
+   * applied
    * through the service (currently the "color" attribute); favorite attributes
    * are stored with the favorite.
    *
@@ -89,8 +92,10 @@ public:
    * a caller that wants to keep it has to supply it again.
    *
    * @param filePath  path to the JSON file for persistence
-   * @param groups    the complete new content of the store
-   * @return true on success, false on write error
+   * @param groups    the complete new content of the store, in the order it should have
+   * @return true on success, false on write error or when the file carries a version this client
+   *         does not understand (then the supplied content is kept in memory and the file is left
+   *         unchanged)
    */
   bool ReplaceAndSave(const std::string &filePath,
                       const std::vector<FavLocationGroup> &groups);
@@ -107,9 +112,30 @@ public:
   void Shutdown();
 
   /**
-   * Return all groups. Empty when no store is loaded.
+   * Return all groups, in the user-defined group order. Empty when no store is
+   * loaded.
    */
   std::vector<FavLocationGroup> GetGroups() const;
+
+  /**
+   * Return the starred favorites in their user-defined order, each entry naming
+   * the group that holds it. Empty when no store is loaded.
+   */
+  std::vector<FavLocationStarredEntry> GetStarred() const;
+
+  /**
+   * The format version of the file the loaded store is backed by, or
+   * FavoriteLocationService::UnknownFileFormatVersion when no store is loaded.
+   */
+  int GetFileFormatVersion() const;
+
+  /**
+   * Whether the loaded store can be read and written. False when no store is
+   * loaded, and false when the file carries a version this client does not
+   * understand: in that case the store reports no groups and refuses to persist
+   * over the file, so content written by a newer client survives.
+   */
+  bool IsFileFormatSupported() const;
 
   bool AddGroup(const std::string &name);
 
@@ -117,6 +143,9 @@ public:
 
   bool RenameGroup(const std::string &oldName,
                    const std::string &newName);
+
+  bool MoveGroup(const std::string &name,
+                 size_t newIndex);
 
   bool AddFavorite(const std::string &groupName,
                    const FavLocation &fav);
@@ -131,6 +160,15 @@ public:
   bool MoveFavorite(const std::string &groupName,
                     const std::string &favName,
                     size_t newIndex);
+
+  bool MoveFavoriteToGroup(const std::string &srcGroup,
+                           const std::string &favName,
+                           const std::string &dstGroup,
+                           size_t newIndex);
+
+  bool MoveStarred(const std::string &groupName,
+                   const std::string &favName,
+                   size_t newIndex);
 
   bool SetStarred(const std::string &groupName,
                   const std::string &favName,
