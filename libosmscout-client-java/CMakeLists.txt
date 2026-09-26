@@ -45,27 +45,41 @@ set(JAVA_SOURCES
 # --- Java compilation + JNI header generation ---
 set(JAVA_CLASSES_DIR ${CMAKE_CURRENT_BINARY_DIR}/java/classes)
 set(JNI_HEADERS_DIR ${CMAKE_CURRENT_BINARY_DIR}/java/headers)
+set(JNI_HEADER_FILE ${JNI_HEADERS_DIR}/com_framstag_libosmscout_client_OSMScoutClient.h)
+
+# The class files are a side effect of the javac run; this stamp records that the run
+# happened, so the jar rule below has a file-level edge to hang off.
+set(JAVA_CLASSES_STAMP ${JAVA_CLASSES_DIR}/.javac-stamp)
 
 add_custom_command(
-  OUTPUT ${JNI_HEADERS_DIR}/com_framstag_libosmscout_client_OSMScoutClient.h
+  OUTPUT ${JNI_HEADER_FILE}
+         ${JAVA_CLASSES_STAMP}
+  # javac only adds class files, so a class whose source was removed would stay in the
+  # jar forever; start from an empty directory so the jar mirrors the sources.
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${JAVA_CLASSES_DIR}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${JAVA_CLASSES_DIR}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${JNI_HEADERS_DIR}
   COMMAND ${Java_JAVAC_EXECUTABLE} -h ${JNI_HEADERS_DIR} -d ${JAVA_CLASSES_DIR} ${JAVA_SOURCES}
+  COMMAND ${CMAKE_COMMAND} -E touch ${JAVA_CLASSES_STAMP}
   DEPENDS ${JAVA_SOURCES}
   COMMENT "Compiling Java sources and generating JNI headers"
 )
 
 add_custom_target(java_compile
-  DEPENDS ${JNI_HEADERS_DIR}/com_framstag_libosmscout_client_OSMScoutClient.h
+  DEPENDS ${JNI_HEADER_FILE}
 )
 
 # --- Jar packaging ---
 set(JAR_FILE ${CMAKE_CURRENT_BINARY_DIR}/libosmscoutclientjava.jar)
 
+# Depends on the files it packages, not on a phony target: a phony dependency carries no
+# timestamp, so the jar would keep its old contents after a Java source changed.
 add_custom_command(
   OUTPUT ${JAR_FILE}
   COMMAND ${Java_JAR_EXECUTABLE} cf ${JAR_FILE} -C ${JAVA_CLASSES_DIR} .
-  DEPENDS java_compile
+  DEPENDS ${JAVA_CLASSES_STAMP}
+          ${JNI_HEADER_FILE}
+          ${JAVA_SOURCES}
   COMMENT "Packaging Java classes into jar"
 )
 

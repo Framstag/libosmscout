@@ -175,6 +175,13 @@ else()
 	message("Skip WaterIndex test, libosmscout-import is missing.")
 endif()
 
+#---- Java client JNI signatures
+# Host-side comparison of the Java native declarations with the JNI functions: a parameter read
+# with the wrong type yields garbage instead of an error (see the magnification incident).
+if(TARGET osmscout_client_java)
+	add_test(NAME JniSignatureParityTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-jni-signatures.sh)
+endif()
+
 #---- WorkQueue
 osmscout_test_project(NAME WorkQueueTest SOURCES src/WorkQueueTest.cpp)
 

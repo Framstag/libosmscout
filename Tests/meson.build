@@ -2,6 +2,11 @@ testIncDir = include_directories('include')
 
 testInstallDir = 'share/osmscout/tests'
 
+# Host-side comparison of the Java native declarations of the client with the JNI functions that
+# implement them: a parameter read with the wrong type yields garbage instead of an error (see the
+# magnification incident). Registered for both build systems, see Tests/CMakeLists.txt.
+test('Check JNI signature parity', files('../scripts/check-jni-signatures.sh'))
+
 FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
              'src/FavoriteLocationServiceTest.cpp',
              include_directories: [testIncDir, osmscoutclientIncDir],

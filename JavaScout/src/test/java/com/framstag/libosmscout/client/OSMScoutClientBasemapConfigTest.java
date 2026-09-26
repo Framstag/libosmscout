@@ -150,10 +150,10 @@ public class OSMScoutClientBasemapConfigTest {
     /** Render the fixture area, waiting briefly for the database to come up. */
     private static int[] renderFixture(OSMScoutClient subject) throws InterruptedException {
         long deadline = System.currentTimeMillis() + 20000;
-        int[] pixels = subject.render(64, 48, FIXTURE_LAT, FIXTURE_LON, 0.0, FIXTURE_MAG);
+        int[] pixels = subject.render(64, 48, FIXTURE_LAT, FIXTURE_LON, 0.0, Math.pow(2, FIXTURE_MAG));
         while (pixels == null && System.currentTimeMillis() < deadline) {
             Thread.sleep(50);
-            pixels = subject.render(64, 48, FIXTURE_LAT, FIXTURE_LON, 0.0, FIXTURE_MAG);
+            pixels = subject.render(64, 48, FIXTURE_LAT, FIXTURE_LON, 0.0, Math.pow(2, FIXTURE_MAG + 0.25));
         }
         return pixels;
     }
