@@ -1077,27 +1077,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::setMapDpi(double dpi)
-//
-// Overrides the physical DPI used for rendering. Each display (phone vs car
-// surface) has its own physical DPI; the client is built with the phone
-// metrics, so Android Auto must switch to the car surface DPI before its
-// first render (otherwise the map is scaled ~1.8x too zoomed on a 236-dpi
-// head unit). Mirrors Settings::SetMapDPI; the next render picks it up.
-// --------------------------------------------------------------------------
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobject self, jdouble dpi)
-{
-  ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->settings == nullptr || dpi <= 0.0) {
-    return;
-  }
-  osmscout::log.Debug() << "[JNI] setMapDpi(" << dpi << ")";
-  data->settings->SetMapDPI(dpi);
-}
-
-// --------------------------------------------------------------------------
 // OSMScoutClient::setNativeDataCacheSize(int cacheSize)
 //
 // Configures the capacity of libosmscout's per-database tile data caches
@@ -1198,6 +1177,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
                                                                              jdouble mag,
+                                                                             jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1286,7 +1266,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_importGpxTrack(JNIEnv *env,
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::render(int width, int height, double lat, double lon, double angle, double mag)
+// OSMScoutClient::render(int width, int height, double lat, double lon, double angle,
+//                        double mag, double dpi)
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -1294,10 +1275,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
                                                            jint width, jint height,
                                                            jdouble lat, jdouble lon,
                                                            jdouble angle,
-                                                           jdouble mag)
+                                                           jdouble mag,
+                                                           jdouble dpi)
 {
   return Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(
-      env, self, width, height, lat, lon, angle, mag, nullptr, nullptr, nullptr, nullptr,
+      env, self, width, height, lat, lon, angle, mag, dpi, nullptr, nullptr, nullptr, nullptr,
       std::numeric_limits<jdouble>::quiet_NaN(),
       std::numeric_limits<jdouble>::quiet_NaN(),
       nullptr, nullptr);
@@ -1305,7 +1287,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
-//                                         double angle, double mag, double[] routeLats, double[] routeLons,
+//                                         double angle, double mag, double dpi,
+//                                         double[] routeLats, double[] routeLons,
 //                                         double[] favoriteLats, double[] favoriteLons,
 //                                         double searchSelLat, double searchSelLon)
 // --------------------------------------------------------------------------
@@ -1316,6 +1299,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
                                                                              jdouble mag,
+                                                                             jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1345,7 +1329,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   // the tile/feature lookups derive their level internally as floor(log2(mag)).
   magnification.SetMagnification(std::max(1.0, mag));
 
-  double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
+  // The projection DPI is part of the render request: each surface passes the DPI
+  // of the display it draws on, so no frame depends on a value another surface
+  // configured. Each display has its own physical DPI — a head unit rendering at
+  // the phone's density is scaled ~1.8x too zoomed, and a phone rendering at the
+  // head unit's density is equally wrong.
+  if (!(dpi > 0.0)) {
+    osmscout::log.Warn() << "[JNI] render rejected: invalid dpi " << dpi;
+    return nullptr;
+  }
   // Verbose render logging disabled; re-enable only when debugging native renderer
   // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
   //                      << " height=" << height << " mag=" << mag;
