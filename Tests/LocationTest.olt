@@ -35,6 +35,12 @@ OLT
                 "amenity" = "library"
                 "name" = "Stadtteilbibliothek Eving"
               ]
+            LOCATION "Kurt-Schumacher-Straße"
+              ADDRESS "1"
+              [
+                "amenity" = "theatre"
+                "name" = "Test-Theater Eving"
+              ]
         }
       }
 

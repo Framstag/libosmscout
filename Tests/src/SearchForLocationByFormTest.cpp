@@ -1,3 +1,5 @@
+#include <memory>
+
 #include <catch2/catch_test_macros.hpp>
 
 #include <osmscout/location/LocationService.h>
@@ -303,5 +305,31 @@ TEST_CASE("Form location search for city, location and address")
     REQUIRE(success);
     REQUIRE_FALSE(result.limitReached);
     REQUIRE(result.results.empty());
+  }
+
+  /*
+   * The index joins the street's words with hyphens; the form search spells them
+   * apart, which the name matcher used by the search bridge resolves
+   * (fix-compound-name-matching).
+   */
+  SECTION("Search for hyphen-joined location in city: 'August Warkner Platz Dortmund' (match)")
+  {
+    osmscout::LocationFormSearchParameter parameter;
+    osmscout::LocationSearchResult        result;
+
+    parameter.SetAdminRegionSearchString("Dortmund");
+    parameter.SetLocationSearchString("August Warkner Platz");
+    parameter.SetStringMatcherFactory(
+        std::make_shared<osmscout::StringMatcherTransliterateTokenFactory>());
+
+    bool success=locationService->SearchForLocationByForm(parameter,
+                                                          result);
+
+    REQUIRE(success);
+    REQUIRE_FALSE(result.limitReached);
+    REQUIRE(result.results.size()==1);
+    REQUIRE(result.results.front().location!=nullptr);
+    REQUIRE(result.results.front().location->name=="August-Warkner-Platz");
+    REQUIRE(result.results.front().locationMatchQuality==osmscout::LocationSearchResult::match);
   }
 }
