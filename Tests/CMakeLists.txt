@@ -227,6 +227,9 @@ osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
 #---- StringMatcher
 osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
 
+#---- SearchScope
+osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
@@ -362,6 +365,13 @@ if(${OSMSCOUT_BUILD_MAP})
 
 else()
 	message("Skip PerformanceTest test, libosmscout-map is missing.")
+endif()
+
+#---- LabelLayouterTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+	osmscout_test_project(NAME LabelLayouterTest SOURCES src/LabelLayouterTest.cpp TARGET OSMScout::Map)
+else()
+	message("Skip LabelLayouterTest, libosmscout-map is missing.")
 endif()
 
 #---- LabelPathTest
