@@ -467,11 +467,11 @@ public class MapRenderer {
             try {
                 if (job.hasOverlays()) {
                     pixels = client.renderWithRouteAndPois(
-                        job.width(), job.height(), job.lat(), job.lon(), job.angle(), job.mag(),
+                        job.width(), job.height(), job.lat(), job.lon(), job.angle(), Math.pow(2, job.mag()),
                         job.routeLats(), job.routeLons(), job.favoriteLats(), job.favoriteLons(),
                         job.searchSelectedLat(), job.searchSelectedLon(), job.trackLats(), job.trackLons());
                 } else {
-                    pixels = client.render(job.width(), job.height(), job.lat(), job.lon(), job.angle(), job.mag());
+                    pixels = client.render(job.width(), job.height(), job.lat(), job.lon(), job.angle(), Math.pow(2, job.mag()));
                 }
                 break; // Success
             } catch (Exception e) {
