@@ -347,6 +347,16 @@ HighwayMilestoneFeatureTest = executable('HighwayMilestoneFeatureTest',
 
 test('Check HighwayMilestone feature parsing and labeling', HighwayMilestoneFeatureTest)
 
+LabelLayouterTest = executable('LabelLayouterTest',
+                               'src/LabelLayouterTest.cpp',
+                               include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                               dependencies: [mathDep, catch2MainDep],
+                               link_with: [osmscoutmap, osmscout],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check LabelLayouter code', LabelLayouterTest)
+
 LabelPathTest = executable('LabelPathTest',
                            'src/LabelPathTest.cpp',
                            include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
@@ -737,6 +747,15 @@ StringUtilsTest = executable('StringUtilsTest',
              install_dir: testInstallDir)
 
 test('Check string utils', StringUtilsTest)
+
+SearchScopeTest = executable('SearchScopeTest',
+             'src/SearchScopeTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check search scope', SearchScopeTest)
 
 StringMatcherTest = executable('StringMatcherTest',
              'src/StringMatcherTest.cpp',

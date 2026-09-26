@@ -1,7 +1,8 @@
-#include <iostream>
 #include <cmath>
 #include <cstddef>
+#include <iostream>
 #include <string>
+#include <vector>
 
 #include <osmscout/util/String.h>
 #include <osmscout/util/StringMatcher.h>
@@ -369,25 +370,41 @@ TEST_CASE("String replace")
 namespace {
   struct MatchExpectation
   {
-    const char* pattern;
-    const char* text;
-    /** Use the transliterating matcher instead of the plain case-insensitive one. */
-    bool transliterate;
+    const char*                 pattern;
+    const char*                 text;
+    bool                        transliterate;
     osmscout::StringMatcher::Result expected;
+
+    /**
+     * The row is constructed from its four values, so a row reads as one line
+     * per expectation and the table stays a plain list of expectations. The
+     * parameters are positional by design: a row is read as "pattern, text,
+     * factory, expected quality" in that order.
+     */
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters, readability-identifier-length) positional row fields
+    MatchExpectation(const char* pattern,
+                     const char* text,
+                     bool transliterate,
+                     osmscout::StringMatcher::Result expected)
+    : pattern(pattern),
+      text(text),
+      transliterate(transliterate),
+      expected(expected)
+    {
+      // no code
+    }
   };
 
   /**
    * Assert the match quality of every table entry, using the matcher the entry
    * asks for.
    */
-  void RequireMatchQuality(const MatchExpectation* cases,std::size_t count)
+  void RequireMatchQuality(const std::vector<MatchExpectation>& cases)
   {
     osmscout::StringMatcherTransliterateFactory transliterateFactory;
-    osmscout::StringMatcherCIFactory             caseInsensitiveFactory;
+    osmscout::StringMatcherCIFactory            caseInsensitiveFactory;
 
-    for (std::size_t i=0; i<count; i++) {
-      const auto& c=cases[i];
-
+    for (const auto& c : cases) {
       osmscout::StringMatcher::Result result=(c.transliterate
         ? transliterateFactory.CreateMatcher(c.pattern)->Match(c.text)
         : caseInsensitiveFactory.CreateMatcher(c.pattern)->Match(c.text));
@@ -399,7 +416,7 @@ namespace {
 
 TEST_CASE("String matcher: transliteration, diacritics and match quality")
 {
-  const MatchExpectation cases[]={
+  const std::vector<MatchExpectation> cases={
     // Sharp s: "ss" query against a sharp-s name (the address book spelling).
     {"Erbstollenstrasse","Erbstollenstraße",true,osmscout::StringMatcher::match},
     // sharp-s query against a sharp-s name.
@@ -433,5 +450,5 @@ TEST_CASE("String matcher: transliteration, diacritics and match quality")
     {"ERLENBRUCH","Erlenbruch",false,osmscout::StringMatcher::match}
   };
 
-  RequireMatchQuality(cases,sizeof(cases)/sizeof(cases[0]));
+  RequireMatchQuality(cases);
 }
