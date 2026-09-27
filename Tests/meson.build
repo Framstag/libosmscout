@@ -559,8 +559,15 @@ TileDataConversionPerformanceTest = executable('TileDataConversionPerformanceTes
              install: true,
              install_dir: testInstallDir)
 
-test('Check tile data conversion performance', TileDataConversionPerformanceTest,
-     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+# The comparison is not registered in a build instrumented for coverage. The instrumentation slows
+# the conversion under test - it lives in libosmscout-map - far more than the hash map baseline it is
+# compared with - that one lives in the standard library and is not instrumented - so the comparison
+# reports the instrumentation instead of the conversion (measured in the coverage build of the sonar
+# job: a share of 4.0 to 5.8 instead of the expected well below one).
+if not get_option('b_coverage')
+  test('Check tile data conversion performance', TileDataConversionPerformanceTest,
+       env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+endif
 
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [osmscoutIncDir, osmscoutmapIncDir]

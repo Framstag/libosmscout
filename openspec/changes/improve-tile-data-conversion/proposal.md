@@ -51,7 +51,8 @@ their requirements are unchanged.
   change replaces.
 - `Tests/src/TestAllocationCounter.cpp` (new) and `Tests/include/TestAllocationCounter.h` (new) - the
   counting allocator the allocation assertions use, shared by the tests, disabled when the binary is
-  built with AddressSanitizer.
+  built with a sanitizer, whose runtime already replaces the global `operator new` and `delete`
+  (AddressSanitizer and MemorySanitizer).
 - `Tests/CMakeLists.txt`, `Tests/meson.build` - both new test targets, in both build systems.
 - `Tests/src/PerformanceTest.cpp` - the existing end-to-end driver used for the before/after number;
   unchanged in the change itself.

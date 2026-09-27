@@ -30,9 +30,10 @@ namespace osmscout {
      *
      * The counting allocator replaces the global operator new and counts every heap block the
      * process allocates, so the difference between two calls is the allocation volume of the code in
-     * between. It is not compiled in when the binary is built with AddressSanitizer: a replacement
-     * of operator new would take the allocations away from the sanitizer's own bookkeeping, which is
-     * why the sanitizer configuration excludes the tests that need the counter.
+     * between. It is not compiled in when the binary is built with a sanitizer, neither
+     * AddressSanitizer nor MemorySanitizer: a replacement of operator new would take the allocations
+     * away from the sanitizer's own bookkeeping and the sanitizer runtime defines the same operators,
+     * which is why the sanitizer configuration excludes the tests that need the counter.
      */
     bool AllocationCounterEnabled();
 
