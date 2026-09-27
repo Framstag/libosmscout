@@ -1176,7 +1176,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jint width, jint height,
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
-                                                                             jdouble mag,
+                                                                             jdouble magnificationScale,
                                                                              jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
@@ -1267,7 +1267,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_importGpxTrack(JNIEnv *env,
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::render(int width, int height, double lat, double lon, double angle,
-//                        double mag, double dpi)
+//                        double magnificationScale, double dpi)
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -1275,11 +1275,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
                                                            jint width, jint height,
                                                            jdouble lat, jdouble lon,
                                                            jdouble angle,
-                                                           jdouble mag,
+                                                           jdouble magnificationScale,
                                                            jdouble dpi)
 {
   return Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(
-      env, self, width, height, lat, lon, angle, mag, dpi, nullptr, nullptr, nullptr, nullptr,
+      env, self, width, height, lat, lon, angle, magnificationScale, dpi, nullptr, nullptr, nullptr, nullptr,
       std::numeric_limits<jdouble>::quiet_NaN(),
       std::numeric_limits<jdouble>::quiet_NaN(),
       nullptr, nullptr);
@@ -1287,7 +1287,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
-//                                         double angle, double mag, double dpi,
+//                                         double angle, double magnificationScale, double dpi,
 //                                         double[] routeLats, double[] routeLons,
 //                                         double[] favoriteLats, double[] favoriteLons,
 //                                         double searchSelLat, double searchSelLon)
@@ -1298,7 +1298,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jint width, jint height,
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
-                                                                             jdouble mag,
+                                                                             jdouble magnificationScale,
                                                                              jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
@@ -1324,10 +1324,23 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     return nullptr;
   }
 
-  osmscout::Magnification magnification;
-  // Fractional magnification (double scale factor, 2^z) is supported natively;
-  // the tile/feature lookups derive their level internally as floor(log2(mag)).
-  magnification.SetMagnification(std::max(1.0, mag));
+  // The Java API passes the magnification as a scale factor (2^zoom level); fractional values are
+  // supported. The level derived from it indexes the cell dimension table, so a scale that cannot
+  // yield a usable level is refused rather than reaching the tile lookup.
+  if (!std::isfinite(magnificationScale) || magnificationScale<1.0) {
+    osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
+                         << " is not a usable scale factor (>= 1 required)";
+    return nullptr;
+  }
+
+  if (std::floor(std::log2(magnificationScale))>static_cast<double>(osmscout::CELL_DIMENSION_MAX)) {
+    osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
+                         << " is above the supported range (2^" << osmscout::CELL_DIMENSION_MAX
+                         << ")";
+    return nullptr;
+  }
+
+  osmscout::Magnification magnification(magnificationScale);
 
   // The projection DPI is part of the render request: each surface passes the DPI
   // of the display it draws on, so no frame depends on a value another surface
@@ -1340,7 +1353,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   }
   // Verbose render logging disabled; re-enable only when debugging native renderer
   // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
-  //                      << " height=" << height << " mag=" << mag;
+  //                      << " height=" << height << " mag=" << magnificationScale;
 
   // Extract route overlay data if provided
   std::vector<osmscout::Point> routePoints;
@@ -1848,7 +1861,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setGpsMarker(JNIEnv *env,
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::projectToPixel(int width, int height, double centerLat,
-//                                 double centerLon, double mag, double dpi,
+//                                 double centerLon, double magnificationScale, double dpi,
 //                                 double angle, double lat, double lon)
 // --------------------------------------------------------------------------
 
@@ -1859,7 +1872,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_projectToPixel(JNIEnv *env,
                                                                    jint height,
                                                                    jdouble centerLat,
                                                                    jdouble centerLon,
-                                                                   jdouble mag,
+                                                                   jdouble magnificationScale,
                                                                    jdouble dpi,
                                                                    jdouble angle,
                                                                    jdouble lat,
@@ -1871,8 +1884,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_projectToPixel(JNIEnv *env,
     return nullptr;
   }
 
-  osmscout::Magnification magnification;
-  magnification.SetMagnification(std::max(1.0, mag));
+  // See render(): the parameter is a magnification scale factor (2^zoom level), not a level.
+  if (!std::isfinite(magnificationScale) || magnificationScale<1.0) {
+    osmscout::log.Warn() << "[JNI] projectToPixel: magnification scale " << magnificationScale
+                         << " is not a usable scale factor (>= 1 required)";
+    return nullptr;
+  }
+
+  if (std::floor(std::log2(magnificationScale))>static_cast<double>(osmscout::CELL_DIMENSION_MAX)) {
+    osmscout::log.Warn() << "[JNI] projectToPixel: magnification scale " << magnificationScale
+                         << " is above the supported range (2^" << osmscout::CELL_DIMENSION_MAX
+                         << ")";
+    return nullptr;
+  }
+
+  osmscout::Magnification magnification(magnificationScale);
 
   osmscout::MercatorProjection projection;
   if (!projection.Set(center, angle, magnification, static_cast<double>(dpi),
@@ -3986,7 +4012,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   // name whose words are joined by a separator is recognized as an exact match;
   // the matcher is additive, so no hit loses the quality it had before.
   osmscout::StringMatcherFactoryRef freeTextMatcherFactory = CreateNameMatcherFactory();
-  osmscout::StringMatcherRef freeTextMatcher = freeTextMatcherFactory->CreateMatcher(query);
+  osmscout::StringMatcherRef        freeTextMatcher = freeTextMatcherFactory->CreateMatcher(query);
 
   for (jsize i = 0; i < static_cast<jsize>(freeTextEntries.size()); i++) {
     const auto &entry = freeTextEntries[static_cast<size_t>(i)];
@@ -6659,7 +6685,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_cancelRoute(JNIEnv *env, job
 // Favorite Location JNI methods
 // --------------------------------------------------------------------------
 
-static jobject toJavaFavLocation(JNIEnv *env, const osmscout::FavLocation &fav)
+namespace {
+
+jobject toJavaFavLocation(JNIEnv *env, const osmscout::FavLocation &fav)
 {
   jclass cls = env->FindClass("com/framstag/libosmscout/client/FavoriteLocation");
   jmethodID ctor = env->GetMethodID(cls, "<init>", "()V");
@@ -6690,7 +6718,7 @@ static jobject toJavaFavLocation(JNIEnv *env, const osmscout::FavLocation &fav)
   return obj;
 }
 
-static jobject toJavaFavGroup(JNIEnv *env, const osmscout::FavLocationGroup &group)
+jobject toJavaFavGroup(JNIEnv *env, const osmscout::FavLocationGroup &group)
 {
   jclass cls = env->FindClass("com/framstag/libosmscout/client/FavoriteLocationGroup");
   jmethodID ctor = env->GetMethodID(cls, "<init>", "()V");
@@ -6732,6 +6760,26 @@ static jobject toJavaFavGroup(JNIEnv *env, const osmscout::FavLocationGroup &gro
 
   return obj;
 }
+
+jobject toJavaStarredEntry(JNIEnv *env, const osmscout::FavLocationStarredEntry &entry)
+{
+  jclass cls = env->FindClass("com/framstag/libosmscout/client/StarredFavoriteLocation");
+  jmethodID ctor = env->GetMethodID(cls, "<init>", "()V");
+  jobject obj = env->NewObject(cls, ctor);
+
+  jfieldID groupNameField = env->GetFieldID(cls, "groupName", "Ljava/lang/String;");
+  jfieldID favoriteField = env->GetFieldID(cls, "favorite", "Lcom/framstag/libosmscout/client/FavoriteLocation;");
+
+  env->SetObjectField(obj, groupNameField, env->NewStringUTF(entry.groupName.c_str()));
+
+  jobject favObj = toJavaFavLocation(env, entry.favorite);
+  env->SetObjectField(obj, favoriteField, favObj);
+  env->DeleteLocalRef(favObj);
+
+  return obj;
+}
+
+} // namespace
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_loadFavoriteLocations(JNIEnv *env, jobject self, jstring filePath)
@@ -7061,6 +7109,129 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavorite(JNIEnv *env, jo
   env->ReleaseStringUTFChars(favName, favCStr);
 
   return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveGroup(JNIEnv *env, jobject self,
+                                                               jstring groupName, jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the order
+  // are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favoriteStore.MoveGroup(groupCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveFavoriteToGroup(JNIEnv *env, jobject self,
+                                                                        jstring groupName,
+                                                                        jstring favName,
+                                                                        jstring targetGroupName,
+                                                                        jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+  const char *targetGroupCStr = env->GetStringUTFChars(targetGroupName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the
+  // destination group are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favoriteStore.MoveFavoriteToGroup(groupCStr, favCStr, targetGroupCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(targetGroupName, targetGroupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_moveStarredFavorite(JNIEnv *env, jobject self,
+                                                                         jstring groupName,
+                                                                         jstring favName,
+                                                                         jint newIndex)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  const char *groupCStr = env->GetStringUTFChars(groupName, nullptr);
+  const char *favCStr = env->GetStringUTFChars(favName, nullptr);
+
+  // A negative index means "first position"; indices beyond the end of the
+  // starred order are clamped by the service itself.
+  size_t targetIndex = newIndex < 0 ? 0 : static_cast<size_t>(newIndex);
+
+  bool ok = data->favoriteStore.MoveStarred(groupCStr, favCStr, targetIndex);
+
+  env->ReleaseStringUTFChars(groupName, groupCStr);
+  env->ReleaseStringUTFChars(favName, favCStr);
+
+  return ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getStarredFavorites(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+
+  // Without a loaded store the starred order is empty, and an unsupported file
+  // reports no groups, so the order is empty for it as well.
+  std::vector<osmscout::FavLocationStarredEntry> starred;
+  if (data != nullptr) {
+    starred = data->favoriteStore.GetStarred();
+  }
+
+  jclass entryCls = env->FindClass("com/framstag/libosmscout/client/StarredFavoriteLocation");
+  jobjectArray result = env->NewObjectArray((jsize)starred.size(), entryCls, nullptr);
+
+  for (size_t i = 0; i < starred.size(); i++) {
+    jobject entryObj = toJavaStarredEntry(env, starred[i]);
+    env->SetObjectArrayElement(result, (jsize)i, entryObj);
+    env->DeleteLocalRef(entryObj);
+  }
+
+  return result;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getFavoriteFileFormatVersion(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return static_cast<jint>(osmscout::FavoriteLocationService::UnknownFileFormatVersion);
+  }
+
+  return static_cast<jint>(data->favoriteStore.GetFileFormatVersion());
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_isFavoriteFileFormatSupported(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return JNI_FALSE;
+  }
+
+  return data->favoriteStore.IsFileFormatSupported() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

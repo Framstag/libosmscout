@@ -86,25 +86,27 @@ Spec references: `poi-search-api` — requirement `POI result data class` (modif
 
 ## Verification Notes
 
-Task 4.3 is treated as verified-by-exclusion. `ctest -j 4 --output-on-failure` reports 124 of 125
-tests passing; the single failure is `MapPainterAreaVisibilityCullTest`, case "An area within the
-border tolerance is not rejected", at `Tests/src/MapPainterAreaVisibilityCullTest.cpp:659`. It is not
-attributable to this change: the change touches only `libosmscout-client-java/src/OSMScoutClient.cpp`
+Task 4.3 was closed on an argument that no longer holds. `ctest -j 4 --output-on-failure` reported 124
+of 125 tests passing, the single failure being `MapPainterAreaVisibilityCullTest`, case "An area within
+the border tolerance is not rejected" (`Tests/src/MapPainterAreaVisibilityCullTest.cpp:659`), which is
+not attributable to this change: the change touches only `libosmscout-client-java/src/OSMScoutClient.cpp`
 (JNI POI result construction), `PoiEntry.java` and two Java test files, none of which the map painter
-loads. The same failure is already fixed on the unmerged branch `fix-area-cull-pixel-tolerance`, whose
-commit `f0176205b` ("fix: apply the area border tolerance in pixels, not millimetres") changes
-`libosmscout-map/src/osmscoutmap/MapPainter.cpp` and that test file. The decision to treat 4.3 as
-satisfied was taken explicitly, with 5.2 remaining unchecked.
+loads. That failure is gone - `f0176205b` ("fix: apply the area border tolerance in pixels, not
+millimetres") is an ancestor of master through PR #1825, not an unmerged branch, and the case passes.
+The whole suite reports 136 of 136 passing, so 4.3 holds on its own terms rather than by exclusion; 5.2
+remains unchecked.
 
 Task 5.2 is left unchecked. Static analysis is clean: `clang-tidy -p build
 libosmscout-client-java/src/OSMScoutClient.cpp` reports no finding on any added line (4475 pre-existing
-diagnostics elsewhere in the file). The formatting gate cannot be satisfied and cannot attribute
-findings: `scripts/format-check.sh check` reports nearly the whole tracked tree as unformatted,
-including files this change never touched, and `uncrustify -c .uncrustify -l CPP` proposes changes to
-the pristine master revision of the touched file (8506 diff lines) and to an untouched file
-(`libosmscout/src/osmscout/util/StringMatcher.cpp`, 29 diff lines). The only proposal affecting the
-added lines is alignment of the whole `jfieldID` declaration run, which the committed file does not
-follow either; aligning only the two added lines would mix styles within one declaration run.
+diagnostics elsewhere in the file). Formatting cannot be satisfied, and it is not an enforced gate: no
+workflow in `.github/workflows/` runs `scripts/format-check.sh`, which requires uncrustify 0.83.0 and
+reports nearly the whole tracked tree as unformatted, including files this change never touched.
+Measured with `uncrustify -c .uncrustify -l CPP`, the touched file carries 10277 diff lines against the
+revision before this change and 10518 against the current one, so the drift is pre-existing and this
+change adds no hunk class of its own. The only proposal affecting the added lines is the alignment of
+the whole `jfieldID` declaration run, which the committed file does not follow either; aligning only the
+two added lines would mix styles within one declaration run, and aligning the run is a whole-file pass.
+The drift is recorded in `TODO.md`.
 
 Runtime verification used the locally available extracts `maps/Dortmund` and
 `maps/nordrhein-westfalen` (not part of the repository) with `-Dpoi.test.db.dir`. Charging stations

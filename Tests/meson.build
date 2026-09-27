@@ -2,6 +2,18 @@ testIncDir = include_directories('include')
 
 testInstallDir = 'share/osmscout/tests'
 
+# Host-side comparison of the Java native declarations of the client with the JNI functions that
+# implement them: a parameter read with the wrong type yields garbage instead of an error (see the
+# magnification incident). Registered for both build systems, see Tests/CMakeLists.txt.
+#
+# The script is executed through the interpreter in its shebang, and a Windows runner resolves the
+# name `bash` to C:\Windows\System32\bash.exe, the WSL launcher, instead of the MSYS one, so the
+# check never runs there (the MSYS/meson job failed on exactly that, see the guard in
+# Tests/CMakeLists.txt for the same reason).
+if host_machine.system() != 'windows'
+  test('Check JNI signature parity', files('../scripts/check-jni-signatures.sh'))
+endif
+
 FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
              'src/FavoriteLocationServiceTest.cpp',
              include_directories: [testIncDir, osmscoutclientIncDir],
