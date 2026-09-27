@@ -1,0 +1,137 @@
+libosmscout:Check asynchronous processing
+libosmscout:Check asynchronous worker
+libosmscout:Check Base64 code
+libosmscout:Check basemap generation contract
+libosmscout:Check cache functionality with CachePerformance
+libosmscout:Check calculation of bearing
+libosmscout:Check cancelable future
+libosmscout:Check client update check contract
+libosmscout:Check coordinate buffer conversions
+libosmscout:Check correctness of NumberSet class
+libosmscout:Check database path registration
+libosmscout:Check db.json writer
+libosmscout:Check encoding of numbers
+libosmscout:Check encoding of numbers
+libosmscout:Check FavoriteLocationService
+libosmscout:Check FavoriteStore
+libosmscout:Check File access implementation
+libosmscout:Check FileFormatVersion APIs
+libosmscout:Check File utilities
+libosmscout:Check handling of geo box intersection
+libosmscout:Check HighwayMilestone feature parsing and labeling
+libosmscout:Check HighwayMilestone location description
+libosmscout:Check implementation of work queue
+libosmscout:Check impl. of geometric functions
+libosmscout:Check JNI signature parity
+libosmscout:Check JSON writer
+libosmscout:Check label formatting
+libosmscout:Check LabelLayouter code
+libosmscout:Check LabelPath code
+libosmscout:Check latch consistency
+libosmscout:Check LocationService
+libosmscout:Check MapDownloadService APIs
+libosmscout:Check MapPainterAreaPreparation compilation
+libosmscout:Check MapPainterAreaVisibilityCull compilation
+libosmscout:Check MapPainterFrameBuffers compilation
+libosmscout:Check MapPainterLabelCulling compilation
+libosmscout:Check MapPainterLabelReuse compilation
+libosmscout:Check MapPainterPointObjectCulling compilation
+libosmscout:Check MapPainterRoute compilation
+libosmscout:Check MapPainterShield compilation
+libosmscout:Check MapPainterShieldQt compilation
+libosmscout:Check MapPainterSkia compilation
+libosmscout:Check MapPainterWayCulling compilation
+libosmscout:Check MercatorProjection
+libosmscout:Check navigation agents
+libosmscout:Check number set performance
+libosmscout:Check object description service
+libosmscout:Check OSS/T file boundaries.oss
+libosmscout:Check OSS/T file cycle.oss
+libosmscout:Check OSS/T file motorways.oss
+libosmscout:Check OSS/T file public-transport.oss
+libosmscout:Check OSS/T file railways.oss
+libosmscout:Check OSS/T file standard.oss
+libosmscout:Check OSS/T file winter-sports.oss
+libosmscout:Check parsing of access rights
+libosmscout:Check parsing of colors
+libosmscout:Check parsing of command line args
+libosmscout:Check parsing of geo coordinates
+libosmscout:Check parsing of opening hours
+libosmscout:Check parsing of time string
+libosmscout:Check parsing of ways.dat
+libosmscout:Check PolygonCenter utility
+libosmscout:Check polygon transformation code
+libosmscout:Check position accuracy with coordinate bits
+libosmscout:Check reader scanner performance
+libosmscout:Check road style colours
+libosmscout:Check rotation of maps
+libosmscout:Check route postprocessor
+libosmscout:Check route style colours
+libosmscout:Check routing
+libosmscout:Check scan conversion code
+libosmscout:Check ScreenBox functionality
+libosmscout:Check ScreenMask functionality
+libosmscout:Check search scope
+libosmscout:Check signal
+libosmscout:Check speed agent
+libosmscout:Check std_byte behaviour
+libosmscout:Check string matcher
+libosmscout:Check string utils
+libosmscout:Check StyleConfig symbol enumeration
+libosmscout:Check StyleConfigVisibilityBounds compilation
+libosmscout:Check style load resilience
+libosmscout:Check SunriseSunset utility
+libosmscout:Check SymbolRenderer Cairo backend
+libosmscout:Check SymbolRenderer SVG backend
+libosmscout:Check text lookup - bosyne
+libosmscout:Check text lookup - vysoka
+libosmscout:Check text lookup - Vysoká
+libosmscout:Check TextMetricsCairo compilation
+libosmscout:Check TextMetrics compilation
+libosmscout:Check TextMetricsCrossBackend compilation
+libosmscout:Check TextMetricsQt compilation
+libosmscout:Check TextMetricsReference compilation
+libosmscout:Check TextMetricsSVG compilation
+libosmscout:Check threaded database
+libosmscout:Check Thread utilities
+libosmscout:Check tiling calculation code
+libosmscout:Check type resolution
+libosmscout:Check type resolution performance
+libosmscout:Check use of '<'...'>' for includes
+libosmscout:Check water index import code
+libosmscout:Check WString<=>String conversion code
+libosmscout:PerformanceTest-cairo-boundaries.oss
+libosmscout:PerformanceTest-cairo-cycle.oss
+libosmscout:PerformanceTest-cairo-motorways.oss
+libosmscout:PerformanceTest-cairo-public-transport.oss
+libosmscout:PerformanceTest-cairo-railways.oss
+libosmscout:PerformanceTest-cairo-standard.oss
+libosmscout:PerformanceTest-cairo-winter-sports.oss
+libosmscout:PerformanceTest-none-boundaries.oss
+libosmscout:PerformanceTest-none-cycle.oss
+libosmscout:PerformanceTest-none-motorways.oss
+libosmscout:PerformanceTest-none-public-transport.oss
+libosmscout:PerformanceTest-none-railways.oss
+libosmscout:PerformanceTest-none-standard.oss
+libosmscout:PerformanceTest-none-winter-sports.oss
+libosmscout:PerformanceTest-noop-boundaries.oss
+libosmscout:PerformanceTest-noop-cycle.oss
+libosmscout:PerformanceTest-noop-motorways.oss
+libosmscout:PerformanceTest-noop-public-transport.oss
+libosmscout:PerformanceTest-noop-railways.oss
+libosmscout:PerformanceTest-noop-standard.oss
+libosmscout:PerformanceTest-noop-winter-sports.oss
+libosmscout:PerformanceTest-opengl-boundaries.oss
+libosmscout:PerformanceTest-opengl-cycle.oss
+libosmscout:PerformanceTest-opengl-motorways.oss
+libosmscout:PerformanceTest-opengl-public-transport.oss
+libosmscout:PerformanceTest-opengl-railways.oss
+libosmscout:PerformanceTest-opengl-standard.oss
+libosmscout:PerformanceTest-opengl-winter-sports.oss
+libosmscout:PerformanceTest-Qt-boundaries.oss
+libosmscout:PerformanceTest-Qt-cycle.oss
+libosmscout:PerformanceTest-Qt-motorways.oss
+libosmscout:PerformanceTest-Qt-public-transport.oss
+libosmscout:PerformanceTest-Qt-railways.oss
+libosmscout:PerformanceTest-Qt-standard.oss
+libosmscout:PerformanceTest-Qt-winter-sports.oss
