@@ -63,6 +63,9 @@ set_tests_properties(FileFormatVersionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR
 osmscout_test_project(NAME MapDownloadServiceTest SOURCES src/MapDownloadServiceTest.cpp TARGET OSMScout::Client)
 set_tests_properties(MapDownloadServiceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
+#---- MapManager
+osmscout_test_project(NAME MapManagerTest SOURCES src/MapManagerTest.cpp TARGET OSMScout::Client)
+
 #---- Latch
 osmscout_test_project(NAME LatchTest SOURCES src/LatchTest.cpp)
 
