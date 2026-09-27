@@ -112,8 +112,12 @@ TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
              install: true,
              install_dir: testInstallDir)
 
+# A performance test that runs on a loaded machine: on the coverage build of a slow CI runner the
+# default timeout of 30 seconds is not enough (measured: 7 s on an idle runner, more than 30 s on a
+# loaded one).
 test('Check type resolution performance', TypeResolutionPerformanceTest,
-     args: [meson.current_source_dir() + '/../stylesheets/map.ost'])
+     args: [meson.current_source_dir() + '/../stylesheets/map.ost'],
+     timeout: 120)
 
 AsyncProcessingTest =  executable('AsyncProcessingTest',
              'src/AsyncProcessingTest.cpp',
@@ -1111,11 +1115,15 @@ ThreadedDatabaseTest = executable('ThreadedDatabaseTest',
              install: true,
              install_dir: testInstallDir)
 
+# Drives the database from 100 threads, so it is slow on a loaded machine: on the coverage build of
+# a CI runner the default timeout of 30 seconds is not enough (measured: 17.5 s on an idle runner,
+# more than 30 s on a loaded one).
 test('Check threaded database', ThreadedDatabaseTest, args : [
         '--threads', '100',
         '--iterations', '1000',
         meson.current_source_dir() + '/data/testregion',
-        meson.current_source_dir() + '/../stylesheets/standard.oss'])
+        meson.current_source_dir() + '/../stylesheets/standard.oss'],
+        timeout: 120)
 
 ThreadTest = executable('ThreadTest',
                     'src/ThreadTest.cpp',

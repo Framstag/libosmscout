@@ -304,3 +304,18 @@ The three following defects broke a build or test job of the pull request and ar
    locally with `--buildtype debugoptimized -Db_coverage=true --unity on`, 196 assertions, 9 failed). The
    comparison is a performance test and is no longer registered in Meson when `b_coverage` is set; the
    binary is still built and `TileDataConversionTest` still runs there.
+4. **MSVC failed to link `TileDataConversionTest`.** The test calls the lvalue overload of
+   `TileData::SetData()` to put the regular ways and areas of a tile into its optimized data
+   (`TileDataConversionTest.cpp:671`, `:682`); the library itself only calls the rvalue overload, so the
+   lvalue one is not instantiated in the DLL and MSVC, which does not let a client instantiate a member of
+   a dllimport class, reported `LNK2019: unresolved external symbol ... TileData<...>::SetData` twice and
+   `LNK1120: 2 unresolved externals`. `DataTileCache.cpp` now instantiates `TileData<NodeRef>`, `<WayRef>`,
+   `<AreaRef>` and `<RouteRef>` as a whole, so every member of the exported class template is part of the
+   library. Verified by building and linking the test in `build-asan` and running it, which is the same
+   class of failure the MSVC import library raises.
+5. **Two pre-existing Meson tests timed out in the sonar coverage job.** `Check type resolution
+   performance` and `Check threaded database` have no timeout of their own, so they run against Meson's
+   default of 30 seconds, and the coverage build of a loaded CI runner needs more: they took 7.1 s and
+   17.5 s on the idle runner that produced the pre-change record and more than 30 s on the loaded runners
+   of the two later runs (`Check threaded database` alone measures 37.8 s in a local debug build). Both
+   now declare `timeout: 120`, the headroom the other slow tests of the suite already have.
