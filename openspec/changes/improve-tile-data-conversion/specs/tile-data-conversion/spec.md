@@ -10,15 +10,16 @@ same on every platform.
 
 ## ADDED Requirements
 
-### Requirement: Each object of the loaded tiles appears exactly once, in an order defined by the database
+### Requirement: Each object of the loaded tiles appears exactly once, with a defined order
 
 Converting the object data of a set of loaded tiles into the `MapData` of one render job SHALL place
 every node, way, area and route in the result exactly once, even when several loaded tiles carry the
-same object and even when a tile additionally holds objects carried over from parent tiles. The
-objects of the result SHALL be ordered by the data file they were read from and, within one data file,
-ascending by their offset in it, so that the sequence a render job receives does not depend on the
-platform, the standard library or the order in which the tiles were handed in. An offset SHALL NOT be
-treated as identifying an object across different data files.
+same object and even when a tile additionally holds objects carried over from parent tiles. An offset
+SHALL NOT be treated as identifying an object across different data files: the regular and the
+optimized data of a kind are read from different files and their offsets are independent of each
+other, so two such objects SHALL both be part of the result. The order of the result SHALL be defined
+and reproducible for the same tiles: the objects SHALL be grouped by their source data file in a fixed
+order, and SHALL NOT depend on the iteration order of an internal container of the implementation.
 
 #### Scenario: An object carried by several loaded tiles appears once
 
@@ -39,10 +40,10 @@ treated as identifying an object across different data files.
 
 #### Scenario: The resulting sequence is reproducible
 
-- **WHEN** the same tile set is converted twice, with the tiles handed in in a different order
+- **WHEN** the same tile list is converted twice
 - **THEN** the resulting sequence of nodes, ways, areas and routes SHALL be identical both times
-- **AND** each sequence SHALL be grouped by source data file and ascending by file offset within each
-  source
+- **AND** each sequence SHALL be grouped by source data file, and no object of the optimized data file
+  of a kind SHALL precede an object of the regular data file of that kind
 
 ### Requirement: The cost of the conversion follows the distinct objects, not the objects of all tiles
 
@@ -66,9 +67,11 @@ over the tile data after the result has been assembled.
 
 ### Requirement: Every phase of the conversion reports itself when it is slow
 
-The conversion SHALL measure its phases separately and SHALL log one warning per slow phase, naming
-the phase that was slow and its duration, so that a slow pan step is attributable from a user device
-log.
+The conversion SHALL measure a phase per source data file it converts - the regular and the optimized
+data of the four kinds - and SHALL log one warning per slow phase, naming the phase that was slow and
+its duration, so that a slow pan step is attributable from a user device log. The duration a phase may
+take before it is reported SHALL be settable, and SHALL default to the value the implementation this
+change replaces warned at.
 
 #### Scenario: A phase exceeds its threshold
 
@@ -82,23 +85,29 @@ log.
 
 ### Requirement: A conversion that became slower fails a test
 
-The conversion SHALL be covered by a test that compares it against a recorded baseline of the
-conversion as it was before this change, converting the same tile set through both, and that fails
-when the conversion is slower than the baseline by more than the recorded margin. The structural cost
-of the conversion SHALL additionally be pinned by an assertion that does not depend on timing.
+The conversion SHALL be covered by a test that compares it against a baseline of the conversion as it
+was before this change, converting the same tile sets through both, and that fails when the conversion
+is slower than the baseline by more than the recorded margins. The test SHALL cover tile sets that
+differ in how often their tiles carry the same object, because the cost of a deduplication mechanism
+depends on that. The structural cost of the conversion SHALL additionally be pinned by assertions that
+do not depend on timing.
 
 #### Scenario: The conversion is slower than the baseline
 
-- **WHEN** the conversion test converts its tile set through the conversion and through the recorded
-  baseline, and the conversion takes longer than the baseline by more than the recorded margin
+- **WHEN** the conversion test converts a tile set through the conversion and through the baseline, and
+  the conversion takes longer than the baseline by more than the recorded margin of a tile set or more
+  than the recorded margin over all tile sets
 - **THEN** the test SHALL fail
 
 #### Scenario: The structural cost is pinned without timing
 
-- **WHEN** the structural test converts a generated tile set with a known duplicate ratio
+- **WHEN** the structural test converts a tile set, and converts it again with every object carried
+  twice
 - **THEN** the counted allocated memory blocks SHALL be at most the number of distinct objects of the
   result plus a constant
-- **AND** the assertion SHALL NOT depend on a measured duration
+- **AND** the block count of the conversion of the repeated tile set SHALL NOT exceed the block count of
+  the first conversion
+- **AND** the assertions SHALL NOT depend on a measured duration
 
 ### Requirement: Every conversion entry point of the library applies the same contract
 
@@ -110,5 +119,5 @@ object types.
 
 - **WHEN** a conversion is restricted to a set of object types
 - **THEN** the result SHALL contain only objects of those types, each of them exactly once
-- **AND** the result SHALL be grouped by source data file and ascending by file offset within each
-  source
+- **AND** the result SHALL be grouped by source data file, and no object of the optimized data file of a
+  kind SHALL precede an object of the regular data file of that kind
