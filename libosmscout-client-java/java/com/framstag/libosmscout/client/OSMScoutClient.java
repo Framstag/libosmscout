@@ -198,13 +198,13 @@ public class OSMScoutClient {
      * @param lat          center latitude in degrees
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
-     * @param magnification magnification level (0 = world, higher = more zoomed in)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @return int[] ARGB pixel data, or null if not initialised or invalid params
      */
     public native int[] render(int width, int height,
                                double lat, double lon,
                                double angle,
-                               int magnification);
+                               double magnification);
 
     /**
      * Sentinel for "no default admin region" — pass to
@@ -632,7 +632,7 @@ public class OSMScoutClient {
      * @param lat          center latitude in degrees
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
-     * @param magnification magnification level (0 = world, higher = more zoomed in)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @param routeLats    array of route waypoint latitudes, or null for no route
      * @param routeLons    array of route waypoint longitudes, or null for no route
      * @param favoriteLats array of favorite latitudes, or null for no favorites
@@ -646,7 +646,7 @@ public class OSMScoutClient {
     public native int[] renderWithRouteAndPois(int width, int height,
                                                double lat, double lon,
                                                double angle,
-                                               int magnification,
+                                               double magnification,
                                                double[] routeLats,
                                                double[] routeLons,
                                                double[] favoriteLats,
@@ -660,7 +660,7 @@ public class OSMScoutClient {
      * Render the current map view to an ARGB pixel array, with optional route overlay.
      * <p>
      * Convenience overload that calls {@link #renderWithRouteAndPois(int, int, double,
-     * double, double, int, double[], double[], double[], double[], double, double, double[], double[])}
+     * double, double, double, double[], double[], double[], double[], double, double, double[], double[])}
      * with no track, favorite, or selected-search markers.
      *
      * @param width        viewport width in pixels
@@ -668,7 +668,7 @@ public class OSMScoutClient {
      * @param lat          center latitude in degrees
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
-     * @param magnification magnification level (0 = world, higher = more zoomed in)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @param routeLats    array of route waypoint latitudes, or null for no route
      * @param routeLons    array of route waypoint longitudes, or null for no route
      * @return int[] ARGB pixel data, or null if not initialised or invalid params
@@ -676,7 +676,7 @@ public class OSMScoutClient {
     public int[] renderWithRoute(int width, int height,
                                  double lat, double lon,
                                  double angle,
-                                 int magnification,
+                                 double magnification,
                                  double[] routeLats,
                                  double[] routeLons) {
         return renderWithRouteAndPois(width, height, lat, lon, angle, magnification,
@@ -706,7 +706,7 @@ public class OSMScoutClient {
      * @param height     viewport height in pixels
      * @param centerLat  map center latitude in degrees
      * @param centerLon  map center longitude in degrees
-     * @param magnification magnification level
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @param dpi        physical dots-per-inch of the display
      * @param angle      map rotation angle in radians (0 = north-up)
      * @param lat        latitude to project
@@ -715,7 +715,7 @@ public class OSMScoutClient {
      */
     public native double[] projectToPixel(int width, int height,
                                           double centerLat, double centerLon,
-                                          int magnification, double dpi,
+                                          double magnification, double dpi,
                                           double angle,
                                           double lat, double lon);
 

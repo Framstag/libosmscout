@@ -81,7 +81,7 @@ public class OSMScoutClientDataCacheSizeTest {
     }
 
     private static int[] render(OSMScoutClient client) {
-        return client.render(RENDER_WIDTH, RENDER_HEIGHT, RENDER_LAT, RENDER_LON, 0.0, RENDER_ZOOM);
+        return client.render(RENDER_WIDTH, RENDER_HEIGHT, RENDER_LAT, RENDER_LON, 0.0, Math.pow(2, RENDER_ZOOM));
     }
 
     private static void assertRendered(int[] pixels) {

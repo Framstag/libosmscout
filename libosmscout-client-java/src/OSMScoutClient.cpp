@@ -1197,7 +1197,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jint width, jint height,
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
-                                                                             jdouble mag,
+                                                                             jdouble magnificationScale,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1294,10 +1294,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
                                                            jint width, jint height,
                                                            jdouble lat, jdouble lon,
                                                            jdouble angle,
-                                                           jdouble mag)
+                                                           jdouble magnificationScale)
 {
   return Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(
-      env, self, width, height, lat, lon, angle, mag, nullptr, nullptr, nullptr, nullptr,
+      env, self, width, height, lat, lon, angle, magnificationScale, nullptr, nullptr, nullptr, nullptr,
       std::numeric_limits<jdouble>::quiet_NaN(),
       std::numeric_limits<jdouble>::quiet_NaN(),
       nullptr, nullptr);
@@ -1315,7 +1315,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jint width, jint height,
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
-                                                                             jdouble mag,
+                                                                             jdouble magnificationScale,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1340,15 +1340,28 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     return nullptr;
   }
 
-  osmscout::Magnification magnification;
-  // Fractional magnification (double scale factor, 2^z) is supported natively;
-  // the tile/feature lookups derive their level internally as floor(log2(mag)).
-  magnification.SetMagnification(std::max(1.0, mag));
+  // The Java API passes the magnification as a scale factor (2^zoom level); fractional values are
+  // supported. The level derived from it indexes the cell dimension table, so a scale that cannot
+  // yield a usable level is refused rather than reaching the tile lookup.
+  if (!std::isfinite(magnificationScale) || magnificationScale<1.0) {
+    osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
+                         << " is not a usable scale factor (>= 1 required)";
+    return nullptr;
+  }
+
+  if (std::floor(std::log2(magnificationScale))>static_cast<double>(osmscout::CELL_DIMENSION_MAX)) {
+    osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
+                         << " is above the supported range (2^" << osmscout::CELL_DIMENSION_MAX
+                         << ")";
+    return nullptr;
+  }
+
+  osmscout::Magnification magnification(magnificationScale);
 
   double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
   // Verbose render logging disabled; re-enable only when debugging native renderer
   // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
-  //                      << " height=" << height << " mag=" << mag;
+  //                      << " height=" << height << " mag=" << magnificationScale;
 
   // Extract route overlay data if provided
   std::vector<osmscout::Point> routePoints;
@@ -1867,7 +1880,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_projectToPixel(JNIEnv *env,
                                                                    jint height,
                                                                    jdouble centerLat,
                                                                    jdouble centerLon,
-                                                                   jdouble mag,
+                                                                   jdouble magnificationScale,
                                                                    jdouble dpi,
                                                                    jdouble angle,
                                                                    jdouble lat,
@@ -1879,8 +1892,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_projectToPixel(JNIEnv *env,
     return nullptr;
   }
 
-  osmscout::Magnification magnification;
-  magnification.SetMagnification(std::max(1.0, mag));
+  // See render(): the parameter is a magnification scale factor (2^zoom level), not a level.
+  if (!std::isfinite(magnificationScale) || magnificationScale<1.0) {
+    osmscout::log.Warn() << "[JNI] projectToPixel: magnification scale " << magnificationScale
+                         << " is not a usable scale factor (>= 1 required)";
+    return nullptr;
+  }
+
+  if (std::floor(std::log2(magnificationScale))>static_cast<double>(osmscout::CELL_DIMENSION_MAX)) {
+    osmscout::log.Warn() << "[JNI] projectToPixel: magnification scale " << magnificationScale
+                         << " is above the supported range (2^" << osmscout::CELL_DIMENSION_MAX
+                         << ")";
+    return nullptr;
+  }
+
+  osmscout::Magnification magnification(magnificationScale);
 
   osmscout::MercatorProjection projection;
   if (!projection.Set(center, angle, magnification, static_cast<double>(dpi),
