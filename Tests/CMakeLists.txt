@@ -324,6 +324,20 @@ else()
     message("Skip OSTAndOSS test, libosmscout-map is missing.")
 endif()
 
+#---- TileDataConversionTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+	osmscout_test_project(NAME TileDataConversionTest SOURCES src/TileDataConversionTest.cpp src/TestAllocationCounter.cpp TARGET OSMScout::OSMScout OSMScout::Map Catch2::Catch2WithMain)
+	set_tests_properties(TileDataConversionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
+	# The comparison holds the previous conversion as its baseline and measures durations, so it is a
+	# performance test: it is excluded from the sanitizer configuration the same way PerformanceTest is
+	# (ctest --exclude-regex "PerformanceTest" matches this name as well).
+	osmscout_test_project(NAME TileDataConversionPerformanceTest SOURCES src/TileDataConversionPerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map Catch2::Catch2WithMain)
+	set_tests_properties(TileDataConversionPerformanceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+else()
+    message("Skip TileDataConversionTest, libosmscout-map is missing.")
+endif()
+
 #---- PerformanceTest
 if(${OSMSCOUT_BUILD_MAP})
 	osmscout_demo_project(NAME PerformanceTest SOURCES src/PerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map)

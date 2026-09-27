@@ -576,6 +576,30 @@ foreach stylesheet : stylesheets
                meson.current_source_dir() + '/../stylesheets/' + stylesheet])
 endforeach
 
+TileDataConversionTest = executable('TileDataConversionTest',
+             ['src/TileDataConversionTest.cpp', 'src/TestAllocationCounter.cpp'],
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check tile data conversion', TileDataConversionTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+# Compares the conversion with the conversion it replaces, so it measures durations and is a
+# performance test: the sanitizer job excludes the tests whose name contains 'PerformanceTest'.
+TileDataConversionPerformanceTest = executable('TileDataConversionPerformanceTest',
+             'src/TileDataConversionPerformanceTest.cpp',
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check tile data conversion performance', TileDataConversionPerformanceTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [osmscoutIncDir, osmscoutmapIncDir]
   deps = [mathDep, openmpDep]
