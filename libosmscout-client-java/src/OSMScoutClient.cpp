@@ -1347,9 +1347,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   // configured. Each display has its own physical DPI — a head unit rendering at
   // the phone's density is scaled ~1.8x too zoomed, and a phone rendering at the
   // head unit's density is equally wrong.
+  // A request without one (the desktop client's convenience overloads pass none)
+  // falls back to the DPI configured on the client.
   if (!(dpi > 0.0)) {
-    osmscout::log.Warn() << "[JNI] render rejected: invalid dpi " << dpi;
-    return nullptr;
+    dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
   }
   // Verbose render logging disabled; re-enable only when debugging native renderer
   // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
