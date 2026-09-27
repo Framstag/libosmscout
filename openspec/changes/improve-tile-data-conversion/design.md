@@ -163,7 +163,9 @@ Alternatives:
 Rationale: the baseline stays in the test, so the assertion survives the old code being deleted from
 the library; the pair of margins covers both "each tile set is not slower" and "the change is a gain",
 and the structural assertions cover the property that timing cannot pin. The test is registered the way
-`PerformanceTest` is registered, so the sanitizer job excludes it by the same substring match.
+`PerformanceTest` is registered, so the sanitizer job excludes it by the same substring match, and Meson
+does not register it in a build instrumented for coverage, where the instrumentation - it slows the
+library but not the standard library the baseline uses - would decide the comparison.
 
 ### D5 - Phase observability: one phase per source data file, one configurable threshold
 

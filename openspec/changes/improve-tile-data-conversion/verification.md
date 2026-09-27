@@ -252,10 +252,12 @@ Both renders report the same pre-existing warnings (`ERROR while loading pattern
 
 `TileDataConversionPerformanceTest` is a performance test and has `PerformanceTest` in its name, so the
 sanitizer configuration's `--exclude-regex "PerformanceTest"` excludes it without a change to the CI
-workflow. The allocation counter of the tests disables itself when the binary is built with
-AddressSanitizer, because a replacement of `operator new` would take the allocations away from the
-sanitizer's own bookkeeping; `TileDataConversionTest` then reports that the allocation bound is not
-checked and skips only that case.
+workflow. The allocation counter of the tests disables itself when the binary is built with a sanitizer,
+because the sanitizer runtime defines the global `operator new` and `delete` itself and a replacement
+here would collide with them at link time (seen with the MemorySanitizer runtime, which defines the same
+operators as the AddressSanitizer one); `TileDataConversionTest` then reports that the allocation bound
+is not checked and skips only that case. In Meson the performance comparison is additionally not
+registered when the build is instrumented for coverage, see section 9.
 
 ## 8. Defects found while implementing (of the tests, not of the library)
 
@@ -276,3 +278,29 @@ checked and skips only that case.
 4. **Two test expressions took `begin()` and `end()` from two different temporaries**
    (`std::set(OffsetsOf(x).begin(), OffsetsOf(x).end())`), which is undefined behaviour and produced the
    segmentation fault above; both now hold the vector in a local.
+
+## 9. Defects of the change, found by CI after the first push
+
+The three following defects broke a build or test job of the pull request and are fixed in it.
+
+1. **The counting allocator collided with the MemorySanitizer runtime.** The guard of
+   `TestAllocationCounter.cpp` recognized AddressSanitizer only, so the MemorySanitizer job compiled the
+   replacement of the global `operator new` and `delete` and the link failed:
+   `multiple definition of 'operator new(unsigned long)'; .../libclang_rt.msan_cxx-x86_64.a(msan_new_delete.cpp.o):
+   first defined here` (eight of them, one per replaced operator). The guard now covers
+   `address_sanitizer` and `memory_sanitizer`. Verified by preprocessing the file per sanitizer: only the
+   plain and the UndefinedBehaviorSanitizer compilations still define the counting operators.
+2. **`Logger::ERROR` did not compile with the Windows headers.** They define `ERROR` as a macro (value
+   `0`), so `osmscout::Logger::ERROR` expanded to `osmscout::Logger::0` in `TileDataConversionTest.cpp`
+   (`error C2589: 'constant': illegal token on right side of '::'` on MSVC, `expected unqualified-id
+   before numeric constant` on MinGW). The test clears the macro after all of its includes, before the
+   class that names the enumerator, with the same guard `Logger.h` itself uses; a header of the includes
+   defines it late enough to survive the clear `Logger.h` performs. Verified by simulating the macro in the
+   last header the test includes: with the guard the file compiles, without it the same error reproduces.
+3. **The coverage build of the sonar job failed the performance comparison.** The job builds with
+   `-Db_coverage=true` and runs every Meson test; the instrumentation slows the conversion under test - it
+   lives in `libosmscout-map` - but not the hash map baseline, which lives in the standard library, so the
+   comparison measured the instrumentation: a share of 4.0 to 5.8 instead of well below one (measured
+   locally with `--buildtype debugoptimized -Db_coverage=true --unity on`, 196 assertions, 9 failed). The
+   comparison is a performance test and is no longer registered in Meson when `b_coverage` is set; the
+   binary is still built and `TileDataConversionTest` still runs there.

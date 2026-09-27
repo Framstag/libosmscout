@@ -41,6 +41,13 @@
 
 #include <TestAllocationCounter.h>
 
+// Since we refer to the ERROR enumeration member below and the Windows headers define ERROR as a
+// macro, which one of the headers included above establishes after Logger.h has already cleared it:
+// the macro is cleared here, after every include of this file.
+#if defined(ERROR)
+  #undef ERROR
+#endif
+
 namespace {
 
   /**

@@ -23,17 +23,24 @@
 #include <cstdlib>
 #include <new>
 
+/**
+ * The sanitizer runtimes bring their own replacement of the global operator new and delete, so a
+ * replacement here would collide with them at link time: the AddressSanitizer runtime defines them
+ * in its C++ runtime, and the MemorySanitizer runtime defines the same set in `msan_new_delete.cpp`
+ * (which is always linked when memory instrumentation is on), so the counting allocator is compiled
+ * out whenever a sanitizer is in use.
+ */
 #if defined(__has_feature)
-  #if __has_feature(address_sanitizer)
-    #define OSMSCOUT_TEST_ADDRESS_SANITIZER 1
+  #if __has_feature(address_sanitizer) || __has_feature(memory_sanitizer)
+    #define OSMSCOUT_TEST_SANITIZER_RUNTIME 1
   #endif
 #endif
 
 #if defined(__SANITIZE_ADDRESS__)
-  #define OSMSCOUT_TEST_ADDRESS_SANITIZER 1
+  #define OSMSCOUT_TEST_SANITIZER_RUNTIME 1
 #endif
 
-#if !defined(OSMSCOUT_TEST_ADDRESS_SANITIZER)
+#if !defined(OSMSCOUT_TEST_SANITIZER_RUNTIME)
   #define OSMSCOUT_TEST_COUNT_ALLOCATIONS 1
 #endif
 
