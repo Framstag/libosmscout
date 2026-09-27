@@ -178,7 +178,10 @@ endif()
 #---- Java client JNI signatures
 # Host-side comparison of the Java native declarations with the JNI functions: a parameter read
 # with the wrong type yields garbage instead of an error (see the magnification incident).
-if(TARGET osmscout_client_java)
+#
+# Not registered on Windows: `bash` resolves to C:\Windows\System32\bash.exe there, the WSL
+# launcher, and not to a shell, so the script never runs (same guard in Tests/meson.build).
+if(TARGET osmscout_client_java AND NOT WIN32)
 	add_test(NAME JniSignatureParityTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-jni-signatures.sh)
 endif()
 
