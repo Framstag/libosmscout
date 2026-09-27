@@ -92,11 +92,23 @@ Spec references: `location-search-api` — requirement `Location search API on O
 
 ## 5. Conventions and documentation
 
-- [ ] 5.1 Check every new or modified line against the documents in `guidelines/` and verify the
-  touched files satisfy them, in particular the naming, comment and include-order rules.
+- [x] 5.1 Check every new or modified line against the documents in `guidelines/` and verify the
+  touched files satisfy them, in particular the naming, comment and include-order rules. Naming
+  (PascalCase classes and methods, camelCase members, verb-first factories), the doxygen block of the
+  new public class and its factory, and the include order of `StringMatcher.h` pass. Three findings do
+  not: the new classes omit `CLASS_FINAL` like all six sibling classes of the same file, the touched
+  files carry pre-existing formatter drift, and `StringMatcher.cpp` includes `<algorithm>` after its
+  project headers while using nothing from it. The first is the file's own convention; the other two
+  predate the change and are recorded in `TODO.md`. The formatter drift on the change's own added
+  lines was fixed in `2375ff52e`, after which each touched file reports the uncrustify hunk count it
+  reported before the change.
 
-- [ ] 5.2 Search the documentation and `AGENTS.md` for a description of the search matching and
-  verify it either already accounts for the new rule or is updated in this change.
+- [x] 5.2 Search the documentation and `AGENTS.md` for a description of the search matching and
+  verify it either already accounts for the new rule or is updated in this change. Nothing describes
+  the matching: `Documentation/`, `AGENTS.md` and `TODO.md` carry no description of the matcher or of
+  how names are compared (the only related `AGENTS.md` line names the `.uncrustify` config), so no
+  existing description can contradict the new rule and there is none to update. The rule is stated in
+  the doxygen block of `StringMatcherTransliterateToken` and in the comments along the search path.
 
 ## Verification Notes
 
@@ -134,3 +146,12 @@ Spec references: `location-search-api` — requirement `Location search API on O
   are unrelated to this change.
 - Task 4.3 and 4.4 need an Android toolchain and a local database extract, neither of which is
   available here; both remain open rather than claimed.
+- Tasks 5.1 and 5.2 were completed while archiving this change, because they were left unchecked when
+  it was merged. The 5.1 pass found formatter drift on the change's own added lines in five files
+  (`StringMatcher.cpp`, `StringMatcher.h`, `OSMScoutClient.cpp` and the two search test files) and
+  fixed it in `2375ff52e`, which changes no behaviour: a whitespace-insensitive diff leaves three
+  inserted blank lines and nothing else. Every touched file then reports the uncrustify hunk count it
+  reported before the change, and the new `Tests/src/StringMatcherTest.cpp` reports none. The
+  pre-existing drift in those files was deliberately left alone - it is not confined to them (see
+  `TODO.md`) and a file-wide pass belongs in its own change. The full suite reports 136 of 136
+  passing after the formatting commit.
