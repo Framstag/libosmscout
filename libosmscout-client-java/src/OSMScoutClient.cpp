@@ -1286,42 +1286,49 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
-//                                         double angle, double magnificationScale, double dpi,
-//                                         double[] routeLats, double[] routeLons,
-//                                         double[] favoriteLats, double[] favoriteLons,
-//                                         double searchSelLat, double searchSelLon)
+// Shared render body of both render entry points.
 // --------------------------------------------------------------------------
 
-extern "C" JNIEXPORT jintArray JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEnv *env, jobject self,
-                                                                             jint width, jint height,
-                                                                             jdouble lat, jdouble lon,
-                                                                             jdouble angle,
-                                                                             jdouble magnificationScale,
-                                                                             jdouble dpi,
-                                                                             jdoubleArray routeLats,
-                                                                             jdoubleArray routeLons,
-                                                                             jdoubleArray favoriteLats,
-                                                                             jdoubleArray favoriteLons,
-                                                                             jdouble searchSelLat,
-                                                                             jdouble searchSelLon,
-                                                                             jdoubleArray trackLats,
-                                                                             jdoubleArray trackLons)
+// Renders one frame into [outPixels] and returns whether a frame was drawn.
+//
+// The allocating entry point (renderWithRouteAndPois) and the buffer-taking one
+// (renderInto) run EXACTLY this code and differ only in where the pixels end up,
+// so the two cannot render different frames. [outPixels] must hold
+// width*height ARGB pixels (0xAARRGGBB) — the layout Bitmap.setPixels and
+// Bitmap.copyPixelsFromBuffer expect. The buffer belongs to the caller: this
+// function writes it for the duration of the call and retains no reference.
+//
+// Never throws into Java: an invalid request (no client, no database thread, a
+// rejected viewport, an unusable magnification) reports `false`.
+static bool renderMapIntoPixels(JNIEnv *env, jobject self,
+                                jint width, jint height,
+                                jdouble lat, jdouble lon,
+                                jdouble angle,
+                                jdouble magnificationScale,
+                                jdouble dpi,
+                                jdoubleArray routeLats,
+                                jdoubleArray routeLons,
+                                jdoubleArray favoriteLats,
+                                jdoubleArray favoriteLons,
+                                jdouble searchSelLat,
+                                jdouble searchSelLon,
+                                jdoubleArray trackLats,
+                                jdoubleArray trackLons,
+                                uint32_t *outPixels)
 {
 
   ClientData *data = getClientData(env, self);
   if (data == nullptr || data->dbThread == nullptr) {
-    return nullptr;
+    return false;
   }
 
-  if (width <= 0 || height <= 0) {
-    return nullptr;
+  if (width <= 0 || height <= 0 || outPixels == nullptr) {
+    return false;
   }
 
   osmscout::GeoCoord center(lat, lon);
   if (!center.IsValid()) {
-    return nullptr;
+    return false;
   }
 
   // The Java API passes the magnification as a scale factor (2^zoom level); fractional values are
@@ -1330,14 +1337,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   if (!std::isfinite(magnificationScale) || magnificationScale<1.0) {
     osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
                          << " is not a usable scale factor (>= 1 required)";
-    return nullptr;
+    return false;
   }
 
   if (std::floor(std::log2(magnificationScale))>static_cast<double>(osmscout::CELL_DIMENSION_MAX)) {
     osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
                          << " is above the supported range (2^" << osmscout::CELL_DIMENSION_MAX
                          << ")";
-    return nullptr;
+    return false;
   }
 
   osmscout::Magnification magnification(magnificationScale);
@@ -1442,9 +1449,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     }
   }
 
-  // Pixel buffer for result
+  // The caller's pixel storage. ARGB (0xAARRGGBB), filled with opaque black so an
+  // unpainted area is black exactly as the allocating path left it.
   size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
-  std::vector<uint32_t> argbPixels(pixelCount, 0xFF000000); // default: opaque black
+  std::fill(outPixels, outPixels + pixelCount, static_cast<uint32_t>(0xFF000000));
 
   bool rendered = false;
 
@@ -1797,7 +1805,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
           uint8_t g = cairoData[offset + 1];
           uint8_t r = cairoData[offset + 2];
           // Alpha is ignored in CAIRO_FORMAT_RGB24, set to fully opaque
-          argbPixels[static_cast<size_t>(y) * width + x] =
+          outPixels[static_cast<size_t>(y) * width + x] =
               0xFF000000 | (static_cast<uint32_t>(r) << 16) |
               (static_cast<uint32_t>(g) << 8) | b;
         }
@@ -1812,7 +1820,48 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     }
   );
 
-  if (!rendered) {
+  return rendered;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
+//                                         double angle, double magnificationScale, double dpi,
+//                                         double[] routeLats, double[] routeLons,
+//                                         double[] favoriteLats, double[] favoriteLons,
+//                                         double searchSelLat, double searchSelLon,
+//                                         double[] trackLats, double[] trackLons)
+// --------------------------------------------------------------------------
+
+// The allocating entry point. Its signature, behaviour and error semantics are
+// unchanged (upstream API, used outside this app): it allocates the frame's pixel
+// array and returns it, and reports an unusable request as null.
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEnv *env, jobject self,
+                                                                             jint width, jint height,
+                                                                             jdouble lat, jdouble lon,
+                                                                             jdouble angle,
+                                                                             jdouble magnificationScale,
+                                                                             jdouble dpi,
+                                                                             jdoubleArray routeLats,
+                                                                             jdoubleArray routeLons,
+                                                                             jdoubleArray favoriteLats,
+                                                                             jdoubleArray favoriteLons,
+                                                                             jdouble searchSelLat,
+                                                                             jdouble searchSelLon,
+                                                                             jdoubleArray trackLats,
+                                                                             jdoubleArray trackLons)
+{
+  if (width <= 0 || height <= 0) {
+    return nullptr;
+  }
+
+  size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
+  std::vector<uint32_t> argbPixels(pixelCount, 0xFF000000); // default: opaque black
+
+  if (!renderMapIntoPixels(env, self, width, height, lat, lon, angle, magnificationScale, dpi,
+                           routeLats, routeLons, favoriteLats, favoriteLons,
+                           searchSelLat, searchSelLon, trackLats, trackLons,
+                           argbPixels.data())) {
     return nullptr;
   }
 
@@ -1826,6 +1875,79 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                          reinterpret_cast<const jint *>(argbPixels.data()));
 
   return result;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::renderInto(int width, int height, double lat, double lon,
+//                            double angle, double magnificationScale, double dpi,
+//                            double[] routeLats, double[] routeLons,
+//                            double[] favoriteLats, double[] favoriteLons,
+//                            double searchSelLat, double searchSelLon,
+//                            double[] trackLats, double[] trackLons,
+//                            ByteBuffer pixels)
+// --------------------------------------------------------------------------
+
+// The buffer-taking entry point: it renders into pixel storage the caller owns and
+// allocates no frame-sized storage of its own (no int[], no intermediate pixel
+// vector). [pixels] must be a DIRECT buffer with at least width*height*4 bytes
+// remaining; the bridge hands the frame to Java as 0xAARRGGBB pixels (the layout
+// Bitmap.copyPixelsFromBuffer expects).
+//
+// Ownership: the caller owns the storage. The bridge writes it only while this
+// call runs and retains no reference, so the caller may release, reuse or display
+// it afterwards — and must not hand the same storage to two renders at once (the
+// bridge does not guard the caller's storage against the caller's own misuse).
+//
+// Returns true when the frame was written, false for an unusable request (no
+// client/database thread, a rejected viewport or magnification, a missing, non-direct
+// or too small buffer). A failed render never reports success, faults, or touches the
+// caller's storage beyond the documented write.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_renderInto(JNIEnv *env, jobject self,
+                                                               jint width, jint height,
+                                                               jdouble lat, jdouble lon,
+                                                               jdouble angle,
+                                                               jdouble magnificationScale,
+                                                               jdouble dpi,
+                                                               jdoubleArray routeLats,
+                                                               jdoubleArray routeLons,
+                                                               jdoubleArray favoriteLats,
+                                                               jdoubleArray favoriteLons,
+                                                               jdouble searchSelLat,
+                                                               jdouble searchSelLon,
+                                                               jdoubleArray trackLats,
+                                                               jdoubleArray trackLons,
+                                                               jobject pixels)
+{
+  if (pixels == nullptr) {
+    osmscout::log.Warn() << "[JNI] renderInto: no pixel buffer";
+    return JNI_FALSE;
+  }
+
+  if (width <= 0 || height <= 0) {
+    return JNI_FALSE;
+  }
+
+  void *address = env->GetDirectBufferAddress(pixels);
+  if (address == nullptr) {
+    osmscout::log.Warn() << "[JNI] renderInto: pixel buffer is not a direct buffer";
+    return JNI_FALSE;
+  }
+
+  // The capacity is a jlong; the frame's byte count is bounded by the pixel count of a
+  // 32-bit size, so the comparison cannot overflow.
+  size_t neededBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * sizeof(uint32_t);
+  jlong capacity = env->GetDirectBufferCapacity(pixels);
+  if (capacity < static_cast<jlong>(neededBytes)) {
+    osmscout::log.Warn() << "[JNI] renderInto: pixel buffer holds " << capacity
+                         << " bytes, the frame needs " << neededBytes;
+    return JNI_FALSE;
+  }
+
+  return renderMapIntoPixels(env, self, width, height, lat, lon, angle, magnificationScale, dpi,
+                             routeLats, routeLons, favoriteLats, favoriteLons,
+                             searchSelLat, searchSelLon, trackLats, trackLons,
+                             reinterpret_cast<uint32_t *>(address)) ? JNI_TRUE : JNI_FALSE;
 }
 
 // --------------------------------------------------------------------------
