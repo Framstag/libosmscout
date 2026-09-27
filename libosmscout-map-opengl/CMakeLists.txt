@@ -45,20 +45,44 @@ set(FONT_FILES
 	data/fonts/LICENSE)
 
 # install shaders
+#
+# SHADER_INSTALL_DIR and FONTS_INSTALL_DIR are the absolute paths compiled into
+# MapOpenGLFeatures.h. They name the configure-time install location, which is
+# where consumers find the files after a normal install.
+#
+# The install destinations are kept relative to the install prefix (Linux
+# branch), so that a prefix chosen at install time (cmake --install --prefix)
+# is honored. On Apple and Windows the platform locations are outside any
+# prefix and are both the destination and the compile-time default.
 if(APPLE)
 	set(SHADER_INSTALL_DIR "/Library/Application Support/osmscout/shaders")
 	set(FONTS_INSTALL_DIR "/Library/Application Support/osmscout/fonts")
+	set(SHADER_INSTALL_DESTINATION "${SHADER_INSTALL_DIR}")
+	set(FONTS_INSTALL_DESTINATION "${FONTS_INSTALL_DIR}")
 elseif(WIN32)
 	set(SHADER_INSTALL_DIR "C:/ProgramData/osmscout/shaders")
 	set(FONTS_INSTALL_DIR "C:/ProgramData/osmscout/fonts")
+	set(SHADER_INSTALL_DESTINATION "${SHADER_INSTALL_DIR}")
+	set(FONTS_INSTALL_DESTINATION "${FONTS_INSTALL_DIR}")
 else() # Linux
-	set(SHADER_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/osmscout/shaders")
-	set(FONTS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/osmscout/fonts")
+	# GNUInstallDirs leaves CMAKE_INSTALL_DATADIR empty when it defaults to
+	# CMAKE_INSTALL_DATAROOTDIR; an empty component would turn the relative
+	# destination below into the absolute path "/osmscout/shaders".
+	if(CMAKE_INSTALL_DATADIR)
+		set(_osmscoutInstallDatadir "${CMAKE_INSTALL_DATADIR}")
+	else()
+		set(_osmscoutInstallDatadir "${CMAKE_INSTALL_DATAROOTDIR}")
+	endif()
+
+	set(SHADER_INSTALL_DIR "${CMAKE_INSTALL_FULL_DATADIR}/osmscout/shaders")
+	set(FONTS_INSTALL_DIR "${CMAKE_INSTALL_FULL_DATADIR}/osmscout/fonts")
+	set(SHADER_INSTALL_DESTINATION "${_osmscoutInstallDatadir}/osmscout/shaders")
+	set(FONTS_INSTALL_DESTINATION "${_osmscoutInstallDatadir}/osmscout/fonts")
 endif()
 install(FILES ${SHADER_FILES}
-		DESTINATION ${SHADER_INSTALL_DIR})
+		DESTINATION ${SHADER_INSTALL_DESTINATION})
 install(FILES ${FONT_FILES}
-	    DESTINATION ${FONTS_INSTALL_DIR})
+	    DESTINATION ${FONTS_INSTALL_DESTINATION})
 set(DEFAULT_FONT_FILE "${FONTS_INSTALL_DIR}/LiberationSans-Regular.ttf")
 
 osmscout_library_project(

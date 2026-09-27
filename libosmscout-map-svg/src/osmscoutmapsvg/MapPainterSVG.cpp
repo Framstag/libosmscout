@@ -21,10 +21,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <iostream>
 #include <iomanip>
 #include <limits>
 #include <list>
+#include <utility>
 
 #if !defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FREETYPE) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
   #include <fontconfig/fontconfig.h>
@@ -103,7 +105,10 @@ namespace osmscout {
 
     fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
 
-    f=fonts.find(fontSize);
+    FontKey key{.fontName=parameter.GetFontName(),
+                .fontSize=fontSize};
+
+    f=fonts.find(key);
 
     if (f!=fonts.end()) {
       return f->second;
@@ -114,7 +119,9 @@ namespace osmscout {
     pango_font_description_set_family(font,parameter.GetFontName().c_str());
     pango_font_description_set_absolute_size(font,fontSize*PANGO_SCALE);
 
-    return fonts.insert(std::make_pair(fontSize,font)).first->second;
+    resolvedFontCount++;
+
+    return fonts.insert(std::make_pair(key,font)).first->second;
   }
 
   std::shared_ptr<MapPainterSVG::SvgLabel> MapPainterSVG::Layout(const Projection& projection,
@@ -377,6 +384,8 @@ namespace osmscout {
       return nullptr;
     }
 
+    resolvedFontCount++;
+
     return fontFaces.insert(std::make_pair(std::make_pair(file,key),face)).first->second;
   }
 
@@ -559,6 +568,11 @@ namespace osmscout {
   }
 
 #endif
+
+  size_t MapPainterSVG::GetResolvedFontCount() const
+  {
+    return resolvedFontCount;
+  }
 
   TextMetrics MapPainterSVG::MeasureText(const Projection& projection,
                                         const MapParameter& parameter,

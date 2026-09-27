@@ -21,11 +21,14 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstddef>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <optional>
 #include <ostream>
 #include <set>
+#include <string>
 #include <unordered_map>
 
 #include <osmscoutmapsvg/MapSVGFeatures.h>
@@ -57,7 +60,33 @@ namespace osmscout {
     using NativeGlyph = StandaloneGlyph;
 
   private:
-    using FontMap = std::unordered_map<size_t,PangoFontDescription*>  ;          //! Map type for mapping  font sizes to font
+    /**
+     * Key of a resolved font: the requested font name and the size the font is resolved at.
+     * Both are inputs of the resolved font, so a font resolved for one name must not be
+     * served for a request with another name.
+     */
+    struct FontKey
+    {
+      std::string fontName;
+      double      fontSize;
+
+      bool operator==(const FontKey& other) const
+      {
+        return fontName==other.fontName &&
+               fontSize==other.fontSize;
+      }
+    };
+
+    struct FontKeyHash
+    {
+      size_t operator()(const FontKey& key) const
+      {
+        return std::hash<std::string>()(key.fontName) ^
+               (std::hash<double>()(key.fontSize) << 1);
+      }
+    };
+
+    using FontMap = std::unordered_map<FontKey,PangoFontDescription*,FontKeyHash>;    //! Map type for mapping a font name and a font size to a font
     PangoFontMap                     *pangoFontMap;
     PangoContext                     *pangoContext;
     FontMap                          fonts;            //! Cached scaled font
@@ -124,6 +153,7 @@ namespace osmscout {
     friend SvgLabelLayouter;
 
     SvgLabelLayouter                  labelLayouter;
+    size_t                            resolvedFontCount{0}; //!< Fonts resolved since construction (diagnostic for tests)
 
     std::map<FillStyle,std::string>   fillStyleNameMap;
     std::map<BorderStyle,std::string> borderStyleNameMap;
@@ -313,6 +343,13 @@ namespace osmscout {
                  const MapParameter& parameter,
                  const std::vector<MapData>& data,
                  std::ostream& stream);
+
+    /**
+     * Number of fonts this painter has resolved since it was created. A diagnostic for tests:
+     * a font resolved for one font name must not be reused for a request with another name, so
+     * a request with a new name resolves a new font. Carries no rendering behaviour.
+     */
+    size_t GetResolvedFontCount() const;
   };
 }
 

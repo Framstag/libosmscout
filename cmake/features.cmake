@@ -562,9 +562,31 @@ endif()
 # Find nlohmann_json (header-only, used by MCPServer)
 find_package(nlohmann_json QUIET)
 
-# Find httplib (header-only, used by MCPServer)
-include(CheckIncludeFileCXX)
-check_include_file_cxx(httplib.h HAVE_HTTPLIB)
+# Find httplib (used by MCPServer).
+# Upstream cpp-httplib is normally header-only, but several distributions
+# (e.g. Debian/Ubuntu's libcpp-httplib-dev) ship it split into a plain
+# declaration header (httplib.h) plus a separately compiled shared library
+# (libcpp-httplib.so), exposed via a "cpp-httplib" pkg-config module. In that
+# case we must link against the library, not just include the header, or we
+# get "undefined reference to httplib::..." linker errors. Prefer pkg-config
+# so we pick up the right library (and its required compile definitions,
+# e.g. CPPHTTPLIB_OPENSSL_SUPPORT) when available, and fall back to a plain
+# header-only detection otherwise.
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(PC_HTTPLIB QUIET IMPORTED_TARGET cpp-httplib)
+endif()
+
+if(PC_HTTPLIB_FOUND)
+  add_library(httplib::httplib ALIAS PkgConfig::PC_HTTPLIB)
+  set(HAVE_HTTPLIB TRUE)
+else()
+  include(CheckIncludeFileCXX)
+  check_include_file_cxx(httplib.h HAVE_HTTPLIB)
+  if(HAVE_HTTPLIB AND NOT TARGET httplib::httplib)
+    add_library(httplib::httplib INTERFACE IMPORTED)
+  endif()
+endif()
 
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})

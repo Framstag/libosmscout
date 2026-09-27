@@ -90,6 +90,63 @@ namespace {
 
     return projection;
   }
+
+  /**
+   * The second font family the font-name cases use to trigger a change: a generic family that
+   * fontconfig resolves to a different font than the bundled family on a host with fonts, and
+   * that the non-pango cairo font API accepts as well.
+   */
+  constexpr const char *SecondFontFamily="monospace";
+
+#if defined(HAVE_LIB_FONTCONFIG)
+
+  /**
+   * The font file fontconfig resolves a font name to, or an empty string. The font-name cases
+   * can only discriminate a stale resolved font when two names resolve to different fonts.
+   */
+  std::string ResolvedFontFile(const std::string& fontName)
+  {
+    FcPattern *pattern=FcPatternCreate();
+
+    if (pattern==nullptr) {
+      return "";
+    }
+
+    FcPatternAddString(pattern,
+                       FC_FAMILY,
+                       reinterpret_cast<const FcChar8*>(fontName.c_str()));
+    FcConfigSubstitute(nullptr,
+                       pattern,
+                       FcMatchPattern);
+    FcDefaultSubstitute(pattern);
+
+    FcResult  matchResult=FcResultNoMatch;
+    FcPattern *match=FcFontMatch(nullptr,
+                                 pattern,
+                                 &matchResult);
+
+    std::string file;
+
+    if (match!=nullptr) {
+      FcChar8 *resolvedFile=nullptr;
+
+      if (FcPatternGetString(match,
+                             FC_FILE,
+                             0,
+                             &resolvedFile)==FcResultMatch &&
+          resolvedFile!=nullptr) {
+        file=reinterpret_cast<const char*>(resolvedFile);
+      }
+
+      FcPatternDestroy(match);
+    }
+
+    FcPatternDestroy(pattern);
+
+    return file;
+  }
+
+#endif
 } // namespace
 
 /**
@@ -342,4 +399,168 @@ TEST_CASE("Cairo measurement depends on the resolution of the projection", "[Tex
   cairo_destroy(context192);
   cairo_surface_destroy(surface96);
   cairo_surface_destroy(surface192);
+}
+
+/**
+ * A resolved font depends on the requested font name and on the font size, so a painter kept open
+ * across a font-name change must resolve a font for the new name instead of serving the font of
+ * the earlier one. The painter counts the fonts it has resolved: an unchanged name and size reuse
+ * their font, a new name resolves another one. The case needs no second font to exist, because a
+ * font is constructed for a name whether or not the name resolves.
+ */
+TEST_CASE("Cairo resolves a font for each requested font name", "[TextMetricsCairo]")
+{
+  std::string fontFamily;
+  std::string error;
+
+  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
+                                              fontFamily,
+                                              error));
+  REQUIRE(error.empty());
+
+#if defined(HAVE_LIB_FONTCONFIG)
+  FcConfigAppFontAddFile(nullptr,
+                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+
+#endif
+
+  cairo_surface_t *surface=cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                                                      800,
+                                                      480);
+
+  REQUIRE(surface!=nullptr);
+
+  cairo_t *context=cairo_create(surface);
+
+  REQUIRE(context!=nullptr);
+
+  osmscout::MapPainterCairo painter;
+
+  painter.DrawMap(CreateProjection(),
+                  CreateParameter(fontFamily),
+                  {},
+                  context);
+
+  painter.MeasureText(CreateProjection(),
+                      CreateParameter(fontFamily),
+                      "Muster",
+                      1.0);
+
+  size_t afterFirst=painter.GetResolvedFontCount();
+
+  REQUIRE(afterFirst>=1);
+
+  // the same font name and the same font size reuse the resolved font
+  painter.MeasureText(CreateProjection(),
+                      CreateParameter(fontFamily),
+                      "Muster",
+                      1.0);
+
+  REQUIRE(painter.GetResolvedFontCount()==afterFirst);
+
+  // another font name resolves another font instead of serving the earlier one
+  painter.MeasureText(CreateProjection(),
+                      CreateParameter(SecondFontFamily),
+                      "Muster",
+                      1.0);
+
+  REQUIRE(painter.GetResolvedFontCount()==afterFirst+1);
+
+  cairo_destroy(context);
+  cairo_surface_destroy(surface);
+}
+
+/**
+ * The ink metrics a painter reports for a font name are the metrics of the font it resolved for
+ * that name, so a painter that measured with one font name and then measures with another must
+ * report the metrics a painter that only ever used the second name reports. The resolution of the
+ * drawn label goes through the same call, so the metrics cover the drawn font as well.
+ *
+ * The comparison discriminates only when the two names resolve to different fonts, so the case
+ * asks fontconfig first and reports an INFO line and passes when they resolve to the same font.
+ */
+TEST_CASE("Cairo measurement follows a font-name change on one painter", "[TextMetricsCairo]")
+{
+  std::string fontFamily;
+  std::string error;
+
+  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
+                                              fontFamily,
+                                              error));
+  REQUIRE(error.empty());
+
+#if defined(HAVE_LIB_FONTCONFIG)
+  FcConfigAppFontAddFile(nullptr,
+                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+
+  if (ResolvedFontFile(fontFamily)==ResolvedFontFile(SecondFontFamily)) {
+    INFO("fontconfig resolves \"" << fontFamily << "\" and \"" << SecondFontFamily
+                                  << "\" to the same font; the font-name comparison cannot discriminate");
+
+    return;
+  }
+#endif
+
+  osmscout::MercatorProjection projection=CreateProjection();
+
+  cairo_surface_t              *surface=cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                                                                   800,
+                                                                   480);
+
+  REQUIRE(surface!=nullptr);
+
+  cairo_t *freshContext=cairo_create(surface);
+  cairo_t *liveContext=cairo_create(surface);
+
+  REQUIRE(freshContext!=nullptr);
+  REQUIRE(liveContext!=nullptr);
+
+  // a painter that only ever used the second font name
+  osmscout::MapPainterCairo freshPainter;
+
+  freshPainter.DrawMap(projection,
+                       CreateParameter(SecondFontFamily),
+                       {},
+                       freshContext);
+
+  osmscout::TextMetrics fresh=freshPainter.MeasureText(projection,
+                                                       CreateParameter(SecondFontFamily),
+                                                       "Muster",
+                                                       1.0);
+
+  // one painter that measured with the first font name and then with the second
+  osmscout::MapPainterCairo livePainter;
+
+  livePainter.DrawMap(projection,
+                      CreateParameter(fontFamily),
+                      {},
+                      liveContext);
+
+  livePainter.MeasureText(projection,
+                          CreateParameter(fontFamily),
+                          "Muster",
+                          1.0);
+
+  osmscout::TextMetrics live=livePainter.MeasureText(projection,
+                                                     CreateParameter(SecondFontFamily),
+                                                     "Muster",
+                                                     1.0);
+
+  REQUIRE(live.width>0.0);
+  REQUIRE(live.width==Catch::Approx(fresh.width).margin(1.0));
+  REQUIRE(live.height==Catch::Approx(fresh.height).margin(1.0));
+  REQUIRE(live.glyphs.size()==fresh.glyphs.size());
+
+  for (size_t i=0; i<fresh.glyphs.size() && i<live.glyphs.size(); i++) {
+    REQUIRE(live.glyphs[i].position.GetX()==Catch::Approx(fresh.glyphs[i].position.GetX()).margin(1.0));
+    REQUIRE(live.glyphs[i].position.GetY()==Catch::Approx(fresh.glyphs[i].position.GetY()).margin(1.0));
+    REQUIRE(live.glyphs[i].box.x==Catch::Approx(fresh.glyphs[i].box.x).margin(1.0));
+    REQUIRE(live.glyphs[i].box.y==Catch::Approx(fresh.glyphs[i].box.y).margin(1.0));
+    REQUIRE(live.glyphs[i].box.width==Catch::Approx(fresh.glyphs[i].box.width).margin(1.0));
+    REQUIRE(live.glyphs[i].box.height==Catch::Approx(fresh.glyphs[i].box.height).margin(1.0));
+  }
+
+  cairo_destroy(freshContext);
+  cairo_destroy(liveContext);
+  cairo_surface_destroy(surface);
 }
