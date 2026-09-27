@@ -19,10 +19,12 @@
 
 #include <osmscoutmapcairo/MapPainterCairo.h>
 
+#include <cstddef>
 #include <limits>
 #include <list>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include <osmscoutmapcairo/LoaderPNG.h>
 #include <osmscoutmapcairo/SymbolRendererCairo.h>
@@ -308,7 +310,10 @@ namespace osmscout {
 
     assert(fontSize > 0 && std::isfinite(fontSize));
 
-    f = fonts.find(fontSize);
+    FontKey key{.fontName=parameter.GetFontName(),
+                .fontSize=fontSize};
+
+    f = fonts.find(key);
 
     if (f != fonts.end()) {
       return f->second;
@@ -319,7 +324,9 @@ namespace osmscout {
     pango_font_description_set_family(font, parameter.GetFontName().c_str());
     pango_font_description_set_absolute_size(font, fontSize * PANGO_SCALE);
 
-    return fonts.insert(std::make_pair(fontSize, font)).first->second;
+    resolvedFontCount++;
+
+    return fonts.insert(std::make_pair(key, font)).first->second;
 #else
     FontMap::const_iterator f;
 
@@ -327,7 +334,10 @@ namespace osmscout {
 
     assert(fontSize > 0 && std::isfinite(fontSize));
 
-    f=fonts.find(fontSize);
+    FontKey key{.fontName=parameter.GetFontName(),
+                .fontSize=fontSize};
+
+    f=fonts.find(key);
 
     if (f!=fonts.end()) {
       return f->second;
@@ -358,8 +368,15 @@ namespace osmscout {
     cairo_font_options_destroy(options);
     cairo_font_face_destroy(fontFace);
 
-    return fonts.insert(std::make_pair(fontSize,scaledFont)).first->second;
+    resolvedFontCount++;
+
+    return fonts.insert(std::make_pair(key,scaledFont)).first->second;
 #endif
+  }
+
+  size_t MapPainterCairo::GetResolvedFontCount() const
+  {
+    return resolvedFontCount;
   }
 
   void MapPainterCairo::SetLineAttributes(const Color &color,
