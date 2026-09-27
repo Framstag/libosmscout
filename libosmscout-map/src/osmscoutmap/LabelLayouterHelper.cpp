@@ -17,25 +17,69 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <algorithm>
+
 #include <osmscoutmap/LabelLayouterHelper.h>
 
+#include <string>
+
 namespace osmscout {
+  std::string BuildMeasurementEnvironment(const std::string& fontName,
+                                          double fontSize,
+                                          double dpi,
+                                          size_t magnification)
+  {
+    // Assembled without a stream so that the per-frame environment costs a single allocation
+    std::string environment;
+
+    environment.reserve(128);
+
+    environment+="font=";
+    environment+=fontName;
+    environment+=";fontSize=";
+    environment+=std::to_string(fontSize);
+    environment+=";dpi=";
+    environment+=std::to_string(dpi);
+    environment+=";magnification=";
+    environment+=std::to_string(magnification);
+
+    return environment;
+  }
+
   ScreenRectMask::ScreenRectMask(size_t screenWidth,
                                  const ScreenPixelRectangle &rect)
+  {
+    Reset(screenWidth,
+          rect);
+  }
+
+  void ScreenRectMask::Reset(size_t screenWidth,
+                             const ScreenPixelRectangle &rect)
   {
     constexpr size_t   bitsPerCell=64u;
     constexpr uint64_t allBitsSet=~0;
 
-    size_t rowLength=screenWidth / bitsPerCell +1;
+    size_t             rowLength=screenWidth / bitsPerCell +1;
 
     if (screenWidth % bitsPerCell!=0u) {
       rowLength++;
     }
 
+    if (rowLength!=bitmask.size()) {
+      bitmask.assign(rowLength,0);
+    }
+    else {
+      std::fill(bitmask.begin(),
+                bitmask.end(),
+                0);
+    }
+
+    // The early returns below leave an empty mask, so the state has to start empty
+    cellFrom=0;
+    cellTo=0;
+
     rowFrom=rect.y;
     rowTo=rect.y+rect.height-1;
-
-    bitmask.resize(rowLength);
 
     // Rectangle is to the right of the screen
     if (rect.x>(int)screenWidth) {
@@ -122,6 +166,28 @@ namespace osmscout {
     }
 
     bitmask.resize(height*rowLength);
+  }
+
+  void ScreenMask::Reset(size_t width, size_t height)
+  {
+    size_t bitsPerCell=64u;
+
+    size_t newRowLength=width / bitsPerCell;
+
+    if (width % bitsPerCell!=0) {
+      newRowLength++;
+    }
+
+    if (newRowLength!=rowLength ||
+        height!=this->height) {
+      rowLength=newRowLength;
+      this->height=height;
+      bitmask.resize(height*rowLength);
+    }
+
+    std::fill(bitmask.begin(),
+              bitmask.end(),
+              0);
   }
 
   void ScreenMask::AddMask(const ScreenRectMask& mask)

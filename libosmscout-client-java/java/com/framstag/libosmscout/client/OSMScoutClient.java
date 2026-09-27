@@ -198,13 +198,13 @@ public class OSMScoutClient {
      * @param lat          center latitude in degrees
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
-     * @param magnification magnification level (0 = world, higher = more zoomed in)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @return int[] ARGB pixel data, or null if not initialised or invalid params
      */
     public native int[] render(int width, int height,
                                double lat, double lon,
                                double angle,
-                               int magnification);
+                               double magnification);
 
     /**
      * Sentinel for "no default admin region" — pass to
@@ -632,7 +632,7 @@ public class OSMScoutClient {
      * @param lat          center latitude in degrees
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
-     * @param magnification magnification level (0 = world, higher = more zoomed in)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @param routeLats    array of route waypoint latitudes, or null for no route
      * @param routeLons    array of route waypoint longitudes, or null for no route
      * @param favoriteLats array of favorite latitudes, or null for no favorites
@@ -646,7 +646,7 @@ public class OSMScoutClient {
     public native int[] renderWithRouteAndPois(int width, int height,
                                                double lat, double lon,
                                                double angle,
-                                               int magnification,
+                                               double magnification,
                                                double[] routeLats,
                                                double[] routeLons,
                                                double[] favoriteLats,
@@ -660,7 +660,7 @@ public class OSMScoutClient {
      * Render the current map view to an ARGB pixel array, with optional route overlay.
      * <p>
      * Convenience overload that calls {@link #renderWithRouteAndPois(int, int, double,
-     * double, double, int, double[], double[], double[], double[], double, double, double[], double[])}
+     * double, double, double, double[], double[], double[], double[], double, double, double[], double[])}
      * with no track, favorite, or selected-search markers.
      *
      * @param width        viewport width in pixels
@@ -668,7 +668,7 @@ public class OSMScoutClient {
      * @param lat          center latitude in degrees
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
-     * @param magnification magnification level (0 = world, higher = more zoomed in)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @param routeLats    array of route waypoint latitudes, or null for no route
      * @param routeLons    array of route waypoint longitudes, or null for no route
      * @return int[] ARGB pixel data, or null if not initialised or invalid params
@@ -676,7 +676,7 @@ public class OSMScoutClient {
     public int[] renderWithRoute(int width, int height,
                                  double lat, double lon,
                                  double angle,
-                                 int magnification,
+                                 double magnification,
                                  double[] routeLats,
                                  double[] routeLons) {
         return renderWithRouteAndPois(width, height, lat, lon, angle, magnification,
@@ -706,7 +706,7 @@ public class OSMScoutClient {
      * @param height     viewport height in pixels
      * @param centerLat  map center latitude in degrees
      * @param centerLon  map center longitude in degrees
-     * @param magnification magnification level
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
      * @param dpi        physical dots-per-inch of the display
      * @param angle      map rotation angle in radians (0 = north-up)
      * @param lat        latitude to project
@@ -715,7 +715,7 @@ public class OSMScoutClient {
      */
     public native double[] projectToPixel(int width, int height,
                                           double centerLat, double centerLon,
-                                          int magnification, double dpi,
+                                          double magnification, double dpi,
                                           double angle,
                                           double lat, double lon);
 
@@ -814,6 +814,87 @@ public class OSMScoutClient {
      * @return true if moved (or already at that position), false if group or favorite not found
      */
     public native boolean moveFavorite(String groupName, String favName, int newIndex);
+
+    /**
+     * Move a group to another position in the group order.
+     *
+     * The target index is 0-based and refers to the group order after the group
+     * has been removed from its current position; an index outside the order
+     * bounds is clamped to the first/last position, and a negative index means
+     * the first position. The order is what {@link #getFavoriteGroups()} returns.
+     *
+     * @param groupName group name
+     * @param newIndex  0-based target position in the group order
+     * @return true if moved (or already at that position), false if the group is not found
+     */
+    public native boolean moveGroup(String groupName, int newIndex);
+
+    /**
+     * Move a favorite from one group into another group.
+     *
+     * The target index is 0-based and refers to the destination group's favorite
+     * list; an index outside that list bounds is clamped to the first/last
+     * position, and a negative index means the first position. The favorite
+     * keeps its coordinates, its attributes and its star. When the destination
+     * group already holds a favorite of that name the move fails and both groups
+     * are left unchanged.
+     *
+     * @param groupName       group the favorite currently belongs to
+     * @param favName         favorite name to move
+     * @param targetGroupName group to move the favorite into
+     * @param newIndex        0-based target position in the destination group
+     * @return true if moved, false if either group or the favorite is not found, or if the
+     *         destination group already holds a favorite of that name
+     */
+    public native boolean moveFavoriteToGroup(String groupName, String favName,
+                                              String targetGroupName, int newIndex);
+
+    /**
+     * Move a starred favorite to another position in the starred order.
+     *
+     * The starred order spans all groups. The target index is 0-based and refers
+     * to that order after the favorite has been removed from its current
+     * position; an index outside the order bounds is clamped to the first/last
+     * position, and a negative index means the first position.
+     *
+     * @param groupName group name
+     * @param favName   favorite name
+     * @param newIndex  0-based target position in the starred order
+     * @return true if moved (or already at that position), false if the group or the favorite is not
+     *         found, or if the favorite is not starred
+     */
+    public native boolean moveStarredFavorite(String groupName, String favName, int newIndex);
+
+    /**
+     * Return the starred favorites in their order, spanning all groups.
+     *
+     * Each entry names the group that holds it. Only starred favorites appear.
+     *
+     * @return array of starred entries in their order, or an empty array if none are starred
+     */
+    public native StarredFavoriteLocation[] getStarredFavorites();
+
+    /**
+     * The format version of the loaded favorites file.
+     *
+     * @return the version found in the file, or -1 when no favorites file is loaded
+     */
+    public native int getFavoriteFileFormatVersion();
+
+    /**
+     * Whether the loaded favorites file carries a version this client can read
+     * and write.
+     *
+     * <p>False means the file was written by a newer client: it is not read as
+     * groups and every favorite changing call, including
+     * {@link #saveFavoriteLocations(String, FavoriteLocationGroup[])}, reports
+     * failure instead of overwriting it. This is how a caller tells "written by a
+     * newer version" apart from "no favorites".</p>
+     *
+     * @return true if the loaded file can be read and written, false if the version is
+     *         unsupported or no file is loaded
+     */
+    public native boolean isFavoriteFileFormatSupported();
 
     /**
      * Set or clear the starred flag on a favorite.

@@ -19,10 +19,34 @@
 
 #include <osmscout/util/TileId.h>
 #include <osmscout/util/Geometry.h>
+#include <osmscout/log/Logger.h>
 
 #include <tuple>
 
 namespace osmscout {
+
+  namespace {
+    /**
+     * The magnification level selects the cell size from the fixed cell dimension table. A level
+     * outside that table has no cell size, so the finest entry is used instead of reading past
+     * the table. Callers are expected to pass a valid level (see Magnification and the
+     * magnification validation in the Java bridge); this keeps a wrong level from turning into
+     * an out-of-bounds read in a build without asserts.
+     */
+    const CellDimension& CellDimensionForLevel(uint32_t level)
+    {
+      if (level>=cellDimension.size()) {
+        osmscout::log.Error() << "TileId: magnification level " << level
+                             << " is outside the supported range 0.."
+                             << (cellDimension.size()-1)
+                             << ", using the finest cell size";
+
+        return cellDimension[cellDimension.size()-1];
+      }
+
+      return cellDimension[level];
+    }
+  }
 
   /**
    * Ceate a new tile by passing magnification and tile coordinates
@@ -56,8 +80,8 @@ namespace osmscout {
   {
     uint32_t level=magnification.GetLevel();
 
-    return GeoCoord(y*cellDimension[level].height-90.0,
-                    x*cellDimension[level].width-180.0);
+    return GeoCoord(y*CellDimensionForLevel(level).height-90.0,
+                    x*CellDimensionForLevel(level).width-180.0);
   }
 
   /**
@@ -72,7 +96,7 @@ namespace osmscout {
    */
   GeoBox TileId::GetBoundingBox(const MagnificationLevel& level) const
   {
-    const auto& ourCellDimension=cellDimension[level.Get()];
+    const auto& ourCellDimension=CellDimensionForLevel(level.Get());
 
     return GeoBox(GeoCoord(y*ourCellDimension.height-90.0,
                            x*ourCellDimension.width-180.0),
@@ -92,7 +116,7 @@ namespace osmscout {
    */
   GeoBox TileId::GetBoundingBox(const Magnification& magnification) const
   {
-   const auto& ourCellDimension=cellDimension[magnification.GetLevel()];
+   const auto& ourCellDimension=CellDimensionForLevel(magnification.GetLevel());
 
     return GeoBox(GeoCoord(y*ourCellDimension.height-90.0,
                            x*ourCellDimension.width-180.0),
@@ -114,8 +138,8 @@ namespace osmscout {
   TileId TileId::GetTile(const Magnification& magnification,
                          const GeoCoord& coord)
   {
-    return {uint32_t((coord.GetLon()+180.0)/cellDimension[magnification.GetLevel()].width),
-            uint32_t((coord.GetLat()+90.0)/cellDimension[magnification.GetLevel()].height)};
+    return {uint32_t((coord.GetLon()+180.0)/CellDimensionForLevel(magnification.GetLevel()).width),
+            uint32_t((coord.GetLat()+90.0)/CellDimensionForLevel(magnification.GetLevel()).height)};
   }
 
   /**
@@ -132,8 +156,8 @@ namespace osmscout {
   TileId TileId::GetTile(const MagnificationLevel& level,
                          const GeoCoord& coord)
   {
-    return {uint32_t((coord.GetLon()+180.0)/cellDimension[level.Get()].width),
-            uint32_t((coord.GetLat()+90.0)/cellDimension[level.Get()].height)};
+    return {uint32_t((coord.GetLon()+180.0)/CellDimensionForLevel(level.Get()).width),
+            uint32_t((coord.GetLat()+90.0)/CellDimensionForLevel(level.Get()).height)};
   }
 
   TileKey::TileKey(const Magnification& magnification,
@@ -145,10 +169,10 @@ namespace osmscout {
 
   GeoBox TileKey::GetBoundingBox() const
   {
-    return GeoBox(GeoCoord(id.GetY()*cellDimension[level].height-90.0,
-                           id.GetX()*cellDimension[level].width-180.0),
-                  GeoCoord((id.GetY()+1)*cellDimension[level].height-90.0,
-                           (id.GetX()+1)*cellDimension[level].width-180.0));
+    return GeoBox(GeoCoord(id.GetY()*CellDimensionForLevel(level).height-90.0,
+                           id.GetX()*CellDimensionForLevel(level).width-180.0),
+                  GeoCoord((id.GetY()+1)*CellDimensionForLevel(level).height-90.0,
+                           (id.GetX()+1)*CellDimensionForLevel(level).width-180.0));
   }
 
 

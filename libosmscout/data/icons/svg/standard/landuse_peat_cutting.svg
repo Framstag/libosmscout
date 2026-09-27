@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+  <rect width="64" height="64" fill="#b3b3b3"/>
+  <rect x="12" y="36" width="40" height="12" fill="#555555"/>
+  <rect x="18" y="24" width="28" height="12" fill="#555555"/>
+  <rect x="24" y="12" width="16" height="12" fill="#555555"/>
+</svg>

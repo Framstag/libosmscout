@@ -862,6 +862,13 @@ namespace osmscout {
                               HDC hdc,
                               RenderSteps startStep,
                               RenderSteps endStep) {
+    // GDI+ measures with the font resolved from the font name and the font size scaled by the
+    // projection, so that state is the measurement environment of the label layouter
+    m_labelLayouter.SetMeasurementEnvironment(BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                                         parameter.GetFontSize(),
+                                                                         projection.GetDPI(),
+                                                                         projection.GetMagnification().GetLevel()));
+
     if (startStep==RenderSteps::Initialize) {
       if (m_pBuffer == nullptr || ((GdiRender *) m_pBuffer)->m_pGraphics->GetHDC()!=hdc) {
         if (m_pBuffer != nullptr) {

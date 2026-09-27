@@ -1,0 +1,36 @@
+0 symbol x=12.885 y=32.054 w=5.669 h=7.559 priority=18446744073709551615 label=christian_church_cross
+1 symbol x=8.522 y=153.941 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+2 symbol x=55.188 y=150.176 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+3 symbol x=88.938 y=150.226 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+4 symbol x=169.813 y=200.239 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+5 symbol x=219.563 y=215.353 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+6 symbol x=235.147 y=204.154 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+7 symbol x=174.210 y=133.604 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+8 symbol x=17.000 y=105.989 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+9 symbol x=4.710 y=86.906 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+10 symbol x=35.813 y=81.635 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+11 symbol x=90.438 y=112.265 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+12 symbol x=82.085 y=74.704 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+13 symbol x=97.210 y=71.189 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+14 symbol x=248.210 y=42.267 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+15 symbol x=69.960 y=19.771 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+16 symbol x=125.063 y=-2.773 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+17 symbol x=168.897 y=10.683 w=5.896 h=3.704 priority=18446744073709551615 label=amenity_bicycle_parking
+18 symbol x=179.438 y=53.817 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+19 symbol x=250.750 y=59.441 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+20 symbol x=152.250 y=126.476 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+21 symbol x=47.063 y=130.141 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+22 symbol x=229.438 y=177.542 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+23 symbol x=221.031 y=155.147 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+24 symbol x=214.375 y=130.593 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+25 symbol x=25.000 y=240.560 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+26 symbol x=255.719 y=156.277 w=8.315 h=9.827 priority=18446744073709551615 label=amenity_parking
+27 text x=248.500 y=182.299 w=15.000 h=6.000 priority=22 label=B 54
+28 text x=192.944 y=228.403 w=15.000 h=6.000 priority=22 label=B 54
+29 text x=120.500 y=211.783 w=15.000 h=6.000 priority=22 label=B 54
+30 text x=-2.280 y=39.613 w=36.000 h=6.000 priority=45 label=Petrikirche
+31 text x=44.970 y=56.395 w=47.000 h=35.000 priority=45 label=Propsteikirche St. Johannes Baptist
+32 text x=170.001 y=19.264 w=30.000 h=24.000 priority=45 label=St. Reinoldi-Kirche
+33 overlay x=85.783 y=36.797 w=79.000 h=28.000 priority=11 label=Mitte
+34 contour x=0.000 y=0.000 w=0.000 h=0.000 priority=26 label=
+35 contour x=0.000 y=0.000 w=0.000 h=0.000 priority=26 label=

@@ -178,6 +178,16 @@ else()
 	message("Skip WaterIndex test, libosmscout-import is missing.")
 endif()
 
+#---- Java client JNI signatures
+# Host-side comparison of the Java native declarations with the JNI functions: a parameter read
+# with the wrong type yields garbage instead of an error (see the magnification incident).
+#
+# Not registered on Windows: `bash` resolves to C:\Windows\System32\bash.exe there, the WSL
+# launcher, and not to a shell, so the script never runs (same guard in Tests/meson.build).
+if(TARGET osmscout_client_java AND NOT WIN32)
+	add_test(NAME JniSignatureParityTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-jni-signatures.sh)
+endif()
+
 #---- WorkQueue
 osmscout_test_project(NAME WorkQueueTest SOURCES src/WorkQueueTest.cpp)
 
@@ -226,6 +236,12 @@ endif()
 
 #---- StringUtils
 osmscout_test_project(NAME StringUtilsTest SOURCES src/StringUtilsTest.cpp)
+
+#---- StringMatcher
+osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
+
+#---- SearchScope
+osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
@@ -364,6 +380,13 @@ else()
 	message("Skip PerformanceTest test, libosmscout-map is missing.")
 endif()
 
+#---- LabelLayouterTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+	osmscout_test_project(NAME LabelLayouterTest SOURCES src/LabelLayouterTest.cpp TARGET OSMScout::Map)
+else()
+	message("Skip LabelLayouterTest, libosmscout-map is missing.")
+endif()
+
 #---- LabelPathTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	osmscout_test_project(NAME LabelPathTest SOURCES src/LabelPathTest.cpp TARGET OSMScout::Map)
@@ -417,6 +440,14 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   set_tests_properties(StyleConfigSymbolsTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 else()
   message("Skip StyleConfigSymbols test, libosmscout-map is missing.")
+endif()
+
+#---- RoadStyleColors
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME RoadStyleColorsTest SOURCES src/RoadStyleColorsTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(RoadStyleColorsTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip RoadStyleColors test, libosmscout-map is missing.")
 endif()
 
 #---- RouteStyleColors
@@ -529,6 +560,13 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME MapPainterLabelCullingTest SOURCES src/MapPainterLabelCullingTest.cpp TARGET OSMScout::Map)
 else()
   message("Skip MapPainterLabelCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterLabelReuseTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterLabelReuseTest SOURCES src/MapPainterLabelReuseTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterLabelReuse test, libosmscout-map is missing.")
 endif()
 
 #---- TextMetricsTest

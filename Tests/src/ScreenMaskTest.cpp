@@ -5,6 +5,80 @@
 
 using namespace osmscout;
 
+TEST_CASE("ScreenMask reset clears the marks of a frame")
+{
+  size_t         screenWidth=200;
+  size_t         screenHeight=200;
+
+  ScreenMask     screenMask(screenWidth,screenHeight);
+
+  ScreenRectMask screenRectMask(screenWidth,ScreenPixelRectangle(10,10,20,20));
+
+  REQUIRE_FALSE(screenMask.HasCollision(screenRectMask));
+
+  screenMask.AddMask(screenRectMask);
+
+  REQUIRE(screenMask.HasCollision(screenRectMask));
+
+  // The marks of a frame must not leak into the next frame
+  screenMask.Reset(screenWidth,screenHeight);
+
+  REQUIRE_FALSE(screenMask.HasCollision(screenRectMask));
+
+  screenMask.AddMask(screenRectMask);
+
+  REQUIRE(screenMask.HasCollision(screenRectMask));
+
+  // A taller viewport keeps the marks away
+  screenMask.Reset(screenWidth,screenHeight+100);
+
+  REQUIRE_FALSE(screenMask.HasCollision(screenRectMask));
+
+  // A viewport that is smaller than the mask keeps the mask outside
+  screenMask.Reset(screenWidth,20);
+
+  ScreenRectMask belowViewport(screenWidth,ScreenPixelRectangle(10,100,20,20));
+
+  REQUIRE_FALSE(screenMask.HasCollision(belowViewport));
+
+  screenMask.AddMask(screenRectMask);
+
+  REQUIRE(screenMask.HasCollision(screenRectMask));
+}
+
+TEST_CASE("ScreenRectMask reset rebuilds the mask")
+{
+  ScreenRectMask screenRectMask(100,ScreenPixelRectangle(10,10,10,10));
+
+  REQUIRE(screenRectMask.GetFirstRow()==10);
+  REQUIRE(screenRectMask.GetCell(0)==0xffc00);
+
+  screenRectMask.Reset(100,ScreenPixelRectangle(10,20,10,10));
+
+  REQUIRE(screenRectMask.GetFirstRow()==20);
+  REQUIRE(screenRectMask.GetCell(0)==0xffc00);
+
+  // A rectangle that lies to the right of the screen is an empty mask
+  screenRectMask.Reset(100,ScreenPixelRectangle(120,10,10,10));
+
+  REQUIRE(screenRectMask.GetFirstCell()==0);
+  REQUIRE(screenRectMask.GetCell(0)==0);
+
+  // A wider screen needs further cells
+  screenRectMask.Reset(200,ScreenPixelRectangle(64,10,10,10));
+
+  REQUIRE(screenRectMask.GetFirstCell()==1);
+  REQUIRE(screenRectMask.GetLastCell()==1);
+  REQUIRE(screenRectMask.GetCell(1)==0x3ff); // 10 bits, starting at the first bit of the cell
+
+  // The mask still works as before after it was reset
+  ScreenMask screenMask(200,200);
+
+  screenMask.AddMask(screenRectMask);
+
+  REQUIRE(screenMask.HasCollision(screenRectMask));
+}
+
 TEST_CASE("Simple ScreenRectMask")
 {
   size_t screenWidth=100;

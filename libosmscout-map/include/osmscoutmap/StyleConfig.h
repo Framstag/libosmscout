@@ -717,6 +717,12 @@ namespace osmscout {
      */
     std::vector<std::string> GetSymbolNames() const;
 
+    /**
+     * Returns the names of all pattern fills used in the stylesheet,
+     * sorted alphabetically
+     */
+    std::vector<std::string> GetPatternNames() const;
+
     void Postprocess();
 
     TypeConfigRef GetTypeConfig() const;

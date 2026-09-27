@@ -21,9 +21,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <array>
 #include <memory>
 #include <set>
-#include <array>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <osmscoutmap/MapImportExport.h>
 
@@ -132,6 +135,14 @@ namespace osmscout {
     bool Intersects(const ScreenRectMask& other) const;
 
     /**
+     * Rebuild the mask for the given rectangle, reusing the bitmask of the previous use. A mask
+     * is only valid for one screen width and one rectangle, so it has to be reset before each
+     * use.
+     */
+    void Reset(size_t screenWidth,
+               const ScreenPixelRectangle &rect);
+
+    /**
      * Return starting index of row (y-coordinate of rectangle)
      * @return index
      */
@@ -179,11 +190,18 @@ namespace osmscout {
   {
   private:
     std::vector<uint64_t> bitmask;
-    size_t                rowLength;
-    size_t                height;
+    size_t                rowLength=0;
+    size_t                height=0;
 
   public:
+    ScreenMask() = default;
     ScreenMask(size_t width, size_t height);
+
+    /**
+     * Reset the mask for a frame: clear all marks and adopt the given viewport size. The bitmask
+     * is reused, so a repeated frame of the same size does not allocate it again.
+     */
+    void Reset(size_t width, size_t height);
 
     void AddMask(const ScreenRectMask& mask);
     bool HasCollision(const ScreenRectMask& mask) const;
@@ -234,6 +252,19 @@ namespace osmscout {
   OSMSCOUT_MAP_API double GetLabelExtentBound(size_t characterCount,
                                               size_t wordCount,
                                               double fontSizePixel);
+
+  /**
+   * Build the measurement environment of a map backend from the state every backend shares:
+   * the font, the factor its size is scaled with, the resolution and the magnification of the
+   * projection. A backend appends the state of its drawing target, for example the scale of a
+   * cairo surface or the DPI of a Qt device.
+   *
+   * The label layouter drops its remembered measurements when the environment changes.
+   */
+  OSMSCOUT_MAP_API std::string BuildMeasurementEnvironment(const std::string& fontName,
+                                                           double fontSize,
+                                                           double dpi,
+                                                           size_t magnification);
 }
 
 #endif

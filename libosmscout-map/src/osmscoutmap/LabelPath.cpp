@@ -34,6 +34,15 @@ namespace osmscout {
   {
   }
 
+  void LabelPath::Clear()
+  {
+    length=0.0;
+    endDistance=0.0;
+    segments.clear();
+    offsetIndex.clear();
+    offsetIndex.push_back(0);
+  }
+
   void LabelPath::AddPoint(const Vertex2D& point)
   {
     if (segments.empty()){

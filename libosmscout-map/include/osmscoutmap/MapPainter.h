@@ -312,6 +312,10 @@ namespace osmscout {
     std::vector<CoordBufferRange>   ringCoordRanges; //!< Reused coordinate ranges of the rings of the area currently prepared
     std::vector<Point>              ringNodes;       //!< Reused node store for a ring that is stored as segments
 
+    std::vector<LabelData>          labelLayoutData; //!< Reused label list of the point labels of an object
+    std::vector<GeoCoord>           shieldGridPoints;//!< Reused grid points of a way carrying a shield label
+    LabelPath                       contourLabelPath;//!< Reused path of a label that follows a way
+
     /**                           L
      Precalculations
       */

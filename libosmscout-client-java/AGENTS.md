@@ -15,7 +15,7 @@
 
 | Path | Purpose |
 |------|---------|
-| `java/com/framstag/libosmscout/client/` | **Java API** — 19 source files: client, builder, data types, callbacks, enums |
+| `java/com/framstag/libosmscout/client/` | **Java API** — 20 source files: client, builder, data types, callbacks, enums |
 | `src/OSMScoutClient.cpp` | **C++ JNI implementation** — 4172 lines, single translation unit |
 | `src/meson.build` | Meson build for native shared library |
 | `java/meson.build` | Meson build for Java JAR + JNI header generation |

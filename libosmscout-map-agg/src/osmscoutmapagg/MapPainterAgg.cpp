@@ -736,6 +736,13 @@ namespace osmscout {
     std::lock_guard<std::mutex> guard(mutex);
     bool                        result;
 
+    // AGG measures with the font file resolved from the font name, scaled by the font size
+    // and the projection, so that state is the measurement environment of the layouter
+    labelLayouter.SetMeasurementEnvironment(BuildMeasurementEnvironment(parameter.GetFontName(),
+                                                                        parameter.GetFontSize(),
+                                                                        projection.GetDPI(),
+                                                                        projection.GetMagnification().GetLevel()));
+
     if (startStep==RenderSteps::Initialize) {
       this->pf=pf;
 

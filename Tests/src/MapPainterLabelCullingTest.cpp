@@ -240,14 +240,15 @@ namespace {
             height};
   }
 
-  TestLayouter MakeLayouter(TestTextLayouter& textLayouter)
+  /**
+   * Prepare a layouter of the test for a frame: it lays out against the visible viewport of the
+   * test without a layout overlap. The layouter reuses its frame state, so it is neither copyable
+   * nor movable and the caller has to own it; it is therefore configured in place.
+   */
+  void ConfigureLayouter(TestLayouter& layouter)
   {
-    TestLayouter layouter(&textLayouter);
-
     layouter.SetViewport(VisibleViewport());
     layouter.SetLayoutOverlap(0);
-
-    return layouter;
   }
 
   /**
@@ -270,10 +271,12 @@ TEST_CASE("A label outside the view is not measured","[MapPainterLabelCulling]")
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
 
-  const auto             projection=MakeProjection();
-  auto                   data=MakeTextLabel("Hauptstrasse");
+  ConfigureLayouter(layouter);
+
+  const auto projection=MakeProjection();
+  auto       data=MakeTextLabel("Hauptstrasse");
 
   // Far outside the bound the label layouter uses
   osmscout::Vertex2D farOutside(20.0*CanvasWidth,20.0*CanvasHeight);
@@ -314,10 +317,12 @@ TEST_CASE("A label that reaches into the view is measured","[MapPainterLabelCull
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
 
-  const auto             projection=MakeProjection();
-  auto                   data=MakeTextLabel("Hauptstrasse");
+  ConfigureLayouter(layouter);
+
+  const auto projection=MakeProjection();
+  auto       data=MakeTextLabel("Hauptstrasse");
 
   // The anchor is outside the viewport, but the label is wide enough to reach into it
   osmscout::Vertex2D anchor(CanvasWidth+10.0,CanvasHeight/2.0);
@@ -354,14 +359,16 @@ TEST_CASE("Icon and element list labels outside the view are not stored","[MapPa
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
 
-  const auto             projection=MakeProjection();
+  ConfigureLayouter(layouter);
 
-  auto                   icon=MakeIconLabel(14.0,14.0);
+  const auto         projection=MakeProjection();
 
-  osmscout::Vertex2D     farOutside(20.0*CanvasWidth,CanvasHeight/2.0);
-  osmscout::Vertex2D     inside(CanvasWidth/2.0,CanvasHeight/2.0);
+  auto               icon=MakeIconLabel(14.0,14.0);
+
+  osmscout::Vertex2D farOutside(20.0*CanvasWidth,CanvasHeight/2.0);
+  osmscout::Vertex2D inside(CanvasWidth/2.0,CanvasHeight/2.0);
 
   // An icon element far outside the view is not stored, an icon inside the view is
   layouter.RegisterLabel(projection,
@@ -432,12 +439,14 @@ TEST_CASE("Off-view labels do not add measurements","[MapPainterLabelCulling]")
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
 
-  const auto             projection=MakeProjection();
-  auto                   data=MakeTextLabel("Hauptstrasse");
+  ConfigureLayouter(layouter);
 
-  constexpr size_t       farLabelCount=1000;
+  const auto       projection=MakeProjection();
+  auto             data=MakeTextLabel("Hauptstrasse");
+
+  constexpr size_t farLabelCount=1000;
 
   for (size_t i=0; i<farLabelCount; i++) {
     osmscout::Vertex2D anchor(6.0*CanvasWidth+10.0*(double)i,
@@ -477,10 +486,12 @@ TEST_CASE("The stored labels are the labels that can appear","[MapPainterLabelCu
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
 
-  const auto             projection=MakeProjection();
-  auto                   data=MakeTextLabel("Hauptstrasse");
+  ConfigureLayouter(layouter);
+
+  const auto projection=MakeProjection();
+  auto       data=MakeTextLabel("Hauptstrasse");
 
   // Positions from inside the view to far outside of it, on both axes
   std::vector<osmscout::Vertex2D> anchors;
@@ -496,8 +507,9 @@ TEST_CASE("The stored labels are the labels that can appear","[MapPainterLabelCu
   size_t reachTouches=0;
 
   for (const auto& anchor : anchors) {
-    bool drawnByTheLabelStage=TextElementRectangle(projection,parameter,data,anchor).Intersects(VisibleViewport());
-    bool reachTouchesViewport=ReachBox(projection,parameter,{data},anchor).Intersects(VisibleViewport());
+    bool   drawnByTheLabelStage=TextElementRectangle(projection,parameter,data,anchor).Intersects(VisibleViewport());
+    bool   reachTouchesViewport=ReachBox(projection,parameter,{data},anchor).Intersects(VisibleViewport());
+    size_t measurementsBefore=textLayouter.LayoutCalls();
 
     if (reachTouchesViewport) {
       reachTouches++;
@@ -522,8 +534,10 @@ TEST_CASE("The stored labels are the labels that can appear","[MapPainterLabelCu
       mustBeStored++;
     }
     else if (!reachTouchesViewport) {
-      // The label cannot reach the layout viewport, so it must not be stored
+      // The label cannot reach the layout viewport, so it must neither be stored nor measured
       mustNotBeStored++;
+
+      REQUIRE(textLayouter.LayoutCalls()==measurementsBefore);
 
       if (storedCount>0) {
         REQUIRE(stored.size()==storedCount);
@@ -540,9 +554,12 @@ TEST_CASE("The stored labels are the labels that can appear","[MapPainterLabelCu
 
   REQUIRE(mustBeStored>0);
   REQUIRE(mustNotBeStored>0);
+  REQUIRE(reachTouches>0);
 
-  // A label is measured exactly when its reach can touch the layout viewport
-  REQUIRE(textLayouter.LayoutCalls()==reachTouches);
+  // A label is measured exactly when its reach can touch the layout viewport, and the measurement
+  // is remembered per measurement key (text, font, font size, proposed width, wrapping), so the
+  // repeated label of this case is measured once instead of once per registration
+  REQUIRE(textLayouter.LayoutCalls()==1);
 }
 
 /**
@@ -556,7 +573,9 @@ TEST_CASE("Labels of a frame without a known viewport are kept","[MapPainterLabe
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
+
+  ConfigureLayouter(layouter);
 
   const auto projection=MakeProjection();
   auto       data=MakeTextLabel("Hauptstrasse");
@@ -600,12 +619,14 @@ TEST_CASE("Labels in the layout margin are kept","[MapPainterLabelCulling]")
 {
   TestTextLayouter       textLayouter;
   osmscout::MapParameter parameter=MakeDefaultParameter();
-  auto                   layouter=MakeLayouter(textLayouter);
+  TestLayouter           layouter(&textLayouter);
+
+  ConfigureLayouter(layouter);
 
   const auto projection=MakeProjection();
   auto       data=MakeTextLabel("Hauptstrasse");
 
-  double margin=LayoutMargin(projection,parameter);
+  double     margin=LayoutMargin(projection,parameter);
 
   REQUIRE(margin>0.0);
 

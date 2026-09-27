@@ -47,10 +47,17 @@ cd JavaScout
 mvn test -Dnative.lib.dir=/path/to/build/lib
 ```
 
+Tests that build a JavaFX dialog or stage need a display; where there is none, run the module under
+`xvfb-run` (see the favorites ordering test below).
+
 Tests requiring native library:
 - `OSMScoutClientNavigationTest` — route calculation via JNI
 - `OSMScoutClientNavigationLiveTest` — live navigation via JNI
 - `OSMScoutClientImportGpxTest` — GPX import via JNI
+- `OSMScoutClientFavoriteOrderingTest` — favorites ordering and file version state via JNI
+- `FavLocationDialogOrderingTest` — the favorites dialog and picker driven for real (needs a display,
+  so run it under `xvfb-run` where there is none; it skips itself when the toolkit or the native
+  library is missing)
 
 Pure unit tests (no native lib needed):
 - `ConfigTest`, `MapRendererStateTest`, `TrackPlayerTest`

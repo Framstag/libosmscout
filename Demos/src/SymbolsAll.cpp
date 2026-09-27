@@ -77,6 +77,7 @@ namespace {
     std::string output{"symbols-output"};
     std::string ost;
     std::string backendStr{"all"};
+    std::vector<std::string> patternPaths;
     double      dpi=96.0;
     size_t      size=256;
   };
@@ -121,6 +122,12 @@ namespace {
                                               }),
                 "backend",
                 "Rendering backend: cairo, svg or all (" + args.backendStr + ")",
+                false);
+      AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
+                                                args.patternPaths.push_back(value);
+                                              }),
+                "pattern-path",
+                "Directory to search for pattern images (repeatable; default: standard icon directory next to the stylesheet)",
                 false);
       AddOption(osmscout::CmdLineDoubleOption([this](const double& value) {
                                                 args.dpi=value;
@@ -196,6 +203,27 @@ namespace {
 
     if (std::filesystem::exists(sibling)) {
       return sibling.string();
+    }
+
+    return {};
+  }
+
+  /**
+   * Resolve the directories to search for pattern images: --pattern-path
+   * or the standard icon directory next to the stylesheet
+   */
+  std::vector<std::string> ResolvePatternPaths(const Arguments& args)
+  {
+    if (!args.patternPaths.empty()) {
+      return args.patternPaths;
+    }
+
+    std::filesystem::path stylesheet(args.stylesheet);
+    std::filesystem::path icons=stylesheet.parent_path() /
+                                 "../libosmscout/data/icons/14x14/standard";
+
+    if (std::filesystem::exists(icons)) {
+      return {icons.string()};
     }
 
     return {};
@@ -336,6 +364,151 @@ namespace {
                       osmscout::Vertex2D(static_cast<double>(size)/2.0,
                                          static_cast<double>(size)/2.0),
                       scale);
+
+      cairo_set_source_rgb(cairo,0.0,0.0,0.0);
+      cairo_move_to(cairo,5.0,static_cast<double>(size)+16.0);
+      cairo_show_text(cairo,names[i].c_str());
+
+      cairo_restore(cairo);
+    }
+
+    bool ok=cairo_surface_write_to_png(surface,path.c_str())==CAIRO_STATUS_SUCCESS;
+
+    cairo_destroy(cairo);
+    cairo_surface_destroy(surface);
+
+    return ok;
+  }
+
+  /**
+   * Render a single pattern tile via the Cairo backend into a PNG file,
+   * scaled to the canvas size with nearest-neighbor filtering
+   */
+  bool RenderPatternCairo(const std::string& patternPath,
+                          const std::string& patternName,
+                          const std::string& path,
+                          size_t size)
+  {
+    std::string filename=(std::filesystem::path(patternPath) /
+                          (patternName+".png")).string();
+
+    cairo_surface_t * tile=cairo_image_surface_create_from_png(filename.c_str());
+
+    if (tile==nullptr ||
+        cairo_surface_status(tile)!=CAIRO_STATUS_SUCCESS) {
+      return false;
+    }
+
+    int tileWidth=cairo_image_surface_get_width(tile);
+    int tileHeight=cairo_image_surface_get_height(tile);
+
+    if (tileWidth<=0 || tileHeight<=0) {
+      cairo_surface_destroy(tile);
+
+      return false;
+    }
+
+    cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                         static_cast<int>(size),
+                                                         static_cast<int>(size));
+
+    if (surface==nullptr ||
+        cairo_surface_status(surface)!=CAIRO_STATUS_SUCCESS) {
+      cairo_surface_destroy(tile);
+
+      return false;
+    }
+
+    cairo_t * cr=cairo_create(surface);
+
+    cairo_set_source_rgb(cr,1.0,1.0,1.0);
+    cairo_paint(cr);
+
+    cairo_scale(cr,
+                static_cast<double>(size)/tileWidth,
+                static_cast<double>(size)/tileHeight);
+    cairo_set_source_surface(cr,tile,0,0);
+    cairo_pattern_set_filter(cairo_get_source(cr),CAIRO_FILTER_NEAREST);
+    cairo_paint(cr);
+
+    bool ok=cairo_surface_write_to_png(surface,path.c_str())==CAIRO_STATUS_SUCCESS;
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    cairo_surface_destroy(tile);
+
+    return ok;
+  }
+
+  /**
+   * Render a contact sheet of all pattern tiles via the Cairo backend
+   */
+  bool RenderPatternSheetCairo(const std::vector<std::string>& patternPaths,
+                               const std::vector<std::string>& names,
+                               const std::string& path,
+                               size_t size)
+  {
+    const size_t    labelHeight=24;
+
+    size_t          count=names.size();
+    size_t          cols=static_cast<size_t>(std::max(1.0,std::ceil(std::sqrt(static_cast<double>(count)))));
+    size_t          rows=count==0 ? 1 : (count+cols-1)/cols;
+    size_t          cellHeight=size+labelHeight;
+    size_t          width=cols*size;
+    size_t          height=rows*cellHeight;
+
+    cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                         static_cast<int>(width),
+                                                         static_cast<int>(height));
+
+    if (surface==nullptr ||
+        cairo_surface_status(surface)!=CAIRO_STATUS_SUCCESS) {
+      return false;
+    }
+
+    cairo_t * cairo=cairo_create(surface);
+
+    cairo_select_font_face(cairo,
+                           "sans",
+                           CAIRO_FONT_SLANT_NORMAL,
+                           CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cairo,12.0);
+
+    for (size_t i=0; i<count; ++i) {
+      size_t col=i%cols;
+      size_t row=i/cols;
+      double x=static_cast<double>(col*size);
+      double y=static_cast<double>(row*cellHeight);
+
+      cairo_save(cairo);
+      cairo_translate(cairo,x,y);
+
+      cairo_set_source_rgb(cairo,1.0,1.0,1.0);
+      cairo_paint(cairo);
+
+      for (const auto& patternPath : patternPaths) {
+        std::string filename=(std::filesystem::path(patternPath) /
+                              (names[i]+".png")).string();
+        cairo_surface_t * tile=cairo_image_surface_create_from_png(filename.c_str());
+
+        if (tile!=nullptr &&
+            cairo_surface_status(tile)==CAIRO_STATUS_SUCCESS) {
+          int tileWidth=cairo_image_surface_get_width(tile);
+          int tileHeight=cairo_image_surface_get_height(tile);
+
+          if (tileWidth>0 && tileHeight>0) {
+            cairo_scale(cairo,
+                        static_cast<double>(size)/tileWidth,
+                        static_cast<double>(size)/tileHeight);
+            cairo_set_source_surface(cairo,tile,0,0);
+            cairo_pattern_set_filter(cairo_get_source(cairo),CAIRO_FILTER_NEAREST);
+            cairo_paint(cairo);
+          }
+
+          cairo_surface_destroy(tile);
+          break;
+        }
+      }
 
       cairo_set_source_rgb(cairo,0.0,0.0,0.0);
       cairo_move_to(cairo,5.0,static_cast<double>(size)+16.0);
@@ -549,12 +722,18 @@ int main(int argc, char* argv[])
   }
 
   std::vector<std::string> names=styleConfig->GetSymbolNames();
+  std::vector<std::string> patternNames=styleConfig->GetPatternNames();
 
-  std::cout << "SymbolsAll: " << names.size() << " symbols in '"
+  std::cout << "SymbolsAll: " << names.size() << " symbols, "
+            << patternNames.size() << " patterns in '"
             << args.stylesheet << "'" << std::endl;
 
   if (args.list) {
     for (const auto& name : names) {
+      std::cout << name << std::endl;
+    }
+
+    for (const auto& name : patternNames) {
       std::cout << name << std::endl;
     }
 
@@ -582,6 +761,14 @@ int main(int argc, char* argv[])
 
   size_t failures=0;
 
+  std::vector<std::string> patternPaths=ResolvePatternPaths(args);
+
+  if (!patternNames.empty() && patternPaths.empty()) {
+    std::cerr << "WARNING: Stylesheet uses " << patternNames.size()
+              << " pattern(s) but no pattern image directory found. "
+              << "Use --pattern-path." << std::endl;
+  }
+
 #if defined(HAVE_OSMSCOUT_MAP_CAIRO)
   if (renderCairo) {
     for (const auto& name : names) {
@@ -597,6 +784,26 @@ int main(int argc, char* argv[])
       }
     }
 
+    for (const auto& name : patternNames) {
+      bool rendered=false;
+
+      for (const auto& patternPath : patternPaths) {
+        std::string path=(std::filesystem::path(args.output) /
+                          (SanitizeFileName(name)+".png")).string();
+
+        if (RenderPatternCairo(patternPath,name,path,args.size)) {
+          std::cout << "  OK   " << path << std::endl;
+          rendered=true;
+          break;
+        }
+      }
+
+      if (!rendered) {
+        std::cerr << "  FAIL " << name << " (pattern image not found)" << std::endl;
+        ++failures;
+      }
+    }
+
     if (args.sheet) {
       std::string path=(std::filesystem::path(args.output) / "symbols.png").string();
 
@@ -606,6 +813,18 @@ int main(int argc, char* argv[])
       else {
         std::cerr << "  FAIL " << path << std::endl;
         ++failures;
+      }
+
+      if (!patternNames.empty() && !patternPaths.empty()) {
+        std::string patternPath=(std::filesystem::path(args.output) / "patterns.png").string();
+
+        if (RenderPatternSheetCairo(patternPaths,patternNames,patternPath,args.size)) {
+          std::cout << "  OK   " << patternPath << std::endl;
+        }
+        else {
+          std::cerr << "  FAIL " << patternPath << std::endl;
+          ++failures;
+        }
       }
     }
   }

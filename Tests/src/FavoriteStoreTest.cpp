@@ -329,3 +329,262 @@ TEST_CASE("A replacement can replace an existing store with different content")
 
   std::filesystem::remove(tmp, ec);
 }
+
+namespace {
+
+// Renders the group order of a store as a comma separated list of names.
+std::string GroupNames(const osmscout::FavoriteStore &store)
+{
+  std::string result;
+
+  for (const auto &group : store.GetGroups()) {
+    if (!result.empty()) {
+      result += ',';
+    }
+    result += group.name;
+  }
+
+  return result;
+}
+
+// Renders a group's favorite order as a comma separated list of names.
+std::string FavoriteNames(const osmscout::FavoriteStore &store,
+                          const std::string &groupName)
+{
+  std::string result;
+
+  for (const auto &group : store.GetGroups()) {
+    if (group.name!=groupName) {
+      continue;
+    }
+
+    for (const auto &fav : group.favorites) {
+      if (!result.empty()) {
+        result += ',';
+      }
+      result += fav.name;
+    }
+  }
+
+  return result;
+}
+
+// Renders the starred order of a store as a comma separated list of
+// group/favorite pairs.
+std::string StarredNames(const osmscout::FavoriteStore &store)
+{
+  std::string result;
+
+  for (const auto &entry : store.GetStarred()) {
+    if (!result.empty()) {
+      result += ',';
+    }
+    result += entry.groupName + "/" + entry.favorite.name;
+  }
+
+  return result;
+}
+
+osmscout::FavLocationGroup MakeGroup(const std::string &name,
+                                     const std::vector<std::string> &favNames)
+{
+  osmscout::FavLocationGroup group;
+  group.name = name;
+
+  for (const auto &favName : favNames) {
+    osmscout::FavLocation fav;
+    fav.name = favName;
+    fav.lat = 51.0;
+    fav.lon = 7.0;
+    group.favorites.push_back(std::move(fav));
+  }
+
+  return group;
+}
+
+}
+
+TEST_CASE("The store keeps the group order it is given")
+{
+  std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_store_group_order_test.json";
+  std::error_code ec;
+  std::filesystem::remove(tmp, ec);
+
+  osmscout::FavoriteStore store;
+
+  // Names whose alphabetical order differs from the supplied order, so a
+  // rebuild that sorted them would be visible
+  std::vector<osmscout::FavLocationGroup> groups;
+  groups.push_back(MakeGroup("Work", {"Office"}));
+  groups.push_back(MakeGroup("Home", {"Flat"}));
+  groups.push_back(MakeGroup("Uni", {}));
+
+  REQUIRE(store.ReplaceAndSave(tmp.string(), groups));
+  REQUIRE(GroupNames(store)=="Work,Home,Uni");
+
+  {
+    osmscout::FavoriteLocationService reread(tmp.string());
+    REQUIRE(GroupNames(store)=="Work,Home,Uni");
+    std::string result;
+    for (const auto &group : reread.GetGroups()) {
+      if (!result.empty()) {
+        result += ',';
+      }
+      result += group.name;
+    }
+    REQUIRE(result=="Work,Home,Uni");
+  }
+
+  // Two replacements with different orders do not mix them
+  std::vector<osmscout::FavLocationGroup> other;
+  other.push_back(MakeGroup("Uni", {}));
+  other.push_back(MakeGroup("Work", {"Office"}));
+  other.push_back(MakeGroup("Home", {"Flat"}));
+
+  REQUIRE(store.ReplaceAndSave(tmp.string(), other));
+  REQUIRE(GroupNames(store)=="Uni,Work,Home");
+
+  {
+    osmscout::FavoriteLocationService reread(tmp.string());
+    std::string result;
+    for (const auto &group : reread.GetGroups()) {
+      if (!result.empty()) {
+        result += ',';
+      }
+      result += group.name;
+    }
+    REQUIRE(result=="Uni,Work,Home");
+  }
+
+  std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("The store forwards the positioning and order operations")
+{
+  std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_store_ordering_ops_test.json";
+  std::error_code ec;
+  std::filesystem::remove(tmp, ec);
+
+  osmscout::FavoriteStore store;
+
+  // Without a loaded store every operation reports failure and the readers are
+  // empty, for the new operations as well
+  CHECK(store.GetStarred().empty());
+  CHECK_FALSE(store.MoveGroup("Work", 0));
+  CHECK_FALSE(store.MoveFavoriteToGroup("Home", "A", "Work", 0));
+  CHECK_FALSE(store.MoveStarred("Home", "A", 0));
+  CHECK(store.GetFileFormatVersion()==osmscout::FavoriteLocationService::UnknownFileFormatVersion);
+  CHECK_FALSE(store.IsFileFormatSupported());
+
+  std::vector<osmscout::FavLocationGroup> groups;
+  groups.push_back(MakeGroup("Home", {"A","B"}));
+  groups.push_back(MakeGroup("Work", {"X","Y"}));
+
+  REQUIRE(store.ReplaceAndSave(tmp.string(), groups));
+
+  // Group order
+  REQUIRE(store.MoveGroup("Work", 0));
+  REQUIRE(GroupNames(store)=="Work,Home");
+
+  // Cross group move
+  REQUIRE(store.MoveFavoriteToGroup("Home", "B", "Work", 1));
+  REQUIRE(FavoriteNames(store, "Home")=="A");
+  REQUIRE(FavoriteNames(store, "Work")=="X,B,Y");
+
+  // Starred order: starring appends, and the order can be arranged
+  REQUIRE(store.SetStarred("Home", "A", true));
+  REQUIRE(store.SetStarred("Work", "B", true));
+  REQUIRE(StarredNames(store)=="Home/A,Work/B");
+  REQUIRE(store.MoveStarred("Work", "B", 0));
+  REQUIRE(StarredNames(store)=="Work/B,Home/A");
+
+  // A refused cross group move is reported and changes nothing
+  REQUIRE(store.AddFavorite("Home", osmscout::FavLocation{"X", 51.0, 7.0, {}}));
+  CHECK_FALSE(store.MoveFavoriteToGroup("Work", "X", "Home", 0));
+  CHECK(FavoriteNames(store, "Work")=="X,B,Y");
+  CHECK(FavoriteNames(store, "Home")=="A,X");
+
+  std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("The store reports the file version and refuses to persist over an unsupported one")
+{
+  std::filesystem::path tmp = std::filesystem::temp_directory_path() / "fav_store_version_test.json";
+  std::error_code ec;
+  std::filesystem::remove(tmp, ec);
+
+  // A file written by a newer client, with content this client must not touch
+  {
+    std::ofstream stream(tmp);
+    stream << R"JSON({
+  "formatVersion": 2,
+  "groups": [
+    { "name": "Work", "attributes": {}, "favorites": [
+      { "name": "Office", "lat": 51.5, "lon": 7.25, "attributes": {} }
+    ] }
+  ]
+}
+)JSON";
+  }
+
+  std::string before = ReadFile(tmp);
+
+  osmscout::FavoriteStore store;
+  REQUIRE(store.ReplaceByPath(tmp.string()));
+
+  REQUIRE(store.GetFileFormatVersion()==2);
+  CHECK_FALSE(store.IsFileFormatSupported());
+  CHECK(store.GetGroups().empty());
+  CHECK(store.GetStarred().empty());
+
+  // A replacement with caller content reports failure and leaves the file alone
+  CHECK_FALSE(store.ReplaceAndSave(tmp.string(), MakeGroups(2, 2, "new")));
+  CHECK(ReadFile(tmp)==before);
+
+  std::filesystem::remove(tmp, ec);
+}
+
+TEST_CASE("The store reports a supported version for the current and the pre-version file")
+{
+  std::filesystem::path current = std::filesystem::temp_directory_path() / "fav_store_version_current_test.json";
+  std::filesystem::path previous = std::filesystem::temp_directory_path() / "fav_store_version_previous_test.json";
+  std::error_code ec;
+  std::filesystem::remove(current, ec);
+  std::filesystem::remove(previous, ec);
+
+  {
+    osmscout::FavoriteStore store;
+    REQUIRE(store.ReplaceAndSave(current.string(), MakeGroups(1, 1, "g")));
+    REQUIRE(store.GetFileFormatVersion()==osmscout::FavoriteLocationService::CurrentFileFormatVersion);
+    CHECK(store.IsFileFormatSupported());
+  }
+
+  {
+    std::ofstream stream(previous);
+    stream << R"JSON({
+  "groups": {
+    "Work": {
+      "name": "Work",
+      "attributes": {},
+      "favorites": [ { "name": "Office", "lat": 51.5, "lon": 7.25, "attributes": {} } ]
+    }
+  }
+}
+)JSON";
+  }
+
+  osmscout::FavoriteStore store;
+  REQUIRE(store.ReplaceByPath(previous.string()));
+  REQUIRE(store.GetFileFormatVersion()==osmscout::FavoriteLocationService::LegacyFileFormatVersion);
+  CHECK(store.IsFileFormatSupported());
+  REQUIRE(store.GetGroups().size()==1);
+  CHECK(store.GetGroups()[0].name=="Work");
+
+  // A pre-version file can be persisted, and the written file is current
+  REQUIRE(store.AddFavorite("Work", osmscout::FavLocation{"Flat", 51.4, 7.2, {}}));
+  REQUIRE(store.ReplaceAndSave(previous.string(), store.GetGroups()));
+  REQUIRE(store.GetFileFormatVersion()==osmscout::FavoriteLocationService::CurrentFileFormatVersion);
+
+  std::filesystem::remove(current, ec);
+  std::filesystem::remove(previous, ec);
+}
