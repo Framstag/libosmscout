@@ -150,16 +150,6 @@ namespace osmscout {
   }
 
   /**
-   * Evict tiles from cache until tile count <= cacheSize
-   */
-  void MapService::CleanupTileCache()
-  {
-    std::lock_guard<std::mutex> lock(stateMutex);
-
-    cache.CleanupCache();
-  }
-
-  /**
    * Evict all tiles from cache (tile count == 0)
    */
   void MapService::FlushTileCache()

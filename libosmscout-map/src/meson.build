@@ -15,7 +15,6 @@ osmscoutmapSrc = [
             'src/osmscoutmap/DataTileCache.cpp',
             'src/osmscoutmap/MapDataAccounting.cpp',
             'src/osmscoutmap/MapDataBudget.cpp',
-            'src/osmscoutmap/MapTileCache.cpp',
             'src/osmscoutmap/MapData.cpp',
             'src/osmscoutmap/MapService.cpp',
             'src/osmscoutmap/MapPainterNoOp.cpp',
