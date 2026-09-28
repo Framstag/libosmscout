@@ -366,4 +366,24 @@ namespace osmscout {
     std::scoped_lock<std::mutex> guard(lookupMutex);
     indexCache.Flush();
   }
+
+  void AreaAreaIndex::SetCacheSize(size_t cacheSize)
+  {
+    std::scoped_lock<std::mutex> guard(lookupMutex);
+    indexCache.SetMaxSize(cacheSize);
+  }
+
+  size_t AreaAreaIndex::GetCacheSize() const
+  {
+    std::scoped_lock<std::mutex> guard(lookupMutex);
+
+    return indexCache.GetMaxSize();
+  }
+
+  size_t AreaAreaIndex::GetCachedEntryCount() const
+  {
+    std::scoped_lock<std::mutex> guard(lookupMutex);
+
+    return indexCache.GetSize();
+  }
 }

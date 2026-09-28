@@ -41,6 +41,8 @@
 
 #include <osmscout/system/Assert.h>
 
+#include <osmscoutmap/MapDataAccounting.h>
+
 namespace osmscout {
 
   /**
@@ -467,6 +469,11 @@ namespace osmscout {
    *
    * The cache will free least recently used tiles first,
    *
+   * The cache is bounded either by the number of tiles it holds or by the accounted weight of
+   * their content (see MapDataAccounting), never by both at the same time: as long as a weight
+   * size is configured, it is the bound that is enforced, because tiles differ widely in the
+   * amount of memory their content occupies and a tile count is no memory bound.
+   *
    */
   class OSMSCOUT_MAP_API DataTileCache
   {
@@ -500,9 +507,15 @@ namespace osmscout {
 
   private:
     size_t             cacheSize;
+    size_t             weightSize=0;   //!< Maximum accounted weight of the cached content, zero if the cache is bounded by its tile count
 
     mutable CacheIndex tileIndex;
     mutable Cache      tileCache;
+
+    /**
+     * Return the accounted weight of the content of the given tile
+     */
+    static size_t GetTileWeight(const Tile& tile);
 
     void ResolveNodesFromParent(Tile& tile,
                                 const Tile& parentTile,
@@ -531,12 +544,38 @@ namespace osmscout {
       return cacheSize;
     }
 
+    /**
+     * Bound the cache by the accounted weight of its content instead of by its tile count. A weight
+     * size of zero returns to the tile count bound.
+     */
+    void SetWeightSize(size_t weightSize);
+
+    /**
+     * Return the maximum accounted weight of the cached content, zero if the cache is bounded by its
+     * tile count
+     */
+    size_t GetWeightSize() const
+    {
+      return weightSize;
+    }
+
+    /**
+     * Return the accounted weight of the content of all cached tiles
+     */
+    size_t GetAccountedWeight() const;
+
      size_t GetCurrentSize() const
     {
       return tileCache.size();
     }
 
     void CleanupCache();
+
+    /**
+     * Drop every cached tile, whatever bound is configured. A tile that a caller still holds stays
+     * alive for that caller, it only leaves the cache.
+     */
+    void Flush();
 
     void InvalidateCache();
 

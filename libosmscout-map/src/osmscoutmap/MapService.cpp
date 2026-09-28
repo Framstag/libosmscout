@@ -86,9 +86,11 @@ namespace osmscout {
     }
   }
 
-  MapService::MapService(const DatabaseRef& database)
+  MapService::MapService(const DatabaseRef& database,
+                         const MapDataBudgetRef& budget)
    : database(database),
      cache(25),
+     budget(budget),
      nodeWorkerThread(&MapService::NodeWorkerLoop,this),
      wayWorkerThread(&MapService::WayWorkerLoop,this),
      wayLowZoomWorkerThread(&MapService::WayLowZoomWorkerLoop,this),
@@ -97,11 +99,17 @@ namespace osmscout {
      routeWorkerThread(&MapService::RouteWorkerLoop,this),
      nextCallbackId(0)
   {
-    // no code
+    if (budget) {
+      budgetContributorId=budget->AddContributor();
+    }
   }
 
   MapService::~MapService()
   {
+    if (budget) {
+      budget->RemoveContributor(budgetContributorId);
+    }
+
     nodeWorkerQueue.Stop();
     wayWorkerQueue.Stop();
     wayLowZoomWorkerQueue.Stop();
@@ -158,9 +166,29 @@ namespace osmscout {
   {
     std::lock_guard<std::mutex> lock(stateMutex);
 
-    size_t size=cache.GetSize();
-    cache.SetSize(0);
-    cache.SetSize(size);
+    cache.Flush();
+  }
+
+  /**
+   * Release the content of the caches of this service
+   */
+  void MapService::ReleaseCaches()
+  {
+    std::lock_guard<std::mutex> lock(stateMutex);
+
+    ReleaseCachesLocked();
+  }
+
+  /**
+   * Release the content of the caches while the caches are locked
+   */
+  void MapService::ReleaseCachesLocked() const
+  {
+    cache.Flush();
+
+    database->FlushCache();
+
+    ReportBudgetUsage();
   }
 
   /**
@@ -172,6 +200,169 @@ namespace osmscout {
     std::lock_guard<std::mutex> lock(stateMutex);
 
     cache.InvalidateCache();
+  }
+
+  /**
+   * Return 'true' if the geographic extent of the database the service serves covers the given area
+   */
+  bool MapService::IsRelevantToView(const GeoBox& viewBox) const
+  {
+    GeoBox databaseBox;
+
+    if (!database->GetBoundingBox(databaseBox)) {
+      // A database whose extent is unknown cannot be shown to be part of the view
+      return false;
+    }
+
+    return databaseBox.Intersects(viewBox);
+  }
+
+  bool MapService::IsRelevantToView(const Projection& projection) const
+  {
+    return IsRelevantToView(projection.GetDimensions());
+  }
+
+  /**
+   * Return the accounted weight of the content of the tile cache and of the object caches of the
+   * database
+   */
+  size_t MapService::GetAccountedWeight() const
+  {
+    size_t weight=cache.GetAccountedWeight();
+
+    Database::DataCacheUsage usage=database->GetDataCacheUsage();
+    MapDataAccounting::Cost    cost;
+
+    cost.nodeCount=usage.nodeCount;
+    cost.wayCount=usage.wayCount;
+    cost.areaCount=usage.areaCount;
+    cost.routeCount=usage.routeCount;
+    cost.indexEntryCount=usage.areaAreaIndexEntryCount;
+
+    return weight+MapDataAccounting::GetWeight(cost);
+  }
+
+  size_t MapService::GetShareWeight() const
+  {
+    if (!budget) {
+      return 0;
+    }
+
+    return budget->GetShareWeight(budgetContributorId);
+  }
+
+  /**
+   * Report the accounted content of the caches of this service to the budget
+   */
+  void MapService::ReportBudgetUsage() const
+  {
+    if (!budget) {
+      return;
+    }
+
+    budget->SetContributorWeight(budgetContributorId,
+                                 GetAccountedWeight());
+  }
+
+  /**
+   * Bound the tile cache and the object caches of the database by the share of the budget that is due
+   * to them
+   */
+  void MapService::ApplyBudgetShare() const
+  {
+    size_t shareWeight=GetShareWeight();
+
+    // The tile cache gets a fraction of the share, the object caches get the rest, because they hold
+    // the bulk of the data of a database
+    size_t tileCacheWeight=shareWeight/divisorOfTileCacheShare;
+
+    if (tileCacheWeight==0) {
+      tileCacheWeight=1;
+    }
+
+    size_t objectCacheWeight=shareWeight>tileCacheWeight ? shareWeight-tileCacheWeight : 0;
+
+    size_t nodeCacheSize=0;
+    size_t wayCacheSize=0;
+    size_t areaCacheSize=0;
+    size_t routeCacheSize=0;
+    size_t areaAreaIndexCacheSize=0;
+
+    database->GetDataCacheSizes(nodeCacheSize,
+                               wayCacheSize,
+                               areaCacheSize,
+                               routeCacheSize,
+                               areaAreaIndexCacheSize);
+
+    MapDataAccounting::Cost configured;
+
+    configured.nodeCount=nodeCacheSize;
+    configured.wayCount=wayCacheSize;
+    configured.areaCount=areaCacheSize;
+    configured.routeCount=routeCacheSize;
+    configured.indexEntryCount=areaAreaIndexCacheSize;
+
+    size_t configuredWeight=MapDataAccounting::GetWeight(configured);
+
+    if (configuredWeight>0 && objectCacheWeight<configuredWeight) {
+      // The configured sizes are the upper bound of every kind: a budget that is larger than the
+      // configured caches does not enlarge them
+      nodeCacheSize=std::max<size_t>(1,nodeCacheSize*objectCacheWeight/configuredWeight);
+      wayCacheSize=std::max<size_t>(1,wayCacheSize*objectCacheWeight/configuredWeight);
+      areaCacheSize=std::max<size_t>(1,areaCacheSize*objectCacheWeight/configuredWeight);
+      routeCacheSize=std::max<size_t>(1,routeCacheSize*objectCacheWeight/configuredWeight);
+      areaAreaIndexCacheSize=std::max<size_t>(1,areaAreaIndexCacheSize*objectCacheWeight/configuredWeight);
+
+      database->SetDataCacheSizes(nodeCacheSize,
+                                  wayCacheSize,
+                                  areaCacheSize,
+                                  routeCacheSize,
+                                  areaAreaIndexCacheSize);
+    }
+
+    cache.SetWeightSize(tileCacheWeight);
+
+    ReportBudgetUsage();
+  }
+
+  /**
+   * Tell the budget whether the caches of this service are part of the current view and apply the
+   * share of the budget that is due to them if the budget distributed it
+   */
+  void MapService::UpdateBudget(const GeoBox& viewBox) const
+  {
+    if (!budget) {
+      return;
+    }
+
+    if (!budgetExtentKnown) {
+      GeoBox databaseBox;
+
+      // The extent of the database is the same for every view, so it is read once
+      if (database->GetBoundingBox(databaseBox)) {
+        budget->SetContributorExtent(budgetContributorId,
+                                     databaseBox);
+      }
+
+      budgetExtentKnown=true;
+    }
+
+    MapDataBudget::TimePoint now=std::chrono::steady_clock::now();
+
+    budget->ReportView(viewBox,now);
+
+    if (budget->DistributeIfStable(now)) {
+      ApplyBudgetShare();
+    }
+    else {
+      ReportBudgetUsage();
+    }
+
+    // A cache that was out of view long enough gives its content back, so that a client that keeps
+    // looking at the map does not keep the data of every region the user left
+    if (budget->IsContributorIdle(budgetContributorId,now)) {
+      ReleaseCachesLocked();
+    }
   }
 
   /**
@@ -833,6 +1024,8 @@ namespace osmscout {
 
     GeoBox boundingBox(projection.GetDimensions());
 
+    UpdateBudget(boundingBox);
+
     cache.GetTilesForBoundingBox(projection.GetMagnification(),
                                  boundingBox,
                                  tiles);
@@ -855,6 +1048,8 @@ namespace osmscout {
     std::lock_guard<std::mutex> lock(stateMutex);
 
     StopClock cacheRetrievalTime;
+
+    UpdateBudget(boundingBox);
 
     cache.GetTilesForBoundingBox(magnification,
                                  boundingBox,
@@ -1012,6 +1207,7 @@ namespace osmscout {
     }
 
     cache.CleanupCache();
+    ReportBudgetUsage();
 
     return success;
   }
@@ -1122,6 +1318,7 @@ namespace osmscout {
     }
 
     cache.CleanupCache();
+    ReportBudgetUsage();
 
     return success;
   }
