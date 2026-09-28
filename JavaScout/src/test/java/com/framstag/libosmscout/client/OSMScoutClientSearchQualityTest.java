@@ -36,12 +36,7 @@ public class OSMScoutClientSearchQualityTest {
 
     /** Skip the test when the native library cannot be loaded. */
     private static void assumeNativeLibrary() {
-        try {
-            new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
-        }
+        TestClients.assumeNativeLibrary();
     }
 
     /** Operator-provided map database directory, or null when unset. */
@@ -119,16 +114,18 @@ public class OSMScoutClientSearchQualityTest {
     public void testSearchWithoutDatabaseReturnsNoEntries(@TempDir Path emptyDir) {
         OSMScoutClient noMapClient = buildClient(emptyDir);
 
-        // An empty directory: the scan cannot pick up a map that happens to lie
-        // around (a stale database in a shared directory aborts the JVM while
-        // scanning it, which is not this test's subject).
-        LocationEntry[] entries = noMapClient.searchLocations("Dortmund", 20);
+        try {
+            // An empty directory: the scan cannot pick up a map that happens to lie
+            // around (a stale database in a shared directory aborts the JVM while
+            // scanning it, which is not this test's subject).
+            LocationEntry[] entries = noMapClient.searchLocations("Dortmund", 20);
 
-        assertNotNull(entries, "search must return an array");
-        assertEquals(0, entries.length,
-            "no database open - search must not return entries");
-
-        noMapClient.close();
+            assertNotNull(entries, "search must return an array");
+            assertEquals(0, entries.length,
+                "no database open - search must not return entries");
+        } finally {
+            noMapClient.close();
+        }
     }
 
     /**

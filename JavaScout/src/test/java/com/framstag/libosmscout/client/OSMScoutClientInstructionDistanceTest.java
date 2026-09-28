@@ -41,12 +41,7 @@ public class OSMScoutClientInstructionDistanceTest {
 
     /** Skip the test when the native library cannot be loaded. */
     private static void assumeNativeLibrary() {
-        try {
-            new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
-        }
+        TestClients.assumeNativeLibrary();
     }
 
     /** Operator-provided map database directory, or null when unset. */
