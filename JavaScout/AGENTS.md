@@ -50,6 +50,33 @@ mvn test -Dnative.lib.dir=/path/to/build/lib
 Tests that build a JavaFX dialog or stage need a display; where there is none, run the module under
 `xvfb-run` (see the favorites ordering test below).
 
+The canonical command for the whole suite is `JavaScout/test.sh <build-dir>` from the repository root
+(for example `JavaScout/test.sh build-meson`): it installs the freshly built client jar into the local
+Maven repository and then runs `mvn test` with the native library of that build directory.
+
+Rules the suite relies on - the native client is process-wide (one active instance at a time, see
+`OSMScoutClientBuilder::build`), so these are not optional style choices:
+
+- **A test class releases every client it obtains, however the test ends** - an `@AfterEach` release or
+  a `try`/`finally` around the body. A client an aborted test leaves behind makes `build()` return null
+  for every later class, which fails all of their tests. A test that builds several clients releases
+  each before building the next.
+- **A probe client is never the subject of an assertion.** `TestClients.assumeNativeLibrary()` builds a
+  client only to detect a missing native library and releases it again; it returns nothing to assert
+  against. A client without a native handle answers client operations from their "not initialised"
+  guards, so asserting against one passes for a reason the test does not name. For the same reason a
+  test whose claim is about database state asserts `isInitialized()` first.
+  `TestClients.receiverWithoutNativeHandle()` is only for JNI calls that ignore their receiver.
+- **The availability probe runs per test, not in a class setup method.** An aborted assumption in
+  `@BeforeAll` drops the whole class from the report (0 tests, 0 skipped, no reason); in `@BeforeEach`
+  each test is reported as skipped with the reason instead.
+- **The native library writes to the process output** (map directory scans), which the test runner
+  reports as a corrupted communication channel and dumps into `target/surefire-reports/*.dumpstream`.
+  That is pre-existing and unrelated to a test's result.
+
+`JavaScout/tools/DownloadCrashTest.java` is a manual reproduction tool, not a test: it lives outside the
+Maven test source root so the suite neither compiles nor runs it.
+
 Tests requiring native library:
 - `OSMScoutClientNavigationTest` — route calculation via JNI
 - `OSMScoutClientNavigationLiveTest` — live navigation via JNI
