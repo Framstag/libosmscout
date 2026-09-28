@@ -153,6 +153,37 @@ public class OSMScoutClient {
     public native void setNativeDataCacheSize(int cacheSize);
 
     /**
+     * Configures the total memory budget of the map data caches of all open
+     * databases (regional databases and basemap together).
+     * <p>
+     * The caches of the databases the map currently shows share the budget,
+     * the caches of the other databases are reduced to a floor and their
+     * content is released once they stay out of view. This is the bound that
+     * keeps the memory of a client with many open databases within the limit of
+     * the device; {@link #setNativeDataCacheSize(int)} remains the capacity of a
+     * single database's tile data cache.
+     * <p>
+     * A non-positive value restores the default budget of the client (64 MiB, the same default the
+     * Qt client configures), which is the bound of an application that does not set one.
+     *
+     * @param bytes memory budget in bytes, or a non-positive value for the
+     *              default budget of the client
+     */
+    public native void setNativeDataCacheBudget(long bytes);
+
+    /**
+     * Returns the number of bytes the map data caches of all open databases
+     * currently hold.
+     * <p>
+     * The figure is derived from an accounting of the cached entries and is
+     * meant for reporting and for checking a configured budget, not as a
+     * measurement of the heap of the process.
+     *
+     * @return accounted size of the caches in bytes
+     */
+    public native long getNativeDataCacheUsage();
+
+    /**
      * Returns the names of all available map styles.
      * <p>
      * Styles are derived from the top-level {@code *.oss} files in the

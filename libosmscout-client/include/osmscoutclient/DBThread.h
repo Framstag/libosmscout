@@ -151,6 +151,7 @@ private:
   DBInstanceRef                      basemapDatabase;
   DatabaseParameter                  databaseParameter;
   std::list<DBInstanceRef>           databases;
+  MapDataBudgetRef                   dataBudget; //!< Memory budget shared by the caches of all databases
 
   TypeConfigRef                      emptyTypeConfig; // type config just with special and custom poi types
   StyleConfigRef                     emptyStyleConfig;
@@ -227,6 +228,25 @@ public:
   void Initialize();
 
   bool isInitialized();
+
+  /**
+   * Set the total memory budget of the map data caches of all databases and of the basemap. The
+   * budget is shared by every database the thread opens, so the caches of all of them together stay
+   * within it.
+   *
+   * A budget of zero bytes drops the bound again: the caches are then bounded by the cache sizes
+   * configured for each database on its own. This is the behaviour of a client that never sets a
+   * budget.
+   */
+  void SetDataCacheBudget(size_t bytes);
+
+  /**
+   * Return the memory budget shared by the caches of all databases
+   */
+  MapDataBudgetRef GetDataCacheBudget() const
+  {
+    return dataBudget;
+  }
 
   /** Return geographical bounding box contains all loaded databases.
    *

@@ -70,6 +70,7 @@ private:
 
   size_t onlineTileCacheSize{100};
   size_t offlineTileCacheSize{200};
+  size_t dataCacheBudget{defaultDataCacheBudget}; //!< Memory budget of the map data caches of all databases
   GLPowerOfTwoTexture glPowerOfTwoTexture{GLPowerOfTwoTexture::Upscaling};
   PixelRatioSetup pixelRatio;
 
@@ -89,6 +90,14 @@ private:
   QString appVersion{"v?"};
 
 public:
+  /**
+   * Default memory budget of the map data caches of all databases and of the basemap (64 MiB). It
+   * bounds the caches of a client that does not configure a budget, because the memory of the caches
+   * of the databases a mobile client has open is the term that can push the process over its memory
+   * limit.
+   */
+  static constexpr size_t defaultDataCacheBudget=64*1024*1024;
+
   OSMScoutQtBuilder();
 
   virtual ~OSMScoutQtBuilder();
@@ -187,6 +196,19 @@ public:
                                                size_t offlineTileCacheSize){
     this->onlineTileCacheSize=onlineTileCacheSize;
     this->offlineTileCacheSize=offlineTileCacheSize;
+    return *this;
+  }
+
+  /**
+   * Set the total memory budget of the map data caches of all databases and of the basemap. The
+   * caches of the databases the user currently looks at share the budget, the caches of the others
+   * are reduced to a floor and their content is released once they stay out of view.
+   *
+   * A budget of zero bytes drops the bound, so that every database is bounded by its own cache sizes
+   * only.
+   */
+  inline OSMScoutQtBuilder& WithDataCacheBudget(size_t dataCacheBudget){
+    this->dataCacheBudget=dataCacheBudget;
     return *this;
   }
 
@@ -300,6 +322,7 @@ private:
              QString cacheLocation,
              size_t onlineTileCacheSize,
              size_t offlineTileCacheSize,
+             size_t dataCacheBudget,
              GLPowerOfTwoTexture glPowerOfTwoTexture,
              const PixelRatioSetup &pixelRatio,
              QString userAgent,

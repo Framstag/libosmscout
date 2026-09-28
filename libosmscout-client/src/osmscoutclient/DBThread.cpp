@@ -43,6 +43,7 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
     basemapStyleFilename(basemapStyleFilename),
     settings(settings),
     mapDpi(-1),
+    dataBudget(std::make_shared<osmscout::MapDataBudget>()),
     lastStyleLoadSucceeded(true),
     iconDirectory(iconDirectory),
     daylight(true),
@@ -324,7 +325,8 @@ CancelableFuture<bool> DBThread::OnDatabaseListChanged(const std::vector<std::fi
                                                        database,
                                                        std::make_shared<osmscout::LocationService>(database),
                                                        std::make_shared<osmscout::LocationDescriptionService>(database),
-                                                       std::make_shared<osmscout::MapService>(database),
+                                                       std::make_shared<osmscout::MapService>(database,
+                                                                                              dataBudget),
                                                        styleConfig));
     }
 
@@ -526,7 +528,18 @@ const std::map<std::string,bool> DBThread::GetStyleFlags() const
   return flags;
 }
 
-CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &idleMs)
+  void DBThread::SetDataCacheBudget(size_t bytes)
+  {
+    if (bytes==0) {
+      dataBudget->ResetBudget();
+
+      return;
+    }
+
+    dataBudget->SetTotalBudget(bytes);
+  }
+
+  CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &idleMs)
 {
   flushCachesSignal.Emit(idleMs);
 
@@ -546,8 +559,7 @@ CancelableFuture<bool> DBThread::FlushCaches(const std::chrono::milliseconds &id
           auto database=db->GetDatabase();
           log.Debug() << "Flushing caches for " << database->GetPath();
           database->DumpStatistics();
-          database->FlushCache();
-          db->GetMapService()->FlushTileCache();
+          db->GetMapService()->ReleaseCaches();
         }
       };
 
@@ -627,7 +639,8 @@ void DBThread::LoadBasemap()
                                                    database,
                                                    std::make_shared<osmscout::LocationService>(database),
                                                    std::make_shared<osmscout::LocationDescriptionService>(database),
-                                                   std::make_shared<osmscout::MapService>(database),
+                                                   std::make_shared<osmscout::MapService>(database,
+                                                                                          dataBudget),
                                                    styleConfig);
     }
     else {
