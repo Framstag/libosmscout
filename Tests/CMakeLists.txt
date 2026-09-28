@@ -227,6 +227,14 @@ osmscout_test_project(NAME RoutePostprocessorTest SOURCES src/RoutePostprocessor
 #---- ScanConversion
 osmscout_test_project(NAME ScanConversionTest SOURCES src/ScanConversionTest.cpp)
 
+#---- MapDataBudget
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapDataBudgetTest SOURCES src/MapDataBudgetTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(MapDataBudgetTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+	message("Skip MapDataBudget test, libosmscout-map is missing.")
+endif()
+
 #---- ScreenMask
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME ScreenMaskTest SOURCES src/ScreenMaskTest.cpp TARGET OSMScout::Map)
