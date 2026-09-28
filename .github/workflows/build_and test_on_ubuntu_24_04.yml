@@ -206,11 +206,17 @@ jobs:
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
                catch2
+               libxml2-dev
+               nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
-               nlohmann-json3-dev
+               libagg-dev
+               libfreetype6-dev libcairo2-dev libpangocairo-1.0-0 libpango1.0-dev
                qmake6 libqt6svg6-dev libqt6core5compat6-dev qt6-declarative-dev qt6-positioning-dev qt6-tools-dev-tools
-               qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev"
+               qt6-l10n-tools qt6-tools-dev qt6-multimedia-dev
+               libglm-dev libglew-dev libglut-dev libglfw3-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev libxxf86vm-dev
+               xvfb
+               fonts-liberation libmarisa-dev"
       - name: Install libpiper
         run: |
           git clone https://github.com/OHF-Voice/piper1-gpl.git

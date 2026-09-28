@@ -245,63 +245,126 @@ endif()
 
 find_package(glfw3)
 
+set(QT5_REQUIRED_COMPONENTS Core Gui Widgets Qml Quick Svg Location Positioning Multimedia LinguistTools)
+set(QT6_REQUIRED_COMPONENTS Core Core5Compat Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools)
+
+# Qt5 and Qt6 both create identical unversioned convenience alias targets
+# (Qt::Core, Qt::Gui, Qt::Multimedia, ...), guarded by "if (NOT TARGET Qt::X)"
+# in their respective Config.cmake files. Since we may speculatively try both
+# Qt5 and Qt6 when QT_VERSION_PREFERRED is not set, calling find_package() for
+# both versions in the *same* process would let whichever succeeds first
+# permanently "claim" those aliases - even if it is later rejected because some
+# other required component (e.g. Multimedia) is missing - leaving downstream
+# targets linked against a mix of Qt5 and Qt6 libraries (CMake errors like
+# "The INTERFACE_QT_MAJOR_VERSION property of ... does not agree with the
+# value of QT_MAJOR_VERSION already determined for ...").
+# Simply disabling versionless-alias creation while probing is *not* safe
+# either: some Qt6 modules (e.g. Qml, Quick, Multimedia) reference the
+# unversioned Qt::Network / Qt::OpenGL aliases directly in their own exported
+# target properties, so suppressing alias creation makes find_package(Qt6...)
+# fail outright with a hard configure error, even when Qt6 is fully installed.
+# To detect which Qt version is available without any of these side effects,
+# probe each candidate version in an isolated child CMake process (which can't
+# pollute the main configure's target namespace), and only perform a single,
+# real, in-process find_package() call for the version that is finally chosen.
+function(osmscout_probe_qt major_version components out_var)
+  set(_probe_dir "${CMAKE_BINARY_DIR}/CMakeFiles/qt_probe_${major_version}")
+  file(MAKE_DIRECTORY "${_probe_dir}")
+  string(REPLACE ";" " " _components_str "${components}")
+  set(_min_version "")
+  if (major_version EQUAL 5)
+    set(_min_version " 5.15")
+  endif ()
+  file(WRITE "${_probe_dir}/CMakeLists.txt"
+    "cmake_minimum_required(VERSION 3.16)\n"
+    # Use LANGUAGES CXX (not NONE): Qt's Config search relies on
+    # CMAKE_LIBRARY_ARCHITECTURE (the multiarch triplet, e.g. x86_64-linux-gnu),
+    # which is only populated once a compiler has been detected.
+    "project(qt_probe LANGUAGES CXX)\n"
+    "find_package(Qt${major_version}${_min_version} COMPONENTS ${_components_str} QUIET)\n"
+    "if (NOT Qt${major_version}_FOUND)\n"
+    "  message(FATAL_ERROR \"Qt${major_version} not fully available\")\n"
+    "endif ()\n")
+  # Forward the relevant path/toolchain hints so the probe looks in the same
+  # places the main configure would (vcpkg toolchain, custom Qt/prefix paths, ...).
+  set(_forward_args)
+  foreach (_var CMAKE_PREFIX_PATH CMAKE_TOOLCHAIN_FILE CMAKE_FIND_ROOT_PATH
+                Qt5_DIR Qt6_DIR QT_ADDITIONAL_PACKAGES_PREFIX_PATH
+                QT_ADDITIONAL_HOST_PACKAGES_PREFIX_PATH)
+    if (DEFINED ${_var} AND NOT "${${_var}}" STREQUAL "")
+      list(APPEND _forward_args "-D${_var}=${${_var}}")
+    endif ()
+  endforeach ()
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" ${_forward_args} -S "${_probe_dir}" -B "${_probe_dir}/build"
+    RESULT_VARIABLE _probe_result
+    OUTPUT_QUIET
+    ERROR_QUIET
+  )
+  if (_probe_result EQUAL 0)
+    set(${out_var} TRUE PARENT_SCOPE)
+  else ()
+    set(${out_var} FALSE PARENT_SCOPE)
+  endif ()
+endfunction()
+
 if (QT_VERSION_PREFERRED AND QT_VERSION_PREFERRED EQUAL 5)
-  message(STATUS "Try loading Qt5 (explicitly preferred)...")
+  message(STATUS "Checking Qt5 availability (explicitly preferred)...")
   set(QT5_TRIED 1)
-  set(QT_DEFAULT_MAJOR_VERSION 5)
-  find_package(Qt5 5.15 COMPONENTS Core Gui Widgets Qml Quick Svg Location Positioning Multimedia LinguistTools QUIET)
-  if(Qt5_FOUND)
+  osmscout_probe_qt(5 "${QT5_REQUIRED_COMPONENTS}" QT5_AVAILABLE)
+  if (QT5_AVAILABLE)
     message(STATUS "Choosing Qt5, since explicitly preferred")
-    set(QT_FOUND 1)
     set(QT_VERSION_MAJOR 5)
   else ()
     message(STATUS "Qt5 NOT found")
-  endif()
+  endif ()
 endif ()
 
 if (QT_VERSION_PREFERRED AND QT_VERSION_PREFERRED EQUAL 6)
-  message(STATUS "Try loading preferred Qt6 (explicitly preferred)...")
+  message(STATUS "Checking Qt6 availability (explicitly preferred)...")
   set(QT6_TRIED 1)
-  set(QT_DEFAULT_MAJOR_VERSION 6)
-  find_package(Qt6 COMPONENTS Core Core5Compat Gui Widgets Qml Quick Svg Positioning Multimedia LinguistTools QUIET)
-  if(Qt6_FOUND)
+  osmscout_probe_qt(6 "${QT6_REQUIRED_COMPONENTS}" QT6_AVAILABLE)
+  if (QT6_AVAILABLE)
     message(STATUS "Choosing Qt6, since explicitly preferred")
-    set(QT_FOUND 1)
     set(QT_VERSION_MAJOR 6)
   else ()
     message(STATUS "Qt6 NOT found")
-  endif()
-endif()
-
-if (NOT QT_FOUND AND NOT QT6_TRIED)
-  message(STATUS "Try loading Qt6 (implicitly preferred version)...")
-  set(QT_DEFAULT_MAJOR_VERSION 6)
-  find_package(Qt6 COMPONENTS Core Core5Compat Gui Widgets Qml Quick Svg Location Positioning Multimedia LinguistTools QUIET)
-endif()
-
-if (NOT QT_FOUND)
-  if (Qt6_FOUND)
-    message(STATUS "Choosing Qt6, since implicitly preferred")
-    set(QT_FOUND 1)
-    set(QT_VERSION_MAJOR 6)
-  else ()
-    message(STATUS "Qt6 NOT found")
-  endif()
-endif()
-
-if (NOT QT_FOUND AND NOT QT5_TRIED)
-  message(STATUS "Try loading Qt5 (implicitly preferred version)...")
-  set(QT_DEFAULT_MAJOR_VERSION 5)
-  find_package(Qt5 5.15 COMPONENTS Core Gui Widgets Qml Quick Svg Location Positioning Multimedia LinguistTools QUIET)
+  endif ()
 endif ()
 
-if(NOT QT_FOUND)
-  if (Qt5_FOUND)
+if (NOT QT_VERSION_MAJOR AND NOT QT6_TRIED)
+  message(STATUS "Checking Qt6 availability (implicitly preferred version)...")
+  osmscout_probe_qt(6 "${QT6_REQUIRED_COMPONENTS}" QT6_AVAILABLE)
+  if (QT6_AVAILABLE)
+    message(STATUS "Choosing Qt6, since implicitly preferred")
+    set(QT_VERSION_MAJOR 6)
+  else ()
+    message(STATUS "Qt6 NOT found")
+  endif ()
+endif ()
+
+if (NOT QT_VERSION_MAJOR AND NOT QT5_TRIED)
+  message(STATUS "Checking Qt5 availability (implicitly preferred version)...")
+  osmscout_probe_qt(5 "${QT5_REQUIRED_COMPONENTS}" QT5_AVAILABLE)
+  if (QT5_AVAILABLE)
     message(STATUS "Choosing Qt5, since implicitly preferred")
-    set(QT_FOUND 1)
     set(QT_VERSION_MAJOR 5)
   else ()
     message(STATUS "Qt5 NOT found")
+  endif ()
+endif ()
+
+# Now that a single Qt version has been chosen (if any), perform the one real,
+# in-process find_package() call for it. Since this is the only find_package()
+# call for Qt in the whole configure run, its default (non-suppressed)
+# versionless-alias creation works correctly and consistently.
+if (QT_VERSION_MAJOR)
+  set(QT_FOUND 1)
+  set(QT_DEFAULT_MAJOR_VERSION ${QT_VERSION_MAJOR})
+  if (QT_VERSION_MAJOR EQUAL 5)
+    find_package(Qt5 5.15 COMPONENTS ${QT5_REQUIRED_COMPONENTS} QUIET)
+  else ()
+    find_package(Qt6 COMPONENTS ${QT6_REQUIRED_COMPONENTS} QUIET)
   endif ()
 endif ()
 
@@ -562,9 +625,31 @@ endif()
 # Find nlohmann_json (header-only, used by MCPServer)
 find_package(nlohmann_json QUIET)
 
-# Find httplib (header-only, used by MCPServer)
-include(CheckIncludeFileCXX)
-check_include_file_cxx(httplib.h HAVE_HTTPLIB)
+# Find httplib (used by MCPServer).
+# Upstream cpp-httplib is normally header-only, but several distributions
+# (e.g. Debian/Ubuntu's libcpp-httplib-dev) ship it split into a plain
+# declaration header (httplib.h) plus a separately compiled shared library
+# (libcpp-httplib.so), exposed via a "cpp-httplib" pkg-config module. In that
+# case we must link against the library, not just include the header, or we
+# get "undefined reference to httplib::..." linker errors. Prefer pkg-config
+# so we pick up the right library (and its required compile definitions,
+# e.g. CPPHTTPLIB_OPENSSL_SUPPORT) when available, and fall back to a plain
+# header-only detection otherwise.
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+  pkg_check_modules(PC_HTTPLIB QUIET IMPORTED_TARGET cpp-httplib)
+endif()
+
+if(PC_HTTPLIB_FOUND)
+  add_library(httplib::httplib ALIAS PkgConfig::PC_HTTPLIB)
+  set(HAVE_HTTPLIB TRUE)
+else()
+  include(CheckIncludeFileCXX)
+  check_include_file_cxx(httplib.h HAVE_HTTPLIB)
+  if(HAVE_HTTPLIB AND NOT TARGET httplib::httplib)
+    add_library(httplib::httplib INTERFACE IMPORTED)
+  endif()
+endif()
 
 # prepare cmake variables for configuration files
 set(OSMSCOUT_HAVE_INT16_T ${HAVE_INT16_T})

@@ -22,7 +22,10 @@
 
 #include <osmscoutmapcairo/MapCairoFeatures.h>
 
+#include <cstddef>
+#include <functional>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 
 #if defined(__WIN32__) || defined(WIN32)
@@ -86,13 +89,40 @@ namespace osmscout {
   private:
     CairoLabelLayouter labelLayouter;
 
-    using FontMap = std::unordered_map<double,CairoFont>;    //! Map type for mapping font sizes to font
+    /**
+     * Key of a resolved font: the requested font name and the size the font is resolved at.
+     * Both are inputs of the resolved font, so a font resolved for one name must not be
+     * served for a request with another name.
+     */
+    struct FontKey
+    {
+      std::string fontName;
+      double      fontSize;
+
+      bool operator==(const FontKey& other) const
+      {
+        return fontName==other.fontName &&
+               fontSize==other.fontSize;
+      }
+    };
+
+    struct FontKeyHash
+    {
+      size_t operator()(const FontKey& key) const
+      {
+        return std::hash<std::string>()(key.fontName) ^
+               (std::hash<double>()(key.fontSize) << 1);
+      }
+    };
+
+    using FontMap = std::unordered_map<FontKey,CairoFont,FontKeyHash>;    //! Map type for mapping a font name and a font size to a font
 
     cairo_t                                *draw;            //! The cairo cairo_t for the mask
     std::vector<cairo_surface_t*>          images;           //! vector of cairo surfaces for icons
     std::vector<cairo_surface_t*>          patternImages;    //! vector of cairo surfaces for patterns
     std::vector<cairo_pattern_t*>          patterns;         //! cairo pattern structure for patterns
     FontMap                                fonts;            //! Cached scaled font
+    size_t                                 resolvedFontCount{0}; //!< Fonts resolved since construction (diagnostic for tests)
     double                                 minimumLineWidth; //! Minimum width a line must have to be visible
 
     std::mutex                             mutex;            //! Mutex for locking concurrent calls
@@ -235,6 +265,13 @@ namespace osmscout {
                  cairo_t *draw,
                  RenderSteps startStep=RenderSteps::FirstStep,
                  RenderSteps endStep=RenderSteps::LastStep);
+
+    /**
+     * Number of fonts this painter has resolved since it was created. A diagnostic for tests:
+     * a font resolved for one font name must not be reused for a request with another name, so
+     * a request with a new name resolves a new font. Carries no rendering behaviour.
+     */
+    size_t GetResolvedFontCount() const;
   };
 }
 

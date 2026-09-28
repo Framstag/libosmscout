@@ -67,6 +67,10 @@ DBThread::DBThread(const std::string &basemapLookupDirectory,
 
 DBThread::~DBThread()
 {
+  // Stop the database thread before the members its tasks read (the databases and
+  // the latch) are destroyed.
+  Stop();
+
   WriteLock locker(latch);
   osmscout::log.Debug() << "DBThread::~DBThread()";
 

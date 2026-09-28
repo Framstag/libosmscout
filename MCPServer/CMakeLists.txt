@@ -19,6 +19,7 @@ set_target_properties(MCPServer PROPERTIES
 target_link_libraries(MCPServer PRIVATE
     OSMScout::OSMScout
     nlohmann_json::nlohmann_json
+    httplib::httplib
 )
 
 if(WIN32)

@@ -33,18 +33,34 @@ MapManager::MapManager(const std::vector<std::filesystem::path> &databaseLookupD
 
 }
 
+MapManager::~MapManager()
+{
+  // Stop the scan before the members it reads (the registered directories and the
+  // published databases) are destroyed.
+  Stop();
+}
+
 CancelableFuture<bool> MapManager::LookupDatabases()
 {
-  return Async<bool>([this](Breaker&) -> bool{
+  return Async<bool>([this](Breaker &breaker) -> bool{
 
     osmscout::log.Info() << "Lookup databases";
     std::unique_lock<std::mutex> lock(lookupMutex);
 
-    databaseDirectories.clear();
+    // Work on a snapshot of the registered directories. The scan must not read the
+    // owner's list while it runs, because the owner's state is released when it is
+    // destroyed, and a stopped scan must not publish a partially updated set.
+    std::vector<std::filesystem::path> lookupDirs=databaseLookupDirs;
+
+    std::vector<MapDirectory> foundDirectories;
     std::set<std::filesystem::path> uniqPaths;
     std::vector<std::filesystem::path> databaseFsDirectories;
 
-    for (const auto &lookupDir:databaseLookupDirs){
+    for (const auto &lookupDir:lookupDirs){
+      if (breaker.IsAborted()) {
+        return false;
+      }
+
       osmscout::log.Info() << "Scanning maps lookup directory: " << lookupDir.string();
 
       if (!std::filesystem::exists(lookupDir) || !std::filesystem::is_directory(lookupDir)) {
@@ -58,6 +74,10 @@ CancelableFuture<bool> MapManager::LookupDatabases()
 
       try {
         for (const auto & fInfo : std::filesystem::recursive_directory_iterator(lookupDir)) {
+          if (breaker.IsAborted()) {
+            return false;
+          }
+
           auto entryPath = fInfo.path();
           if (fInfo.is_regular_file() && entryPath.has_filename() && entryPath.has_parent_path() && entryPath.filename() == TypeConfig::FILE_TYPES_DAT){
             candidateCount++;
@@ -73,7 +93,7 @@ CancelableFuture<bool> MapManager::LookupDatabases()
                                      << "' at " << mapDir.GetDirStr()
                                      << (mapDir.HasMetadata() ? " (with metadata)" : " (no metadata)");
                 if (uniqPaths.find(mapDir.GetDir()) == uniqPaths.end()) {
-                  databaseDirectories.push_back(mapDir);
+                  foundDirectories.push_back(mapDir);
                   databaseFsDirectories.push_back(mapDir.GetDir());
                   uniqPaths.insert(mapDir.GetDir());
                 }
@@ -95,6 +115,12 @@ CancelableFuture<bool> MapManager::LookupDatabases()
                            << " scan complete: " << candidateCount << " candidates, "
                            << validCount << " valid, " << invalidCount << " invalid";
     }
+
+    if (breaker.IsAborted()) {
+      return false;
+    }
+
+    databaseDirectories=foundDirectories;
     osmscout::log.Info() << "Total installed maps found: " << databaseDirectories.size();
     databaseListChanged.Emit(databaseFsDirectories);
 
