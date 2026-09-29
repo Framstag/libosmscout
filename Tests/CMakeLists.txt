@@ -450,6 +450,14 @@ else()
   message("Skip RoadStyleColors test, libosmscout-map is missing.")
 endif()
 
+#---- PatternLookup
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME PatternLookupTest SOURCES src/PatternLookupTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(PatternLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip PatternLookup test, libosmscout-map is missing.")
+endif()
+
 #---- RouteStyleColors
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME RouteStyleColorsTest SOURCES src/RouteStyleColorsTest.cpp TARGET OSMScout::Map)
@@ -635,6 +643,14 @@ endif()
 #---- SVGIconSkiaTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME SVGIconSkiaTest SOURCES src/SVGIconSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- MapPainterCairoPatternTest: the report of a pattern fill the backend cannot serve
+if(${OSMSCOUT_BUILD_MAP_CAIRO} AND TARGET OSMScout::Map AND TARGET OSMScout::MapCairo)
+  osmscout_test_project(NAME MapPainterCairoPatternTest SOURCES src/MapPainterCairoPatternTest.cpp TARGET OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+  set_tests_properties(MapPainterCairoPatternTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip MapPainterCairoPattern test, libosmscout-map-cairo is missing.")
 endif()
 
 #---- SymbolRendererCairoTest

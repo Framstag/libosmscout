@@ -19,6 +19,8 @@
 
 #include <osmscoutmapskia/MapPainterSkia.h>
 
+#include <osmscoutmap/PatternLookup.h>
+
 #include <osmscoutmapskia/SymbolRendererSkia.h>
 
 #include <core/SkBitmap.h>
@@ -186,13 +188,20 @@ namespace osmscout {
 
     if (fill) {
       if (fill->HasPattern() &&
+          fill->GetPatternId()!=0 &&
           projection.GetMagnification() >= fill->GetPatternMinMag()) {
-        // Try to load pattern
-        for (const auto& patternPath : parameter.GetPatternPaths()) {
-          std::string filename = patternPath + fill->GetPatternName() + ".png";
+        const std::string patternName=fill->GetPatternName();
+        std::string       filename;
 
+        auto status=PatternLookup::Resolve(parameter.GetPatternPaths(),
+                                           patternName,
+                                           ".png",
+                                           filename);
+
+        sk_sp<SkShader> shader;
+
+        if (status==PatternLookup::Status::Found) {
           auto it = patternCache.find(filename);
-          sk_sp<SkShader> shader;
 
           if (it != patternCache.end()) {
             shader = it->second;
@@ -208,16 +217,28 @@ namespace osmscout {
             }
             patternCache[filename] = shader;
           }
+        }
 
-          if (shader) {
-            SkPaint fillPaint;
-            fillPaint.setAntiAlias(true);
-            fillPaint.setStyle(SkPaint::kFill_Style);
-            fillPaint.setShader(shader);
-            draw->drawPath(path, fillPaint);
-            hasFill = true;
-            break;
+        if (shader) {
+          SkPaint fillPaint;
+          fillPaint.setAntiAlias(true);
+          fillPaint.setStyle(SkPaint::kFill_Style);
+          fillPaint.setShader(shader);
+          draw->drawPath(path, fillPaint);
+          hasFill = true;
+        }
+        else {
+          if (status==PatternLookup::Status::Found) {
+            log.Error() << "ERROR while loading pattern image '" << filename << "'";
           }
+          else {
+            log.Error() << PatternLookup::Describe(parameter.GetPatternPaths(),
+                                                   patternName,
+                                                   ".png",
+                                                   status);
+          }
+
+          fill->SetPatternId(0);
         }
       }
 
