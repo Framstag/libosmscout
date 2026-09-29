@@ -351,7 +351,9 @@ namespace osmscout {
             }
           }
 
-          p.push_back(p[0]);
+          const auto first=p[0];
+
+          p.push_back(first);
           for (size_t idx = 0;
                idx < borderStyles.size();
                idx++) {
