@@ -188,6 +188,17 @@ if(TARGET osmscout_client_java AND NOT WIN32)
 	add_test(NAME JniSignatureParityTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-jni-signatures.sh)
 endif()
 
+#---- Self-appends of a sequence
+# Host-side check that no append reads the element it stores out of the sequence it appends to: the
+# sequence may move its storage while it grows, and a geometry then loses or gains a point (GCC
+# reported the shape once, see the script).
+#
+# Not registered on Windows for the same reason as the check above: `bash` resolves to the WSL
+# launcher there and not to a shell (same guard in Tests/meson.build).
+if(NOT WIN32)
+	add_test(NAME VectorSelfAppendTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-vector-self-append.sh)
+endif()
+
 #---- WorkQueue
 osmscout_test_project(NAME WorkQueueTest SOURCES src/WorkQueueTest.cpp)
 

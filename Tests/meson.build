@@ -12,6 +12,12 @@ testInstallDir = 'share/osmscout/tests'
 # Tests/CMakeLists.txt for the same reason).
 if host_machine.system() != 'windows'
   test('Check JNI signature parity', files('../scripts/check-jni-signatures.sh'))
+
+  # Host-side check that no append reads the element it stores out of the sequence it appends to:
+  # the sequence may move its storage while it grows, and a geometry then loses or gains a point
+  # (GCC reported the shape once, see the script). Registered for both build systems, see
+  # Tests/CMakeLists.txt.
+  test('Check vector self append', files('../scripts/check-vector-self-append.sh'))
 endif
 
 FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',

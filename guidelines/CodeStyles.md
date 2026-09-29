@@ -268,6 +268,19 @@ Guard name: `OSMSCOUT_<MODULE>_<NAME>_H`
 - **`std::string_view`** in newer feature code parameter signatures
 - **`// NOLINT`** annotations for lint suppression on intentional public members
 
+### Containers & Appends
+
+- An append must not read the element it stores out of the sequence it appends to: a sequence may
+  move its storage while it grows, so `sequence.push_back(sequence.front())` stores an element that
+  the grow has already moved from or released. Take the element into a value of its own first:
+  ```cpp
+  const auto first=sequence.front();
+
+  sequence.push_back(first);
+  ```
+- `scripts/check-vector-self-append.sh` reports every append of that shape in the tree and runs as the
+  test `VectorSelfAppendTest` (CMake) / `Check vector self append` (Meson).
+
 ### Error Handling
 
 - **`assert()`** from `<cassert>` via `osmscout/system/Assert.h` for internal invariants only
