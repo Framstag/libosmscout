@@ -243,6 +243,14 @@ osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
 #---- SearchScope
 osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- FramePixelLayout
+# The JNI render entry points hand the frame to two consumers that read different layouts
+# (Bitmap.setPixels reads 0xAARRGGBB words, Bitmap.copyPixelsFromBuffer reads the bitmap's own
+# byte order). Writing one layout into the other destination is a red/blue channel swap, so the
+# helper is unit-tested here rather than only covered by the Kotlin-side seam tests, which go
+# through a fake client and cannot see a byte order at all.
+osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 

@@ -69,6 +69,7 @@
 #include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
+#include "frame_pixel_layout.h"
 #include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -1289,14 +1290,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 // Shared render body of both render entry points.
 // --------------------------------------------------------------------------
 
-// Renders one frame into [outPixels] and returns whether a frame was drawn.
+// The frame's pixel layout depends on the destination, and the two layouts are NOT the
+// same:
+//
+//   * an int[] element is one 0xAARRGGBB word — what Bitmap.setPixels reads;
+//   * a direct buffer is consumed by Bitmap.copyPixelsFromBuffer, which reads the
+//     bitmap's own byte order — R,G,B,A on Android's ARGB_8888 (the NDK names that
+//     format ANDROID_BITMAP_FORMAT_RGBA_8888), i.e. the little-endian word
+//     0xAABBGGRR.
+//
+// Writing one layout into the other destination is a red/blue channel swap, not a
+// rounding difference: that is how motorways rendered red and rivers orange on the
+// device on 2026-09-29 (openspec change reduce-render-peak-memory, design D1b).
+// [naviveylin::FrameDestination] (frame_pixel_layout.h) is therefore the only place a frame
+// pixel is written, and each entry point states the layout its destination needs.
+// Renders one frame into [destination] and returns whether a frame was drawn.
 //
 // The allocating entry point (renderWithRouteAndPois) and the buffer-taking one
-// (renderInto) run EXACTLY this code and differ only in where the pixels end up,
-// so the two cannot render different frames. [outPixels] must hold
-// width*height ARGB pixels (0xAARRGGBB) — the layout Bitmap.setPixels and
-// Bitmap.copyPixelsFromBuffer expect. The buffer belongs to the caller: this
-// function writes it for the duration of the call and retains no reference.
+// (renderInto) run EXACTLY this code and differ only in where the pixels end up and
+// in the layout [destination] states, so the two cannot render different frames. The
+// storage belongs to the caller: this function writes it for the duration of the
+// call and retains no reference.
 //
 // Never throws into Java: an invalid request (no client, no database thread, a
 // rejected viewport, an unusable magnification) reports `false`.
@@ -1314,7 +1328,7 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
                                 jdouble searchSelLon,
                                 jdoubleArray trackLats,
                                 jdoubleArray trackLons,
-                                uint32_t *outPixels)
+                                const naviveylin::FrameDestination &destination)
 {
 
   ClientData *data = getClientData(env, self);
@@ -1322,7 +1336,7 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
     return false;
   }
 
-  if (width <= 0 || height <= 0 || outPixels == nullptr) {
+  if (width <= 0 || height <= 0 || destination.data == nullptr) {
     return false;
   }
 
@@ -1449,10 +1463,10 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
     }
   }
 
-  // The caller's pixel storage. ARGB (0xAARRGGBB), filled with opaque black so an
-  // unpainted area is black exactly as the allocating path left it.
+  // The caller's pixel storage, filled with opaque black so an unpainted area is black
+  // exactly as the allocating path left it.
   size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
-  std::fill(outPixels, outPixels + pixelCount, static_cast<uint32_t>(0xFF000000));
+  destination.Clear(pixelCount);
 
   bool rendered = false;
 
@@ -1804,10 +1818,9 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
           uint8_t b = cairoData[offset + 0];
           uint8_t g = cairoData[offset + 1];
           uint8_t r = cairoData[offset + 2];
-          // Alpha is ignored in CAIRO_FORMAT_RGB24, set to fully opaque
-          outPixels[static_cast<size_t>(y) * width + x] =
-              0xFF000000 | (static_cast<uint32_t>(r) << 16) |
-              (static_cast<uint32_t>(g) << 8) | b;
+          // Cairo's own order is B,G,R,X, which is neither destination's layout: the
+          // swap happens here, once, into the layout the destination states.
+          destination.Write(static_cast<size_t>(y) * width + x, r, g, b);
         }
       }
 
@@ -1858,10 +1871,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
   std::vector<uint32_t> argbPixels(pixelCount, 0xFF000000); // default: opaque black
 
+  // The allocating path hands the frame to Java as int[] elements, which is the
+  // 0xAARRGGBB layout Bitmap.setPixels reads.
+  naviveylin::FrameDestination destination{argbPixels.data(), naviveylin::FrameLayout::ArgbInt};
+
   if (!renderMapIntoPixels(env, self, width, height, lat, lon, angle, magnificationScale, dpi,
                            routeLats, routeLons, favoriteLats, favoriteLons,
                            searchSelLat, searchSelLon, trackLats, trackLons,
-                           argbPixels.data())) {
+                           destination)) {
     return nullptr;
   }
 
@@ -1890,8 +1907,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 // The buffer-taking entry point: it renders into pixel storage the caller owns and
 // allocates no frame-sized storage of its own (no int[], no intermediate pixel
 // vector). [pixels] must be a DIRECT buffer with at least width*height*4 bytes
-// remaining; the bridge hands the frame to Java as 0xAARRGGBB pixels (the layout
-// Bitmap.copyPixelsFromBuffer expects).
+// remaining, and the frame is written in the layout Bitmap.copyPixelsFromBuffer
+// reads: four bytes R,G,B,A per pixel, the bitmap's own byte order. That is NOT the
+// allocating entry point's 0xAARRGGBB int[] layout — see [FrameLayout].
 //
 // Ownership: the caller owns the storage. The bridge writes it only while this
 // call runs and retains no reference, so the caller may release, reuse or display
@@ -1944,10 +1962,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderInto(JNIEnv *env, jobj
     return JNI_FALSE;
   }
 
+  // The caller hands this storage to Bitmap.copyPixelsFromBuffer, so the frame is
+  // written in the bitmap's own byte order, not the int[] layout.
+  naviveylin::FrameDestination destination{address, naviveylin::FrameLayout::RgbaBytes};
+
   return renderMapIntoPixels(env, self, width, height, lat, lon, angle, magnificationScale, dpi,
                              routeLats, routeLons, favoriteLats, favoriteLons,
                              searchSelLat, searchSelLon, trackLats, trackLons,
-                             reinterpret_cast<uint32_t *>(address)) ? JNI_TRUE : JNI_FALSE;
+                             destination) ? JNI_TRUE : JNI_FALSE;
 }
 
 // --------------------------------------------------------------------------
