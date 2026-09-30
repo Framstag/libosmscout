@@ -1045,6 +1045,16 @@ if buildImport
 
   test('Check water index import code', WaterIndexTest)
 
+  OptimizeAreaWayIdsTest = executable('OptimizeAreaWayIdsTest',
+               'src/OptimizeAreaWayIdsTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout, osmscoutimport],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check the area and way id optimization', OptimizeAreaWayIdsTest)
+
   JsonWriterTest = executable('JsonWriterTest',
                ['src/JsonWriterTest.cpp'],
                include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
