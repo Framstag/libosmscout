@@ -717,12 +717,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
   std::filesystem::path fsPath(pathCStr);
   env->ReleaseStringUTFChars(pathJStr, pathCStr);
 
-  // Add to known paths if not already present. All opened maps stay loaded:
-  // libosmscout renders whichever database(s) cover the current viewport, so
-  // multiple maps can be used simultaneously without switching (fix-download).
-  // The registry serialises concurrent openers: the path list is no longer
-  // mutated while another thread (or the database thread) reads it.
-  data->knownPaths.Register(fsPath);
+  // Register the path (all opened maps stay loaded: libosmscout renders
+  // whichever database(s) cover the current viewport, so multiple maps can be
+  // used simultaneously without switching (fix-download)). Only an existing
+  // directory is accepted (spec native-database-open - Single-database open
+  // keeps its contract): a rejected path enters no set and counts no set
+  // change, so nothing is published and every database already loaded stays
+  // open. The report names the directory only - a diagnostics line carries
+  // identity, never a position or a path (spec auto-diagnostics).
+  // The registry serialises concurrent openers: the path list is not mutated
+  // while another thread (or the database thread) reads it.
+  if (!data->knownPaths.RegisterOpenable(fsPath)) {
+    osmscout::log.Warn() << "[JNI] openDatabase: not an existing map database directory: "
+                         << fsPath.filename().string();
+
+    return JNI_FALSE;
+  }
 
   // Trigger DBThread to process the updated path list. The snapshot is a value
   // copy taken under the registry's own lock, so the database thread never
@@ -748,6 +758,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
 // string is reported false and is not registered; a null array or an empty
 // array returns an empty array. A client that is not usable (no database
 // thread) reports every requested directory as false instead of faulting.
+// A directory that is not an existing directory is registered and reported all
+// the same (spec native-database-open - One directory cannot be opened), so the
+// batch never fails because of one bad entry.
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jbooleanArray JNICALL
@@ -790,6 +803,17 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabases(JNIEnv *env, j
   ClientData *data = getClientData(env, self);
 
   if (data != nullptr && data->dbThread != nullptr && !paths.empty()) {
+    // The batch keeps its documented tolerance: a directory that disappears
+    // between the app's scan and this call must not fail the batch, so the path
+    // is registered all the same and merely reported here. The directory name
+    // only, never the path (spec auto-diagnostics).
+    for (const auto &path : paths) {
+      if (!osmscout::IsOpenableDatabaseDirectory(path)) {
+        osmscout::log.Warn() << "[JNI] openDatabases: not an existing map database directory: "
+                             << path.filename().string();
+      }
+    }
+
     auto registration = data->knownPaths.RegisterAll(paths);
 
     for (size_t k=0; k<paths.size(); k++) {
