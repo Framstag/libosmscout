@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <osmscout/lib/CoreImportExport.h>
@@ -39,6 +40,11 @@ namespace osmscout {
   using TagId = uint16_t;
 
   using TagMap = std::unordered_map<TagId, std::string>;
+
+  /**
+   * A (tag key, tag value) pair a tag condition can match for
+   */
+  using TagValue = std::pair<TagId,std::string>;
 
   /**
    * \ingroup type
@@ -71,6 +77,25 @@ namespace osmscout {
      */
     virtual void CollectTagKeys(std::vector<TagId>& keys,
                                 bool& guaranteed) const = 0;
+
+    /**
+     * Collects the (tag,value) pairs this condition can match for.
+     *
+     * If 'exhaustive' is true, the condition cannot evaluate to true unless the tag
+     * map carries at least one of the returned (tag,value) pairs, i.e. the returned
+     * pairs are a conservative superset of the values that can make it match. If
+     * 'exhaustive' is false, the condition may match for a value that is not listed
+     * (e.g. an existence, ordering or negated condition) and has to be evaluated for
+     * every object that carries one of its keys.
+     *
+     * The default reports no pairs and is not exhaustive, which is always safe.
+     */
+    virtual void CollectTagValues(std::vector<TagValue>& values,
+                                  bool& exhaustive) const
+    {
+      values.clear();
+      exhaustive=false;
+    }
   };
 
   /**
@@ -107,6 +132,14 @@ namespace osmscout {
       // A negated condition may be true even if the inner tags are not present
       guaranteed=false;
     }
+
+    void CollectTagValues(std::vector<TagValue>& values,
+                          bool& exhaustive) const override
+    {
+      // The negated condition may match for any value not declared by its child
+      values.clear();
+      exhaustive=false;
+    }
   };
 
   /**
@@ -136,6 +169,9 @@ namespace osmscout {
 
     void CollectTagKeys(std::vector<TagId>& keys,
                         bool& guaranteed) const override;
+
+    void CollectTagValues(std::vector<TagValue>& values,
+                          bool& exhaustive) const override;
   };
 
   /**
@@ -170,6 +206,14 @@ namespace osmscout {
       keys.push_back(tag);
       guaranteed=true;
     }
+
+    void CollectTagValues(std::vector<TagValue>& values,
+                          bool& exhaustive) const override
+    {
+      // The condition matches for any value of the tag, so no value is declared
+      values.clear();
+      exhaustive=false;
+    }
   };
 
   /**
@@ -203,6 +247,9 @@ namespace osmscout {
 
     bool Evaluate(const TagMap& tagMap) const override;
 
+    void CollectTagValues(std::vector<TagValue>& values,
+                          bool& exhaustive) const override;
+
     void CollectTagKeys(std::vector<TagId>& keys,
                         bool& guaranteed) const override
     {
@@ -230,6 +277,9 @@ namespace osmscout {
     void AddTagValue(const std::string& tagValue);
 
     bool Evaluate(const TagMap& tagMap) const override;
+
+    void CollectTagValues(std::vector<TagValue>& values,
+                          bool& exhaustive) const override;
 
     void CollectTagKeys(std::vector<TagId>& keys,
                         bool& guaranteed) const override
