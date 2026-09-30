@@ -175,6 +175,8 @@ if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
+	osmscout_test_project(NAME OptimizeAreaWayIdsTest SOURCES src/OptimizeAreaWayIdsTest.cpp TARGET OSMScout::Import)
+
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
 
 	# The basemap step needs a GNU userland (md5sum, GNU coreutils); it reports
