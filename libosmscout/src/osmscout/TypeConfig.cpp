@@ -1134,6 +1134,39 @@
     }
   }
 
+  void TypeConfig::CollectCandidateStreams(const std::unordered_map<TagId,TypeKeyIndex>& index,
+                                           const std::vector<TypeConditionEntry>& fallback,
+                                           const TagMap& tagMap,
+                                           std::vector<const std::vector<TypeConditionEntry>*>& streams)
+  {
+    streams.reserve(tagMap.size()*2+1);
+
+    for (const auto& tagEntry : tagMap) {
+      auto entry=index.find(tagEntry.first);
+
+      if (entry==index.end()) {
+        continue;
+      }
+
+      const auto& keyIndex=entry->second;
+
+      auto bucket=keyIndex.valueBuckets.find(tagEntry.second);
+
+      if (bucket!=keyIndex.valueBuckets.end() &&
+          !bucket->second.empty()) {
+        streams.push_back(&bucket->second);
+      }
+
+      if (!keyIndex.keyOnly.empty()) {
+        streams.push_back(&keyIndex.keyOnly);
+      }
+    }
+
+    if (!fallback.empty()) {
+      streams.push_back(&fallback);
+    }
+  }
+
   const TypeConfig::TypeConditionEntry* TypeConfig::FindFirstMatch(const std::vector<const std::vector<TypeConditionEntry>*>& streams,
                                                                    unsigned char requiredTypes,
                                                                    const TagMap& tagMap) const
@@ -1211,32 +1244,10 @@
 
     std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-    streams.reserve(tagMap.size()*2+1);
-
-    for (const auto& tagEntry : tagMap) {
-      auto index=nodeTypeIndex.find(tagEntry.first);
-
-      if (index==nodeTypeIndex.end()) {
-        continue;
-      }
-
-      const auto& keyIndex=index->second;
-
-      auto bucket=keyIndex.valueBuckets.find(tagEntry.second);
-
-      if (bucket!=keyIndex.valueBuckets.end() &&
-          !bucket->second.empty()) {
-        streams.push_back(&bucket->second);
-      }
-
-      if (!keyIndex.keyOnly.empty()) {
-        streams.push_back(&keyIndex.keyOnly);
-      }
-    }
-
-    if (!nodeFallbackConditions.empty()) {
-      streams.push_back(&nodeFallbackConditions);
-    }
+    CollectCandidateStreams(nodeTypeIndex,
+                            nodeFallbackConditions,
+                            tagMap,
+                            streams);
 
     const TypeConditionEntry* match=FindFirstMatch(streams,
                                                    0,
@@ -1258,32 +1269,10 @@
 
     std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-    streams.reserve(tagMap.size()*2+1);
-
-    for (const auto& tagEntry : tagMap) {
-      auto index=wayAreaTypeIndex.find(tagEntry.first);
-
-      if (index==wayAreaTypeIndex.end()) {
-        continue;
-      }
-
-      const auto& keyIndex=index->second;
-
-      auto bucket=keyIndex.valueBuckets.find(tagEntry.second);
-
-      if (bucket!=keyIndex.valueBuckets.end() &&
-          !bucket->second.empty()) {
-        streams.push_back(&bucket->second);
-      }
-
-      if (!keyIndex.keyOnly.empty()) {
-        streams.push_back(&keyIndex.keyOnly);
-      }
-    }
-
-    if (!wayAreaFallbackConditions.empty()) {
-      streams.push_back(&wayAreaFallbackConditions);
-    }
+    CollectCandidateStreams(wayAreaTypeIndex,
+                            wayAreaFallbackConditions,
+                            tagMap,
+                            streams);
 
     const TypeConditionEntry* match=FindFirstMatch(streams,
                                                    0,
@@ -1317,32 +1306,10 @@
       // Multipolygon relations are resolved by scanning area conditions
       std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-      streams.reserve(tagMap.size()*2+1);
-
-      for (const auto& tagEntry : tagMap) {
-        auto index=wayAreaTypeIndex.find(tagEntry.first);
-
-        if (index==wayAreaTypeIndex.end()) {
-          continue;
-        }
-
-        const auto& keyIndex=index->second;
-
-        auto bucket=keyIndex.valueBuckets.find(tagEntry.second);
-
-        if (bucket!=keyIndex.valueBuckets.end() &&
-            !bucket->second.empty()) {
-          streams.push_back(&bucket->second);
-        }
-
-        if (!keyIndex.keyOnly.empty()) {
-          streams.push_back(&keyIndex.keyOnly);
-        }
-      }
-
-      if (!wayAreaFallbackConditions.empty()) {
-        streams.push_back(&wayAreaFallbackConditions);
-      }
+      CollectCandidateStreams(wayAreaTypeIndex,
+                              wayAreaFallbackConditions,
+                              tagMap,
+                              streams);
 
       const TypeConditionEntry* match=FindFirstMatch(streams,
                                                      TypeInfo::typeArea,
@@ -1353,32 +1320,10 @@
     else {
       std::vector<const std::vector<TypeConditionEntry>*> streams;
 
-      streams.reserve(tagMap.size()+1);
-
-      for (const auto& tagEntry : tagMap) {
-        auto index=relationTypeIndex.find(tagEntry.first);
-
-        if (index==relationTypeIndex.end()) {
-          continue;
-        }
-
-        const auto& keyIndex=index->second;
-
-        auto bucket=keyIndex.valueBuckets.find(tagEntry.second);
-
-        if (bucket!=keyIndex.valueBuckets.end() &&
-            !bucket->second.empty()) {
-          streams.push_back(&bucket->second);
-        }
-
-        if (!keyIndex.keyOnly.empty()) {
-          streams.push_back(&keyIndex.keyOnly);
-        }
-      }
-
-      if (!relationFallbackConditions.empty()) {
-        streams.push_back(&relationFallbackConditions);
-      }
+      CollectCandidateStreams(relationTypeIndex,
+                              relationFallbackConditions,
+                              tagMap,
+                              streams);
 
       const TypeConditionEntry* match=FindFirstMatch(streams,
                                                      0,

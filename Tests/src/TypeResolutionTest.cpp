@@ -747,56 +747,47 @@ static TypeConfigRef BuildCrowdedKeyConfig(size_t valueCount,
   return config;
 }
 
-TEST_CASE("No-match value on a crowded key reaches no condition", "[TypeResolution]")
+/**
+ * Asserts the crowded-key contract of one type config: every declared value owns its own
+ * condition, the key carries no value-less condition, an undeclared value reaches no
+ * condition and resolves to ignore, and a declared value resolves to its own type.
+ */
+static void CheckCrowdedKeyConfig(const TypeConfigRef& config,
+                                  size_t declaredValues,
+                                  const std::string& declaredValue)
 {
-  const size_t declared=50;
-
-  TypeConfigRef config=BuildCrowdedKeyConfig(declared);
-
   TagId amenity=config->GetTagId("amenity");
 
   const auto& nodeIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*config);
 
-  // Every declared value owns exactly its own condition, none is value-less
-  REQUIRE(nodeIndex.at(amenity).valueBuckets.size()==declared);
+  REQUIRE(nodeIndex.at(amenity).valueBuckets.size()==declaredValues);
   REQUIRE(nodeIndex.at(amenity).keyOnly.empty());
-
-  // The crowded key declares no condition for the undeclared value
   REQUIRE(nodeIndex.at(amenity).valueBuckets.count("undeclared")==0);
 
   TagMap noMatch=MakeTagMap(*config,{{"amenity","undeclared"}});
   REQUIRE(config->GetNodeType(noMatch)==config->typeInfoIgnore);
 
-  // A declared value still reaches its own condition
-  TagMap match=MakeTagMap(*config,{{"amenity","value_7"}});
-  REQUIRE(config->GetNodeType(match)->GetName()=="amenity_value_7");
+  TagMap match=MakeTagMap(*config,{{"amenity",declaredValue}});
+  REQUIRE(config->GetNodeType(match)->GetName()=="amenity_"+declaredValue);
+}
+
+TEST_CASE("No-match value on a crowded key reaches no condition", "[TypeResolution]")
+{
+  CheckCrowdedKeyConfig(BuildCrowdedKeyConfig(50),
+                        50,
+                        "value_7");
 }
 
 TEST_CASE("Type growth on one key leaves a no-match value's candidates unchanged", "[TypeResolution]")
 {
-  TypeConfigRef shipped=BuildCrowdedKeyConfig(10);
-  TypeConfigRef grown=BuildCrowdedKeyConfig(10,40);
-
-  const auto& shippedIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*shipped);
-  const auto& grownIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*grown);
-
-  TagId shippedAmenity=shipped->GetTagId("amenity");
-  TagId grownAmenity=grown->GetTagId("amenity");
-
-  // The grown config has four times as many types, but the undeclared value still
-  // reaches nothing in either config
-  REQUIRE(shippedIndex.at(shippedAmenity).valueBuckets.size()==10);
-  REQUIRE(grownIndex.at(grownAmenity).valueBuckets.size()==50);
-  REQUIRE(shippedIndex.at(shippedAmenity).valueBuckets.count("undeclared")==0);
-  REQUIRE(grownIndex.at(grownAmenity).valueBuckets.count("undeclared")==0);
-  REQUIRE(shippedIndex.at(shippedAmenity).keyOnly.empty());
-  REQUIRE(grownIndex.at(grownAmenity).keyOnly.empty());
-
-  TagMap shippedMap=MakeTagMap(*shipped,{{"amenity","undeclared"}});
-  TagMap grownMap=MakeTagMap(*grown,{{"amenity","undeclared"}});
-
-  REQUIRE(shipped->GetNodeType(shippedMap)==shipped->typeInfoIgnore);
-  REQUIRE(grown->GetNodeType(grownMap)==grown->typeInfoIgnore);
+  // Four times as many types on the same key: the undeclared value still reaches
+  // nothing and a declared value still resolves to its own type
+  CheckCrowdedKeyConfig(BuildCrowdedKeyConfig(10),
+                        10,
+                        "value_3");
+  CheckCrowdedKeyConfig(BuildCrowdedKeyConfig(10,40),
+                        50,
+                        "value_3");
 }
 
 TEST_CASE("Dispatch matches linear scan on a crowded key", "[TypeResolution]")

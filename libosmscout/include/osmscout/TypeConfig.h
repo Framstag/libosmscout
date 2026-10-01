@@ -1124,6 +1124,17 @@ namespace osmscout {
     std::vector<TypeConditionEntry> wayAreaFallbackConditions;
     std::vector<TypeConditionEntry> relationFallbackConditions;
 
+    /**
+     * Appends the candidate streams of one geometry kind for the given tags: for
+     * every tag the value bucket of the tag's value and the key-only list, skipping
+     * empty lists, plus the fallback conditions. The caller passes the streams to
+     * FindFirstMatch, which merges them in type-definition order.
+     */
+    static void CollectCandidateStreams(const std::unordered_map<TagId,TypeKeyIndex>& index,
+                                        const std::vector<TypeConditionEntry>& fallback,
+                                        const TagMap& tagMap,
+                                        std::vector<const std::vector<TypeConditionEntry>*>& streams);
+
     // Features
 
     std::vector<FeatureRef>                     features;
