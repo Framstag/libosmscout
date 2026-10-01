@@ -774,28 +774,28 @@ TEST_CASE("No-match value on a crowded key reaches no condition", "[TypeResoluti
 
 TEST_CASE("Type growth on one key leaves a no-match value's candidates unchanged", "[TypeResolution]")
 {
-  TypeConfigRef small=BuildCrowdedKeyConfig(10);
+  TypeConfigRef shipped=BuildCrowdedKeyConfig(10);
   TypeConfigRef grown=BuildCrowdedKeyConfig(10,40);
 
-  const auto& smallIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*small);
+  const auto& shippedIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*shipped);
   const auto& grownIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*grown);
 
-  TagId smallAmenity=small->GetTagId("amenity");
+  TagId shippedAmenity=shipped->GetTagId("amenity");
   TagId grownAmenity=grown->GetTagId("amenity");
 
-  // The value grown adds four times as many types, but the undeclared value still
+  // The grown config has four times as many types, but the undeclared value still
   // reaches nothing in either config
-  REQUIRE(smallIndex.at(smallAmenity).valueBuckets.size()==10);
+  REQUIRE(shippedIndex.at(shippedAmenity).valueBuckets.size()==10);
   REQUIRE(grownIndex.at(grownAmenity).valueBuckets.size()==50);
-  REQUIRE(smallIndex.at(smallAmenity).valueBuckets.count("undeclared")==0);
+  REQUIRE(shippedIndex.at(shippedAmenity).valueBuckets.count("undeclared")==0);
   REQUIRE(grownIndex.at(grownAmenity).valueBuckets.count("undeclared")==0);
-  REQUIRE(smallIndex.at(smallAmenity).keyOnly.empty());
+  REQUIRE(shippedIndex.at(shippedAmenity).keyOnly.empty());
   REQUIRE(grownIndex.at(grownAmenity).keyOnly.empty());
 
-  TagMap smallMap=MakeTagMap(*small,{{"amenity","undeclared"}});
+  TagMap shippedMap=MakeTagMap(*shipped,{{"amenity","undeclared"}});
   TagMap grownMap=MakeTagMap(*grown,{{"amenity","undeclared"}});
 
-  REQUIRE(small->GetNodeType(smallMap)==small->typeInfoIgnore);
+  REQUIRE(shipped->GetNodeType(shippedMap)==shipped->typeInfoIgnore);
   REQUIRE(grown->GetNodeType(grownMap)==grown->typeInfoIgnore);
 }
 
