@@ -72,6 +72,21 @@ public class LocationEntry {
     public boolean hasHouseNumber;
 
     /**
+     * Whether this entry lies inside the active search scope (the default admin
+     * region).
+     * <p>
+     * The bridge reports the verdict because the extent of the resolved region
+     * is a native-side fact: a caller receives it instead of re-deriving a
+     * region's area from positions. A search without a scope reports every
+     * entry as inside it, and a bridge that does not set the field leaves it
+     * true — the pre-change behaviour — so an app and a library of different
+     * vintages keep working together. A caller ordering results places entries
+     * outside the scope below entries inside it (spec:
+     * search-result-ranking).
+     */
+    public boolean inSearchScope = true;
+
+    /**
      * Name of the component that supplied {@link #label}: for a house-level
      * entry the street name (the label itself is street + house number), for a
      * location/POI/region entry the entry's own name. For the coordinate result
