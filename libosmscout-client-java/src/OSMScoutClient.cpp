@@ -427,6 +427,13 @@ struct AdminRegionEntry
   osmscout::AdminRegionRef region;
 };
 
+/**
+ * Memory budget of the map data caches of all databases of a Java client that does not configure one.
+ * It bounds the caches of a mobile client, whose memory limit is reached by the caches of the
+ * databases it has open rather than by the data of the current view.
+ */
+static constexpr std::size_t defaultDataCacheBudget=64*1024*1024;
+
 struct ClientData
 {
   osmscout::SettingsRef settings;                    //!< Application settings
@@ -437,6 +444,8 @@ struct ClientData
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
+  std::set<std::string> cacheSizedDatabases;          //!< Paths whose per-database cache size was applied already
+  std::size_t dataCacheBudget{defaultDataCacheBudget};//!< Memory budget of the caches of all databases
   osmscout::DatabasePathRegistry knownPaths;          //!< Registered map database paths, guarded by the registry's own mutex
 
   // Routing state
@@ -658,6 +667,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
     customPoiTypes,
     basemapStyleFilename
   );
+
+  clientData->dbThread->SetDataCacheBudget(clientData->dataCacheBudget);
 
   // Paths explicitly opened via openDatabase() are tracked separately.
   // Lookup directories (including the default download maps parent) are
@@ -1115,7 +1126,58 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEn
     return;
   }
   data->tileDataCacheSize = (cacheSize > 0) ? static_cast<std::size_t>(cacheSize) : 0;
+
+  // The size a client configured for a single database is applied to the
+  // databases that are open already; databases that open later are configured
+  // when they are seen for the first time.
+  data->cacheSizedDatabases.clear();
+
   osmscout::log.Debug() << "[JNI] setNativeDataCacheSize(" << cacheSize << ")";
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::setNativeDataCacheBudget(long bytes)
+//
+// Configures the total memory budget of the map data caches of all open
+// databases (regional databases and basemap). The caches of the databases of
+// the current view share the budget, the caches of the others are reduced to a
+// floor and released once they stay out of view. A non-positive value restores
+// the default budget of the Java client.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheBudget(JNIEnv *env, jobject self, jlong bytes)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+
+  data->dataCacheBudget = (bytes > 0) ? static_cast<std::size_t>(bytes) : defaultDataCacheBudget;
+
+  if (data->dbThread) {
+    data->dbThread->SetDataCacheBudget(data->dataCacheBudget);
+  }
+
+  osmscout::log.Debug() << "[JNI] setNativeDataCacheBudget(" << bytes
+                        << ") -> " << data->dataCacheBudget;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::getNativeDataCacheUsage()
+//
+// Returns the accounted size of the map data caches of all open databases.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_getNativeDataCacheUsage(JNIEnv *env, jobject self)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || !data->dbThread) {
+    return 0;
+  }
+
+  return static_cast<jlong>(data->dbThread->GetDataCacheBudget()->GetUsage());
 }
 
 // --------------------------------------------------------------------------
@@ -1542,19 +1604,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
       // asynchronously since the last render - map scan, basemap reload).
       if (data->tileDataCacheSize > 0) {
         for (const auto &db : databases) {
-          if (db && db->GetMapService()) {
+          if (!db || !db->GetMapService()) {
+            continue;
+          }
+
+          // The per-database capacity is applied once per database, not on every
+          // render: it is the bound a client configures for a single database,
+          // while the memory budget below bounds all of them together.
+          if (data->cacheSizedDatabases.insert(db->path).second) {
             db->GetMapService()->SetCacheSize(data->tileDataCacheSize);
           }
         }
-        if (basemapDatabase && basemapDatabase->GetMapService()) {
+
+        if (basemapDatabase && basemapDatabase->GetMapService() &&
+            data->cacheSizedDatabases.insert(basemapDatabase->path).second) {
           basemapDatabase->GetMapService()->SetCacheSize(data->tileDataCacheSize);
         }
-        osmscout::log.Debug() << "[JNI] render: applied tile data cache size "
-                              << data->tileDataCacheSize
-                              << " to " << databases.size() << " db(s)"
-                              << (basemapDatabase && basemapDatabase->GetMapService()
-                                      ? " + basemap"
-                                      : "");
       }
 
       // Load regular databases first

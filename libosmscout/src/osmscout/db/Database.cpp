@@ -181,6 +181,12 @@ namespace osmscout {
    : parameter(parameter)
   {
     log.Debug() << "Database::Database()";
+
+    dataCacheSizes.nodeCacheSize=parameter.GetNodeDataCacheSize();
+    dataCacheSizes.wayCacheSize=parameter.GetWayDataCacheSize();
+    dataCacheSizes.areaCacheSize=parameter.GetAreaDataCacheSize();
+    dataCacheSizes.routeCacheSize=parameter.GetRouteDataCacheSize();
+    dataCacheSizes.areaAreaIndexCacheSize=parameter.GetAreaAreaIndexCacheSize();
   }
 
   Database::~Database()
@@ -338,7 +344,7 @@ namespace osmscout {
     }
 
     if (!nodeDataFile) {
-      nodeDataFile=std::make_shared<NodeDataFile>(parameter.GetNodeDataCacheSize());
+      nodeDataFile=std::make_shared<NodeDataFile>(GetDataCacheSizesInternal().nodeCacheSize);
     }
 
     if (!nodeDataFile->IsOpen()) {
@@ -368,7 +374,7 @@ namespace osmscout {
     }
 
     if (!areaDataFile) {
-      areaDataFile=std::make_shared<AreaDataFile>(parameter.GetAreaDataCacheSize());
+      areaDataFile=std::make_shared<AreaDataFile>(GetDataCacheSizesInternal().areaCacheSize);
     }
 
     if (!areaDataFile->IsOpen()) {
@@ -400,7 +406,7 @@ namespace osmscout {
     }
 
     if (!wayDataFile) {
-      wayDataFile=std::make_shared<WayDataFile>(parameter.GetWayDataCacheSize());
+      wayDataFile=std::make_shared<WayDataFile>(GetDataCacheSizesInternal().wayCacheSize);
     }
 
     if (!wayDataFile->IsOpen()) {
@@ -432,7 +438,7 @@ namespace osmscout {
     }
 
     if (!routeDataFile) {
-      routeDataFile=std::make_shared<RouteDataFile>(parameter.GetRouteDataCacheSize());
+      routeDataFile=std::make_shared<RouteDataFile>(GetDataCacheSizesInternal().routeCacheSize);
     }
 
     if (!routeDataFile->IsOpen()) {
@@ -492,7 +498,7 @@ namespace osmscout {
     }
 
     if (!areaAreaIndex) {
-      areaAreaIndex=std::make_shared<AreaAreaIndex>(parameter.GetAreaAreaIndexCacheSize());
+      areaAreaIndex=std::make_shared<AreaAreaIndex>(GetDataCacheSizesInternal().areaAreaIndexCacheSize);
 
       StopClock timer;
 
@@ -978,6 +984,141 @@ namespace osmscout {
       }
     }
 
+  }
+
+  Database::DataCacheSizes Database::GetDataCacheSizesInternal() const
+  {
+    std::scoped_lock<std::mutex> guard(dataCacheSizesMutex);
+
+    return dataCacheSizes;
+  }
+
+  void Database::SetDataCacheSizes(size_t nodeCacheSize,
+                                   size_t wayCacheSize,
+                                   size_t areaCacheSize,
+                                   size_t routeCacheSize,
+                                   size_t areaAreaIndexCacheSize)
+  {
+    {
+      std::scoped_lock<std::mutex> guard(dataCacheSizesMutex);
+
+      dataCacheSizes.nodeCacheSize=nodeCacheSize;
+      dataCacheSizes.wayCacheSize=wayCacheSize;
+      dataCacheSizes.areaCacheSize=areaCacheSize;
+      dataCacheSizes.routeCacheSize=routeCacheSize;
+      dataCacheSizes.areaAreaIndexCacheSize=areaAreaIndexCacheSize;
+
+      // Keep the parameters in sync, so that no code path observes a different size
+      parameter.SetNodeDataCacheSize(nodeCacheSize);
+      parameter.SetWayDataCacheSize(wayCacheSize);
+      parameter.SetAreaDataCacheSize(areaCacheSize);
+      parameter.SetRouteDataCacheSize(routeCacheSize);
+      parameter.SetAreaAreaIndexCacheSize(areaAreaIndexCacheSize);
+    }
+
+    // The data files are locked one after the other, never while the sizes are locked, so that the
+    // lock order of the lazy creation of a data file is not inverted
+    {
+      std::scoped_lock<std::mutex> guard(nodeDataFileMutex);
+
+      if (nodeDataFile) {
+        nodeDataFile->SetCacheSize(nodeCacheSize);
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(wayDataFileMutex);
+
+      if (wayDataFile) {
+        wayDataFile->SetCacheSize(wayCacheSize);
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(areaDataFileMutex);
+
+      if (areaDataFile) {
+        areaDataFile->SetCacheSize(areaCacheSize);
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(routeDataFileMutex);
+
+      if (routeDataFile) {
+        routeDataFile->SetCacheSize(routeCacheSize);
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(areaAreaIndexMutex);
+
+      if (areaAreaIndex) {
+        areaAreaIndex->SetCacheSize(areaAreaIndexCacheSize);
+      }
+    }
+  }
+
+  void Database::GetDataCacheSizes(size_t& nodeCacheSize,
+                                   size_t& wayCacheSize,
+                                   size_t& areaCacheSize,
+                                   size_t& routeCacheSize,
+                                   size_t& areaAreaIndexCacheSize) const
+  {
+    DataCacheSizes sizes=GetDataCacheSizesInternal();
+
+    nodeCacheSize=sizes.nodeCacheSize;
+    wayCacheSize=sizes.wayCacheSize;
+    areaCacheSize=sizes.areaCacheSize;
+    routeCacheSize=sizes.routeCacheSize;
+    areaAreaIndexCacheSize=sizes.areaAreaIndexCacheSize;
+  }
+
+  Database::DataCacheUsage Database::GetDataCacheUsage() const
+  {
+    DataCacheUsage usage;
+
+    {
+      std::scoped_lock<std::mutex> guard(nodeDataFileMutex);
+
+      if (nodeDataFile) {
+        usage.nodeCount=nodeDataFile->GetCachedEntryCount();
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(wayDataFileMutex);
+
+      if (wayDataFile) {
+        usage.wayCount=wayDataFile->GetCachedEntryCount();
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(areaDataFileMutex);
+
+      if (areaDataFile) {
+        usage.areaCount=areaDataFile->GetCachedEntryCount();
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(routeDataFileMutex);
+
+      if (routeDataFile) {
+        usage.routeCount=routeDataFile->GetCachedEntryCount();
+      }
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(areaAreaIndexMutex);
+
+      if (areaAreaIndex) {
+        usage.areaAreaIndexEntryCount=areaAreaIndex->GetCachedEntryCount();
+      }
+    }
+
+    return usage;
   }
 
   NodeRegionSearchResult Database::LoadNodesInRadius(const GeoCoord& location,

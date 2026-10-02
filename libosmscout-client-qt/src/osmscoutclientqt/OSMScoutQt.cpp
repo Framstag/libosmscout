@@ -184,6 +184,7 @@ OSMScoutQtBuilder::~OSMScoutQtBuilder()
                                   cacheLocation,
                                   onlineTileCacheSize,
                                   offlineTileCacheSize,
+                                  dataCacheBudget,
                                   glPowerOfTwoTexture,
                                   pixelRatio,
                                   userAgent,
@@ -305,6 +306,7 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                        QString cacheLocation,
                        size_t onlineTileCacheSize,
                        size_t offlineTileCacheSize,
+                       size_t dataCacheBudget,
                        GLPowerOfTwoTexture glPowerOfTwoTexture,
                        const PixelRatioSetup &pixelRatio,
                        QString userAgent,
@@ -335,6 +337,8 @@ OSMScoutQt::OSMScoutQt(SettingsRef settings,
                                       settings,
                                       mapManager,
                                       customPoiTypeVector);
+
+  dbThread->SetDataCacheBudget(dataCacheBudget);
 
   dbThread->Initialize();
 

@@ -417,6 +417,18 @@ LabelPathTest = executable('LabelPathTest',
 
 test('Check LabelPath code', LabelPathTest)
 
+MapDataBudgetTest = executable('MapDataBudgetTest',
+                           'src/MapDataBudgetTest.cpp',
+                           include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+                           dependencies: [mathDep, catch2MainDep],
+                           link_with: [osmscoutmap, osmscout],
+                           install: true,
+                           install_dir: testInstallDir)
+
+test('Check map data accounting and budget', MapDataBudgetTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir(),
+           'TESTS_TMP_DIR='+meson.current_build_dir()])
+
 LatchTest = executable('LatchTest',
              'src/LatchTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

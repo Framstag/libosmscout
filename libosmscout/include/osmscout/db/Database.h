@@ -295,6 +295,31 @@ namespace osmscout {
    */
   class OSMSCOUT_API Database CLASS_FINAL
   {
+  public:
+    /**
+     * The number of entries the object caches of one database currently hold, per kind of entry.
+     */
+    struct DataCacheUsage CLASS_FINAL
+    {
+      size_t nodeCount=0;                //!< Number of cached nodes
+      size_t wayCount=0;                 //!< Number of cached ways
+      size_t areaCount=0;                //!< Number of cached areas
+      size_t routeCount=0;               //!< Number of cached routes
+      size_t areaAreaIndexEntryCount=0;  //!< Number of cached area area index entries
+
+      /**
+       * Return 'true' if no cache holds an entry
+       */
+      bool IsEmpty() const
+      {
+        return nodeCount==0 &&
+               wayCount==0 &&
+               areaCount==0 &&
+               routeCount==0 &&
+               areaAreaIndexEntryCount==0;
+      }
+    };
+
   private:
     DatabaseParameter               parameter;                //!< Parameterization of this db object
 
@@ -359,6 +384,28 @@ namespace osmscout {
 
     mutable SRTMRef                 srtmIndex;                //!< Digital elevation data (usually from "Shuttle Radar Topography Mission")
     mutable std::mutex              srtmIndexMutex;           //!< Mutex to make lazy initialisation of SRTM thread-safe
+
+    /**
+     * Number of entries the object caches of the database hold. It is the source of truth for the
+     * size of a cache: a data file that is created later uses the current value, and a data file
+     * that already exists is resized when the value changes.
+     */
+    struct DataCacheSizes CLASS_FINAL
+    {
+      size_t nodeCacheSize=0;           //!< Maximum number of cached nodes
+      size_t wayCacheSize=0;            //!< Maximum number of cached ways
+      size_t areaCacheSize=0;           //!< Maximum number of cached areas
+      size_t routeCacheSize=0;          //!< Maximum number of cached routes
+      size_t areaAreaIndexCacheSize=0;  //!< Maximum number of cached area area index entries
+    };
+
+    mutable std::mutex              dataCacheSizesMutex;      //!< Mutex to protect the cache sizes
+    DataCacheSizes                  dataCacheSizes;           //!< Number of entries the object caches hold
+
+    /**
+     * Return a copy of the configured cache sizes. The method is thread-safe.
+     */
+    DataCacheSizes GetDataCacheSizesInternal() const;
 
   private:
     template<typename DataFile, typename OffsetsCol, typename DataCol>
@@ -569,6 +616,46 @@ namespace osmscout {
     void DumpStatistics() const;
 
     void FlushCache();
+
+    /**
+     * Change the number of entries the object caches of this database hold. The sizes are stored in
+     * the parameters of the database, so a data file that is created later uses them, and they are
+     * applied to every data file that has already been created, which strips the oldest entries of a
+     * cache that shrinks.
+     *
+     * @param nodeCacheSize
+     *    Maximum number of cached nodes
+     * @param wayCacheSize
+     *    Maximum number of cached ways
+     * @param areaCacheSize
+     *    Maximum number of cached areas
+     * @param routeCacheSize
+     *    Maximum number of cached routes
+     * @param areaAreaIndexCacheSize
+     *    Maximum number of cached area area index entries
+     */
+    void SetDataCacheSizes(size_t nodeCacheSize,
+                           size_t wayCacheSize,
+                           size_t areaCacheSize,
+                           size_t routeCacheSize,
+                           size_t areaAreaIndexCacheSize);
+
+    /**
+     * Return the number of entries the object caches of this database are configured to hold: the
+     * nodes, ways, areas, routes and area area index entries.
+     */
+    void GetDataCacheSizes(size_t& nodeCacheSize,
+                           size_t& wayCacheSize,
+                           size_t& areaCacheSize,
+                           size_t& routeCacheSize,
+                           size_t& areaAreaIndexCacheSize) const;
+
+    /**
+     * Return the number of entries the object caches of this database currently hold. Only files that
+     * have already been created are reported, so the call never opens a data file that was not used
+     * yet.
+     */
+    DataCacheUsage GetDataCacheUsage() const;
   };
 
   //! Reference counted reference to an Database instance

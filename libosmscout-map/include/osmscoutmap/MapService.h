@@ -31,6 +31,7 @@
 
 #include <osmscoutmap/MapPainter.h>
 #include <osmscoutmap/StyleConfig.h>
+#include <osmscoutmap/MapDataBudget.h>
 
 #include <osmscout/db/Database.h>
 
@@ -94,6 +95,13 @@ namespace osmscout {
    * - Get objects of a certain type in a given area and impose certain
    * limits on the resulting data (size of area, number of objects,
    * low zoom optimizations,...).
+   *
+   * The data a service holds for its database lives in caches: tiles of loaded objects and the object
+   * caches of the data files of the database. The content of those caches is accounted by
+   * MapDataAccounting, which relates the kinds of cached entries to each other and turns the
+   * accounted total into a memory figure. The weights of the kinds and the number of bytes a weight
+   * unit stands for are documented at the constants of MapDataAccounting, so the unit has exactly one
+   * definition.
    */
   class OSMSCOUT_MAP_API MapService
   {
@@ -115,11 +123,22 @@ namespace osmscout {
     using CallbackId = size_t;
     using TileStateCallback = std::function<void (const TileRef &)>;
 
+    /**
+     * The share of a database is divided by this value to get the weight its tile cache may use; the
+     * object caches of the data files get the rest, because they hold the bulk of the data of a
+     * database.
+     */
+    static constexpr size_t divisorOfTileCacheShare=4;
+
   private:
     mutable std::mutex           stateMutex;           //!< Mutex to protect internal state
 
     DatabaseRef                  database;             //!< The reference to the db
     mutable DataTileCache        cache;                //!< Data cache
+
+    MapDataBudgetRef             budget;               //!< The memory budget the caches participate in, may be null
+    MapDataBudget::ContributorId budgetContributorId=0; //!< Handle of the caches in the budget
+    mutable bool                 budgetExtentKnown=false; //!< True once the extent of the database was reported to the budget
 
     mutable WorkQueue<bool>      nodeWorkerQueue;
     std::thread                  nodeWorkerThread;
@@ -338,9 +357,71 @@ namespace osmscout {
                                            std::list<TileRef>& tiles,
                                            bool async) const;
 
+    /**
+     * Tell the budget whether the caches of this service are part of the current view and apply the
+     * share of the budget that is due to them if the budget distributed it. Method is called while the
+     * caches are locked.
+     */
+    void UpdateBudget(const GeoBox& viewBox) const;
+
+    /**
+     * Bound the tile cache and the object caches of the database by the share of the budget that is
+     * due to them
+     */
+    void ApplyBudgetShare() const;
+
+    /**
+     * Report the accounted content of the caches of this service to the budget
+     */
+    void ReportBudgetUsage() const;
+
+    /**
+     * Release the content of the caches while the caches are locked
+     */
+    void ReleaseCachesLocked() const;
+
   public:
-    explicit MapService(const DatabaseRef& database);
+    explicit MapService(const DatabaseRef& database,
+                        const MapDataBudgetRef& budget=nullptr);
     virtual ~MapService();
+
+    /**
+     * Return the budget the caches of this service participate in, may be null
+     */
+    MapDataBudgetRef GetBudget() const
+    {
+      return budget;
+    }
+
+    /**
+     * Return the accounted weight of the content of the tile cache and of the object caches of the
+     * database
+     */
+    size_t GetAccountedWeight() const;
+
+    /**
+     * Return 'true' if the geographic extent of the database the service serves covers the area of the
+     * given projection
+     */
+    bool IsRelevantToView(const Projection& projection) const;
+
+    /**
+     * Return 'true' if the geographic extent of the database the service serves covers the given area
+     */
+    bool IsRelevantToView(const GeoBox& viewBox) const;
+
+    /**
+     * Return the accounted weight the caches of this service may hold, zero if the budget did not
+     * distribute its shares (or if the service has no budget)
+     */
+    size_t GetShareWeight() const;
+
+    /**
+     * Release the content of the caches of this service: the tile cache drops its tiles and the
+     * object caches of the database are flushed. The objects of a view are reloaded afterwards, so a
+     * client uses this for data it does not need while the user looks elsewhere.
+     */
+    void ReleaseCaches();
 
     void SetCacheSize(size_t cacheSize);
     size_t GetCacheSize() const;

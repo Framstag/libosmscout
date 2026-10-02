@@ -13,6 +13,8 @@ osmscoutmapSrc = [
             'src/osmscoutmap/StyleConfig.cpp',
             'src/osmscoutmap/StyleProcessor.cpp',
             'src/osmscoutmap/DataTileCache.cpp',
+            'src/osmscoutmap/MapDataAccounting.cpp',
+            'src/osmscoutmap/MapDataBudget.cpp',
             'src/osmscoutmap/MapTileCache.cpp',
             'src/osmscoutmap/MapData.cpp',
             'src/osmscoutmap/MapService.cpp',
