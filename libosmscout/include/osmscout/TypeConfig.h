@@ -1094,12 +1094,28 @@ namespace osmscout {
       size_t          conditionIndex;   //!< Index of the condition within the type
     };
 
+    /**
+     * Dispatch index of one geometry kind for one tag key.
+     *
+     * Conditions whose reported value set is exhaustive for a concrete tag value are
+     * stored under that value in 'valueBuckets'; conditions that are not discriminated
+     * by a value (existence, ordering, negation, ...) stay in 'keyOnly'. Both are kept
+     * sorted by (typeIndex, conditionIndex) to preserve the evaluation order of the
+     * linear scan.
+     */
+    struct TypeKeyIndex
+    {
+      std::unordered_map<std::string,std::vector<TypeConditionEntry>> valueBuckets; //!< Conditions by declared tag value
+      std::vector<TypeConditionEntry>                                 keyOnly;        //!< Conditions not discriminated by a value
+    };
+
     // Type resolution dispatch index, one per geometry kind. Maps a tag id to the
-    // list of conditions that are primarily discriminated by that tag. The lists are
+    // conditions primarily discriminated by that tag: the value buckets hold the
+    // conditions that declare a concrete value, keyOnly the remainder. The lists are
     // sorted by (typeIndex, conditionIndex).
-    std::unordered_map<TagId,std::vector<TypeConditionEntry>> nodeTypeIndex;
-    std::unordered_map<TagId,std::vector<TypeConditionEntry>> wayAreaTypeIndex;
-    std::unordered_map<TagId,std::vector<TypeConditionEntry>> relationTypeIndex;
+    std::unordered_map<TagId,TypeKeyIndex> nodeTypeIndex;
+    std::unordered_map<TagId,TypeKeyIndex> wayAreaTypeIndex;
+    std::unordered_map<TagId,TypeKeyIndex> relationTypeIndex;
 
     // Conditions that may match even if none of their discriminated tags is present
     // (e.g. conditions containing negation). They have to be evaluated for every
@@ -1107,6 +1123,17 @@ namespace osmscout {
     std::vector<TypeConditionEntry> nodeFallbackConditions;
     std::vector<TypeConditionEntry> wayAreaFallbackConditions;
     std::vector<TypeConditionEntry> relationFallbackConditions;
+
+    /**
+     * Appends the candidate streams of one geometry kind for the given tags: for
+     * every tag the value bucket of the tag's value and the key-only list, skipping
+     * empty lists, plus the fallback conditions. The caller passes the streams to
+     * FindFirstMatch, which merges them in type-definition order.
+     */
+    static void CollectCandidateStreams(const std::unordered_map<TagId,TypeKeyIndex>& index,
+                                        const std::vector<TypeConditionEntry>& fallback,
+                                        const TagMap& tagMap,
+                                        std::vector<const std::vector<TypeConditionEntry>*>& streams);
 
     // Features
 

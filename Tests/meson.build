@@ -61,6 +61,17 @@ StyleLoadResilienceTest = executable('StyleLoadResilienceTest',
 test('Check style load resilience', StyleLoadResilienceTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
+StyleReportCondensationTest = executable('StyleReportCondensationTest',
+             'src/StyleReportCondensationTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient, osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check style report condensation', StyleReportCondensationTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
 AccessParseTest =  executable('AccessParseTest',
              'src/AccessParseTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -70,6 +81,17 @@ AccessParseTest =  executable('AccessParseTest',
              install_dir: testInstallDir)
 
 test('Check parsing of access rights', AccessParseTest)
+
+AreaIndexLookupTest = executable('AreaIndexLookupTest',
+             'src/AreaIndexLookupTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check area index lookup', AreaIndexLookupTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
 TypeResolutionTest =  executable('TypeResolutionTest',
              'src/TypeResolutionTest.cpp',

@@ -11,9 +11,17 @@ osmscout_test_project(NAME DatabaseOpenTest SOURCES src/DatabaseOpenTest.cpp TAR
 osmscout_test_project(NAME StyleLoadResilienceTest SOURCES src/StyleLoadResilienceTest.cpp TARGET OSMScout::Client)
 set_tests_properties(StyleLoadResilienceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
+#---- Style report condensation
+osmscout_test_project(NAME StyleReportCondensationTest SOURCES src/StyleReportCondensationTest.cpp TARGET OSMScout::Client)
+set_tests_properties(StyleReportCondensationTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- AccessParse
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
+
+#---- AreaIndexLookup
+osmscout_test_project(NAME AreaIndexLookupTest SOURCES src/AreaIndexLookupTest.cpp)
+set_tests_properties(AreaIndexLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
 #---- AsyncProcessing
 osmscout_test_project(NAME AsyncProcessingTest SOURCES src/AsyncProcessingTest.cpp)

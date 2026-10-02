@@ -80,6 +80,80 @@ void Parser::SemWarning(const char* msg)
   errors->Warning(t->line, t->col, msg);
 }
 
+/**
+ * Notes a type name that could not be resolved and records the finding with its
+ * own position, without logging it: the parse reports the distinct names in one
+ * line at its end (see ReportUnresolvedTypes), so a name referenced by many
+ * rules costs one entry in that report instead of one log line per reference.
+ */
+void Parser::NoteUnresolvedType(const std::string& name, const std::string& message)
+{
+  if (!state) {
+    return;
+  }
+
+  unresolvedTypeNames.insert(name);
+
+  errors->RecordWarning(t->line, t->col, message.c_str());
+}
+
+namespace {
+  /// How many distinct unresolved type names the condensed report lists inline.
+  constexpr size_t UNRESOLVED_TYPE_SAMPLE_LIMIT=8;
+}
+
+/**
+ * Reports the distinct type names this parser could not resolve in one line: the
+ * style file, the exact number of distinct names and a bounded, sorted sample
+ * (see NoteUnresolvedType). The line is logged, not recorded as a finding, so the
+ * findings a caller receives keep one entry per reference; with debug logging
+ * enabled the complete name list is logged as well.
+ */
+void Parser::ReportUnresolvedTypes()
+{
+  if (unresolvedTypeNames.empty()) {
+    return;
+  }
+
+  std::stringstream buffer;
+
+  buffer << "Unknown types in '" << filename << "': " << unresolvedTypeNames.size();
+
+  size_t shown=0;
+  bool   truncated=false;
+
+  for (const auto& name : unresolvedTypeNames) {
+    if (shown==UNRESOLVED_TYPE_SAMPLE_LIMIT) {
+      truncated=true;
+      break;
+    }
+
+    buffer << (shown==0 ? " (" : ", ") << name;
+
+    shown++;
+  }
+
+  if (truncated) {
+    buffer << ", " << (unresolvedTypeNames.size()-shown) << " more";
+  }
+
+  buffer << ")";
+
+  errors->log.Warn() << buffer.str();
+
+  if (errors->log.IsDebug()) {
+    std::stringstream detail;
+
+    detail << "Unknown types in '" << filename << "':";
+
+    for (const auto& name : unresolvedTypeNames) {
+      detail << " " << name;
+    }
+
+    errors->log.Debug() << detail.str();
+  }
+}
+
 void Parser::Get()
 {
   for (;;) {
@@ -414,7 +488,7 @@ void Parser::WAYGROUP(size_t priority) {
 			
 			if (!wayType) {
 			 std::string e="Unknown way type '"+wayTypeName+"'";
-			 SemWarning(e.c_str());
+			 NoteUnresolvedType(wayTypeName,e);
 			}
 			else if (!wayType->CanBeWay()) {
 			 std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -436,7 +510,7 @@ void Parser::WAYGROUP(size_t priority) {
 			
 			if (!wayType) {
 			 std::string e="Unknown way type '"+wayTypeName+"'";
-			 SemWarning(e.c_str());
+			 NoteUnresolvedType(wayTypeName,e);
 			}
 			else if (!wayType->CanBeWay()) {
 			 std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -1108,7 +1182,7 @@ void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
 		if (!type) {
 		 std::string e="Unknown type '"+name+"'";
 		
-		 SemWarning(e.c_str());
+		 NoteUnresolvedType(name,e);
 		}
 		else if (filter.FiltersByType() &&
 		        !filter.HasType(type)) {
@@ -1129,7 +1203,7 @@ void Parser::STYLEFILTER_TYPE(StyleFilter& filter) {
 			if (!type) {
 			 std::string e="Unknown type '"+name+"'";
 			
-			 SemWarning(e.c_str());
+			 NoteUnresolvedType(name,e);
 			}
 			else if (filter.FiltersByType() &&
 			        !filter.HasType(type)) {
@@ -2425,6 +2499,7 @@ void Parser::Parse()
   Get();
 	OSS();
 	Expect(0);
+  ReportUnresolvedTypes();
 }
 
 Parser::Parser(Scanner *scanner,
@@ -2706,6 +2781,23 @@ void Errors::Warning(const char *s)
   error.text=s;
 
   log.Warn() << error.line << "," << error.column << " " << "Warning: " << error.text;
+
+  errors.push_back(error);
+}
+
+/**
+ * Records a warning without logging it: a caller that reports the same class of
+ * finding itself (see Parser::ReportUnresolvedTypes) gets one log line per load
+ * instead of one per occurrence, while every finding stays available to callers.
+ */
+void Errors::RecordWarning(int line, int col, const char *s)
+{
+  Err error;
+
+  error.type=Err::Warning;
+  error.line=line;
+  error.column=col;
+  error.text=s;
 
   errors.push_back(error);
 }
