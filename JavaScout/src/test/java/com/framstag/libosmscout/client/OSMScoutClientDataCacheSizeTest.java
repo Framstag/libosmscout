@@ -30,12 +30,7 @@ public class OSMScoutClientDataCacheSizeTest {
 
     /** Skip the test when the native library cannot be loaded. */
     private static void assumeNativeLibrary() {
-        try {
-            new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
-        }
+        TestClients.assumeNativeLibrary();
     }
 
     /** Operator-provided map database directory, or null when unset. */
@@ -99,14 +94,16 @@ public class OSMScoutClientDataCacheSizeTest {
     public void testSetCacheSizeWithoutDatabase(@TempDir Path emptyDir) {
         OSMScoutClient noMapClient = buildClient(emptyDir);
 
-        noMapClient.setNativeDataCacheSize(1024);
-        noMapClient.setNativeDataCacheSize(0);
-        noMapClient.setNativeDataCacheSize(-1);
+        try {
+            noMapClient.setNativeDataCacheSize(1024);
+            noMapClient.setNativeDataCacheSize(0);
+            noMapClient.setNativeDataCacheSize(-1);
 
-        assertNull(render(noMapClient),
-            "without a database there is no map data to render");
-
-        noMapClient.close();
+            assertNull(render(noMapClient),
+                "without a database there is no map data to render");
+        } finally {
+            noMapClient.close();
+        }
     }
 
     /**
