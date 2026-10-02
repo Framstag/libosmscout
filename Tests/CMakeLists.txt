@@ -19,6 +19,10 @@ set_tests_properties(StyleReportCondensationTest PROPERTIES ENVIRONMENT "TESTS_T
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
 
+#---- AreaIndexLookup
+osmscout_test_project(NAME AreaIndexLookupTest SOURCES src/AreaIndexLookupTest.cpp)
+set_tests_properties(AreaIndexLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- AsyncProcessing
 osmscout_test_project(NAME AsyncProcessingTest SOURCES src/AsyncProcessingTest.cpp)
 
@@ -190,6 +194,17 @@ endif()
 # launcher, and not to a shell, so the script never runs (same guard in Tests/meson.build).
 if(TARGET osmscout_client_java AND NOT WIN32)
 	add_test(NAME JniSignatureParityTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-jni-signatures.sh)
+endif()
+
+#---- Self-appends of a sequence
+# Host-side check that no append reads the element it stores out of the sequence it appends to: the
+# sequence may move its storage while it grows, and a geometry then loses or gains a point (GCC
+# reported the shape once, see the script).
+#
+# Not registered on Windows for the same reason as the check above: `bash` resolves to the WSL
+# launcher there and not to a shell (same guard in Tests/meson.build).
+if(NOT WIN32)
+	add_test(NAME VectorSelfAppendTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/check-vector-self-append.sh)
 endif()
 
 #---- WorkQueue
@@ -462,6 +477,14 @@ else()
   message("Skip RoadStyleColors test, libosmscout-map is missing.")
 endif()
 
+#---- PatternLookup
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME PatternLookupTest SOURCES src/PatternLookupTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(PatternLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip PatternLookup test, libosmscout-map is missing.")
+endif()
+
 #---- RouteStyleColors
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME RouteStyleColorsTest SOURCES src/RouteStyleColorsTest.cpp TARGET OSMScout::Map)
@@ -647,6 +670,14 @@ endif()
 #---- SVGIconSkiaTest
 if(${OSMSCOUT_BUILD_MAP_SKIA})
   osmscout_test_project(NAME SVGIconSkiaTest SOURCES src/SVGIconSkiaTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapSkia Catch2::Catch2WithMain)
+endif()
+
+#---- MapPainterCairoPatternTest: the report of a pattern fill the backend cannot serve
+if(${OSMSCOUT_BUILD_MAP_CAIRO} AND TARGET OSMScout::Map AND TARGET OSMScout::MapCairo)
+  osmscout_test_project(NAME MapPainterCairoPatternTest SOURCES src/MapPainterCairoPatternTest.cpp TARGET OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
+  set_tests_properties(MapPainterCairoPatternTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip MapPainterCairoPattern test, libosmscout-map-cairo is missing.")
 endif()
 
 #---- SymbolRendererCairoTest

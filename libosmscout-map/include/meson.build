@@ -20,6 +20,7 @@ osmscoutmapHeader = [
             'osmscoutmap/MapTileCache.h',
             'osmscoutmap/MapData.h',
             'osmscoutmap/MapService.h',
+            'osmscoutmap/PatternLookup.h',
             'osmscoutmap/MapPainterNoOp.h',
             'osmscoutmap/SymbolRenderer.h'
           ]

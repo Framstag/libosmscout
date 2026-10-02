@@ -142,6 +142,58 @@ namespace osmscout {
     }
   }
 
+  void TagBoolCondition::CollectTagValues(std::vector<TagValue>& values,
+                                          bool& exhaustive) const
+  {
+    values.clear();
+
+    switch (type) {
+    case boolAnd:
+      // A match has to satisfy every child, so a child that is exhaustive on its
+      // own already restricts the whole condition to that child's values. The
+      // union of the children's values is a conservative superset of them.
+      exhaustive=false;
+
+      for (const auto& condition : conditions) {
+        std::vector<TagValue> childValues;
+        bool                  childExhaustive=false;
+
+        condition->CollectTagValues(childValues,
+                                    childExhaustive);
+
+        values.insert(values.end(),
+                      childValues.begin(),
+                      childValues.end());
+
+        exhaustive=exhaustive || childExhaustive;
+      }
+      break;
+    case boolOr:
+      // A match may come from any branch, so the whole condition is only
+      // exhaustive if every branch is.
+      exhaustive=true;
+
+      for (const auto& condition : conditions) {
+        std::vector<TagValue> childValues;
+        bool                  childExhaustive=false;
+
+        condition->CollectTagValues(childValues,
+                                    childExhaustive);
+
+        values.insert(values.end(),
+                      childValues.begin(),
+                      childValues.end());
+
+        exhaustive=exhaustive && childExhaustive;
+      }
+      break;
+    default:
+      assert(false);
+      exhaustive=false;
+      break;
+    }
+  }
+
   TagExistsCondition::TagExistsCondition(TagId tag)
   : tag(tag)
   {
@@ -245,6 +297,23 @@ namespace osmscout {
     }
   }
 
+  void TagBinaryCondition::CollectTagValues(std::vector<TagValue>& values,
+                                            bool& exhaustive) const
+  {
+    values.clear();
+    exhaustive=false;
+
+    // Only an equality on a concrete string value is exhaustive: the object has to
+    // carry exactly that (tag,value) pair for the condition to match. A numeric
+    // equality compares parsed numbers, so it is left to the key-level evaluation.
+    if (valueType==string &&
+        binaryOperator==operatorEqual) {
+      values.emplace_back(tag,
+                          tagStringValue);
+      exhaustive=true;
+    }
+  }
+
   TagIsInCondition::TagIsInCondition(TagId tag)
   : tag(tag)
   {
@@ -254,6 +323,20 @@ namespace osmscout {
   void TagIsInCondition::AddTagValue(const std::string& tagValue)
   {
     tagValues.insert(tagValue);
+  }
+
+  void TagIsInCondition::CollectTagValues(std::vector<TagValue>& values,
+                                          bool& exhaustive) const
+  {
+    values.clear();
+
+    for (const auto& tagValue : tagValues) {
+      values.emplace_back(tag,
+                          tagValue);
+    }
+
+    // An empty value set can never match, so it is not exhaustive either
+    exhaustive=!values.empty();
   }
 
   bool TagIsInCondition::Evaluate(const TagMap& tagMap) const

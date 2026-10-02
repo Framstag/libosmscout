@@ -1207,7 +1207,9 @@ constexpr bool debugTiling = false;
       // Currently transformation optimization code sometimes does not correctly handle the closing point for areas
       if (coast->isArea) {
         if (coastline->points.front()!=coastline->points.back()) {
-          coastline->points.push_back(coastline->points.front());
+          const auto first=coastline->points.front();
+
+          coastline->points.push_back(first);
         }
 
         if (coastline->points.size()<=3) {

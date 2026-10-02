@@ -49,7 +49,7 @@ Each directory is a standalone CMake/Meson subproject:
 | `stylesheets/` | `.oss` (styles) and `.ost` (type defs) style definitions |
 | `Documentation/` | Build guides, style syntax docs, notes per platform; `MapRepository.md` documents the map repository pipeline (imports manifest, region index, basemap configuration, db.json metadata, regeneration script including the basemap step, container, client update check); `FavoritesFileFormat.md` documents the client favorites file (format versions, ordered groups, favorites and their attributes, star order, compatibility and the planned end of the pre-version read path) |
 | `setup/` | (empty — reserved for dev setup scripts) |
-| `scripts/` | cppcheck.sh, etc.; `mapgen/` holds the map regeneration script (`mapgen.sh`), the basemap step (`mapgen-basemap.sh`), example configs (`imports.example.json`, `names.example.json`, `basemap.example.json`), nginx example, the client-check and basemap-check test harnesses, and the mapgen Dockerfile |
+| `scripts/` | cppcheck.sh, check-jni-signatures.sh, check-vector-self-append.sh (tree check for appends that read an element of the sequence they append to), etc.; `mapgen/` holds the map regeneration script (`mapgen.sh`), the basemap step (`mapgen-basemap.sh`), example configs (`imports.example.json`, `names.example.json`, `basemap.example.json`), nginx example, the client-check and basemap-check test harnesses, and the mapgen Dockerfile |
 | `ci/` | Docker build configs |
 | `packaging/` | Platform packaging |
 | `webpage/` | Project website source |
@@ -273,6 +273,7 @@ include order, comments, formatting, header guards, templates, and error handlin
 - File I/O uses custom scanner/writer classes in `osmscout::io`
 - Map rendering goes through `MapRenderer` interface per backend
 - Styles are applied via `StyleConfig` which loads `.oss`/`.ost` files
+- A pattern image is an icon image: an entry point that renders a stylesheet passes its image directories to both `MapParameter::SetIconPaths` and `MapParameter::SetPatternPaths` (the demos' `DrawMap.h`, `OSMScoutOpenGL`, the Qt client, Apple and both Android apps); a render without a pattern image source reports it instead of silently drawing the solid fill, and `StyleConfigSymbolsTest` resolves every pattern reference of the shipped stylesheets against the shipped `libosmscout/data/icons/14x14/standard`
 
 ### Pitfalls
 - Two build systems (CMake + Meson) both must be updated for structural changes

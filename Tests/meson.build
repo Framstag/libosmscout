@@ -12,6 +12,12 @@ testInstallDir = 'share/osmscout/tests'
 # Tests/CMakeLists.txt for the same reason).
 if host_machine.system() != 'windows'
   test('Check JNI signature parity', files('../scripts/check-jni-signatures.sh'))
+
+  # Host-side check that no append reads the element it stores out of the sequence it appends to:
+  # the sequence may move its storage while it grows, and a geometry then loses or gains a point
+  # (GCC reported the shape once, see the script). Registered for both build systems, see
+  # Tests/CMakeLists.txt.
+  test('Check vector self append', files('../scripts/check-vector-self-append.sh'))
 endif
 
 FavoriteLocationServiceTest = executable('FavoriteLocationServiceTest',
@@ -75,6 +81,17 @@ AccessParseTest =  executable('AccessParseTest',
              install_dir: testInstallDir)
 
 test('Check parsing of access rights', AccessParseTest)
+
+AreaIndexLookupTest = executable('AreaIndexLookupTest',
+             'src/AreaIndexLookupTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check area index lookup', AreaIndexLookupTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
 TypeResolutionTest =  executable('TypeResolutionTest',
              'src/TypeResolutionTest.cpp',
@@ -831,6 +848,20 @@ if buildMapCairo
                                install_dir: testInstallDir)
 
   test('Check SymbolRenderer Cairo backend', SymbolRendererCairoTest)
+
+  MapPainterCairoPatternTest = executable('MapPainterCairoPatternTest',
+                               'src/MapPainterCairoPatternTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep, cairoDep, pangocairoDep],
+                               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+                               install: true,
+                               install_dir: testInstallDir)
+
+  mapPainterCairoPatternEnv = environment()
+  mapPainterCairoPatternEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+  mapPainterCairoPatternEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+  test('Check Cairo pattern report', MapPainterCairoPatternTest, env: mapPainterCairoPatternEnv)
 endif
 
 StyleConfigSymbolsTest = executable('StyleConfigSymbolsTest',
@@ -846,6 +877,20 @@ styleConfigSymbolsEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
 styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
+
+PatternLookupTest = executable('PatternLookupTest',
+                               'src/PatternLookupTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+patternLookupEnv = environment()
+patternLookupEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+patternLookupEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check pattern image lookup', PatternLookupTest, env: patternLookupEnv)
 
 RouteStyleColorsTest = executable('RouteStyleColorsTest',
                                'src/RouteStyleColorsTest.cpp',
