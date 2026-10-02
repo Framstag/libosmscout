@@ -39,12 +39,7 @@ public class OSMScoutClientDataCacheBudgetTest {
 
     /** Skip the test when the native library cannot be loaded. */
     private static void assumeNativeLibrary() {
-        try {
-            new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
-        }
+        TestClients.assumeNativeLibrary();
     }
 
     /** Operator-provided map database directory, or null when unset. */
@@ -120,17 +115,19 @@ public class OSMScoutClientDataCacheBudgetTest {
     public void testBudgetWithoutDatabase(@TempDir Path emptyDir) {
         OSMScoutClient noMapClient = buildClient(emptyDir);
 
-        noMapClient.setNativeDataCacheBudget(64L * 1024 * 1024);
-        noMapClient.setNativeDataCacheBudget(0);
-        noMapClient.setNativeDataCacheBudget(-1);
+        try {
+            noMapClient.setNativeDataCacheBudget(64L * 1024 * 1024);
+            noMapClient.setNativeDataCacheBudget(0);
+            noMapClient.setNativeDataCacheBudget(-1);
 
-        assertEquals(0, noMapClient.getNativeDataCacheUsage(),
-            "a client without a database holds no cached map data");
+            assertEquals(0, noMapClient.getNativeDataCacheUsage(),
+                "a client without a database holds no cached map data");
 
-        assertNull(render(noMapClient),
-            "without a database there is no map data to render");
-
-        noMapClient.close();
+            assertNull(render(noMapClient),
+                "without a database there is no map data to render");
+        } finally {
+            noMapClient.close();
+        }
     }
 
     /**

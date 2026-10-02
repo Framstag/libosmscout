@@ -596,14 +596,11 @@ namespace osmscout {
   };
 
   /**
-   * \ingroup tiledcache
-   *
-   * Reference counted reference to a DataTileCache instance
-   */
-  using TiledDataCacheRef = std::shared_ptr<DataTileCache>;
-
-  /**
    * \defgroup tiledcache Classes for caching map data per tile
+   *
+   * DataTileCache and Tile are the tile cache that is in use: the map service of a database fills it
+   * with the objects of the tiles a view needs. The template MapTileCache and its MapTile, which were
+   * declared, compiled and installed next to it without ever being used, were removed.
    */
 }
 
