@@ -26,6 +26,8 @@
 #include <string>
 #include <utility>
 
+#include <osmscoutmap/PatternLookup.h>
+
 #include <osmscoutmapcairo/LoaderPNG.h>
 #include <osmscoutmapcairo/SymbolRendererCairo.h>
 
@@ -549,9 +551,15 @@ namespace osmscout {
       return true;
     }
 
-    for (const auto & path : parameter.GetPatternPaths()) {
-      std::string filename = path + style.GetPatternName() + ".png";
+    const std::string patternName=style.GetPatternName();
+    std::string       filename;
 
+    auto status=PatternLookup::Resolve(parameter.GetPatternPaths(),
+                                       patternName,
+                                       ".png",
+                                       filename);
+
+    if (status==PatternLookup::Status::Found) {
       cairo_surface_t *image = osmscout::LoadPNG(filename);
 
       if (image != nullptr) {
@@ -577,9 +585,16 @@ namespace osmscout {
 
         return true;
       }
+
+      log.Error() << "ERROR while loading pattern image '" << filename << "'";
+    }
+    else {
+      log.Error() << PatternLookup::Describe(parameter.GetPatternPaths(),
+                                             patternName,
+                                             ".png",
+                                             status);
     }
 
-    log.Error() << "ERROR while loading pattern image '" << style.GetPatternName() << "'";
     style.SetPatternId(0);
 
     return false;

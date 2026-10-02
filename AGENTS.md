@@ -284,6 +284,7 @@ include order, comments, formatting, header guards, templates, and error handlin
 - File I/O uses custom scanner/writer classes in `osmscout::io`
 - Map rendering goes through `MapRenderer` interface per backend
 - Styles are applied via `StyleConfig` which loads `.oss`/`.ost` files
+- A pattern image is an icon image: an entry point that renders a stylesheet passes its image directories to both `MapParameter::SetIconPaths` and `MapParameter::SetPatternPaths` (the demos' `DrawMap.h`, `OSMScoutOpenGL`, the Qt client, Apple and both Android apps); a render without a pattern image source reports it instead of silently drawing the solid fill, and `StyleConfigSymbolsTest` resolves every pattern reference of the shipped stylesheets against the shipped `libosmscout/data/icons/14x14/standard`
 
 ### Pitfalls
 - Two build systems (CMake + Meson) both must be updated for structural changes
