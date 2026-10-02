@@ -137,7 +137,7 @@ TEST_CASE("Pattern lookup finds an image in a later directory", "[PatternLookup]
                                                                  filename);
 
   REQUIRE(status==osmscout::PatternLookup::Status::Found);
-  REQUIRE(filename==(patternDir / "natural_scrub.png").string());
+  REQUIRE(std::filesystem::path(filename)==patternDir / "natural_scrub.png");
   REQUIRE(osmscout::PatternLookup::Describe(patternPaths,
                                             "natural_scrub",
                                             ".png",
@@ -159,7 +159,7 @@ TEST_CASE("Pattern lookup accepts a directory without a trailing separator", "[P
                                                filename);
 
   REQUIRE(status==osmscout::PatternLookup::Status::Found);
-  REQUIRE(filename==directory + "/landuse_cemetery.png");
+  REQUIRE(std::filesystem::path(filename)==patternDir / "landuse_cemetery.png");
 }
 
 TEST_CASE("Pattern lookup does not resolve another file extension", "[PatternLookup]")

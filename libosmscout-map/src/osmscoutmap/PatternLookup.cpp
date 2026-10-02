@@ -29,23 +29,15 @@ namespace osmscout {
   namespace {
 
     /**
-     * File the lookup would read for the pattern in the given directory.
+     * File the lookup would read for the pattern in the given directory. The separator is the
+     * native one, so that the file can be handed to the platform file APIs of the backends.
      */
     std::string GetCandidateFile(const std::string& directory,
                                  const std::string& patternName,
                                  const std::string& extension)
     {
-      std::string filename=directory;
-
-      if (!filename.empty() &&
-          filename.back()!='/') {
-        filename.push_back('/');
-      }
-
-      filename+=patternName;
-      filename+=extension;
-
-      return filename;
+      return (std::filesystem::path(directory) /
+              (patternName+extension)).string();
     }
   }
 

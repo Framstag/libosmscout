@@ -137,6 +137,43 @@ Rebuilding every touched file produced no warning of its own; the warnings in th
 - `TODO.md`: the pattern-wiring entry is annotated as closed by this change (the report, the wiring, the IOS part and the verification are recorded in it), and the symbol/pattern gate entry states that the pattern half is now gated while the symbol half is not.
 - `AGENTS.md`: the "Common Patterns" list records that a pattern image is an icon image, that an entry point passes its image directories to both `SetIconPaths` and `SetPatternPaths`, and that `StyleConfigSymbolsTest` resolves the shipped pattern references.
 
+## 6. Follow-up: portable lookup and the macOS CMake libpng
+
+The first CI run of the change failed in three jobs, all of them in the new tests rather than in the backends.
+
+### 6.1 Windows: the lookup test compared two spellings of one path
+
+`gcc and cmake` and `gcc and meson` (MSYS2) failed at `Tests/src/PatternLookupTest.cpp:140`
+(`Pattern lookup finds an image in a later directory`): the helper joined the directory with `'/'`, while the
+test built the expected name with `std::filesystem::path` and compared `path.string()`, which is the native
+form (`\\` on Windows). The same file was compared in two spellings.
+
+`PatternLookup::Resolve` now joins through `std::filesystem::path` and returns the native spelling, which is
+also the form the backends hand to the platform file APIs, and the test compares
+`std::filesystem::path(filename)==patternDir / "..."` (the trailing-separator case included, which previously
+expected the `/`-joined string).
+
+```
+ctest -R "PatternLookupTest|MapPainterCairoPatternTest" --output-on-failure  -> Passed (2 tests)
+```
+
+(fresh CMake/Ninja Release build, Cairo enabled, `TESTS_TOP_DIR`/`TESTS_TMP_DIR` set).
+
+### 6.2 macOS: one job compiled against a different libpng than it ran with
+
+The `cmake` job of the OS X workflow failed at `Tests/src/MapPainterCairoPatternTest.cpp:437`
+(`Cairo stays quiet when it can serve the pattern`, expansion `0 == 1`): no `Loaded pattern image` line.
+Its configure said `-- Found PNG: /opt/homebrew/lib/libpng.dylib (found version "1.4.12")` and the run then
+printed `libpng warning: Application built with libpng-1.4.12 but running with 1.6.58`, so `LoaderPNG`
+decoded against an old header and could not load the shipped image. The `meson` job on the same runner
+found 1.6.58 through pkg-config and passed the same test, so the mismatch is the CMake search picking up a
+stale `png.h` from a prefix other than the Homebrew keg whose library it links.
+
+The OS X CMake configure in `.github/workflows/build_and test_on_osx.yml` now pins `PNG_PNG_INCLUDE_DIR` and
+`PNG_LIBRARY` to the `libpng` keg (`PNG_ROOT` is not honoured by `FindPNG`), next to the existing `Qt5_DIR`
+pin. **Not verified here**: the fix needs the macOS runner; what was verified is that both pattern tests pass
+with a matched libpng on this machine and that the mismatch is the only difference to the passing meson job.
+
 ## Open limitations
 
 - **IOS backend not verified**: `MapPainterIOS.mm` is Apple-only; the change mirrors the Cairo path but neither compiles nor runs in this environment. It needs the iOS/macOS workflows.
