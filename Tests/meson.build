@@ -1213,9 +1213,11 @@ if buildMapCairo
   test('Check MapPainterShield compilation', MapPainterShieldTest)
 endif
 
-if buildMapOpenGL
-  # The decision is a free function, but the test needs a GL link to reach it, so it is registered
-  # under the same condition as the OpenGL driver of PerformanceTest.
+if buildMapOpenGL and glfwDep.found()
+  # The decision is a free function, but the test needs the GLFW link of the OpenGL backend to reach
+  # it, so it is registered under the same condition as the OpenGL driver of PerformanceTest. GLFW is
+  # the one dependency the OpenGL backend itself does not require, so a configuration without it must
+  # skip the test instead of compiling it against a header that is only on the default include path.
   OpenGLAreaVisibilityTest = executable('OpenGLAreaVisibilityTest',
                'src/OpenGLAreaVisibilityTest.cpp',
                include_directories: [testIncDir, osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],

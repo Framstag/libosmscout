@@ -238,3 +238,27 @@ Doxygen with `@param`/`@return` on the new public function and the new getters, 
   as in the code it replaces.
 - That `sortedAreas` is cleared and reserved on every call, and that the sort - the draw order - is
   still applied.
+
+## 10. CI registration of the test (follow-up on this branch)
+
+The registration of section 1 was written on a machine with GLFW installed. The OpenGL condition of
+*the library* (GL, GLM, GLEW, FreeType) does not imply GLFW on the CI runners, and the first run of
+those jobs after the implementation commit failed in three ways:
+
+- The Ubuntu Meson jobs do not install `libglfw3-dev` (the CMake job does). `Tests/meson.build`
+  registered the test under `if buildMapOpenGL` alone, so it compiled against `GLFW/glfw3.h` and
+  stopped with `fatal error: GLFW/glfw3.h: No such file or directory`. The guard now also requires
+  `glfwDep.found()`, the same condition the OpenGL driver of `PerformanceTest` uses, which is what
+  task 1.5 asked for.
+- On MinGW `glfwDep` comes from `compiler.find_library('glfw')`, which does not match the package's
+  `libglfw3`; the header still resolves through the default `/mingw64/include`, so the same guard
+  keeps the Meson job from failing the link with `undefined reference to 'glfwSetErrorCallback'`.
+- The MSYS CMake job finds GLFW and builds the test, but the test step's `PATH` did not name
+  `libosmscout-map-opengl`; the process exited with `0xc0000135` (`STATUS_DLL_NOT_FOUND`). The `PATH`
+  now names that directory like the other library directories of that step.
+
+Verification: `Tests/meson.build` was configured with a `pkg-config` wrapper that fails only for
+`glfw3*`. The resulting target list has no `OpenGLAreaVisibilityTest` while `libosmscout-map-opengl`
+stays on, and the target is back with the real `pkg-config`. The Windows and macOS jobs verify the
+`PATH` and the skip behaviour themselves.
+
