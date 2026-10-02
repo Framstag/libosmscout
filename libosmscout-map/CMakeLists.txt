@@ -9,6 +9,7 @@ set(HEADER_FILES
 	include/osmscoutmap/MapParameter.h
 	include/osmscoutmap/MapData.h
 	include/osmscoutmap/MapService.h
+	include/osmscoutmap/PatternLookup.h
 	include/osmscoutmap/LabelProvider.h
 	include/osmscoutmap/LabelPath.h
 	include/osmscoutmap/Styles.h
@@ -31,6 +32,7 @@ set(SOURCE_FILES
 	src/osmscoutmap/MapPainter.cpp
 	src/osmscoutmap/MapPainterStatistics.cpp
 	src/osmscoutmap/MapParameter.cpp
+	src/osmscoutmap/PatternLookup.cpp
 	src/osmscoutmap/MapData.cpp
 	src/osmscoutmap/MapService.cpp
 	src/osmscoutmap/LabelProvider.cpp

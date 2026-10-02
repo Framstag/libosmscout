@@ -839,6 +839,20 @@ if buildMapCairo
                                install_dir: testInstallDir)
 
   test('Check SymbolRenderer Cairo backend', SymbolRendererCairoTest)
+
+  MapPainterCairoPatternTest = executable('MapPainterCairoPatternTest',
+                               'src/MapPainterCairoPatternTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapcairoIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep, cairoDep, pangocairoDep],
+                               link_with: [osmscout, osmscoutmap, osmscoutmapcairo],
+                               install: true,
+                               install_dir: testInstallDir)
+
+  mapPainterCairoPatternEnv = environment()
+  mapPainterCairoPatternEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+  mapPainterCairoPatternEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+  test('Check Cairo pattern report', MapPainterCairoPatternTest, env: mapPainterCairoPatternEnv)
 endif
 
 StyleConfigSymbolsTest = executable('StyleConfigSymbolsTest',
@@ -854,6 +868,20 @@ styleConfigSymbolsEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
 styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
+
+PatternLookupTest = executable('PatternLookupTest',
+                               'src/PatternLookupTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+patternLookupEnv = environment()
+patternLookupEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+patternLookupEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check pattern image lookup', PatternLookupTest, env: patternLookupEnv)
 
 RouteStyleColorsTest = executable('RouteStyleColorsTest',
                                'src/RouteStyleColorsTest.cpp',
