@@ -1163,6 +1163,24 @@ if buildMapCairo
   test('Check MapPainterShield compilation', MapPainterShieldTest)
 endif
 
+if buildMapOpenGL
+  # The decision is a free function, but the test needs a GL link to reach it, so it is registered
+  # under the same condition as the OpenGL driver of PerformanceTest.
+  OpenGLAreaVisibilityTest = executable('OpenGLAreaVisibilityTest',
+               'src/OpenGLAreaVisibilityTest.cpp',
+               include_directories: [testIncDir, osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, openGLDep, glfwDep, glmDep, glewDep, pngDep, ftDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
+               # The one case that needs a painter takes the bundled font file and the shader
+               # directory of the OpenGL backend.
+               cpp_args: ['-DOPENGL_TEST_FONT_FILE="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"',
+                          '-DOPENGL_TEST_SHADER_DIR="' + meson.project_source_root() + '/libosmscout-map-opengl/data/shaders"'],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check OpenGL area visibility', OpenGLAreaVisibilityTest)
+endif
+
 if buildMapQt
   MapPainterShieldQtTest = executable('MapPainterShieldQtTest',
                'src/MapPainterShieldQtTest.cpp',

@@ -1,4 +1,5 @@
 set(HEADER_FILES
+		include/osmscoutmapopengl/AreaVisibility.h
 		include/osmscoutmapopengl/MapOpenGLImportExport.h
 		include/osmscoutmapopengl/OpenGLMapData.h
 		include/osmscoutmapopengl/MapPainterOpenGL.h
@@ -16,6 +17,7 @@ set(HEADER_FILES
 		)
 
 set(SOURCE_FILES
+		src/osmscoutmapopengl/AreaVisibility.cpp
 		src/osmscoutmapopengl/MapPainterOpenGL.cpp
 		src/osmscoutmapopengl/Triangulate.cpp
 		src/osmscoutmapopengl/PNGLoaderOpenGL.cpp

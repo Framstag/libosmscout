@@ -23,6 +23,7 @@
 
 #include <osmscoutmap/MapPainter.h>
 
+#include <osmscoutmapopengl/AreaVisibility.h>
 #include <osmscoutmapopengl/MapPainterOpenGL.h>
 #include <osmscoutmapopengl/Triangulate.h>
 #include <osmscoutmapopengl/PNGLoaderOpenGL.h>
@@ -187,19 +188,27 @@ namespace osmscout {
 
     //osmscout::log.Info() << "Area: " << data.areas.size();
 
-    std::vector<AreaRef> areas;
-    areas.reserve(data.areas.size() + data.poiAreas.size());
-    areas.insert(areas.end(), data.areas.begin(), data.areas.end());
-    areas.insert(areas.end(), data.poiAreas.begin(), data.poiAreas.end());
+    examinedRingCount=0;
+    keptRingCount=0;
 
-    std::sort(areas.begin(), areas.end(),
+    sortedAreas.clear();
+    sortedAreas.reserve(data.areas.size()+data.poiAreas.size());
+    sortedAreas.insert(sortedAreas.end(),
+                       data.areas.begin(),
+                       data.areas.end());
+    sortedAreas.insert(sortedAreas.end(),
+                       data.poiAreas.begin(),
+                       data.poiAreas.end());
+
+    std::sort(sortedAreas.begin(),
+              sortedAreas.end(),
               [](const AreaRef &a, const AreaRef &b) -> bool {
                 GeoBox b1=a->GetBoundingBox();
                 GeoBox b2=b->GetBoundingBox();
                 return b1.GetHeight() * b1.GetWidth() > b2.GetHeight() * b2.GetWidth();
               });
 
-    for (const auto &area : areas) {
+    for (const auto &area : sortedAreas) {
       size_t ringId = Area::outerRingId;
       bool foundRing = true;
 
@@ -247,6 +256,31 @@ namespace osmscout {
 
           foundRing = true;
 
+          // The visibility decision comes before any per-ring geometry work: a ring the view cannot
+          // show costs neither the copy of its nodes nor the removal of the duplicates among them.
+          // The tolerance is half of the width of the ring's own border style, so the style has to be
+          // resolved first.
+          BorderStyleRef borderStyle;
+          size_t borderStyleIndex = 0;
+
+          if (!borderStyles.empty() &&
+              borderStyles.front()->GetDisplayOffset() == 0.0 &&
+              borderStyles.front()->GetOffset() == 0.0) {
+            borderStyle = borderStyles[borderStyleIndex];
+            borderStyleIndex++;
+          }
+
+          double borderWidth = borderStyle ? borderStyle->GetWidth() : 0.0;
+
+          examinedRingCount++;
+
+          if (!IsAreaRingVisible(loadProjection,
+                                 ring.GetBoundingBox(),
+                                 borderWidth,
+                                 parameter.GetAreaMinDimensionMM())) {
+            continue;
+          }
+
           std::vector<Point> p = area->rings[i].nodes;
           std::vector<osmscout::Area::Ring> r;
 
@@ -266,8 +300,6 @@ namespace osmscout {
             continue;
           }
 
-          osmscout::GeoBox ringBoundingBox=ring.GetBoundingBox();
-
           size_t j = i + 1;
           int hasClippings = 0;
           while (j < area->rings.size() &&
@@ -278,33 +310,18 @@ namespace osmscout {
             hasClippings = 1;
           }
 
-          std::vector<GLfloat> points;
-
           if (!fillStyle) {
             continue;
           }
 
           Color c = fillStyle->GetFillColor();
 
-          BorderStyleRef borderStyle;
-          size_t borderStyleIndex = 0;
-
-          if (!borderStyles.empty() &&
-              borderStyles.front()->GetDisplayOffset() == 0.0 &&
-              borderStyles.front()->GetOffset() == 0.0) {
-            borderStyle = borderStyles[borderStyleIndex];
-            borderStyleIndex++;
-          }
-
-          double borderWidth = borderStyle ? borderStyle->GetWidth() : 0.0;
-
-          if (!IsVisibleArea(loadProjection,
-                             ringBoundingBox,
-                             borderWidth / 2.0)) {
-            continue;
-          }
+          // The triangulated geometry of this ring, filled by the triangulation below
+          std::vector<GLfloat> points;
 
           try {
+            keptRingCount++;
+
             if (hasClippings == 1) {
               for (auto &ring: r) {
                 for (int i = ring.nodes.size() - 1; i >= 0; i--) {
@@ -410,35 +427,6 @@ namespace osmscout {
         ringId++;
       }
     }
-  }
-
-  bool osmscout::MapPainterOpenGL::IsVisibleArea(const Projection &projection, const GeoBox &boundingBox,
-                                                 double pixelOffset) {
-    Vertex2D minPixel;
-    Vertex2D maxPixel;
-
-    projection.GeoToPixel(boundingBox.GetMinCoord(),
-                          minPixel);
-
-    projection.GeoToPixel(boundingBox.GetMaxCoord(),
-                          maxPixel);
-
-    double xMin = std::min(minPixel.GetX(), maxPixel.GetX()) - pixelOffset;
-    double xMax = std::max(minPixel.GetX(), maxPixel.GetX()) + pixelOffset;
-    double yMin = std::min(minPixel.GetY(), maxPixel.GetY()) - pixelOffset;
-    double yMax = std::max(minPixel.GetY(), maxPixel.GetY()) + pixelOffset;
-
-    double areaMinDimension = projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM());
-
-    if (xMax - xMin <= areaMinDimension &&
-        yMax - yMin <= areaMinDimension) {
-      return false;
-    }
-
-    return !(xMin >= projection.GetWidth() ||
-             yMin >= projection.GetHeight() ||
-             xMax < 0 ||
-             yMax < 0);
   }
 
   void osmscout::MapPainterOpenGL::ProcessWay(const osmscout::WayRef &way,
