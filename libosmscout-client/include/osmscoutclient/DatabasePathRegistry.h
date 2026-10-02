@@ -59,6 +59,26 @@ struct OSMSCOUT_CLIENT_API DatabasePathRegistration
 /**
  * \ingroup ClientAPI
  *
+ * Whether @p path is a map database directory the client can open: the path
+ * exists and is a directory.
+ *
+ * The answer is decided without throwing - any filesystem error (a missing
+ * path, a permission failure) is a "no" - because the caller sits on the JNI
+ * boundary, where an exception would have to be mapped to a Java exception for
+ * a case the contract already covers with a false result. A symbolic link to a
+ * directory counts as a directory.
+ *
+ * This is the one place the client inspects what the filesystem says about a
+ * path, and it is deliberately not used by the batch entry: RegisterAll()
+ * registers what it was handed, so a directory that disappears between a scan
+ * and the call cannot fail the batch. Only the single-path entry
+ * RegisterOpenable() validates.
+ */
+OSMSCOUT_CLIENT_API bool IsOpenableDatabaseDirectory(const std::filesystem::path &path) noexcept;
+
+/**
+ * \ingroup ClientAPI
+ *
  * Owns the list of map database directories the client has been asked to open,
  * serialising every access to it.
  *
@@ -79,6 +99,11 @@ struct OSMSCOUT_CLIENT_API DatabasePathRegistration
  * individually needs K publications - each of them closes and reopens every
  * database - so a caller that has a list must hand it over in one call.
  *
+ * Registration itself never inspects the filesystem: Register() and
+ * RegisterAll() put the path in the set unconditionally, and only the
+ * single-path entry RegisterOpenable() validates it first - see
+ * IsOpenableDatabaseDirectory() for why the batch path must not.
+ *
  * All methods are safe to call from any thread and at any time.
  */
 class OSMSCOUT_CLIENT_API DatabasePathRegistry
@@ -97,6 +122,20 @@ public:
    * @return true when the path is part of the registered set afterwards
    */
   bool Register(const std::filesystem::path &path);
+
+  /**
+   * Register a single directory, but only when it is an openable database
+   * directory (see IsOpenableDatabaseDirectory()).
+   *
+   * A rejected path enters no set and counts no set change, so the caller can
+   * tell from the result alone whether it has to publish the set to the
+   * database thread.
+   *
+   * @param path  the map database directory
+   * @return true when @p path is part of the registered set afterwards; false
+   *         when it was rejected
+   */
+  bool RegisterOpenable(const std::filesystem::path &path);
 
   /**
    * Register a list of directories as one operation, skipping paths already
