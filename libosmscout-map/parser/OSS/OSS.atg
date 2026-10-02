@@ -1,5 +1,6 @@
 #include <limits>
 #include <list>
+#include <set>
 #include <sstream>
 
 #include <osmscout/Pixel.h>
@@ -18,6 +19,13 @@ std::string                           filename;
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
+
+/**
+ * Distinct type names that could not be resolved against the type configuration
+ * while this parser ran; reported once at the end of the parse (see
+ * Parser::ReportUnresolvedTypes) instead of once per occurrence.
+ */
+std::set<std::string>                 unresolvedTypeNames;
 
 enum class ValueType
 {
@@ -286,7 +294,7 @@ PRODUCTIONS
 
                       if (!wayType) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
-                        SemWarning(e.c_str());
+                        NoteUnresolvedType(wayTypeName,e);
                       }
                       else if (!wayType->CanBeWay()) {
                         std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -310,7 +318,7 @@ PRODUCTIONS
 
                       if (!wayType) {
                         std::string e="Unknown way type '"+wayTypeName+"'";
-                        SemWarning(e.c_str());
+                        NoteUnresolvedType(wayTypeName,e);
                       }
                       else if (!wayType->CanBeWay()) {
                         std::string e="Tyype '"+wayTypeName+"' is not a way type";
@@ -848,7 +856,7 @@ PRODUCTIONS
                   if (!type) {
                     std::string e="Unknown type '"+name+"'";
 
-                    SemWarning(e.c_str());
+                    NoteUnresolvedType(name,e);
                   }
                   else if (filter.FiltersByType() &&
                            !filter.HasType(type)) {
@@ -870,7 +878,7 @@ PRODUCTIONS
                     if (!type) {
                       std::string e="Unknown type '"+name+"'";
 
-                      SemWarning(e.c_str());
+                      NoteUnresolvedType(name,e);
                     }
                     else if (filter.FiltersByType() &&
                              !filter.HasType(type)) {

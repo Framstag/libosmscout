@@ -55,6 +55,17 @@ StyleLoadResilienceTest = executable('StyleLoadResilienceTest',
 test('Check style load resilience', StyleLoadResilienceTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
+StyleReportCondensationTest = executable('StyleReportCondensationTest',
+             'src/StyleReportCondensationTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient, osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check style report condensation', StyleReportCondensationTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
 AccessParseTest =  executable('AccessParseTest',
              'src/AccessParseTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
