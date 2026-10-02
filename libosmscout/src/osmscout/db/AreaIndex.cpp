@@ -20,6 +20,8 @@
 #include <osmscout/db/AreaIndex.h>
 
 #include <algorithm>
+#include <atomic>
+#include <cassert>
 
 #include <osmscout/io/File.h>
 
@@ -59,6 +61,8 @@ namespace osmscout {
   void AreaIndex::Close()
   {
     typeData.clear();
+    entryOfType.clear();
+
     try {
       if (scanner.IsOpen()) {
         scanner.Close();
@@ -107,6 +111,22 @@ namespace osmscout {
         }
 
         typeData.push_back(data);
+      }
+
+      // Address the entries by the type index, so a lookup can find the entries of the types
+      // a request names without walking the entries.
+      entryOfType.assign(typeConfig->GetTypeCount(),
+                         kNoEntry);
+
+      for (size_t i=0; i<typeData.size(); i++) {
+        assert(typeData[i].type);
+
+        size_t typeIndex=typeData[i].type->GetIndex();
+
+        assert(typeIndex<entryOfType.size());
+        assert(entryOfType[typeIndex]==kNoEntry);
+
+        entryOfType[typeIndex]=static_cast<uint32_t>(i);
       }
 
       return !scanner.HasError();
@@ -214,22 +234,44 @@ namespace osmscout {
 
     std::unordered_set<FileOffset> uniqueOffsets;
 
-    try {
-      for (const auto& data : typeData) {
-        if (types.IsSet(data.type)) {
-          GetOffsets(data,
-                     boundingBox,
-                     uniqueOffsets);
+    size_t                         examinedEntries=0;
 
-          loadedTypes.Set(data.type);
+    try {
+      // Only the entries the request names are resolved: the work of a lookup follows the
+      // request, not the entries this index carries.
+      for (const TypeInfoRef& type : types) {
+        size_t typeIndex=type->GetIndex();
+
+        if (typeIndex>=entryOfType.size()) {
+          continue;
         }
+
+        uint32_t entry=entryOfType[typeIndex];
+
+        if (entry==kNoEntry) {
+          continue;
+        }
+
+        GetOffsets(typeData[entry],
+                   boundingBox,
+                   uniqueOffsets);
+
+        examinedEntries++;
+
+        loadedTypes.Set(type);
       }
     }
     catch (IOException& e) {
+      examinedEntryCount.store(examinedEntries,
+                               std::memory_order_relaxed);
+
       log.Error() << e.GetDescription();
 
       return false;
     }
+
+    examinedEntryCount.store(examinedEntries,
+                             std::memory_order_relaxed);
 
     offsets.insert(offsets.end(),uniqueOffsets.begin(),uniqueOffsets.end());
 

@@ -19,6 +19,10 @@ set_tests_properties(StyleReportCondensationTest PROPERTIES ENVIRONMENT "TESTS_T
 #---- AccessParse
 osmscout_test_project(NAME AccessParseTest SOURCES src/AccessParseTest.cpp)
 
+#---- AreaIndexLookup
+osmscout_test_project(NAME AreaIndexLookupTest SOURCES src/AreaIndexLookupTest.cpp)
+set_tests_properties(AreaIndexLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
 #---- AsyncProcessing
 osmscout_test_project(NAME AsyncProcessingTest SOURCES src/AsyncProcessingTest.cpp)
 

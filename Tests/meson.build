@@ -82,6 +82,17 @@ AccessParseTest =  executable('AccessParseTest',
 
 test('Check parsing of access rights', AccessParseTest)
 
+AreaIndexLookupTest = executable('AreaIndexLookupTest',
+             'src/AreaIndexLookupTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check area index lookup', AreaIndexLookupTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
 TypeResolutionTest =  executable('TypeResolutionTest',
              'src/TypeResolutionTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
