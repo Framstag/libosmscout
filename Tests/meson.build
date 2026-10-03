@@ -629,19 +629,6 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     performanceTestIncludes = includes + [testIncDir]
     performanceTestArgs = ['-fPIC']
 
-    # The Cairo and Qt drivers resolve a font by family name: the test takes
-    # the family of the font file it is started with (Tests/include/TestFontSupport.h)
-    if ftDep.found()
-      performanceTestDeps += ftDep
-      performanceTestIncludes += include_directories('../Demos/include')
-      performanceTestArgs += '-DHAVE_LIB_FREETYPE'
-
-      if fontconfigDep.found()
-        performanceTestDeps += fontconfigDep
-        performanceTestArgs += '-DHAVE_LIB_FONTCONFIG'
-      endif
-    endif
-
     PerformanceTest = executable('PerformanceTest',
                                  'src/PerformanceTest.cpp',
                                  cpp_args: performanceTestArgs,
@@ -1201,19 +1188,10 @@ if buildMapCairo
   mapPainterShieldTestDeps = [mathDep, openmpDep, catch2MainDep, pangocairoDep]
   mapPainterShieldTestArgs = []
 
-  # The test takes the family of the bundled font file and registers that file
-  # (see Tests/include/TestFontSupport.h), so that it measures the font the
-  # repository ships instead of the font the host provides
-  if ftDep.found()
-    mapPainterShieldTestDeps += ftDep
-    mapPainterShieldTestIncludes += include_directories('../Demos/include')
-    mapPainterShieldTestArgs += ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
-
-    if fontconfigDep.found()
-      mapPainterShieldTestDeps += fontconfigDep
-      mapPainterShieldTestArgs += '-DHAVE_LIB_FONTCONFIG'
-    endif
-  endif
+  # The test configures the painter with the font file the repository ships and
+  # prepares nothing itself: resolving that file to the face it holds is the job
+  # of the backend
+  mapPainterShieldTestArgs += ['-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
 
   MapPainterShieldTest = executable('MapPainterShieldTest',
                'src/MapPainterShieldTest.cpp',

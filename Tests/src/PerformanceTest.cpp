@@ -22,9 +22,11 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
-#include <sstream>
+#include <cstdlib>
+#include <filesystem>
 #include <limits>
 #include <new>
+#include <sstream>
 #include <tuple>
 
 #include <config.h>
@@ -33,9 +35,8 @@
 
 #include <osmscout/projection/TileProjection.h>
 
+#include <osmscoutmap/FontNameResolution.h>
 #include <osmscoutmap/MapService.h>
-
-#include <TestFontSupport.h>
 
 #if defined(HAVE_LIB_OSMSCOUTMAPCAIRO)
 #include <osmscoutmapcairo/MapPainterCairo.h>
@@ -756,23 +757,27 @@ bool ResolveFontName(const Arguments& args,
 {
   fontName=args.font;
 
-  // Only backends that resolve a font by family name need the family stored in
-  // the font file; the file based backends (Agg, OpenGL, GDI) load the file itself
-  if (args.driver!="cairo" && args.driver!="Qt") {
-    return true;
+  // A font file the test was started with has to be readable. The painter would otherwise serve a
+  // substituted face, and the run would report numbers for a font the caller did not ask for
+  // (spec: font-dependent-test-fonts). A name that is not an existing file may be a family name
+  // and is left to the backend.
+  std::error_code errorCode;
+
+  if (std::filesystem::is_regular_file(fontName,
+                                       errorCode) &&
+      osmscout::FontNameResolution::CanReadFamilyFromFile()) {
+    std::string family;
+    std::string message;
+
+    if (!osmscout::FontNameResolution::ReadFamilyFromFile(fontName,
+                                                         family,
+                                                         message)) {
+      std::cerr << "ERROR: cannot read the font file \"" << fontName
+                << "\": " << message << std::endl;
+
+      return false;
+    }
   }
-
-  std::string error;
-  std::string resolved=osmscout::FontNameForFamilyBackend(args.font,
-                                                          error);
-
-  if (resolved.empty()) {
-    std::cerr << "ERROR: cannot read the font family from \"" << args.font
-              << "\": " << error << std::endl;
-    return false;
-  }
-
-  fontName=resolved;
 
   return true;
 }

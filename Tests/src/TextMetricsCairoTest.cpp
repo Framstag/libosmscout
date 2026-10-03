@@ -260,115 +260,10 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
   REQUIRE(error.empty());
   REQUIRE_FALSE(reference.glyphs.empty());
 
-  // Resolve the family name stored inside the font file. The cairo backend
-  // resolves fonts by family name through fontconfig; asking for the file
-  // name (which is not a family name) silently substitutes another font on
-  // systems without the font installed.
-  std::string fontFamily;
-
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-#if defined(HAVE_LIB_FONTCONFIG)
-  // Make the bundled font file visible to fontconfig so that fontconfig
-  // (and thus the Pango/cairo font resolution) can find the exact font even
-  // if the font is not installed system-wide
-  bool appFontAdded=FcConfigAppFontAddFile(nullptr,
-                                           reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-
-  if (!appFontAdded) {
-    INFO("Cannot register font \"" << TEXT_METRICS_FONT_PATH << "\" as fontconfig application font");
-  }
-
-  // Verify that fontconfig resolves the family to a Liberation Sans font.
-  // Otherwise the metrics below are measured with a substituted font (e.g.
-  // Arial/Helvetica, which is metric-compatible with Liberation Sans except
-  // for a few glyphs like "\u00df") and the comparison fails confusingly.
-  FcPattern *pattern=FcPatternCreate();
-
-  REQUIRE(pattern!=nullptr);
-
-  FcPatternAddString(pattern,
-                     FC_FAMILY,
-                     reinterpret_cast<const FcChar8*>(fontFamily.c_str()));
-
-  FcConfigSubstitute(nullptr,
-                     pattern,
-                     FcMatchPattern);
-  FcDefaultSubstitute(pattern);
-
-  FcResult  matchResult=FcResultNoMatch;
-  FcPattern *match=FcFontMatch(nullptr,
-                               pattern,
-                               &matchResult);
-
-  REQUIRE(match!=nullptr);
-
-  FcChar8 *resolvedFamily=nullptr;
-  FcChar8 *resolvedFile=nullptr;
-
-  FcPatternGetString(match,
-                     FC_FAMILY,
-                     0,
-                     &resolvedFamily);
-  FcPatternGetString(match,
-                     FC_FILE,
-                     0,
-                     &resolvedFile);
-
-  INFO("fontconfig resolved \"" << fontFamily << "\" to \""
-       << (resolvedFamily!=nullptr ? std::string(reinterpret_cast<char*>(resolvedFamily)) : std::string("?"))
-       << "\" (" << (resolvedFile!=nullptr ? std::string(reinterpret_cast<char*>(resolvedFile)) : std::string("?")) << ")");
-
-  REQUIRE(resolvedFamily!=nullptr);
-  REQUIRE(fontFamily==reinterpret_cast<const char*>(resolvedFamily));
-
-  FcPatternDestroy(match);
-  FcPatternDestroy(pattern);
-#endif
-
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && defined(PANGO_VERSION_CHECK)
-#if PANGO_VERSION_CHECK(1,56,0)
-  // Register the font file directly with the Pango font map. This is the
-  // backend-independent way (since Pango 1.56) to load a font from a file:
-  // fontconfig application font on Unix, DirectWrite on Windows. Without
-  // this, systems without the font installed silently substitute another
-  // font and the measurement comparison fails.
-  //
-  // The CoreText font map (default on macOS) does not support loading font
-  // files; there the font must be installed system-wide (see CI setup) and
-  // the measurement comparison below is the actual check.
-  {
-    PangoFontMap *fontMap=pango_cairo_font_map_get_default();
-
-    // The CoreText font map (default on macOS) does not support loading font
-    // files; there the font must be installed system-wide (see CI setup) and
-    // the measurement comparison below is the actual check. The font map
-    // type is not exposed through a public header, so detect it at runtime.
-    const char *fontMapType=G_OBJECT_TYPE_NAME(fontMap);
-    bool        isCoreText=strstr(fontMapType, "CoreText")!=nullptr;
-
-    if (!isCoreText) {
-      GError *pangoError=nullptr;
-
-      bool fontAdded=pango_font_map_add_font_file(fontMap,
-                                                  TEXT_METRICS_FONT_PATH,
-                                                  &pangoError);
-
-      if (pangoError!=nullptr) {
-        INFO("Cannot add font \"" << TEXT_METRICS_FONT_PATH << "\" to the Pango font map: "
-             << pangoError->message);
-
-        g_error_free(pangoError);
-      }
-
-      REQUIRE(fontAdded);
-    }
-  }
-#endif
-#endif
+  // The painter is configured with the font file the reference was measured from. Resolving that
+  // file to the face it holds is the job of the backend, so the test prepares nothing itself
+  // (spec: font-dependent-test-fonts).
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 
   cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
                                                        800,
@@ -387,12 +282,12 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
 
   // DrawMap sets the internal cairo context used by Layout()/MeasureText()
   painter.DrawMap(CreateProjection(),
-                  CreateParameter(fontFamily),
+                  CreateParameter(fontName),
                   {},
                   cr);
 
   auto metrics=painter.MeasureText(CreateProjection(),
-                                   CreateParameter(fontFamily),
+                                   CreateParameter(fontName),
                                    "Musterstraße",
                                    1.0);
 
@@ -437,20 +332,11 @@ TEST_CASE("Cairo measurement matches the FreeType reference", "[TextMetricsCairo
  */
 TEST_CASE("Cairo measurement depends on the resolution of the projection", "[TextMetricsCairo]")
 {
-  std::string fontFamily;
-  std::string error;
+  // The painter is configured with the font file the repository ships; resolving that file to the
+  // face it holds is the job of the backend (spec: font-dependent-test-fonts)
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-#if defined(HAVE_LIB_FONTCONFIG)
-  FcConfigAppFontAddFile(nullptr,
-                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-#endif
-
-  osmscout::MapParameter       parameter=CreateParameter(fontFamily);
+  osmscout::MapParameter       parameter=CreateParameter(fontName);
 
   osmscout::MercatorProjection projection96=CreateProjectionForDpi(96.0);
   osmscout::MercatorProjection projection192=CreateProjectionForDpi(192.0);
@@ -499,19 +385,9 @@ TEST_CASE("Cairo measurement depends on the resolution of the projection", "[Tex
  */
 TEST_CASE("Cairo resolves a font for each requested font name", "[TextMetricsCairo]")
 {
-  std::string fontFamily;
-  std::string error;
-
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-#if defined(HAVE_LIB_FONTCONFIG)
-  FcConfigAppFontAddFile(nullptr,
-                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-
-#endif
+  // The painter is configured with the font file the repository ships; resolving that file to the
+  // face it holds is the job of the backend (spec: font-dependent-test-fonts)
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 
   cairo_surface_t *surface=cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
                                                       800,
@@ -526,12 +402,12 @@ TEST_CASE("Cairo resolves a font for each requested font name", "[TextMetricsCai
   osmscout::MapPainterCairo painter;
 
   painter.DrawMap(CreateProjection(),
-                  CreateParameter(fontFamily),
+                  CreateParameter(fontName),
                   {},
                   context);
 
   painter.MeasureText(CreateProjection(),
-                      CreateParameter(fontFamily),
+                      CreateParameter(fontName),
                       "Muster",
                       1.0);
 
@@ -541,7 +417,7 @@ TEST_CASE("Cairo resolves a font for each requested font name", "[TextMetricsCai
 
   // the same font name and the same font size reuse the resolved font
   painter.MeasureText(CreateProjection(),
-                      CreateParameter(fontFamily),
+                      CreateParameter(fontName),
                       "Muster",
                       1.0);
 
@@ -570,20 +446,16 @@ TEST_CASE("Cairo resolves a font for each requested font name", "[TextMetricsCai
  */
 TEST_CASE("Cairo measurement follows a font-name change on one painter", "[TextMetricsCairo]")
 {
-  std::string fontFamily;
-  std::string error;
-
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
+  // The painter is configured with the font file the repository ships; resolving that file to the
+  // face it holds is the job of the backend (spec: font-dependent-test-fonts)
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 
 #if defined(HAVE_LIB_FONTCONFIG)
-  FcConfigAppFontAddFile(nullptr,
-                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-
-  if (ResolvedFontFile(fontFamily)==ResolvedFontFile(SecondFontFamily)) {
-    INFO("fontconfig resolves \"" << fontFamily << "\" and \"" << SecondFontFamily
+  // Ask fontconfig how it resolves the two configured names: the comparison below discriminates
+  // only when they are not the same font. This only reads the font configuration, it does not
+  // change it.
+  if (ResolvedFontFile(fontName)==ResolvedFontFile(SecondFontFamily)) {
+    INFO("fontconfig resolves \"" << fontName << "\" and \"" << SecondFontFamily
                                   << "\" to the same font; the font-name comparison cannot discriminate");
 
     return;
@@ -621,12 +493,12 @@ TEST_CASE("Cairo measurement follows a font-name change on one painter", "[TextM
   osmscout::MapPainterCairo livePainter;
 
   livePainter.DrawMap(projection,
-                      CreateParameter(fontFamily),
+                      CreateParameter(fontName),
                       {},
                       liveContext);
 
   livePainter.MeasureText(projection,
-                          CreateParameter(fontFamily),
+                          CreateParameter(fontName),
                           "Muster",
                           1.0);
 

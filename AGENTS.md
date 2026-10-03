@@ -129,6 +129,8 @@ Notes:
 - **Subprojects** (Meson): wraps in `subprojects/`
 - **System**: Standard OSM dependencies (libxml2, protobuf, libpng, zlib, etc.)
 - **`nlohmann_json`**: required by `libosmscout-import` (it reads and writes the `db.json` database metadata). The requirement lives in that library's build description, so configurations that turn the import library off (`OSMSCOUT_BUILD_IMPORT=OFF`, e.g. iOS, Android, JavaScout) do not need it. The MCPServer still finds it optionally.
+- **`freetype`**: optional for `libosmscout-map` (the family name of a configured font file is read out of it) and for `libosmscout-map-cairo`, where it is also used to draw the face of a configured font file without Pango. Both are feature-gated (`OSMSCOUT_MAP_HAVE_LIB_FREETYPE`, `OSMSCOUT_MAP_CAIRO_HAVE_LIB_FREETYPE`), so a build without FreeType keeps a font name unchanged and passes it on as it is.
+- **`fontconfig` and the FreeType font backend of cairo**: optional for `libosmscout-map-cairo` (`OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG`, `OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT`). Fontconfig is what Pango before 1.56 needs to serve a configured font file (Pango 1.56 and later adds the file to the font map of the painter), and `cairo-ft` is what the Pango-less variant draws such a file with. Without either, that variant falls back to resolving the family of the file.
 
 ## CI/CD
 
@@ -150,7 +152,7 @@ GitHub Actions in `.github/workflows/`:
 
 Note: `build_and_test_on_vs2025.yml` caches vcpkg-built dependencies as NuGet packages in the GitHub Packages feed (`nuget.pkg.github.com/Framstag`), versioned by vcpkg ABI hash. The cache self-heals after runner image/toolchain updates; the workflow needs `packages: write` permission for the `GITHUB_TOKEN`.
 
-Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, and both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`). The font-dependent tests themselves take the family out of the bundled font file (`Tests/include/TestFontSupport.h`) and select the fontconfig based Pango font map, because Pango's default font map on Windows resolves families through the Win32 font collection and ignores fontconfig (MSYS2 issue 4293).
+Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, and both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`). The font-dependent tests configure the bundled font file as the font name; a backend that resolves a font by family serves the face of that file (see the `font-management` capability), which is what makes them measure the repository font on every host instead of the fonts a runner happens to provide.
 
 ## Code Conventions
 
