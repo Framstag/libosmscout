@@ -869,6 +869,20 @@ styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
 
+StyleConfigLookupCostTest = executable('StyleConfigLookupCostTest',
+                               'src/StyleConfigLookupCostTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+styleConfigLookupCostEnv = environment()
+styleConfigLookupCostEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+styleConfigLookupCostEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check StyleConfig lookup cost and result', StyleConfigLookupCostTest, env: styleConfigLookupCostEnv)
+
 PatternLookupTest = executable('PatternLookupTest',
                                'src/PatternLookupTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],

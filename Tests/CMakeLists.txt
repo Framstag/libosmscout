@@ -461,6 +461,14 @@ else()
   message("Skip StyleConfigSymbols test, libosmscout-map is missing.")
 endif()
 
+#---- StyleConfigLookupCost
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME StyleConfigLookupCostTest SOURCES src/StyleConfigLookupCostTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(StyleConfigLookupCostTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip StyleConfigLookupCost test, libosmscout-map is missing.")
+endif()
+
 #---- RoadStyleColors
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME RoadStyleColorsTest SOURCES src/RoadStyleColorsTest.cpp TARGET OSMScout::Map)
