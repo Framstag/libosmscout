@@ -37,8 +37,10 @@ namespace osmscout {
   bool FontNameResolution::CanReadFamilyFromFile()
   {
 #if defined(OSMSCOUT_MAP_HAVE_LIB_FREETYPE)
+
     return true;
 #else
+
     return false;
 #endif
   }
@@ -51,7 +53,7 @@ namespace osmscout {
     error.clear();
 
 #if defined(OSMSCOUT_MAP_HAVE_LIB_FREETYPE)
-    FT_Library library;
+    FT_Library library=nullptr;
 
     if (FT_Init_FreeType(&library)!=0) {
       error="cannot initialize FreeType";
@@ -59,7 +61,7 @@ namespace osmscout {
       return false;
     }
 
-    FT_Face face;
+    FT_Face face=nullptr;
 
     if (FT_New_Face(library,
                     fontFile.c_str(),

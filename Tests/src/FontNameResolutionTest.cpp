@@ -56,7 +56,7 @@ namespace {
    * The family the repository font file declares. Asserted rather than read, so that a
    * resolution that names the wrong face is caught.
    */
-  const char* RepositoryFontFamily="Liberation Sans";
+  const char * RepositoryFontFamily="Liberation Sans";
 
   /**
    * Removes a file written by a test however the test ends.
@@ -68,7 +68,7 @@ namespace {
 
   public:
     explicit TempFile(const std::filesystem::path& path)
-    : path(path)
+      : path(path)
     {
       // no code
     }
@@ -105,8 +105,8 @@ namespace {
 
     std::filesystem::path file=directory / "FontNameResolutionTest-not-a-font.bin";
 
-    std::ofstream stream(file,
-                         std::ios::binary | std::ios::trunc);
+    std::ofstream         stream(file,
+                                 std::ios::binary | std::ios::trunc);
 
     stream << "this file holds no font";
     stream.close();
@@ -178,8 +178,8 @@ TEST_CASE("The family of a configured font file is read out of the file", "[Font
     std::string error;
 
     REQUIRE_FALSE(osmscout::FontNameResolution::ReadFamilyFromFile(fontFile.string(),
-                                                                  family,
-                                                                  error));
+                                                                   family,
+                                                                   error));
     REQUIRE(family.empty());
     REQUIRE_FALSE(error.empty());
 
@@ -195,8 +195,8 @@ TEST_CASE("The family of a configured font file is read out of the file", "[Font
   std::string error;
 
   REQUIRE(osmscout::FontNameResolution::ReadFamilyFromFile(fontFile.string(),
-                                                          family,
-                                                          error));
+                                                           family,
+                                                           error));
   REQUIRE(family==RepositoryFontFamily);
   REQUIRE(error.empty());
 }
@@ -215,8 +215,8 @@ TEST_CASE("A file that cannot be read as a font is reported", "[FontNameResoluti
   std::string error;
 
   REQUIRE_FALSE(osmscout::FontNameResolution::ReadFamilyFromFile(file.Path().string(),
-                                                                family,
-                                                                error));
+                                                                 family,
+                                                                 error));
   REQUIRE(family.empty());
   REQUIRE_FALSE(error.empty());
 

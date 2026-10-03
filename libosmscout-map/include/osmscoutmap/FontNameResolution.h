@@ -46,7 +46,8 @@ namespace osmscout {
     /**
      * What a configured font name names.
      */
-    struct Result {
+    struct Result
+    {
       std::string fontName; //!< name to hand an interface that resolves a font by family
       std::string fontFile; //!< font file the name refers to, empty if the name names no file
     };
