@@ -21,6 +21,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <limits>
 #include <string>
@@ -177,6 +178,72 @@ namespace {
 
 #endif
 } // namespace
+
+/**
+ * A configured font file is measured as the face the file holds, without the test preparing the
+ * text stack in any way (spec: font-management, "Both backends that resolve by family draw the
+ * file's face").
+ *
+ * This case registers nothing itself: the painter alone has to make the configured file resolvable
+ * to its text stack. It runs in both variants of the backend - the FreeType variant has always
+ * resolved a file, so the case pins that the variant which resolves by family catches up with it.
+ */
+TEST_CASE("SVG measures a configured font file as the face of that file", "[TextMetricsSVG]")
+{
+  TextMetricsAll::ReferenceMetrics reference;
+  std::string                      error;
+
+  REQUIRE(TextMetricsAll::MeasureReference(TEXT_METRICS_FONT_PATH,
+                                          ScenarioText,
+                                          ScenarioFontSize,
+                                          ScenarioFontSizeParam,
+                                          ScenarioDpi,
+                                          reference,
+                                          error));
+
+  REQUIRE(error.empty());
+  REQUIRE_FALSE(reference.glyphs.empty());
+
+  // The painter is configured with the font FILE, and the test process prepares nothing
+  osmscout::MapPainterSVG painter;
+
+  auto metrics=painter.MeasureText(CreateProjection(),
+                                   CreateParameter(TEXT_METRICS_FONT_PATH),
+                                   ScenarioText,
+                                   ScenarioFontSize);
+
+  auto substituted=painter.MeasureText(CreateProjection(),
+                                       CreateParameter("OsmscoutNoSuchFontFamily"),
+                                       ScenarioText,
+                                       ScenarioFontSize);
+
+  REQUIRE(metrics.glyphs.size()==reference.glyphs.size());
+
+  double tolerance=3.0;
+
+  for (size_t i=0; i<reference.glyphs.size() && i<metrics.glyphs.size(); i++) {
+    REQUIRE(metrics.glyphs[i].box.width==Catch::Approx(static_cast<double>(reference.glyphs[i].width)).margin(tolerance));
+    REQUIRE(metrics.glyphs[i].box.height==Catch::Approx(static_cast<double>(reference.glyphs[i].height)).margin(tolerance));
+  }
+
+  // A configured font file must not be measured with the face the host substitutes for a name it
+  // cannot resolve, otherwise this case cannot tell the two apart
+  bool differs=false;
+
+  for (size_t i=0; i<metrics.glyphs.size() && i<substituted.glyphs.size(); i++) {
+    if (std::abs(metrics.glyphs[i].box.width-static_cast<double>(substituted.glyphs[i].box.width))>0.5 ||
+        std::abs(metrics.glyphs[i].position.GetX()-substituted.glyphs[i].position.GetX())>0.5) {
+      differs=true;
+
+      break;
+    }
+  }
+
+  INFO("label width for the configured file: " << metrics.width
+       << ", for the substituted family: " << substituted.width);
+
+  REQUIRE(differs);
+}
 
 /**
  * Make the bundled font file known to the platform font resolution, so that the
