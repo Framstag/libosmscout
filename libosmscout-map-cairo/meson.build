@@ -1,5 +1,15 @@
 cppArgs = []
 
+# The pango-less text path draws the face of a configured font file directly, when the cairo
+# build offers the FreeType font backend
+cairoHasFreeTypeFace = false
+
+if cairoDep.found() and ftDep.found()
+  cairoHasFreeTypeFace = compiler.has_function('cairo_ft_font_face_create_for_ft_face',
+                                               prefix: '#include <cairo-ft.h>',
+                                               dependencies: [cairoDep, ftDep])
+endif
+
 if get_option('default_library')=='shared'
   cppArgs += ['-DOSMScoutMapCairo_EXPORTS']
 

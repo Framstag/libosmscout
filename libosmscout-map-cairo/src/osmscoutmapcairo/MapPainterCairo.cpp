@@ -36,10 +36,14 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/util/String.h>
 
-#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && \
-    !PANGO_VERSION_CHECK(1, 56, 0) && \
-    defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG)
-  #include <fontconfig/fontconfig.h>
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+  #include <cairo-ft.h>
+#endif
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+  #if !PANGO_VERSION_CHECK(1, 56, 0) && defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG)
+    #include <fontconfig/fontconfig.h>
+  #endif
 #endif
 
 namespace osmscout {
@@ -345,8 +349,7 @@ namespace osmscout {
     ReleaseFontMap();
 #endif
 
-    for (const auto &image : images) {
-      if (image != nullptr) {
+    for (const auto &image : images) {      if (image != nullptr) {
         cairo_surface_destroy(image);
       }
     }
@@ -372,6 +375,26 @@ namespace osmscout {
 #endif
       }
     }
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+    // After the scaled fonts that use them: the faces loaded from a configured font file, and the
+    // FreeType library they were loaded with
+    for (auto *fontFace : loadedFontFaces) {
+      if (fontFace != nullptr) {
+        cairo_font_face_destroy(fontFace);
+      }
+    }
+
+    for (auto face : ftFaces) {
+      if (face != nullptr) {
+        FT_Done_Face(face);
+      }
+    }
+
+    if (ftLibrary!=nullptr) {
+      FT_Done_FreeType(ftLibrary);
+    }
+#endif
   }
 
   MapPainterCairo::CairoFont MapPainterCairo::GetFont(const Projection &projection,
@@ -428,9 +451,24 @@ namespace osmscout {
     cairo_font_options_t *options;
     cairo_scaled_font_t  *scaledFont;
 
-    fontFace=cairo_toy_font_face_create(parameter.GetFontName().c_str(),
-                                        CAIRO_FONT_SLANT_NORMAL,
-                                        CAIRO_FONT_WEIGHT_NORMAL);
+    // A configured font file names the face it holds. Where this variant can load it, it draws
+    // that face; the configured name is not a family name and asking for it as one would serve
+    // whatever the host substitutes.
+    FontNameResolution::Result resolved=FontNameResolution::Resolve(parameter.GetFontName());
+
+    fontFace=nullptr;
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+    if (!resolved.fontFile.empty()) {
+      fontFace=CreateFontFaceFromFile(resolved.fontFile);
+    }
+#endif
+
+    if (fontFace==nullptr) {
+      fontFace=cairo_toy_font_face_create(resolved.fontName.c_str(),
+                                          CAIRO_FONT_SLANT_NORMAL,
+                                          CAIRO_FONT_WEIGHT_NORMAL);
+    }
 
     cairo_matrix_init_scale(&scaleMatrix,fontSize,fontSize);
     cairo_matrix_init_identity(&transformMatrix);
@@ -457,6 +495,50 @@ namespace osmscout {
   {
     return resolvedFontCount;
   }
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+
+  cairo_font_face_t* MapPainterCairo::CreateFontFaceFromFile(const std::string& fontFile)
+  {
+    if (ftLibrary==nullptr &&
+        FT_Init_FreeType(&ftLibrary)!=0) {
+      log.Error() << "Cannot initialize FreeType, the configured font file '" << fontFile
+                  << "' cannot be loaded";
+
+      return nullptr;
+    }
+
+    FT_Face face=nullptr;
+
+    if (FT_New_Face(ftLibrary,
+                    fontFile.c_str(),
+                    0,
+                    &face)!=0) {
+      log.Error() << "Cannot load a font face from the configured font file '" << fontFile << "'";
+
+      return nullptr;
+    }
+
+    cairo_font_face_t *fontFace=cairo_ft_font_face_create_for_ft_face(face,
+                                                                      0);
+
+    if (fontFace==nullptr) {
+      log.Error() << "Cannot create a font face from the configured font file '" << fontFile << "'";
+
+      FT_Done_Face(face);
+
+      return nullptr;
+    }
+
+    // Kept for the lifetime of the painter: a scaled font created from this face uses the face,
+    // and the face uses the FreeType face and its library
+    ftFaces.push_back(face);
+    loadedFontFaces.push_back(fontFace);
+
+    return fontFace;
+  }
+
+#endif
 
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
 

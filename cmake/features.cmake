@@ -210,13 +210,41 @@ set(HAVE_LIB_AGG ${LIBAGG_FOUND})
 find_package(Freetype)
 target_exists(Freetype::Freetype HAVE_LIB_FREETYPE)
 
-find_package(Fontconfig QUIET)
-set(HAVE_LIB_FONTCONFIG ${Fontconfig_FOUND})
+# The pango-less cairo path can draw the face of a configured font file directly, when the
+# cairo build offers the FreeType font backend. The header and the symbol are both checked,
+# because the FreeType backend of cairo is a build option of cairo itself.
+if(FREETYPE_FOUND AND CAIRO_FOUND)
+  include(CheckCXXSourceCompiles)
+
+  set(CMAKE_REQUIRED_INCLUDES ${CAIRO_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
+
+  check_cxx_source_compiles(
+    "#include <cairo-ft.h>
+     #include <ft2build.h>
+     #include FT_FREETYPE_H
+     int main() {
+       FT_Library library;
+       if (FT_Init_FreeType(&library) != 0) { return 1; }
+       FT_Face face;
+       cairo_font_face_t *fontFace = cairo_ft_font_face_create_for_ft_face(face, 0);
+       return fontFace != nullptr ? 0 : 1;
+     }"
+    OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT
+  )
+
+  unset(CMAKE_REQUIRED_INCLUDES)
+  unset(CMAKE_REQUIRED_LIBRARIES)
+endif()
 
 find_package(Pango)
 set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
+
+# The font configuration is what the Cairo backend falls back to where its text stack cannot be
+# handed a configured font file (Pango before 1.56); it is not a build requirement
+find_package(Fontconfig QUIET)
 
 # A configured font name may be a font family or a font file. The map library
 # reads the family out of a file where FreeType is available; the Cairo backend
@@ -224,7 +252,7 @@ set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
 # font configuration where the stack cannot be handed a file directly.
 set(OSMSCOUT_MAP_HAVE_LIB_FREETYPE ${HAVE_LIB_FREETYPE})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FREETYPE ${HAVE_LIB_FREETYPE})
-set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG ${HAVE_LIB_FONTCONFIG})
+set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG ${Fontconfig_FOUND})
 
 find_package(harfbuzz)
 target_exists(harfbuzz::harfbuzz HAVE_LIB_HARFBUZZ)

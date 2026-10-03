@@ -16,4 +16,9 @@
 #cmakedefine OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG
 #endif
 
+#ifndef OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT
+/* The FreeType font backend of cairo can draw the face of a configured font file */
+#cmakedefine OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT
+#endif
+
 #endif

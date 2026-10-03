@@ -27,6 +27,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #if defined(__WIN32__) || defined(WIN32)
   #include <cairo.h>
@@ -39,6 +40,21 @@
 #if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
   #include <pango/pangocairo.h>
   #include <pango/pango-glyph.h>
+#endif
+
+/**
+ * Whether a configured font file can be drawn as the face it holds without a text stack that
+ * resolves fonts by family: the variant without Pango loads the file with FreeType and draws
+ * that face through the FreeType font backend of cairo. Internal to this backend; the feature
+ * macros above are its inputs.
+ */
+#if !defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO) && \
+    defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FREETYPE) && \
+    defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT)
+  #define OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE 1
+
+  #include <ft2build.h>
+  #include FT_FREETYPE_H
 #endif
 
 #include <osmscoutmapcairo/MapCairoImportExport.h>
@@ -133,6 +149,12 @@ namespace osmscout {
     std::string                            fontMapFile;             //!< Font file added to the font map, empty if none was
 #endif
 
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+    FT_Library                             ftLibrary{nullptr}; //!< FreeType library of the fonts loaded from a configured file
+    std::vector<FT_Face>                   ftFaces;            //!< Faces of that library, kept alive for the scaled fonts
+    std::vector<cairo_font_face_t*>        loadedFontFaces;    //!< Font faces built from those faces
+#endif
+
   private:
     CairoFont GetFont(const Projection& projection,
                  const MapParameter& parameter,
@@ -160,6 +182,15 @@ namespace osmscout {
      * Release the font map and its context, if this painter has them.
      */
     void ReleaseFontMap();
+#endif
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+    /**
+     * Build a cairo font face for the face a configured font file holds. The face and its
+     * FreeType library are kept by this painter, so that the scaled fonts created from them stay
+     * usable; a null return means that the caller has to resolve a family instead.
+     */
+    cairo_font_face_t* CreateFontFaceFromFile(const std::string& fontFile);
 #endif
 
     /**
