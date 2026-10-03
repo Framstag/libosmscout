@@ -14,11 +14,23 @@ subdir('include/osmscoutmapcairo/private')
 subdir('src')
 
 # TODO: We either have only cairo or the complete pango/glib stack...
+# FreeType and the font configuration are optional: they serve a configured
+# font file that the text stack cannot be handed directly
+osmscoutmapcairoDeps = [mathDep, threadDep, cairoDep, pangoDep, pangocairoDep, pngDep, gobjectDep]
+
+if ftDep.found()
+  osmscoutmapcairoDeps += [ftDep]
+endif
+
+if fontconfigDep.found()
+  osmscoutmapcairoDeps += [fontconfigDep]
+endif
+
 osmscoutmapcairo = library('osmscout_map_cairo',
                            osmscoutmapcairoSrc,
                            include_directories: [osmscoutmapcairoIncDir, osmscoutmapIncDir, osmscoutIncDir],
                            cpp_args: cppArgs,
-                           dependencies: [mathDep, threadDep, cairoDep, pangoDep, pangocairoDep, pngDep, gobjectDep],
+                           dependencies: osmscoutmapcairoDeps,
                            link_with: [osmscoutmap, osmscout],
                            version: libraryVersion,
                            install: true)

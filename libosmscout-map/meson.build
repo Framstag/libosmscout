@@ -13,11 +13,19 @@ subdir('include/osmscoutmap')
 subdir('include/osmscoutmap/private')
 subdir('src')
 
+osmscoutmapDeps = [mathDep, threadDep]
+
+# The family name of a configured font file is read with FreeType where it is
+# available; without it a font name is passed on unchanged
+if ftDep.found()
+  osmscoutmapDeps += [ftDep]
+endif
+
 osmscoutmap = library('osmscout_map',
                       osmscoutmapSrc,
                       include_directories: [osmscoutmapIncDir, osmscoutIncDir],
                       cpp_args: cppArgs,
-                      dependencies: [mathDep, threadDep],
+                      dependencies: osmscoutmapDeps,
                       link_with: [osmscout],
                       version: libraryVersion,
                       install: true)

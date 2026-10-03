@@ -869,6 +869,20 @@ styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
 
+FontNameResolutionTest = executable('FontNameResolutionTest',
+                                     'src/FontNameResolutionTest.cpp',
+                                     include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                                     dependencies: [mathDep, openmpDep, catch2MainDep],
+                                     link_with: [osmscout, osmscoutmap],
+                                     install: true,
+                                     install_dir: testInstallDir)
+
+fontNameResolutionEnv = environment()
+fontNameResolutionEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+fontNameResolutionEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check the resolution of a configured font name', FontNameResolutionTest, env: fontNameResolutionEnv)
+
 PatternLookupTest = executable('PatternLookupTest',
                                'src/PatternLookupTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],

@@ -210,10 +210,21 @@ set(HAVE_LIB_AGG ${LIBAGG_FOUND})
 find_package(Freetype)
 target_exists(Freetype::Freetype HAVE_LIB_FREETYPE)
 
+find_package(Fontconfig QUIET)
+set(HAVE_LIB_FONTCONFIG ${Fontconfig_FOUND})
+
 find_package(Pango)
 set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
+
+# A configured font name may be a font family or a font file. The map library
+# reads the family out of a file where FreeType is available; the Cairo backend
+# additionally makes the file itself resolvable to its text stack, with the
+# font configuration where the stack cannot be handed a file directly.
+set(OSMSCOUT_MAP_HAVE_LIB_FREETYPE ${HAVE_LIB_FREETYPE})
+set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FREETYPE ${HAVE_LIB_FREETYPE})
+set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG ${HAVE_LIB_FONTCONFIG})
 
 find_package(harfbuzz)
 target_exists(harfbuzz::harfbuzz HAVE_LIB_HARFBUZZ)
