@@ -147,4 +147,9 @@ conditional in `CalculateUsedTypes`.
 - The pre-change per-call resolution figure was not measured.
 - `PerformanceTest` was not rebuilt in the base worktree (its configuration needs the test set that the minimal
   base build turns off), so the render-path performance figure of this change rests on the identical render
-  output (section 1) and on the resolution figure (section 4) rather than on a `PerformanceTest` A/B.
+  output (section 1) and on the resolution figure (section 4) rather than on a `PerformanceTest` A/B. In the
+  branch's build `xvfb-run ctest -R PerformanceTest --output-on-failure` passes 39/39 sub-tests (44.3 s total).
+  Task 6.2 stays open for the `PerformanceTest` A/B.
+- `MapDataBudgetTest` is not registered in this configuration at all (`ctest -R MapDataBudgetTest` finds no
+  test): it belongs to the open `map-data-memory-budget` change, not to `origin/master`, so there is no figure
+  of it to compare here.
