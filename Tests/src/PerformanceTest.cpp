@@ -568,6 +568,12 @@ public:
       openglMapPainter->SetMagnification(projection.GetMagnification());
 
       openglMapPainter->ProcessData(data, projection, styleConfig);
+
+      // The area step reports the rings its visibility decision examined and the rings it kept, so a
+      // run with --debug shows how the per-ring work follows the rings the view keeps
+      std::cout << "Area rings: examined " << openglMapPainter->GetExaminedRingCount()
+                << " kept " << openglMapPainter->GetKeptRingCount() << std::endl;
+
       openglMapPainter->SwapData();
       openglMapPainter->DrawMap(step,
                                 step);

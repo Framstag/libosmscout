@@ -561,6 +561,21 @@ else()
   message("Skip MapPainterAreaVisibilityCull test, libosmscout-map is missing.")
 endif()
 
+#---- OpenGLAreaVisibilityTest
+#
+# The decision of the OpenGL backend's area step is a free function, but the test needs a GL link to
+# reach it, so it is registered under the same condition as the OpenGL driver of PerformanceTest.
+if(${OSMSCOUT_BUILD_MAP_OPENGL} AND TARGET OSMScout::MapOpenGL AND TARGET glfw)
+  osmscout_test_project(NAME OpenGLAreaVisibilityTest SOURCES src/OpenGLAreaVisibilityTest.cpp TARGET OSMScout::MapOpenGL glfw)
+  # The one case that needs a painter takes the bundled font file and the shader directory of the
+  # OpenGL backend, the same resources the OpenGL driver of PerformanceTest is started with.
+  target_compile_definitions(OpenGLAreaVisibilityTest PRIVATE
+    OPENGL_TEST_FONT_FILE="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"
+    OPENGL_TEST_SHADER_DIR="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/shaders")
+else()
+  message("Skip OpenGLAreaVisibilityTest test, libosmscout-map-opengl is missing.")
+endif()
+
 #---- StyleConfigVisibilityBoundsTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME StyleConfigVisibilityBoundsTest SOURCES src/StyleConfigVisibilityBoundsTest.cpp TARGET OSMScout::Map)

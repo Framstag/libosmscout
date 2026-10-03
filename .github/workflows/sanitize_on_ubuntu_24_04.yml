@@ -58,6 +58,24 @@ jobs:
               -DCMAKE_CXX_COMPILER=/usr/bin/clang++-20"
       - name: Build project
         run: cmake --build build
+      - name: Check that no sanitizer binary carries a second allocator
+        # A sanitizer runtime and gperftools' tcmalloc both interpose malloc/free, so a binary that
+        # links both reports the other allocator's pointers as invalid frees
+        # (see openspec/changes/fix-sanitizer-allocator-conflict). The configuration turns the heap
+        # profiler off for a sanitizer runtime; this check keeps that from regressing unnoticed.
+        run: |
+          binaries=$(find build -maxdepth 3 -name 'PerformanceTest*' -type f -perm -u+x)
+          if [ -z "${binaries}" ]; then
+            echo "No PerformanceTest binary found to check" >&2
+            exit 1
+          fi
+          for binary in ${binaries}; do
+            echo "checking ${binary}"
+            if ldd "${binary}" | grep -q tcmalloc; then
+              echo "${binary} links tcmalloc next to a sanitizer runtime" >&2
+              exit 1
+            fi
+          done
       - name: Install project
         run: sudo cmake --install build
       - name: Run tests
@@ -151,6 +169,24 @@ jobs:
               -DCMAKE_CXX_COMPILER=/usr/bin/clang++-21"
       - name: Build project
         run: cmake --build build
+      - name: Check that no sanitizer binary carries a second allocator
+        # A sanitizer runtime and gperftools' tcmalloc both interpose malloc/free, so a binary that
+        # links both reports the other allocator's pointers as invalid frees
+        # (see openspec/changes/fix-sanitizer-allocator-conflict). The configuration turns the heap
+        # profiler off for a sanitizer runtime; this check keeps that from regressing unnoticed.
+        run: |
+          binaries=$(find build -maxdepth 3 -name 'PerformanceTest*' -type f -perm -u+x)
+          if [ -z "${binaries}" ]; then
+            echo "No PerformanceTest binary found to check" >&2
+            exit 1
+          fi
+          for binary in ${binaries}; do
+            echo "checking ${binary}"
+            if ldd "${binary}" | grep -q tcmalloc; then
+              echo "${binary} links tcmalloc next to a sanitizer runtime" >&2
+              exit 1
+            fi
+          done
       - name: Install project
         run: sudo cmake --install build
       - name: Run tests
@@ -201,6 +237,24 @@ jobs:
               -DCMAKE_CXX_COMPILER=/usr/bin/g++"
       - name: Build project
         run: cmake --build build
+      - name: Check that no sanitizer binary carries a second allocator
+        # A sanitizer runtime and gperftools' tcmalloc both interpose malloc/free, so a binary that
+        # links both reports the other allocator's pointers as invalid frees
+        # (see openspec/changes/fix-sanitizer-allocator-conflict). The configuration turns the heap
+        # profiler off for a sanitizer runtime; this check keeps that from regressing unnoticed.
+        run: |
+          binaries=$(find build -maxdepth 3 -name 'PerformanceTest*' -type f -perm -u+x)
+          if [ -z "${binaries}" ]; then
+            echo "No PerformanceTest binary found to check" >&2
+            exit 1
+          fi
+          for binary in ${binaries}; do
+            echo "checking ${binary}"
+            if ldd "${binary}" | grep -q tcmalloc; then
+              echo "${binary} links tcmalloc next to a sanitizer runtime" >&2
+              exit 1
+            fi
+          done
       - name: Install project
         run: sudo cmake --install build
       - name: Run tests
