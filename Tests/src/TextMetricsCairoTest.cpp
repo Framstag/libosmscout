@@ -20,8 +20,9 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <filesystem>
+#include <cmath>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 #if defined(HAVE_LIB_FONTCONFIG)
@@ -148,6 +149,94 @@ namespace {
 
 #endif
 } // namespace
+
+/**
+ * A configured font file is measured as the face the file holds, without the test preparing
+ * the text stack in any way (spec: font-management, "A font file is drawn as the face of that
+ * file").
+ *
+ * This case is declared first and registers nothing itself: the painter alone has to make the
+ * configured file resolvable to its text stack. On the code before the change the file path was
+ * handed to the family-based interface, which resolved it to whatever face the host falls back
+ * to for an unknown name - so the comparison below against the FreeType reference of the same
+ * file is the assertion that fails then.
+ */
+TEST_CASE("Cairo measures a configured font file as the face of that file", "[TextMetricsCairo]")
+{
+  TextMetricsAll::ReferenceMetrics reference;
+  std::string                      error;
+
+  REQUIRE(TextMetricsAll::MeasureReference(TEXT_METRICS_FONT_PATH,
+                                          "Musterstra\u00dfe",
+                                          1.0,
+                                          10.0,
+                                          96.0,
+                                          reference,
+                                          error));
+
+  REQUIRE(error.empty());
+  REQUIRE_FALSE(reference.glyphs.empty());
+
+  cairo_surface_t * surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                       800,
+                                                       480);
+
+  REQUIRE(surface!=nullptr);
+
+  cairo_t * cr=cairo_create(surface);
+
+  REQUIRE(cr!=nullptr);
+
+  // The painter is configured with the font FILE, and the test process prepares nothing
+  osmscout::MapPainterCairo painter;
+
+  painter.DrawMap(CreateProjection(),
+                  CreateParameter(TEXT_METRICS_FONT_PATH),
+                  {},
+                  cr);
+
+  auto metrics=painter.MeasureText(CreateProjection(),
+                                   CreateParameter(TEXT_METRICS_FONT_PATH),
+                                   "Musterstra\u00dfe",
+                                   1.0);
+
+  REQUIRE(metrics.glyphs.size()==reference.glyphs.size());
+
+  // The face of the file, not the face the host substitutes for an unknown font name
+  auto substituted=painter.MeasureText(CreateProjection(),
+                                       CreateParameter("OsmscoutNoSuchFontFamily"),
+                                       "Musterstra\u00dfe",
+                                       1.0);
+
+  double tolerance=3.0;
+
+  for (size_t i=0; i<reference.glyphs.size() && i<metrics.glyphs.size(); i++) {
+    REQUIRE(metrics.glyphs[i].box.width==Catch::Approx(static_cast<double>(reference.glyphs[i].width)).margin(tolerance));
+    REQUIRE(metrics.glyphs[i].box.height==Catch::Approx(static_cast<double>(reference.glyphs[i].height)).margin(tolerance));
+  }
+
+  // A font file that names the face it holds must not be measured with the substituted face:
+  // at least one glyph box has to differ, otherwise this case cannot tell the two apart and the
+  // host provides the same face for both
+  bool differs=false;
+
+  for (size_t i=0; i<metrics.glyphs.size() && i<substituted.glyphs.size(); i++) {
+    if (std::abs(metrics.glyphs[i].box.width-static_cast<double>(substituted.glyphs[i].box.width))>0.5 ||
+        std::abs(metrics.glyphs[i].position.GetX()-substituted.glyphs[i].position.GetX())>0.5) {
+      differs=true;
+
+      break;
+    }
+  }
+
+  INFO("label width for the configured file: " << metrics.width
+       << ", for the substituted family: " << substituted.width);
+
+  REQUIRE(differs);
+
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
 
 /**
  * The Cairo backend (Pango text stack) must measure the same text like the

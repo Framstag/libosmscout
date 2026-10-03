@@ -127,10 +127,40 @@ namespace osmscout {
 
     std::mutex                             mutex;            //! Mutex for locking concurrent calls
 
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    PangoFontMap                           *fontMap{nullptr};       //!< Font map of this painter, holding the configured font file
+    PangoContext                           *fontContext{nullptr};   //!< Context of that map, shared by the layouts of this painter
+    std::string                            fontMapFile;             //!< Font file added to the font map, empty if none was
+#endif
+
   private:
     CairoFont GetFont(const Projection& projection,
                  const MapParameter& parameter,
                  double fontSize);
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    /**
+     * The font map of this painter, created and kept in step with the configured font.
+     *
+     * The map belongs to the painter and a configured font file is added to it, so that the
+     * family the file holds resolves to that file. The addition is confined to that map: the
+     * font map API adds a file to the configuration of that map, not to the font configuration
+     * of the process (where it is available at all).
+     */
+    PangoFontMap* GetFontMap(const MapParameter& parameter);
+
+    /**
+     * Create a layout on the font map of this painter and bind it to the current drawing
+     * target, so that the layout takes its scale and its font options from the target exactly
+     * as a layout created with pango_cairo_create_layout() would.
+     */
+    PangoLayout* CreateLayout(const MapParameter& parameter);
+
+    /**
+     * Release the font map and its context, if this painter has them.
+     */
+    void ReleaseFontMap();
+#endif
 
     /**
      * Return the environment the label measurements of this painter depend on: the state that
