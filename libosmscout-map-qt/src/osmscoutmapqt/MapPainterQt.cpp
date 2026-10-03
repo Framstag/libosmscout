@@ -42,6 +42,24 @@
 
 namespace osmscout {
 
+namespace {
+  /**
+   * Identity of a resolved font is the font size quantized to the pixel grid of the drawing: the
+   * scaled font size truncated to whole device pixels. The quantization is what keeps the number of
+   * distinct cached fonts independent of the number of labels a frame registers - two labels whose
+   * resolved sizes differ by less than a device pixel select the same font - so it is a stated rule
+   * of the cache rather than a property of the key's field type.
+   */
+  size_t FontPixelSize(double scaledFontSize)
+  {
+    if (scaledFontSize<=0.0) {
+      return 0;
+    }
+
+    return static_cast<size_t>(scaledFontSize);
+  }
+} // namespace
+
   MapPainterQt::MapPainterQt()
   : labelLayouter(this)
   {
@@ -54,8 +72,29 @@ namespace osmscout {
 
   MapPainterQt::~MapPainterQt()
   {
-    // no code
-    // TODO: Clean up fonts
+    ClearFonts();
+  }
+
+  size_t MapPainterQt::GetResolvedFontCount() const
+  {
+    return resolvedFontCount;
+  }
+
+  size_t MapPainterQt::GetRetainedFontCount() const
+  {
+    return fonts.size();
+  }
+
+  void MapPainterQt::ReleaseFonts()
+  {
+    std::lock_guard<std::mutex> guard(mutex);
+
+    ClearFonts();
+  }
+
+  void MapPainterQt::ClearFonts()
+  {
+    fonts.clear();
   }
 
   QFont MapPainterQt::GetFont(const Projection& projection,
@@ -64,12 +103,13 @@ namespace osmscout {
   {
     FontDescriptor descriptor;
     descriptor.fontName=QString::fromStdString(parameter.GetFontName());
-    descriptor.fontSize=fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize());
+    descriptor.fontSize=FontPixelSize(fontSize*projection.ConvertWidthToPixel(parameter.GetFontSize()));
     descriptor.weight=QFont::Normal;
     descriptor.italic=false;
 
-    if (fonts.contains(descriptor)) {
-      return fonts.value(descriptor);
+    auto cachedFont=fonts.find(descriptor);
+    if (cachedFont!=fonts.end()) {
+      return cachedFont.value();
     }
 
     QFont font(descriptor.fontName.toStdString().c_str(),
@@ -80,6 +120,8 @@ namespace osmscout {
     font.setStyleStrategy(static_cast<QFont::StyleStrategy>(QFont::PreferAntialias | QFont::PreferMatch));
 
     fonts[descriptor]=font;
+    resolvedFontCount++;
+
     return font;
   }
 
@@ -889,6 +931,10 @@ namespace osmscout {
   {
     patternImages.clear();
     patterns.clear();
+
+    // The replaced stylesheet may draw with other fonts, so the fonts resolved for it are not
+    // needed any more. This runs inside a frame, so it must not lock the painter's mutex.
+    ClearFonts();
   }
 
   void MapPainterQt::BeforeDrawingCallback(const Projection& projection,
