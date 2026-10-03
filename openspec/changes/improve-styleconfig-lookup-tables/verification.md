@@ -140,16 +140,40 @@ Fixed while verifying: `static` on the three new file-local helpers, direct `<cs
 `osmscout/TypeConfig.h` includes, explicit parentheses in `TypeSetBytes`, if/else instead of the nested
 conditional in `CalculateUsedTypes`.
 
-## 6. Limitations
+## 6. PerformanceTest A/B (task 6.2)
+
+The base worktree was reconfigured with the full library set (Qt, OpenGL, Skia, SVG, Cairo, client, import)
+and `cmake --build /tmp/base-12-build --target PerformanceTest`, so both states can run the same command:
+
+```text
+xvfb-run -a ctest -R PerformanceTest
+
+base (67884c96c)  35 `PerformanceTest-*` sub-tests present, all passing; the four further perf targets
+                  (CachePerformanceTest, TypeResolutionPerformanceTest, NumberSetPerformanceTest,
+                  ReaderScannerPerformanceTest) were not built in this worktree and report "Not Run"
+main (HEAD)       39 tests, all passing
+
+the 35 common sub-tests: all pass in both states
+  total                    base 8.41 s   main 6.12 s
+  noop   7 tests           base 0.77 s   main 0.34 s
+  cairo  7 tests           base 0.76 s   main 0.46 s
+  Qt     7 tests           included in the totals
+  opengl 7 tests           base 3.47 s   main 3.80 s
+
+printed figures of `PerformanceTest-cairo-standard.oss`:
+  base: DB total 0.61 s, Draw allocs 113, Map total 0.34 s
+  main: DB total 0.67 s, Draw allocs 113, Map total 0.23 s
+```
+
+The draw allocation count is identical (113) and no sub-test changed its status; the per-backend times differ
+by less than the run-to-run spread of these tests (the OpenGL group even reads slower in the newer build). The
+load-time slope comparison is in section 3.
+
+## 7. Limitations
 
 - The pre-change *slot*, *evaluation* and *byte* counts come from the implementation session (see section 3),
   not from a commit: the diagnostics and the dense tables were never committed together.
 - The pre-change per-call resolution figure was not measured.
-- `PerformanceTest` was not rebuilt in the base worktree (its configuration needs the test set that the minimal
-  base build turns off), so the render-path performance figure of this change rests on the identical render
-  output (section 1) and on the resolution figure (section 4) rather than on a `PerformanceTest` A/B. In the
-  branch's build `xvfb-run ctest -R PerformanceTest --output-on-failure` passes 39/39 sub-tests (44.3 s total).
-  Task 6.2 stays open for the `PerformanceTest` A/B.
 - `MapDataBudgetTest` is not registered in this configuration at all (`ctest -R MapDataBudgetTest` finds no
   test): it belongs to the open `map-data-memory-budget` change, not to `origin/master`, so there is no figure
   of it to compare here.

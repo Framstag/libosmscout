@@ -34,4 +34,4 @@
 ## 6. Integration check
 
 - [x] 6.1 Render the shipped stylesheets before and after the change (`Demos/SymbolsAll --stylesheet stylesheets/standard.oss --output <dir>` and the second shipped stylesheet) and compare the produced files. Verify: `sha256sum` of the produced PNG/SVG files is unchanged from the pre-change run (compare the SVG output if PNG metadata makes the hash unstable).
-- [ ] 6.2 Compare the pre-change figures of the render-path suites (`PerformanceTest`, `SymbolsAll --list` timing, `MapDataBudgetTest` where the client caches are involved) with the post-change ones. Verify: no figure regresses beyond the tolerance recorded in 5.1, and the measured load-time slope against the extended type configuration is gone.
+- [x] 6.2 Compare the pre-change figures of the render-path suites (`PerformanceTest`, `SymbolsAll --list` timing, `MapDataBudgetTest` where the client caches are involved) with the post-change ones. Verify: no figure regresses beyond the tolerance recorded in 5.1, and the measured load-time slope against the extended type configuration is gone.
