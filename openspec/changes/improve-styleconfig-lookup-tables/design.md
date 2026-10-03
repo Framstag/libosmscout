@@ -217,17 +217,21 @@ Projected effect:
 
 - **Cost**: the build stops paying `conditionals x defined types` and pays `conditionals x types named by that
   conditional` (554 resolved name applications instead of 385k membership tests, and the level dimension
-  follows), so the slope of the measured table goes away. The absolute figure for the shipped configuration
-  barely moves, because the type-definition parse dominates it — this change removes the growth, not the
-  current cost.
-- **Memory**: per family-slot the table goes from `638 x 22 x 24 B + 638 x 24 B` (~350 KB) to
-  `423 x 22 x 24 B + 423 x 24 B` (~233 KB); at 1489 defined types the old shape is ~820 KB against the same
-  ~233 KB. At today's type count that is a ~30 % cut per slot — the decisive part is again the slope, and it
-  is what TODO §74 pays today (+129 ms, ~2.3x table bytes).
+  follows), so the slope of the measured table goes away. **Measured (2026-10-03, same session, median of
+  five end-to-end `SymbolsAll --list` runs)**: 168.4 ms at 638 defined types and 234.7 ms at 1489 before the
+  change against 28.8 ms and 56.7 ms after, i.e. the slope per +851 defined types fell from +66.3 to +27.9 ms
+  and the shipped figure fell 5.8x. The prediction that the shipped figure would barely move was wrong: the
+  type-count-driven walk and the per-type level containers were a much larger part of the load than the type
+  definition parse. The remaining slope is the `*TypeSet` vectors (TODO §20) and the larger `.ost` parse.
+- **Memory**: the shipped configuration's style-selector tables now retain 3 845 544 bytes for 152 560 prepared
+  slots (measured by the test and by `SymbolsAll --list`), against the ~4.7 MB the dense shape held at the
+  same type count; at 1489 defined types the dense shape is ~820 KB per family-slot against ~233 KB for the
+  same referenced types. The `*TypeSet` vectors are reported separately and still scale (615 600 bytes at the
+  shipped type count), because their representation is TODO §20.
 - **Lookup**: one extra dependent load (the translation array is 638 x 4 B ≈ 2.6 KB at the shipped type count,
-  ≈ 6 KB at 1489, so it stays in L1/L2) per style family per resolved style; the 215 defined-but-unreferenced
-  types get cheaper because an empty level list is replaced by a single branch. The resolution figure in
-  `StyleConfigLookupCostTest.cpp` covers the direction.
+  ≈ 6 KB at 1489, so it stays in L1/L2) per style family per resolved style. **Measured**: 11.4 ns per
+  resolution of a referenced type and 1.9 ns for a type the sheet does not reference (200 000 iterations each),
+  the latter cheaper because it takes the not-referenced branch instead of walking a level's selectors.
 - **Not removed**: the `*TypeSets` members stay type-count sized until TODO §20.
 
 ## Flow
