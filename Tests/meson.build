@@ -629,19 +629,6 @@ if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
     performanceTestIncludes = includes + [testIncDir]
     performanceTestArgs = ['-fPIC']
 
-    # The Cairo and Qt drivers resolve a font by family name: the test takes
-    # the family of the font file it is started with (Tests/include/TestFontSupport.h)
-    if ftDep.found()
-      performanceTestDeps += ftDep
-      performanceTestIncludes += include_directories('../Demos/include')
-      performanceTestArgs += '-DHAVE_LIB_FREETYPE'
-
-      if fontconfigDep.found()
-        performanceTestDeps += fontconfigDep
-        performanceTestArgs += '-DHAVE_LIB_FONTCONFIG'
-      endif
-    endif
-
     PerformanceTest = executable('PerformanceTest',
                                  'src/PerformanceTest.cpp',
                                  cpp_args: performanceTestArgs,
@@ -868,6 +855,20 @@ styleConfigSymbolsEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
 styleConfigSymbolsEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
 
 test('Check StyleConfig symbol enumeration', StyleConfigSymbolsTest, env: styleConfigSymbolsEnv)
+
+FontNameResolutionTest = executable('FontNameResolutionTest',
+                                     'src/FontNameResolutionTest.cpp',
+                                     include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                                     dependencies: [mathDep, openmpDep, catch2MainDep],
+                                     link_with: [osmscout, osmscoutmap],
+                                     install: true,
+                                     install_dir: testInstallDir)
+
+fontNameResolutionEnv = environment()
+fontNameResolutionEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+fontNameResolutionEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check the resolution of a configured font name', FontNameResolutionTest, env: fontNameResolutionEnv)
 
 PatternLookupTest = executable('PatternLookupTest',
                                'src/PatternLookupTest.cpp',
@@ -1187,19 +1188,10 @@ if buildMapCairo
   mapPainterShieldTestDeps = [mathDep, openmpDep, catch2MainDep, pangocairoDep]
   mapPainterShieldTestArgs = []
 
-  # The test takes the family of the bundled font file and registers that file
-  # (see Tests/include/TestFontSupport.h), so that it measures the font the
-  # repository ships instead of the font the host provides
-  if ftDep.found()
-    mapPainterShieldTestDeps += ftDep
-    mapPainterShieldTestIncludes += include_directories('../Demos/include')
-    mapPainterShieldTestArgs += ['-DHAVE_LIB_FREETYPE', '-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
-
-    if fontconfigDep.found()
-      mapPainterShieldTestDeps += fontconfigDep
-      mapPainterShieldTestArgs += '-DHAVE_LIB_FONTCONFIG'
-    endif
-  endif
+  # The test configures the painter with the font file the repository ships and
+  # prepares nothing itself: resolving that file to the face it holds is the job
+  # of the backend
+  mapPainterShieldTestArgs += ['-DTEXT_METRICS_FONT_PATH="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"']
 
   MapPainterShieldTest = executable('MapPainterShieldTest',
                'src/MapPainterShieldTest.cpp',

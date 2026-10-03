@@ -32,6 +32,14 @@
   #include <fontconfig/fontconfig.h>
 #endif
 
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+  #if !PANGO_VERSION_CHECK(1, 56, 0) && defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
+    #include <fontconfig/fontconfig.h>
+  #endif
+#endif
+
+#include <osmscoutmap/FontNameResolution.h>
+
 #include <osmscout/system/Assert.h>
 #include <osmscoutmapsvg/SymbolRendererSVG.h>
 #include <osmscout/system/Math.h>
@@ -45,6 +53,65 @@
 namespace osmscout {
 
   static const char* valueChar="0123456789abcdef";
+
+#if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
+
+  /**
+   * Make a font file resolvable to the given font map, so that the family the file holds resolves
+   * to that file.
+   *
+   * Pango 1.56 adds a font file to the configuration of a font map. Older Pango has no such API, so
+   * the file has to go into the font configuration of the process instead, which every font map of
+   * the process shares - the addition is then not confined to this painter.
+   */
+  static bool AddFontFileToFontMap(PangoFontMap* fontMap,
+                                   const std::string& fontFile,
+                                   std::string& error)
+  {
+#if PANGO_VERSION_CHECK(1, 56, 0)
+    GError* pangoError=nullptr;
+
+    if (pango_font_map_add_font_file(fontMap,
+                                    fontFile.c_str(),
+                                    &pangoError)) {
+      return true;
+    }
+
+    if (pangoError!=nullptr) {
+      error=pangoError->message;
+      g_error_free(pangoError);
+    }
+    else {
+      error="the font map did not accept the file";
+    }
+
+    return false;
+#elif defined(OSMSCOUT_MAP_SVG_HAVE_LIB_FONTCONFIG)
+    if (!FcInit()) {
+      error="the font configuration cannot be initialized";
+
+      return false;
+    }
+
+    if (FcConfigAppFontAddFile(nullptr,
+                              reinterpret_cast<const FcChar8*>(fontFile.c_str()))) {
+      return true;
+    }
+
+    error="the font configuration did not accept the file";
+
+    return false;
+#else
+    (void)fontMap;
+    (void)fontFile;
+
+    error="this build cannot make a font file resolvable to the text stack";
+
+    return false;
+#endif
+  }
+
+#endif
 
   MapPainterSVG::MapPainterSVG()
   : labelLayouter(this),
@@ -114,9 +181,29 @@ namespace osmscout {
       return f->second;
     }
 
+    FontNameResolution::Result resolved=FontNameResolution::Resolve(parameter.GetFontName());
+
+    // A configured font file names the face it holds; the configured name is not a family name and
+    // asking for it as one would serve whatever the host substitutes. The file has to be made
+    // resolvable to this painter's font map for that to take effect.
+    if (fontMapFile!=resolved.fontFile) {
+      fontMapFile=resolved.fontFile;
+
+      if (!fontMapFile.empty()) {
+        std::string error;
+
+        if (!AddFontFileToFontMap(pangoFontMap,
+                                  fontMapFile,
+                                  error)) {
+          log.Error() << "Cannot make the configured font file '" << fontMapFile
+                      << "' resolvable to the text stack: " << error;
+        }
+      }
+    }
+
     PangoFontDescription* font=pango_font_description_new();
 
-    pango_font_description_set_family(font,parameter.GetFontName().c_str());
+    pango_font_description_set_family(font,resolved.fontName.c_str());
     pango_font_description_set_absolute_size(font,fontSize*PANGO_SCALE);
 
     resolvedFontCount++;

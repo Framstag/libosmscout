@@ -21,6 +21,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <limits>
 #include <string>
@@ -179,6 +180,72 @@ namespace {
 } // namespace
 
 /**
+ * A configured font file is measured as the face the file holds, without the test preparing the
+ * text stack in any way (spec: font-management, "Both backends that resolve by family draw the
+ * file's face").
+ *
+ * This case registers nothing itself: the painter alone has to make the configured file resolvable
+ * to its text stack. It runs in both variants of the backend - the FreeType variant has always
+ * resolved a file, so the case pins that the variant which resolves by family catches up with it.
+ */
+TEST_CASE("SVG measures a configured font file as the face of that file", "[TextMetricsSVG]")
+{
+  TextMetricsAll::ReferenceMetrics reference;
+  std::string                      error;
+
+  REQUIRE(TextMetricsAll::MeasureReference(TEXT_METRICS_FONT_PATH,
+                                          ScenarioText,
+                                          ScenarioFontSize,
+                                          ScenarioFontSizeParam,
+                                          ScenarioDpi,
+                                          reference,
+                                          error));
+
+  REQUIRE(error.empty());
+  REQUIRE_FALSE(reference.glyphs.empty());
+
+  // The painter is configured with the font FILE, and the test process prepares nothing
+  osmscout::MapPainterSVG painter;
+
+  auto metrics=painter.MeasureText(CreateProjection(),
+                                   CreateParameter(TEXT_METRICS_FONT_PATH),
+                                   ScenarioText,
+                                   ScenarioFontSize);
+
+  auto substituted=painter.MeasureText(CreateProjection(),
+                                       CreateParameter("OsmscoutNoSuchFontFamily"),
+                                       ScenarioText,
+                                       ScenarioFontSize);
+
+  REQUIRE(metrics.glyphs.size()==reference.glyphs.size());
+
+  double tolerance=3.0;
+
+  for (size_t i=0; i<reference.glyphs.size() && i<metrics.glyphs.size(); i++) {
+    REQUIRE(metrics.glyphs[i].box.width==Catch::Approx(static_cast<double>(reference.glyphs[i].width)).margin(tolerance));
+    REQUIRE(metrics.glyphs[i].box.height==Catch::Approx(static_cast<double>(reference.glyphs[i].height)).margin(tolerance));
+  }
+
+  // A configured font file must not be measured with the face the host substitutes for a name it
+  // cannot resolve, otherwise this case cannot tell the two apart
+  bool differs=false;
+
+  for (size_t i=0; i<metrics.glyphs.size() && i<substituted.glyphs.size(); i++) {
+    if (std::abs(metrics.glyphs[i].box.width-static_cast<double>(substituted.glyphs[i].box.width))>0.5 ||
+        std::abs(metrics.glyphs[i].position.GetX()-substituted.glyphs[i].position.GetX())>0.5) {
+      differs=true;
+
+      break;
+    }
+  }
+
+  INFO("label width for the configured file: " << metrics.width
+       << ", for the substituted family: " << substituted.width);
+
+  REQUIRE(differs);
+}
+
+/**
  * Make the bundled font file known to the platform font resolution, so that the
  * font family of the font file resolves to the exact font even if it is not
  * installed system-wide: fontconfig application font for the FreeType variant
@@ -202,30 +269,10 @@ TEST_CASE("SVG measurement matches the FreeType reference", "[TextMetricsSVG]")
   REQUIRE(error.empty());
   REQUIRE_FALSE(reference.glyphs.empty());
 
-  std::string fontFamily;
-
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-#if defined(HAVE_LIB_FONTCONFIG)
-  // fontconfig resolves the family name stored in the font file for both text
-  // stacks, so the backend measures with the exact font of the reference
-  const std::string fontName=fontFamily;
-
-  bool              appFontAdded=FcConfigAppFontAddFile(nullptr,
-                                                        reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-
-  if (!appFontAdded) {
-    INFO("Cannot register font \"" << TEXT_METRICS_FONT_PATH << "\" as fontconfig application font");
-  }
-#else
-  // Without fontconfig the pango-less text stack expects a font file as font
-  // name (the convention of the FreeType based backends)
+  // The painter is configured with the font file the reference was measured from. Resolving that
+  // file to the face it holds is the job of the backend, so the test prepares nothing itself
+  // (spec: font-dependent-test-fonts).
   const std::string fontName=TEXT_METRICS_FONT_PATH;
-
-#endif
 
   osmscout::MapPainterSVG painter;
 
@@ -275,23 +322,9 @@ TEST_CASE("SVG measurement matches the FreeType reference", "[TextMetricsSVG]")
  */
 TEST_CASE("SVG label dimensions match the pango baseline", "[TextMetricsSVG]")
 {
-  std::string fontFamily;
-  std::string error;
-
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-#if defined(HAVE_LIB_FONTCONFIG)
-  FcConfigAppFontAddFile(nullptr,
-                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-
-  const std::string fontName=fontFamily;
-
-#else
+  // The painter is configured with the font file the repository ships; resolving that file to the
+  // face it holds is the job of the backend (spec: font-dependent-test-fonts)
   const std::string fontName=TEXT_METRICS_FONT_PATH;
-#endif
 
 #if defined(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO)
   INFO("SVG text stack: pango");
@@ -341,21 +374,14 @@ TEST_CASE("SVG label dimensions match the pango baseline", "[TextMetricsSVG]")
 TEST_CASE("SVG resolves a font for each requested font name", "[TextMetricsSVG]")
 {
 #if defined(HAVE_LIB_FONTCONFIG)
-  std::string fontFamily;
-  std::string error;
-
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-  FcConfigAppFontAddFile(nullptr,
-                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
+  // The painter is configured with the font file the repository ships; resolving that file to the
+  // face it holds is the job of the backend (spec: font-dependent-test-fonts)
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 
   osmscout::MapPainterSVG painter;
 
   painter.MeasureText(CreateProjection(),
-                      CreateParameter(fontFamily),
+                      CreateParameter(fontName),
                       ScenarioText,
                       ScenarioFontSize);
 
@@ -365,7 +391,7 @@ TEST_CASE("SVG resolves a font for each requested font name", "[TextMetricsSVG]"
 
   // the same font name and the same font size reuse the resolved font
   painter.MeasureText(CreateProjection(),
-                      CreateParameter(fontFamily),
+                      CreateParameter(fontName),
                       ScenarioText,
                       ScenarioFontSize);
 
@@ -396,19 +422,15 @@ TEST_CASE("SVG resolves a font for each requested font name", "[TextMetricsSVG]"
 TEST_CASE("SVG measurement follows a font-name change on one painter", "[TextMetricsSVG]")
 {
 #if defined(HAVE_LIB_FONTCONFIG)
-  std::string fontFamily;
-  std::string error;
+  // The painter is configured with the font file the repository ships; resolving that file to the
+  // face it holds is the job of the backend (spec: font-dependent-test-fonts)
+  const std::string fontName=TEXT_METRICS_FONT_PATH;
 
-  REQUIRE(TextMetricsAll::ReferenceFontFamily(TEXT_METRICS_FONT_PATH,
-                                              fontFamily,
-                                              error));
-  REQUIRE(error.empty());
-
-  FcConfigAppFontAddFile(nullptr,
-                         reinterpret_cast<const FcChar8*>(TEXT_METRICS_FONT_PATH));
-
-  if (ResolvedFontFile(fontFamily)==ResolvedFontFile(SecondFontFamily)) {
-    INFO("fontconfig resolves \"" << fontFamily << "\" and \"" << SecondFontFamily
+  // Ask fontconfig how it resolves the two configured names: the comparison below discriminates
+  // only when they are not the same font. This only reads the font configuration, it does not
+  // change it.
+  if (ResolvedFontFile(fontName)==ResolvedFontFile(SecondFontFamily)) {
+    INFO("fontconfig resolves \"" << fontName << "\" and \"" << SecondFontFamily
                                   << "\" to the same font; the font-name comparison cannot discriminate");
 
     return;
@@ -428,7 +450,7 @@ TEST_CASE("SVG measurement follows a font-name change on one painter", "[TextMet
   osmscout::MapPainterSVG livePainter;
 
   livePainter.MeasureText(projection,
-                          CreateParameter(fontFamily),
+                          CreateParameter(fontName),
                           ScenarioText,
                           ScenarioFontSize);
 

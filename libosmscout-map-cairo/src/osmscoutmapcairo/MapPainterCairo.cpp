@@ -26,6 +26,7 @@
 #include <string>
 #include <utility>
 
+#include <osmscoutmap/FontNameResolution.h>
 #include <osmscoutmap/PatternLookup.h>
 
 #include <osmscoutmapcairo/LoaderPNG.h>
@@ -35,7 +36,79 @@
 #include <osmscout/system/Math.h>
 #include <osmscout/util/String.h>
 
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+  #include <cairo-ft.h>
+#endif
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+  #if !PANGO_VERSION_CHECK(1, 56, 0) && defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG)
+    #include <fontconfig/fontconfig.h>
+  #endif
+#endif
+
 namespace osmscout {
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+
+  namespace {
+
+    /**
+     * Make a font file resolvable to the given font map, so that the family the file holds
+     * resolves to that file.
+     *
+     * Pango 1.56 adds a font file to the configuration of a font map. Older Pango has no such
+     * API, so the file has to go into the font configuration of the process instead, which every
+     * font map of the process shares - the addition is then not confined to this painter.
+     */
+    bool AddFontFileToMap(PangoFontMap* map,
+                          const std::string& file,
+                          std::string& error)
+    {
+#if PANGO_VERSION_CHECK(1, 56, 0)
+      GError* pangoError=nullptr;
+
+      if (pango_font_map_add_font_file(map,
+                                      file.c_str(),
+                                      &pangoError)) {
+        return true;
+      }
+
+      if (pangoError!=nullptr) {
+        error=pangoError->message;
+        g_error_free(pangoError);
+      }
+      else {
+        error="the font map did not accept the file";
+      }
+
+      return false;
+#elif defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG)
+      if (!FcInit()) {
+        error="the font configuration cannot be initialized";
+
+        return false;
+      }
+
+      if (FcConfigAppFontAddFile(nullptr,
+                                reinterpret_cast<const FcChar8*>(file.c_str()))) {
+        return true;
+      }
+
+      error="the font configuration did not accept the file";
+
+      return false;
+#else
+      (void)map;
+      (void)file;
+
+      error="this build cannot make a font file resolvable to the text stack";
+
+      return false;
+#endif
+    }
+  }
+
+#endif
 
   /* Returns Euclidean distance between two points */
   static double CalculatePointDistance(cairo_path_data_t *a, cairo_path_data_t *b)
@@ -272,8 +345,11 @@ namespace osmscout {
 
   MapPainterCairo::~MapPainterCairo()
   {
-    for (const auto &image : images) {
-      if (image != nullptr) {
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+    ReleaseFontMap();
+#endif
+
+    for (const auto &image : images) {      if (image != nullptr) {
         cairo_surface_destroy(image);
       }
     }
@@ -299,6 +375,26 @@ namespace osmscout {
 #endif
       }
     }
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+    // After the scaled fonts that use them: the faces loaded from a configured font file, and the
+    // FreeType library they were loaded with
+    for (auto *fontFace : loadedFontFaces) {
+      if (fontFace != nullptr) {
+        cairo_font_face_destroy(fontFace);
+      }
+    }
+
+    for (auto face : ftFaces) {
+      if (face != nullptr) {
+        FT_Done_Face(face);
+      }
+    }
+
+    if (ftLibrary!=nullptr) {
+      FT_Done_FreeType(ftLibrary);
+    }
+#endif
   }
 
   MapPainterCairo::CairoFont MapPainterCairo::GetFont(const Projection &projection,
@@ -321,9 +417,13 @@ namespace osmscout {
       return f->second;
     }
 
+    // A configured font file names the face it holds, so an interface resolving by family serves
+    // that face instead of whatever the host falls back to for the path it was given
+    FontNameResolution::Result resolved=FontNameResolution::Resolve(parameter.GetFontName());
+
     PangoFontDescription *font = pango_font_description_new();
 
-    pango_font_description_set_family(font, parameter.GetFontName().c_str());
+    pango_font_description_set_family(font, resolved.fontName.c_str());
     pango_font_description_set_absolute_size(font, fontSize * PANGO_SCALE);
 
     resolvedFontCount++;
@@ -351,9 +451,24 @@ namespace osmscout {
     cairo_font_options_t *options;
     cairo_scaled_font_t  *scaledFont;
 
-    fontFace=cairo_toy_font_face_create(parameter.GetFontName().c_str(),
-                                        CAIRO_FONT_SLANT_NORMAL,
-                                        CAIRO_FONT_WEIGHT_NORMAL);
+    // A configured font file names the face it holds. Where this variant can load it, it draws
+    // that face; the configured name is not a family name and asking for it as one would serve
+    // whatever the host substitutes.
+    FontNameResolution::Result resolved=FontNameResolution::Resolve(parameter.GetFontName());
+
+    fontFace=nullptr;
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+    if (!resolved.fontFile.empty()) {
+      fontFace=CreateFontFaceFromFile(resolved.fontFile);
+    }
+#endif
+
+    if (fontFace==nullptr) {
+      fontFace=cairo_toy_font_face_create(resolved.fontName.c_str(),
+                                          CAIRO_FONT_SLANT_NORMAL,
+                                          CAIRO_FONT_WEIGHT_NORMAL);
+    }
 
     cairo_matrix_init_scale(&scaleMatrix,fontSize,fontSize);
     cairo_matrix_init_identity(&transformMatrix);
@@ -380,6 +495,141 @@ namespace osmscout {
   {
     return resolvedFontCount;
   }
+
+#if defined(OSMSCOUT_MAP_CAIRO_LOAD_FONT_FILE)
+
+  cairo_font_face_t* MapPainterCairo::CreateFontFaceFromFile(const std::string& fontFile)
+  {
+    if (ftLibrary==nullptr &&
+        FT_Init_FreeType(&ftLibrary)!=0) {
+      log.Error() << "Cannot initialize FreeType, the configured font file '" << fontFile
+                  << "' cannot be loaded";
+
+      return nullptr;
+    }
+
+    FT_Face face=nullptr;
+
+    if (FT_New_Face(ftLibrary,
+                    fontFile.c_str(),
+                    0,
+                    &face)!=0) {
+      log.Error() << "Cannot load a font face from the configured font file '" << fontFile << "'";
+
+      return nullptr;
+    }
+
+    cairo_font_face_t *fontFace=cairo_ft_font_face_create_for_ft_face(face,
+                                                                      0);
+
+    if (fontFace==nullptr) {
+      log.Error() << "Cannot create a font face from the configured font file '" << fontFile << "'";
+
+      FT_Done_Face(face);
+
+      return nullptr;
+    }
+
+    // Kept for the lifetime of the painter: a scaled font created from this face uses the face,
+    // and the face uses the FreeType face and its library
+    ftFaces.push_back(face);
+    loadedFontFaces.push_back(fontFace);
+
+    return fontFace;
+  }
+
+#endif
+
+#if defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+
+  void MapPainterCairo::ReleaseFontMap()
+  {
+    if (fontContext!=nullptr) {
+      g_object_unref(fontContext);
+      fontContext=nullptr;
+    }
+
+    if (fontMap!=nullptr) {
+      g_object_unref(fontMap);
+      fontMap=nullptr;
+    }
+  }
+
+  PangoFontMap* MapPainterCairo::GetFontMap(const MapParameter& parameter)
+  {
+    FontNameResolution::Result resolved=FontNameResolution::Resolve(parameter.GetFontName());
+
+    if (fontMap!=nullptr &&
+        fontMapFile==resolved.fontFile) {
+      return fontMap;
+    }
+
+    ReleaseFontMap();
+
+    fontMap=pango_cairo_font_map_new();
+    fontMapFile=resolved.fontFile;
+
+    if (fontMap==nullptr) {
+      log.Error() << "Cannot create a font map, no text can be laid out";
+
+      return nullptr;
+    }
+
+    fontContext=pango_font_map_create_context(fontMap);
+
+    if (fontContext==nullptr) {
+      log.Error() << "Cannot create the context of the font map, no text can be laid out";
+
+      ReleaseFontMap();
+
+      return nullptr;
+    }
+
+    if (!fontMapFile.empty()) {
+      std::string error;
+
+      if (!AddFontFileToMap(fontMap,
+                            fontMapFile,
+                            error)) {
+        // Reported once per configured font file: the map is kept until the configuration
+        // changes, so this is not reached again for the same file
+        log.Error() << "Cannot make the configured font file '" << fontMapFile
+                    << "' resolvable to the text stack: " << error;
+      }
+    }
+
+    return fontMap;
+  }
+
+  PangoLayout* MapPainterCairo::CreateLayout(const MapParameter& parameter)
+  {
+    if (GetFontMap(parameter)!=nullptr &&
+        fontContext!=nullptr) {
+      PangoLayout* layout=pango_layout_new(fontContext);
+
+      if (layout!=nullptr) {
+        if (draw!=nullptr) {
+          // Take the scale and the font options of the drawing target, as a layout created
+          // with pango_cairo_create_layout() would
+          pango_cairo_update_layout(draw,
+                                    layout);
+        }
+
+        return layout;
+      }
+    }
+
+    if (draw==nullptr) {
+      return nullptr;
+    }
+
+    log.Warn() << "Cannot create a layout on the font map of this painter, "
+                  "falling back to the layout of the drawing target";
+
+    return pango_cairo_create_layout(draw);
+  }
+
+#endif
 
   void MapPainterCairo::SetLineAttributes(const Color &color,
                                           double width,
@@ -819,7 +1069,7 @@ namespace osmscout {
                                                                        bool /*contourLabel*/)
   {
     auto label = std::make_shared<MapPainterCairo::CairoLabel>(
-        std::shared_ptr<PangoLayout>(pango_cairo_create_layout(draw), g_object_unref));
+        std::shared_ptr<PangoLayout>(CreateLayout(parameter), g_object_unref));
 
     CairoFont font=GetFont(projection,
                            parameter,
@@ -1416,8 +1666,8 @@ namespace osmscout {
   {
     // The metrics of a measured label depend on the resolved font and on the resolution of the
     // projection: GetFont scales the requested size by the font size and the projection. On the
-    // Pango path they additionally depend on the font options of the drawing target, because
-    // pango_cairo_create_layout() takes them from it.
+    // Pango path they additionally depend on the font options of the drawing target, because the
+    // layout of this painter is bound to that target.
     std::string environment=BuildMeasurementEnvironment(parameter.GetFontName(),
                                                        parameter.GetFontSize(),
                                                        projection.GetDPI(),

@@ -126,6 +126,15 @@ namespace osmscout {
   public:
     MapParameter();
 
+    /**
+     * Font to draw and measure labels with.
+     *
+     * The name is either a font family ("Liberation Sans") or the path of a font file. A backend
+     * that resolves a font by family serves the face the file holds, and a backend that loads a
+     * font file directly loads it, so both forms are valid for every backend. A name that is
+     * neither a readable font file nor a family the host can resolve is reported and drawn with a
+     * default face.
+     */
     void SetFontName(const std::string& fontName);
     void SetFontSize(double fontSize);
 
@@ -196,6 +205,10 @@ namespace osmscout {
     void SetBreaker(const BreakerRef& breaker);
 
 
+    /**
+     * The font name this parameter was configured with, as it was configured: a font family or the
+     * path of a font file (see SetFontName).
+     */
     std::string GetFontName() const
     {
       return fontName;

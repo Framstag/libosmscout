@@ -90,6 +90,7 @@ namespace osmscout {
     PangoFontMap                     *pangoFontMap;
     PangoContext                     *pangoContext;
     FontMap                          fonts;            //! Cached scaled font
+    std::string                       fontMapFile;     //!< Font file added to the font map, empty if none was
 
 #else
 
