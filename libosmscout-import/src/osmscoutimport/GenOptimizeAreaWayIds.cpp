@@ -19,6 +19,7 @@
 
 #include <osmscoutimport/GenOptimizeAreaWayIds.h>
 
+#include <osmscoutimport/private/AreaWayIdReferenceRule.h>
 #include <osmscoutimport/private/Config.h>
 
 #if defined(HAVE_STD_EXECUTION)
@@ -27,13 +28,13 @@
 
 #include <algorithm>
 #include <numeric>
-#include <unordered_set>
 
 #include <osmscout/io/DataFile.h>
 #include <osmscout/io/FileScanner.h>
 #include <osmscout/io/FileWriter.h>
 
 #include <osmscout/util/PolygonCenter.h>
+#include <osmscout/util/StopClock.h>
 
 #include <osmscoutimport/GenMergeAreas.h>
 #include <osmscoutimport/GenWayWayDat.h>
@@ -56,20 +57,20 @@ namespace osmscout {
   class CopyAreasProcessor : public Processor
   {
   private:
-    const TypeConfig& typeConfig;
-    const ImportParameter& parameter;
-    Progress& progress;
-    const std::unordered_set<Id>& usedIdAtLeastTwiceSet;
+    const TypeConfig             & typeConfig;
+    const ImportParameter        & parameter;
+    Progress                     & progress;
+    const AreaWayIdReferenceRule & rule;
 
   public:
     CopyAreasProcessor(const TypeConfig& typeConfig,
                        const ImportParameter& parameter,
                        Progress& progress,
-                       const std::unordered_set<Id>& usedIdAtLeastTwiceSet)
+                       const AreaWayIdReferenceRule& rule)
     : typeConfig(typeConfig),
       parameter(parameter),
       progress(progress),
-      usedIdAtLeastTwiceSet(usedIdAtLeastTwiceSet)
+      rule(rule)
     {
     }
 
@@ -102,6 +103,7 @@ namespace osmscout {
 
       try {
         uint32_t idClearedCount=0;
+        StopClock phaseClock;
 
         progress.SetAction("Copy data from 'areas2.tmp' to 'areas3.tmp'");
 
@@ -130,11 +132,12 @@ namespace osmscout {
 
           for (auto& ring : data.rings) {
             for (auto& node : ring.nodes) {
-              if (usedIdAtLeastTwiceSet.find(node.GetId())==usedIdAtLeastTwiceSet.end()) {
+              if (!rule.KeepsSerial(node.GetId())) {
                 node.ClearSerial();
                 idClearedCount++;
               }
             }
+
             ring.center=OptionalRingCenter(ring);
           }
 
@@ -149,6 +152,8 @@ namespace osmscout {
         writer.Close();
 
         progress.Info(std::to_string(idClearedCount)+" node serials cleared");
+        phaseClock.Stop();
+        progress.Info("Phase 'Copy area data' took "+phaseClock.ResultString()+" s");
       }
       catch (IOException& e) {
         progress.Error(e.GetDescription());
@@ -166,22 +171,21 @@ namespace osmscout {
   class CopyWaysProcessor : public Processor
   {
   private:
-    const TypeConfig& typeConfig;
-    const ImportParameter& parameter;
-    Progress& progress;
-    const std::unordered_set<Id>& usedIdAtLeastTwiceSet;
+    const TypeConfig             & typeConfig;
+    const ImportParameter        & parameter;
+    Progress                     & progress;
+    const AreaWayIdReferenceRule & rule;
 
   public:
     CopyWaysProcessor(const TypeConfig& typeConfig,
-                       const ImportParameter& parameter,
-                       Progress& progress,
-                       const std::unordered_set<Id>& usedIdAtLeastTwiceSet)
-      : typeConfig(typeConfig),
-        parameter(parameter),
-        progress(progress),
-        usedIdAtLeastTwiceSet(usedIdAtLeastTwiceSet)
-    {
-    }
+                      const ImportParameter& parameter,
+                      Progress& progress,
+                      const AreaWayIdReferenceRule& rule)
+    : typeConfig(typeConfig),
+      parameter(parameter),
+      progress(progress),
+      rule(rule)
+    {}
 
     bool operator()() override
     {
@@ -192,6 +196,7 @@ namespace osmscout {
 
       try {
         uint32_t idClearedCount=0;
+        StopClock phaseClock;
 
         scanner.Open(AppendFileToDir(parameter.GetDestinationDirectory(),
                                      WayWayDataGenerator::WAYWAY_TMP),
@@ -217,7 +222,7 @@ namespace osmscout {
                     scanner);
 
           for (auto& node : data.nodes) {
-            if (usedIdAtLeastTwiceSet.find(node.GetId())==usedIdAtLeastTwiceSet.end()) {
+            if (!rule.KeepsSerial(node.GetId())) {
               node.ClearSerial();
               idClearedCount++;
             }
@@ -234,6 +239,8 @@ namespace osmscout {
         writer.Close();
 
         progress.Info(std::to_string(idClearedCount)+" node serials cleared");
+        phaseClock.Stop();
+        progress.Info("Phase 'Copy way data' took "+phaseClock.ResultString()+" s");
       }
       catch (IOException& e) {
         progress.Error(e.GetDescription());
@@ -264,10 +271,10 @@ namespace osmscout {
   bool OptimizeAreaWayIdsGenerator::ScanAreaIds(const ImportParameter& parameter,
                                                 Progress& progress,
                                                 const TypeConfig& typeConfig,
-                                                std::unordered_set<Id>& usedIdSet,
-                                                std::unordered_set<Id>& usedIdAtLeastTwiceSet)
+                                                AreaWayIdReferenceRule& rule)
   {
     FileScanner scanner;
+    StopClock   phaseClock;
 
     progress.SetAction("Scanning ids from 'areas2.tmp'");
 
@@ -298,26 +305,13 @@ namespace osmscout {
             continue;
           }
 
-          std::unordered_set<Id> nodeIds;
-
-          for (const auto& node : ring.nodes) {
-            nodeIds.insert(node.GetId());
-          }
-
-          idCount+=static_cast<uint32_t>(nodeIds.size());
-
-          for (auto nodeId : nodeIds) {
-            if (usedIdSet.find(nodeId)!=usedIdSet.end()) {
-              usedIdAtLeastTwiceSet.insert(nodeId);
-            }
-            else {
-              usedIdSet.insert(nodeId);
-            }
-          }
+          idCount+=static_cast<uint32_t>(rule.AddObject(ring.nodes));
         }
       }
 
       progress.Info(std::to_string(dataCount)+" areas, "+std::to_string(idCount)+" ids found");
+      phaseClock.Stop();
+      progress.Info("Phase 'Scan area ids' took "+phaseClock.ResultString()+" s");
 
       scanner.Close();
     }
@@ -332,10 +326,10 @@ namespace osmscout {
   bool OptimizeAreaWayIdsGenerator::ScanWayIds(const ImportParameter& parameter,
                                                Progress& progress,
                                                const TypeConfig& typeConfig,
-                                               std::unordered_set<Id>& usedIdSet,
-                                               std::unordered_set<Id>& usedIdAtLeastTwiceSet)
+                                               AreaWayIdReferenceRule& rule)
   {
     FileScanner scanner;
+    StopClock   phaseClock;
 
     progress.SetAction("Scanning ids from 'wayway.tmp'");
 
@@ -365,34 +359,21 @@ namespace osmscout {
           continue;
         }
 
-        std::unordered_set<Id> nodeIds;
-
-        for (const auto& node : data.nodes) {
-          nodeIds.insert(node.GetId());
-        }
-
-        idCount+=static_cast<uint32_t>(nodeIds.size());
-
-        for (auto id : nodeIds) {
-          if (usedIdSet.find(id)!=usedIdSet.end()) {
-            usedIdAtLeastTwiceSet.insert(id);
-          }
-          else {
-            usedIdSet.insert(id);
-          }
-        }
+        idCount+=static_cast<uint32_t>(rule.AddObject(data.nodes));
 
         // If we have a circular way, we "fake" a double usage,
         // to make sure, that the node id of the first node
         // is not dropped later on, and we cannot detect
         // circular ways anymore
         if (data.IsCircular()) {
-          usedIdAtLeastTwiceSet.insert(data.GetBackId());
+          rule.ForceSerial(data.GetBackId());
           circularWayCount++;
         }
       }
 
       progress.Info(std::to_string(dataCount)+" ways, "+std::to_string(idCount)+" ids, "+std::to_string(circularWayCount)+" circular ways found");
+      phaseClock.Stop();
+      progress.Info("Phase 'Scan way ids' took "+phaseClock.ResultString()+" s");
 
       scanner.Close();
     }
@@ -410,34 +391,51 @@ namespace osmscout {
   {
     progress.SetAction("Optimize ids for areas and ways");
 
-    std::unordered_set<Id> usedIdSet;
-    std::unordered_set<Id> usedIdAtLeastTwiceSet;
+    AreaWayIdReferenceRule rule;
+
+    StopClock              scanAreasClock;
 
     if (!ScanAreaIds(parameter,
                      progress,
                      *typeConfig,
-                     usedIdSet,
-                     usedIdAtLeastTwiceSet)) {
+                     rule)) {
       return false;
     }
+
+    scanAreasClock.Stop();
+
+    // The first scan has observed how many ids the areas reference. Use the count
+    // it reports as the reserve, so that the set the ways are folded into does not
+    // grow up from empty a second time.
+    rule.ReserveReferencedIds(rule.GetReferencedIdCount());
+
+    StopClock scanWaysClock;
 
     if (!ScanWayIds(parameter,
                     progress,
                     *typeConfig,
-                    usedIdSet,
-                    usedIdAtLeastTwiceSet)) {
+                    rule)) {
       return false;
     }
 
-    progress.Info("Found "+std::to_string(usedIdSet.size())+" relevant nodes, "+std::to_string(usedIdAtLeastTwiceSet.size())+" of it at least used twice");
+    scanWaysClock.Stop();
 
-    usedIdSet.clear();
+    progress.Info("Found "+std::to_string(rule.GetReferencedIdCount())+" relevant nodes, "+
+                  std::to_string(rule.GetUsedAtLeastTwiceCount())+" of it at least used twice");
+
+    rule.DiscardReferencedIds();
+
+    StopClock                 copiesClock;
 
     std::vector<ProcessorRef> processors{
-        std::make_shared<CopyAreasProcessor>(*typeConfig, parameter, progress,
-                                             usedIdAtLeastTwiceSet),
-        std::make_shared<CopyWaysProcessor>(*typeConfig, parameter, progress,
-                                            usedIdAtLeastTwiceSet)};
+      std::make_shared<CopyAreasProcessor>(*typeConfig,
+                                           parameter,
+                                           progress,
+                                           rule),
+      std::make_shared<CopyWaysProcessor>(*typeConfig,
+                                          parameter,
+                                          progress,
+                                          rule)};
 
     std::vector<bool> successes(processors.size(),false);
 
@@ -457,6 +455,11 @@ namespace osmscout {
                      return (*processor)();
                    });
 #endif
+    copiesClock.Stop();
+
+    progress.Info("Optimize ids: scan areas "+scanAreasClock.ResultString()+" s, scan ways "+
+                  scanWaysClock.ResultString()+" s, copy phases "+copiesClock.ResultString()+" s");
+
     return std::accumulate(successes.begin(),
                            successes.end(),
                            true,
