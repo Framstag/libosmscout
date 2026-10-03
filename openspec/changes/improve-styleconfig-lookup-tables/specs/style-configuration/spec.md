@@ -38,11 +38,12 @@ before this change.
 - **WHEN** the style of that type is resolved at that level
 - **THEN** the resolved style carries the attribute of the second rule and the value of the first
 
-#### Scenario: Rules that name no type still cover every type
+#### Scenario: A rule that selects by feature covers the types that carry the feature
 
-- **GIVEN** a stylesheet with a rule that carries no type selector, next to rules that do
-- **WHEN** the style configuration is built and the type-less rule is resolved for an arbitrary defined type
-- **THEN** the type-less rule is applied to that type
+- **GIVEN** a stylesheet whose rule selects by a feature instead of a type, next to rules that name types
+- **WHEN** the style configuration is built and the rule is resolved for a type that carries the feature
+  and for one that does not
+- **THEN** the rule is applied to the type that carries the feature
 - **AND** the rules that name types only apply to the types they name
 
 ### Requirement: A type the stylesheet does not reference resolves to no style

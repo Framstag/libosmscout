@@ -134,10 +134,12 @@ The lookup translates the type index to "not referenced" and returns no style, w
   backend would have to add the check, `AGENTS.md` treats an assert that user stylesheet data can trigger as
   a bug, and the stylesheets in the tree already reference parked types that are not defined.
 
-**Risk**: the sentinel path changes behaviour for a type the stylesheet does not reference — today it gets
-an empty list and therefore also resolves to no style, so the results agree; the risk is an `assert`-only
-difference in debug builds. Mitigation: the spec scenario "Unreferenced type yields no style without
-aborting" is a debug-build case in the test suite.
+**Risk**: the sentinel path changes how a type the stylesheet does not reference is looked up. Today every
+*defined* type owns a level vector whose entries are empty lists, so such a type also resolves to no style
+and `assert(!styleSelectors.empty())` never fires for it (verified 2026-10-03: that assert is unreachable for
+a defined-but-unreferenced type, it would only fire for a type the type configuration does not know); after
+the change such a type has no position in the table at all. Mitigation: the translation array maps it to the
+sentinel, and the resolution case pins "no style, no assert" in a Debug and in a Release build.
 
 ### D4 — Measure with a unit test that reports a slot count, plus a timing figure
 
@@ -167,9 +169,11 @@ assertion is noisy. Mitigation: assert on the deterministic numbers (prepared sl
   (`libosmscout-map/include/osmscoutmap/oss/Parser.h:211`). Keep that resolved list on the rule's filter — a
   `std::vector<TypeInfoRef>` beside the existing `TypeInfoSet`, exposed by an accessor on `StyleFilter`
   (`StyleConfig.h:243-281`) — and drive `SortInConditionals` (`:544-571`) and `CalculateUsedTypes` (`:520-541`)
-  from it, collecting each family's referenced set from the same lists. A rule with no `TYPE` selector keeps
-  its "applies to all types" meaning (`filtersByType == false`) and its family still walks all types; 38 of
-  the shipped selectors are of that kind, all in the route/service families.
+  from it, collecting each family's referenced set from the same lists. Every parsed filter carries a type
+  set — `TYPE`, `GROUP`, `FEATURE` and `PATH` each call `SetTypes()` (`oss/Parser.cpp:1140`, `:1152`,
+  `:1170`, `:1219`) — so no family needs an all-types fallback, and a filter that never received `SetTypes()`
+  covers no type at all, because `TypeInfoSet::IsSet` is bounds-checked (`TypeInfoSet.h:160-166`). A
+  family's referenced set is therefore exactly the union of its filters' type sets.
 - **Alternative: enumerate each filter's `TypeInfoSet`.** This is what the loops do today (`HasType`).
   Rejected: `TypeInfoSet` is a full-length `std::vector<TypeInfoRef>`, so that enumeration is O(defined types)
   again and leaves the walking term of "Expected effect" untouched — the load time would keep growing with
