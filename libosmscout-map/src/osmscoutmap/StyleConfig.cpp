@@ -604,13 +604,16 @@ namespace osmscout {
   }
 
   template<class S, class A>
-  void SortInConditionals(const std::list<ConditionalStyle<S,A>>& conditionals,
+  void SortInConditionals(const std::string& family,
+                          const std::list<ConditionalStyle<S,A>>& conditionals,
                           size_t maxLevel,
                           const StyleConfig::LookupPositions& positions,
                           std::vector<std::vector<std::list<StyleSelector<S,A>>>>& selectors,
                           StyleConfig::BuildDiagnostics& diagnostics)
   {
     selectors.resize(positions.count);
+
+    diagnostics.familySlots[family];
 
     if (!selectors.empty()) {
       diagnostics.tableBytes+=selectors.size()*sizeof(selectors[0]);
@@ -621,6 +624,7 @@ namespace osmscout {
 
       if (!selector.empty()) {
         diagnostics.preparedSlots+=selector.size();
+        diagnostics.familySlots[family]+=selector.size();
         diagnostics.tableBytes+=selector.size()*sizeof(selector[0]);
       }
     }
@@ -686,7 +690,8 @@ namespace osmscout {
   }
 
   template<class S, class A>
-  void SortInConditionalsBySlot(const std::list<ConditionalStyle<S,A>>& conditionals,
+  void SortInConditionalsBySlot(const std::string& family,
+                                const std::list<ConditionalStyle<S,A>>& conditionals,
                                 size_t maxLevel,
                                 const StyleConfig::LookupPositions& positions,
                                 std::vector<std::vector<std::vector<std::list<StyleSelector<S,A>>>>>& selectors,
@@ -700,6 +705,8 @@ namespace osmscout {
 
     selectors.resize(styleBySlot.size());
 
+    diagnostics.familySlots[family];
+
     if (!selectors.empty()) {
       diagnostics.tableBytes+=selectors.size()*sizeof(selectors[0]);
     }
@@ -707,7 +714,8 @@ namespace osmscout {
     size_t idx=0;
 
     for (const auto& entry : styleBySlot) {
-      SortInConditionals(entry.second,
+      SortInConditionals(family,
+                         entry.second,
                          maxLevel,
                          positions,
                          selectors[idx],
@@ -733,13 +741,15 @@ namespace osmscout {
                            nodeIconStyleConditionals,
                            nodeIconStylePositions);
 
-    SortInConditionalsBySlot(nodeTextStyleConditionals,
+    SortInConditionalsBySlot("nodeText",
+                             nodeTextStyleConditionals,
                              maxLevel,
                              nodeTextStylePositions,
                              nodeTextStyleSelectors,
                              buildDiagnostics);
 
-    SortInConditionals(nodeIconStyleConditionals,
+    SortInConditionals("nodeIcon",
+                       nodeIconStyleConditionals,
                        maxLevel,
                        nodeIconStylePositions,
                        nodeIconStyleSelectors,
@@ -806,25 +816,29 @@ namespace osmscout {
                            wayPathShieldStyleConditionals,
                            wayPathShieldStylePositions);
 
-    SortInConditionalsBySlot(wayLineStyleConditionals,
+    SortInConditionalsBySlot("wayLine",
+                             wayLineStyleConditionals,
                              maxLevel,
                              wayLineStylePositions,
                              wayLineStyleSelectors,
                              buildDiagnostics);
 
-    SortInConditionalsBySlot(wayPathSymbolStyleConditionals,
+    SortInConditionalsBySlot("wayPathSymbol",
+                             wayPathSymbolStyleConditionals,
                              maxLevel,
                              wayPathSymbolStylePositions,
                              wayPathSymbolStyleSelectors,
                              buildDiagnostics);
 
-    SortInConditionals(wayPathTextStyleConditionals,
+    SortInConditionals("wayPathText",
+                       wayPathTextStyleConditionals,
                        maxLevel,
                        wayPathTextStylePositions,
                        wayPathTextStyleSelectors,
                        buildDiagnostics);
 
-    SortInConditionals(wayPathShieldStyleConditionals,
+    SortInConditionals("wayPathShield",
+                       wayPathShieldStyleConditionals,
                        maxLevel,
                        wayPathShieldStylePositions,
                        wayPathShieldStyleSelectors,
@@ -904,13 +918,15 @@ namespace osmscout {
                            areaBorderSymbolStyleConditionals,
                            areaBorderSymbolStylePositions);
 
-    SortInConditionals(areaFillStyleConditionals,
+    SortInConditionals("areaFill",
+                       areaFillStyleConditionals,
                        maxLevel,
                        areaFillStylePositions,
                        areaFillStyleSelectors,
                        buildDiagnostics);
 
-    SortInConditionalsBySlot(areaBorderStyleConditionals,
+    SortInConditionalsBySlot("areaBorder",
+                             areaBorderStyleConditionals,
                              maxLevel,
                              areaBorderStylePositions,
                              areaBorderStyleSelectors,
@@ -940,25 +956,29 @@ namespace osmscout {
       }
     }
 
-    SortInConditionalsBySlot(areaTextStyleConditionals,
+    SortInConditionalsBySlot("areaText",
+                             areaTextStyleConditionals,
                              maxLevel,
                              areaTextStylePositions,
                              areaTextStyleSelectors,
                              buildDiagnostics);
 
-    SortInConditionals(areaIconStyleConditionals,
+    SortInConditionals("areaIcon",
+                       areaIconStyleConditionals,
                        maxLevel,
                        areaIconStylePositions,
                        areaIconStyleSelectors,
                        buildDiagnostics);
 
-    SortInConditionals(areaBorderTextStyleConditionals,
+    SortInConditionals("areaBorderText",
+                       areaBorderTextStyleConditionals,
                        maxLevel,
                        areaBorderTextStylePositions,
                        areaBorderTextStyleSelectors,
                        buildDiagnostics);
 
-    SortInConditionals(areaBorderSymbolStyleConditionals,
+    SortInConditionals("areaBorderSymbol",
+                       areaBorderSymbolStyleConditionals,
                        maxLevel,
                        areaBorderSymbolStylePositions,
                        areaBorderSymbolStyleSelectors,
@@ -1021,7 +1041,8 @@ namespace osmscout {
                            routePathTextStyleConditionals,
                            routePathTextStylePositions);
 
-    SortInConditionals(routePathTextStyleConditionals,
+    SortInConditionals("routePathText",
+                       routePathTextStyleConditionals,
                        maxLevel,
                        routePathTextStylePositions,
                        routePathTextStyleSelectors,
@@ -1045,7 +1066,8 @@ namespace osmscout {
 
     buildDiagnostics.typeSetBytes+=TypeSetBytes(routeTypeSets,*typeConfig);
 
-    SortInConditionalsBySlot(routeLineStyleConditionals,
+    SortInConditionalsBySlot("routeLine",
+                             routeLineStyleConditionals,
                              maxLevel,
                              routeLineStylePositions,
                              routeLineStyleSelectors,

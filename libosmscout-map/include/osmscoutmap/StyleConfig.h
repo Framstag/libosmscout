@@ -957,10 +957,11 @@ namespace osmscout {
      */
     struct BuildDiagnostics
     {
-      size_t preparedSlots{0};            //!< Style-selector slots the build prepared
-      size_t typeConditionEvaluations{0}; //!< Type conditions evaluated against a candidate type
-      size_t tableBytes{0};               //!< Bytes the style-selector tables retain (estimate)
-      size_t typeSetBytes{0};             //!< Bytes the per-level type sets retain (estimate)
+      size_t                             preparedSlots{0};            //!< Style-selector slots the build prepared
+      size_t                             typeConditionEvaluations{0}; //!< Type conditions evaluated against a candidate type
+      size_t                             tableBytes{0};               //!< Bytes the style-selector tables retain (estimate)
+      size_t                             typeSetBytes{0};             //!< Bytes the per-level type sets retain (estimate)
+      std::map<std::string,size_t>       familySlots;                 //!< Prepared slots per style family
     };
 
     const BuildDiagnostics& GetBuildDiagnostics() const

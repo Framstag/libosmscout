@@ -20,6 +20,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <chrono>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -472,4 +473,179 @@ TEST_CASE("A rule that selects by feature covers the types that carry the featur
   REQUIRE(ResolveFill(styleConfig,
                       unnamedType,
                       Magnification(Magnification::magDetail))==nullptr);
+}
+
+/**
+ * A resolution at a magnification the style sheet does not declare resolves from the last level its
+ * family prepared, so a rule that starts at a level still applies at any closer zoom (spec
+ * style-configuration, requirement "A rule with a minimum magnification level resolves nothing below
+ * it").
+ */
+TEST_CASE("A resolution beyond the declared levels uses the last level of the family","[StyleConfigLookupCost]")
+{
+  const auto types=MakeTypes();
+  auto       styleConfig=LoadStyleSheet(types.typeConfig,
+                                        WriteStyleSheet("StyleConfigLookupCostClamp.oss",
+                                                        FillAndTextStyleSheet()));
+
+  // The sheet declares its rules for the detail level and closer; the house level is far beyond the
+  // level count of the family
+  FillStyleRef fillStyle=ResolveFill(styleConfig,
+                                     types.areaType,
+                                     Magnification(Magnification::magHouse));
+
+  REQUIRE(fillStyle!=nullptr);
+  REQUIRE(fillStyle->GetFillColor().ToHexString()==Color::FromHexString("#ff0000").ToHexString());
+
+  REQUIRE(ResolveTexts(styleConfig,
+                       types.areaType,
+                       Magnification(Magnification::magHouse)).size()==1);
+}
+
+/**
+ * A style sheet that names a type the type configuration does not define still loads and keeps the
+ * rules of the types it can resolve; the report of the unresolved reference is pinned by
+ * `StyleReportCondensationTest` (spec style-configuration, requirement "A stylesheet that references
+ * an undefined type still loads").
+ */
+TEST_CASE("A stylesheet that references an undefined type still loads","[StyleConfigLookupCost]")
+{
+  const auto types=MakeTypes();
+  auto       styleConfig=LoadStyleSheet(types.typeConfig,
+                                        WriteStyleSheet("StyleConfigLookupCostUndefinedType.oss",
+                                                        "  STYLE\n"
+                                                        "    [MAG detail-] {\n"
+                                                        "      [TYPE test_does_not_exist] AREA { color: #00ff00; }\n"
+                                                        "      [TYPE test_area] AREA { color: #ff0000; }\n"
+                                                        "    }\n"));
+
+  // The rule of the type the configuration does define still resolves, and the rule of the unknown
+  // name did not become the fill of that type
+  FillStyleRef fillStyle=ResolveFill(styleConfig,
+                                     types.areaType,
+                                     Magnification(Magnification::magDetail));
+
+  REQUIRE(fillStyle!=nullptr);
+  REQUIRE(fillStyle->GetFillColor().ToHexString()==Color::FromHexString("#ff0000").ToHexString());
+
+  REQUIRE(types.typeConfig->GetTypeInfo("test_does_not_exist")==nullptr);
+}
+
+/**
+ * The build cost of a shipped style sheet is reported with the slots each style family prepared, so a
+ * regression from type growth is visible (spec style-configuration, requirement "Style-configuration
+ * build cost is observable").
+ */
+TEST_CASE("The build cost of the shipped stylesheets is reported","[StyleConfigLookupCost]")
+{
+  const std::filesystem::path styleDir=std::filesystem::path(GetEnv("TESTS_TOP_DIR","..")) / ".." / "stylesheets";
+
+  REQUIRE(std::filesystem::is_directory(styleDir));
+
+  // The shipped type configuration, which the shipped style sheets are built against
+  auto typeConfig=std::make_shared<osmscout::TypeConfig>();
+
+  REQUIRE(typeConfig->LoadFromOSTFile((styleDir / "map.ost").string()));
+
+  const std::filesystem::path styleSheet=styleDir / "standard.oss";
+
+  double                           first=0.0;
+  double                           second=0.0;
+  osmscout::StyleConfig::BuildDiagnostics diagnostics;
+
+  for (size_t run=0; run<2; run++) {
+    auto styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+    auto start=std::chrono::steady_clock::now();
+
+    REQUIRE(styleConfig->Load(styleSheet.string()));
+
+    auto end=std::chrono::steady_clock::now();
+    double milliseconds=std::chrono::duration<double,std::milli>(end-start).count();
+
+    if (run==0) {
+      first=milliseconds;
+    }
+    else {
+      second=milliseconds;
+    }
+
+    diagnostics=styleConfig->GetBuildDiagnostics();
+  }
+
+  INFO("shipped standard.oss: " << first << " ms, repeated " << second << " ms");
+  INFO("slots " << diagnostics.preparedSlots
+                << ", type condition evaluations " << diagnostics.typeConditionEvaluations
+                << ", table bytes " << diagnostics.tableBytes
+                << ", type set bytes " << diagnostics.typeSetBytes);
+
+  for (const auto& entry : diagnostics.familySlots) {
+    INFO("family " << entry.first << ": " << entry.second << " slots");
+  }
+
+  REQUIRE(diagnostics.preparedSlots>0);
+  REQUIRE(diagnostics.familySlots.size()==14);
+
+  // The reported figure has to be stable across a repeated build. The tolerance is loose on purpose:
+  // the case is meant to surface a regression of an order of magnitude, not to measure absolutes
+  REQUIRE(second<first*3.0+5.0);
+}
+
+/**
+ * The per-call cost of the resolution path the type positions sit on is reported for a type the sheet
+ * references and for one it does not (spec style-configuration, requirement "The style-resolution
+ * accessor contract is preserved").
+ */
+TEST_CASE("The per-call cost of resolving a style is reported","[StyleConfigLookupCost]")
+{
+  const auto        types=MakeTypes(50);
+  auto              styleConfig=LoadStyleSheet(types.typeConfig,
+                                               WriteStyleSheet("StyleConfigLookupCostResolution.oss",
+                                                               FillAndTextStyleSheet()));
+  auto              unreferencedType=types.typeConfig->GetTypeInfo("test_unreferenced_0");
+
+  REQUIRE(unreferencedType!=nullptr);
+
+  const size_t      iterations=200000;
+  const Magnification magnification(Magnification::magDetail);
+
+  auto              unreferencedBuffer=MakeBuffer(unreferencedType);
+  auto              referencedBuffer=MakeBuffer(types.areaType);
+  auto              projection=MakeProjection(magnification);
+
+  size_t            hits=0;
+  auto              start=std::chrono::steady_clock::now();
+
+  for (size_t i=0; i<iterations; i++) {
+    if (styleConfig->GetAreaFillStyle(types.areaType,
+                                      referencedBuffer,
+                                      projection)!=nullptr) {
+      hits++;
+    }
+  }
+
+  auto   end=std::chrono::steady_clock::now();
+  double referencedNs=static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/static_cast<double>(iterations);
+
+  size_t misses=0;
+
+  start=std::chrono::steady_clock::now();
+
+  for (size_t i=0; i<iterations; i++) {
+    if (styleConfig->GetAreaFillStyle(unreferencedType,
+                                      unreferencedBuffer,
+                                      projection)==nullptr) {
+      misses++;
+    }
+  }
+
+  end=std::chrono::steady_clock::now();
+
+  double unreferencedNs=static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/static_cast<double>(iterations);
+
+  INFO("referenced type: " << referencedNs << " ns per resolution (" << hits << " hits)");
+  INFO("unreferenced type: " << unreferencedNs << " ns per resolution (" << misses << " misses)");
+
+  REQUIRE(hits==iterations);
+  REQUIRE(misses==iterations);
+  REQUIRE(unreferencedNs<referencedNs*10.0);
 }
