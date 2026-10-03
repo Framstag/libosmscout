@@ -724,9 +724,9 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  auto loadEnd=std::chrono::steady_clock::now();
+  auto                     loadEnd=std::chrono::steady_clock::now();
 
-  double loadMilliseconds=std::chrono::duration<double,std::milli>(loadEnd-loadStart).count();
+  double                   loadMilliseconds=std::chrono::duration<double,std::milli>(loadEnd-loadStart).count();
 
   std::vector<std::string> names=styleConfig->GetSymbolNames();
   std::vector<std::string> patternNames=styleConfig->GetPatternNames();
@@ -738,7 +738,7 @@ int main(int argc, char* argv[])
   if (args.list) {
     // The cost of building the style configuration goes to stderr, so the symbol list on stdout stays a
     // plain list of names
-    const osmscout::StyleConfig::BuildDiagnostics& diagnostics=styleConfig->GetBuildDiagnostics();
+    const osmscout::StyleConfig::BuildDiagnostics & diagnostics=styleConfig->GetBuildDiagnostics();
 
     std::cerr << "Style configuration built in " << loadMilliseconds << " ms: "
               << diagnostics.preparedSlots << " slots, "

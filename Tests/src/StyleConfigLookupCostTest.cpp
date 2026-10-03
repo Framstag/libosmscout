@@ -67,7 +67,7 @@ namespace {
   constexpr double PROJECTION_DPI=96.0;
 
   /** The type the style sheets of these tests declare their rules for. */
-  constexpr const char* AREA_TYPE_NAME="test_area";
+  constexpr const char * AREA_TYPE_NAME="test_area";
 
   struct TestTypes
   {
@@ -170,7 +170,7 @@ namespace {
   osmscout::FeatureValueBuffer MakeNamedBuffer(const osmscout::TypeInfoRef& typeInfo)
   {
     osmscout::FeatureValueBuffer buffer;
-    size_t                      nameIndex=0;
+    size_t                       nameIndex=0;
 
     buffer.SetType(typeInfo);
 
@@ -289,8 +289,8 @@ TEST_CASE("A stylesheet resolves the declared fill and text styles of a referenc
   REQUIRE(fillStyle->GetFillColor().ToHexString()==Color::FromHexString("#ff0000").ToHexString());
 
   std::vector<TextStyleRef> textStyles=ResolveTexts(styleConfig,
-                                                   types.areaType,
-                                                   Magnification(Magnification::magDetail));
+                                                    types.areaType,
+                                                    Magnification(Magnification::magDetail));
 
   REQUIRE(textStyles.size()==1);
   REQUIRE(textStyles.front()->GetTextColor().ToHexString()==Color::FromHexString("#0000ff").ToHexString());
@@ -339,8 +339,8 @@ TEST_CASE("Two rules for one type compose the declared attributes","[StyleConfig
                                                         "    }\n"));
 
   std::vector<TextStyleRef> textStyles=ResolveTexts(styleConfig,
-                                                   types.areaType,
-                                                   Magnification(Magnification::magDetail));
+                                                    types.areaType,
+                                                    Magnification(Magnification::magDetail));
 
   REQUIRE(textStyles.size()==1);
 
@@ -363,7 +363,7 @@ TEST_CASE("The build diagnostic reports what a style configuration prepared","[S
                                         WriteStyleSheet("StyleConfigLookupCostDiagnostics.oss",
                                                         FillAndTextStyleSheet()));
 
-  const auto& diagnostics=styleConfig->GetBuildDiagnostics();
+  const auto & diagnostics=styleConfig->GetBuildDiagnostics();
 
   INFO("slots " << diagnostics.preparedSlots
                 << ", evaluations " << diagnostics.typeConditionEvaluations
@@ -389,12 +389,12 @@ TEST_CASE("Defined but unreferenced types add no build work","[StyleConfigLookup
   auto       small=LoadStyleSheet(smallTypes.typeConfig,
                                   WriteStyleSheet("StyleConfigLookupCostScalingSmall.oss",
                                                   FillAndTextStyleSheet()));
-  auto       large=LoadStyleSheet(largeTypes.typeConfig,
-                                  WriteStyleSheet("StyleConfigLookupCostScalingLarge.oss",
-                                                  FillAndTextStyleSheet()));
+  auto large=LoadStyleSheet(largeTypes.typeConfig,
+                            WriteStyleSheet("StyleConfigLookupCostScalingLarge.oss",
+                                            FillAndTextStyleSheet()));
 
-  const auto& smallDiagnostics=small->GetBuildDiagnostics();
-  const auto& largeDiagnostics=large->GetBuildDiagnostics();
+  const auto & smallDiagnostics=small->GetBuildDiagnostics();
+  const auto & largeDiagnostics=large->GetBuildDiagnostics();
 
   INFO("small type set: slots " << smallDiagnostics.preparedSlots
                                 << ", evaluations " << smallDiagnostics.typeConditionEvaluations
@@ -426,7 +426,7 @@ TEST_CASE("A type the stylesheet does not reference resolves to no style","[Styl
                                         WriteStyleSheet("StyleConfigLookupCostUnreferenced.oss",
                                                         FillAndTextStyleSheet()));
 
-  auto       unreferencedType=types.typeConfig->GetTypeInfo("test_unreferenced_0");
+  auto unreferencedType=types.typeConfig->GetTypeInfo("test_unreferenced_0");
 
   REQUIRE(unreferencedType!=nullptr);
 
@@ -458,7 +458,7 @@ TEST_CASE("A rule that selects by feature covers the types that carry the featur
                                                         "      [FEATURE Name] AREA { color: #00ff00; }\n"
                                                         "    }\n"));
 
-  auto       unnamedType=types.typeConfig->GetTypeInfo("test_unnamed_area");
+  auto unnamedType=types.typeConfig->GetTypeInfo("test_unnamed_area");
 
   REQUIRE(unnamedType!=nullptr);
 
@@ -547,10 +547,10 @@ TEST_CASE("The build cost of the shipped stylesheets is reported","[StyleConfigL
 
   REQUIRE(typeConfig->LoadFromOSTFile((styleDir / "map.ost").string()));
 
-  const std::filesystem::path styleSheet=styleDir / "standard.oss";
+  const std::filesystem::path             styleSheet=styleDir / "standard.oss";
 
-  double                           first=0.0;
-  double                           second=0.0;
+  double                                  first=0.0;
+  double                                  second=0.0;
   osmscout::StyleConfig::BuildDiagnostics diagnostics;
 
   for (size_t run=0; run<2; run++) {
@@ -559,7 +559,7 @@ TEST_CASE("The build cost of the shipped stylesheets is reported","[StyleConfigL
 
     REQUIRE(styleConfig->Load(styleSheet.string()));
 
-    auto end=std::chrono::steady_clock::now();
+    auto   end=std::chrono::steady_clock::now();
     double milliseconds=std::chrono::duration<double,std::milli>(end-start).count();
 
     if (run==0) {
@@ -597,23 +597,23 @@ TEST_CASE("The build cost of the shipped stylesheets is reported","[StyleConfigL
  */
 TEST_CASE("The per-call cost of resolving a style is reported","[StyleConfigLookupCost]")
 {
-  const auto        types=MakeTypes(50);
-  auto              styleConfig=LoadStyleSheet(types.typeConfig,
-                                               WriteStyleSheet("StyleConfigLookupCostResolution.oss",
-                                                               FillAndTextStyleSheet()));
-  auto              unreferencedType=types.typeConfig->GetTypeInfo("test_unreferenced_0");
+  const auto types=MakeTypes(50);
+  auto       styleConfig=LoadStyleSheet(types.typeConfig,
+                                        WriteStyleSheet("StyleConfigLookupCostResolution.oss",
+                                                        FillAndTextStyleSheet()));
+  auto unreferencedType=types.typeConfig->GetTypeInfo("test_unreferenced_0");
 
   REQUIRE(unreferencedType!=nullptr);
 
-  const size_t      iterations=200000;
+  const size_t        iterations=200000;
   const Magnification magnification(Magnification::magDetail);
 
-  auto              unreferencedBuffer=MakeBuffer(unreferencedType);
-  auto              referencedBuffer=MakeBuffer(types.areaType);
-  auto              projection=MakeProjection(magnification);
+  auto                unreferencedBuffer=MakeBuffer(unreferencedType);
+  auto                referencedBuffer=MakeBuffer(types.areaType);
+  auto                projection=MakeProjection(magnification);
 
-  size_t            hits=0;
-  auto              start=std::chrono::steady_clock::now();
+  size_t              hits=0;
+  auto                start=std::chrono::steady_clock::now();
 
   for (size_t i=0; i<iterations; i++) {
     if (styleConfig->GetAreaFillStyle(types.areaType,
@@ -624,7 +624,8 @@ TEST_CASE("The per-call cost of resolving a style is reported","[StyleConfigLook
   }
 
   auto   end=std::chrono::steady_clock::now();
-  double referencedNs=static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/static_cast<double>(iterations);
+  double referencedNs=static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/
+                       static_cast<double>(iterations);
 
   size_t misses=0;
 
@@ -640,7 +641,8 @@ TEST_CASE("The per-call cost of resolving a style is reported","[StyleConfigLook
 
   end=std::chrono::steady_clock::now();
 
-  double unreferencedNs=static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/static_cast<double>(iterations);
+  double unreferencedNs=static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count())/
+                         static_cast<double>(iterations);
 
   INFO("referenced type: " << referencedNs << " ns per resolution (" << hits << " hits)");
   INFO("unreferenced type: " << unreferencedNs << " ns per resolution (" << misses << " misses)");

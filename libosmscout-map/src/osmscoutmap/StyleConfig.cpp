@@ -21,6 +21,9 @@
 
 #include <set>
 #include <algorithm>
+#include <cstdint>
+
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -521,10 +524,10 @@ namespace osmscout {
    * The bytes the per-level type sets of one family retain, as an estimate: one set per level, each
    * of them holding a pointer per defined type.
    */
-  size_t TypeSetBytes(const std::vector<TypeInfoSet>& typeSets,
-                      const TypeConfig& typeConfig)
+  static size_t TypeSetBytes(const std::vector<TypeInfoSet>& typeSets,
+                             const TypeConfig& typeConfig)
   {
-    return typeSets.size()*(sizeof(TypeInfoSet)+typeConfig.GetTypeCount()*sizeof(TypeInfoRef));
+    return typeSets.size()*(sizeof(TypeInfoSet)+(typeConfig.GetTypeCount()*sizeof(TypeInfoRef)));
   }
 
   /**
@@ -534,9 +537,9 @@ namespace osmscout {
    * cost follows the referenced styles").
    */
   template<class S, class A>
-  void CollectReferencedTypes(const TypeConfig& typeConfig,
-                              const std::list<ConditionalStyle<S,A>>& conditionals,
-                              StyleConfig::LookupPositions& positions)
+  static void CollectReferencedTypes(const TypeConfig& typeConfig,
+                                     const std::list<ConditionalStyle<S,A>>& conditionals,
+                                     StyleConfig::LookupPositions& positions)
   {
     positions.positions.assign(typeConfig.GetTypeCount(),
                                StyleConfig::LookupPositions::noPosition);
@@ -563,9 +566,9 @@ namespace osmscout {
    * the type index through the family's positions first.
    */
   template<class Table>
-  const typename Table::value_type* LookupRow(const Table& table,
-                                              const StyleConfig::LookupPositions& positions,
-                                              size_t typeIndex)
+  static const typename Table::value_type* LookupRow(const Table& table,
+                                                    const StyleConfig::LookupPositions& positions,
+                                                    size_t typeIndex)
   {
     if (typeIndex>=positions.positions.size()) {
       return nullptr;
@@ -589,9 +592,11 @@ namespace osmscout {
   {
     for (const auto& conditional : conditionals) {
       size_t minLvl=conditional.filter.GetMinLevel();
-      size_t maxLvl=conditional.filter.HasMaxLevel()
-                      ? conditional.filter.GetMaxLevel()
-                      : (maxLevel>0 ? maxLevel-1 : 0);
+      size_t maxLvl=maxLevel>0 ? maxLevel-1 : 0;
+
+      if (conditional.filter.HasMaxLevel()) {
+        maxLvl=conditional.filter.GetMaxLevel();
+      }
 
       for (const auto& type : conditional.filter.GetTypeList()) {
         diagnostics.typeConditionEvaluations++;

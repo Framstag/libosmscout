@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <memory>
@@ -613,8 +614,8 @@ namespace osmscout {
     {
       static constexpr uint32_t noPosition=std::numeric_limits<uint32_t>::max();
 
-      std::vector<uint32_t> positions;   //!< One entry per defined type
-      size_t                count{0};    //!< Number of types the family references
+      std::vector<uint32_t>     positions; //!< One entry per defined type
+      size_t                    count{0}; //!< Number of types the family references
     };
 
     // Node
@@ -677,20 +678,20 @@ namespace osmscout {
      * style-configuration, requirement "Style-configuration build cost follows the referenced
      * styles").
      */
-    LookupPositions                            nodeTextStylePositions;
-    LookupPositions                            nodeIconStylePositions;
-    LookupPositions                            wayLineStylePositions;
-    LookupPositions                            wayPathTextStylePositions;
-    LookupPositions                            wayPathSymbolStylePositions;
-    LookupPositions                            wayPathShieldStylePositions;
-    LookupPositions                            areaFillStylePositions;
-    LookupPositions                            areaBorderStylePositions;
-    LookupPositions                            areaTextStylePositions;
-    LookupPositions                            areaIconStylePositions;
-    LookupPositions                            areaBorderTextStylePositions;
-    LookupPositions                            areaBorderSymbolStylePositions;
-    LookupPositions                            routeLineStylePositions;
-    LookupPositions                            routePathTextStylePositions;
+    LookupPositions nodeTextStylePositions;
+    LookupPositions nodeIconStylePositions;
+    LookupPositions wayLineStylePositions;
+    LookupPositions wayPathTextStylePositions;
+    LookupPositions wayPathSymbolStylePositions;
+    LookupPositions wayPathShieldStylePositions;
+    LookupPositions areaFillStylePositions;
+    LookupPositions areaBorderStylePositions;
+    LookupPositions areaTextStylePositions;
+    LookupPositions areaIconStylePositions;
+    LookupPositions areaBorderTextStylePositions;
+    LookupPositions areaBorderSymbolStylePositions;
+    LookupPositions routeLineStylePositions;
+    LookupPositions routePathTextStylePositions;
 
     /**
      * Maximum width of the area border styles that can be resolved at each magnification level, in
@@ -957,11 +958,11 @@ namespace osmscout {
      */
     struct BuildDiagnostics
     {
-      size_t                             preparedSlots{0};            //!< Style-selector slots the build prepared
-      size_t                             typeConditionEvaluations{0}; //!< Type conditions evaluated against a candidate type
-      size_t                             tableBytes{0};               //!< Bytes the style-selector tables retain (estimate)
-      size_t                             typeSetBytes{0};             //!< Bytes the per-level type sets retain (estimate)
-      std::map<std::string,size_t>       familySlots;                 //!< Prepared slots per style family
+      size_t                       preparedSlots{0};                  //!< Style-selector slots the build prepared
+      size_t                       typeConditionEvaluations{0};       //!< Type conditions evaluated against a candidate type
+      size_t                       tableBytes{0};                     //!< Bytes the style-selector tables retain (estimate)
+      size_t                       typeSetBytes{0};                   //!< Bytes the per-level type sets retain (estimate)
+      std::map<std::string,size_t> familySlots;                       //!< Prepared slots per style family
     };
 
     const BuildDiagnostics& GetBuildDiagnostics() const
@@ -987,7 +988,7 @@ namespace osmscout {
     //@}
 
   private:
-    BuildDiagnostics              buildDiagnostics;   //!< What building this configuration cost, for tests
+    BuildDiagnostics buildDiagnostics;                //!< What building this configuration cost, for tests
   };
 
   using StyleConfigRef = std::shared_ptr<StyleConfig>;
