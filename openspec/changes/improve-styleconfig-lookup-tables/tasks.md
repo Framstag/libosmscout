@@ -21,10 +21,10 @@
 
 ## 4. Contract, builds and code quality
 
-- [ ] 4.1 Verify the accessor contract is untouched: build all renderer backends with no painter edit and confirm `git diff --stat` names no painter file. Verify: `cmake --build build` succeeds without warnings from the touched files. (parent spec: `style-configuration`, requirement "The style-resolution accessor contract is preserved")
-- [ ] 4.2 Run the full suite in the CMake build (`QT_QPA_PLATFORM=offscreen`, `TESTS_TOP_DIR`, `TESTS_TMP_DIR`) and confirm no test changed its expectation. Verify: `ctest -j 2 --output-on-failure` passes with the same test count as before the change. (parent spec: all requirements; existing tests still pass)
-- [ ] 4.3 Run the Meson build and suite and confirm the new test is registered there as well. Verify: `meson compile -C build-meson && meson test -C build-meson --print-errorlogs` passes. (parent spec: all requirements; both build systems stay green)
-- [ ] 4.4 Check the touched files (`StyleConfig.h`, `StyleConfig.cpp`, `oss/Parser.h`, the new test) against `guidelines/`, `.uncrustify` and `.clang-tidy`. Verify: uncrustify reports no finding for the touched files and clang-tidy reports none that the file's own change introduced.
+- [x] 4.1 Verify the accessor contract is untouched: build all renderer backends with no painter edit and confirm `git diff --stat` names no painter file. Verify: `cmake --build build` succeeds without warnings from the touched files. (parent spec: `style-configuration`, requirement "The style-resolution accessor contract is preserved")
+- [x] 4.2 Run the full suite in the CMake build (`QT_QPA_PLATFORM=offscreen`, `TESTS_TOP_DIR`, `TESTS_TMP_DIR`) and confirm no test changed its expectation. Verify: `ctest -j 2 --output-on-failure` passes with the same test count as before the change. (parent spec: all requirements; existing tests still pass)
+- [x] 4.3 Run the Meson build and suite and confirm the new test is registered there as well. Verify: `meson compile -C build-meson && meson test -C build-meson --print-errorlogs` passes. (parent spec: all requirements; both build systems stay green)
+- [x] 4.4 Check the touched files (`StyleConfig.h`, `StyleConfig.cpp`, `oss/Parser.h`, the new test) against `guidelines/`, `.uncrustify` and `.clang-tidy`. Verify: uncrustify reports no finding for the touched files and clang-tidy reports none that the file's own change introduced.
 
 ## 5. Record
 
