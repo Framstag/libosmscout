@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <memory>
@@ -245,6 +246,7 @@ namespace osmscout {
   private:
     bool                         filtersByType;
     TypeInfoSet                  types;
+    std::vector<TypeInfoRef>     typeList;   //!< The types of `types`, in the order of the type indices
     size_t                       minLevel;
     size_t                       maxLevel;
     std::list<FeatureFilterData> features;
@@ -278,6 +280,15 @@ namespace osmscout {
     bool HasType(const TypeInfoRef& type) const
     {
       return types.IsSet(type);
+    }
+
+    /**
+     * The types the filter covers, in the order of the type configuration's indices. Empty when the
+     * filter covers no type, which is the state of a filter that was never given any.
+     */
+    const std::vector<TypeInfoRef>& GetTypeList() const
+    {
+      return typeList;
     }
 
     size_t GetMinLevel() const
@@ -593,6 +604,20 @@ namespace osmscout {
     std::unordered_map<std::string,SymbolRef>  symbols;                //!< Map of symbols by name
     SymbolRef                                  emptySymbol;            //!< A default empty symbol
 
+  public:
+    /**
+     * The type positions of one style family: the family's lookup table holds one entry per type the
+     * loaded sheet references, and `positions[typeIndex]` is the position of that type in the table,
+     * or `noPosition` when the sheet does not reference it. Filled by Postprocess().
+     */
+    struct LookupPositions
+    {
+      static constexpr uint32_t noPosition=std::numeric_limits<uint32_t>::max();
+
+      std::vector<uint32_t>     positions; //!< One entry per defined type
+      size_t                    count{0}; //!< Number of types the family references
+    };
+
     // Node
   private:
     std::list<TextConditionalStyle>            nodeTextStyleConditionals;
@@ -646,6 +671,27 @@ namespace osmscout {
     IconStyleLookupTable                       areaIconStyleSelectors;
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
     PathSymbolStyleLookupTable                 areaBorderSymbolStyleSelectors;
+
+    /**
+     * The type positions of every style family, one per family: a lookup translates the object's type
+     * index through the family's positions before it reads the family's table (spec
+     * style-configuration, requirement "Style-configuration build cost follows the referenced
+     * styles").
+     */
+    LookupPositions nodeTextStylePositions;
+    LookupPositions nodeIconStylePositions;
+    LookupPositions wayLineStylePositions;
+    LookupPositions wayPathTextStylePositions;
+    LookupPositions wayPathSymbolStylePositions;
+    LookupPositions wayPathShieldStylePositions;
+    LookupPositions areaFillStylePositions;
+    LookupPositions areaBorderStylePositions;
+    LookupPositions areaTextStylePositions;
+    LookupPositions areaIconStylePositions;
+    LookupPositions areaBorderTextStylePositions;
+    LookupPositions areaBorderSymbolStylePositions;
+    LookupPositions routeLineStylePositions;
+    LookupPositions routePathTextStylePositions;
 
     /**
      * Maximum width of the area border styles that can be resolved at each magnification level, in
@@ -907,6 +953,24 @@ namespace osmscout {
     //@}
 
     /**
+     * What building this style configuration cost, so a test can assert that the cost follows the
+     * styles a sheet references instead of the number of defined types (spec style-configuration).
+     */
+    struct BuildDiagnostics
+    {
+      size_t                       preparedSlots{0};                  //!< Style-selector slots the build prepared
+      size_t                       typeConditionEvaluations{0};       //!< Type conditions evaluated against a candidate type
+      size_t                       tableBytes{0};                     //!< Bytes the style-selector tables retain (estimate)
+      size_t                       typeSetBytes{0};                   //!< Bytes the per-level type sets retain (estimate)
+      std::map<std::string,size_t> familySlots;                       //!< Prepared slots per style family
+    };
+
+    const BuildDiagnostics& GetBuildDiagnostics() const
+    {
+      return buildDiagnostics;
+    }
+
+    /**
      * Methods for loading a concrete OSS style sheet
      */
     //@{
@@ -922,6 +986,9 @@ namespace osmscout {
     const std::list<StyleError>&  GetErrors() const;
     const std::list<StyleError>&  GetWarnings() const;
     //@}
+
+  private:
+    BuildDiagnostics buildDiagnostics;                //!< What building this configuration cost, for tests
   };
 
   using StyleConfigRef = std::shared_ptr<StyleConfig>;

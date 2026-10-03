@@ -21,6 +21,9 @@
 
 #include <set>
 #include <algorithm>
+#include <cstdint>
+
+#include <osmscout/TypeConfig.h>
 
 #include <osmscout/system/Assert.h>
 
@@ -198,6 +201,12 @@ namespace osmscout {
   {
     this->types=types;
     this->filtersByType=true;
+
+    typeList.clear();
+
+    for (const auto& type : types) {
+      typeList.push_back(type);
+    }
 
     return *this;
   }
@@ -511,30 +520,88 @@ namespace osmscout {
     }
   }
 
-  template<class S, class A>
-  void CalculateUsedTypes(const TypeConfig& typeConfig,
-                          const std::list<ConditionalStyle<S,A>>& conditionals,
-                          size_t maxLevel,
-                          std::vector<TypeInfoSet>& typeSets)
+  /**
+   * The bytes the per-level type sets of one family retain, as an estimate: one set per level, each
+   * of them holding a pointer per defined type.
+   */
+  static size_t TypeSetBytes(const std::vector<TypeInfoSet>& typeSets,
+                             const TypeConfig& typeConfig)
   {
-    for (size_t level=0;
-         level<maxLevel;
-         ++level) {
-      for (const auto& conditional : conditionals) {
-        for (const auto& type : typeConfig.GetTypes()) {
-          if (!conditional.filter.HasType(type)) {
-            continue;
-          }
+    return typeSets.size()*(sizeof(TypeInfoSet)+(typeConfig.GetTypeCount()*sizeof(TypeInfoRef)));
+  }
 
-          if (level<conditional.filter.GetMinLevel()) {
-            continue;
-          }
+  /**
+   * The positions of the types the given conditionals name: `positions.positions[typeIndex]` is the
+   * dense position of that type among the referenced ones, or `noPosition`, and `positions.count` is
+   * the number of referenced types (spec style-configuration, requirement "Style-configuration build
+   * cost follows the referenced styles").
+   */
+  template<class S, class A>
+  static void CollectReferencedTypes(const TypeConfig& typeConfig,
+                                     const std::list<ConditionalStyle<S,A>>& conditionals,
+                                     StyleConfig::LookupPositions& positions)
+  {
+    positions.positions.assign(typeConfig.GetTypeCount(),
+                               StyleConfig::LookupPositions::noPosition);
+    positions.count=0;
 
-          if (conditional.filter.HasMaxLevel() &&
-              level>conditional.filter.GetMaxLevel()) {
-            continue;
-          }
+    for (const auto& conditional : conditionals) {
+      for (const auto& type : conditional.filter.GetTypeList()) {
+        size_t index=type->GetIndex();
 
+        if (index>=positions.positions.size()) {
+          continue;
+        }
+
+        if (positions.positions[index]==StyleConfig::LookupPositions::noPosition) {
+          positions.positions[index]=static_cast<uint32_t>(positions.count++);
+        }
+      }
+    }
+  }
+
+  /**
+   * The selectors of a family table for the given type index, or nullptr when the loaded sheet does
+   * not reference that type. The table holds one entry per referenced type, so the lookup translates
+   * the type index through the family's positions first.
+   */
+  template<class Table>
+  static const typename Table::value_type* LookupRow(const Table& table,
+                                                    const StyleConfig::LookupPositions& positions,
+                                                    size_t typeIndex)
+  {
+    if (typeIndex>=positions.positions.size()) {
+      return nullptr;
+    }
+
+    auto position=positions.positions[typeIndex];
+
+    if (position==StyleConfig::LookupPositions::noPosition ||
+        position>=table.size()) {
+      return nullptr;
+    }
+
+    return &table[position];
+  }
+
+  template<class S, class A>
+  void CalculateUsedTypes(const std::list<ConditionalStyle<S,A>>& conditionals,
+                          size_t maxLevel,
+                          std::vector<TypeInfoSet>& typeSets,
+                          StyleConfig::BuildDiagnostics& diagnostics)
+  {
+    for (const auto& conditional : conditionals) {
+      size_t minLvl=conditional.filter.GetMinLevel();
+      size_t maxLvl=maxLevel>0 ? maxLevel-1 : 0;
+
+      if (conditional.filter.HasMaxLevel()) {
+        maxLvl=conditional.filter.GetMaxLevel();
+      }
+
+      for (const auto& type : conditional.filter.GetTypeList()) {
+        diagnostics.typeConditionEvaluations++;
+
+        for (size_t level=minLvl; level<maxLevel && level<=maxLvl; level++) {
           typeSets[level].Set(type);
         }
       }
@@ -542,22 +609,44 @@ namespace osmscout {
   }
 
   template<class S, class A>
-  void SortInConditionals(const TypeConfig& typeConfig,
+  void SortInConditionals(const std::string& family,
                           const std::list<ConditionalStyle<S,A>>& conditionals,
                           size_t maxLevel,
-                          std::vector<std::vector<std::list<StyleSelector<S,A>>>>& selectors)
+                          const StyleConfig::LookupPositions& positions,
+                          std::vector<std::vector<std::list<StyleSelector<S,A>>>>& selectors,
+                          StyleConfig::BuildDiagnostics& diagnostics)
   {
-    selectors.resize(typeConfig.GetTypeCount());
+    selectors.resize(positions.count);
+
+    diagnostics.familySlots[family];
+
+    if (!selectors.empty()) {
+      diagnostics.tableBytes+=selectors.size()*sizeof(selectors[0]);
+    }
 
     for (auto& selector : selectors) {
       selector.resize(maxLevel+1);
+
+      if (!selector.empty()) {
+        diagnostics.preparedSlots+=selector.size();
+        diagnostics.familySlots[family]+=selector.size();
+        diagnostics.tableBytes+=selector.size()*sizeof(selector[0]);
+      }
     }
 
     for (const auto& conditional : conditionals) {
       StyleSelector<S,A> selector(conditional.filter,conditional.style);
 
-      for (const auto& type : typeConfig.GetTypes()) {
-        if (!conditional.filter.HasType(type)) {
+      for (const auto& type : conditional.filter.GetTypeList()) {
+        diagnostics.typeConditionEvaluations++;
+
+        if (type->GetIndex()>=positions.positions.size()) {
+          continue;
+        }
+
+        auto position=positions.positions[type->GetIndex()];
+
+        if (position==StyleConfig::LookupPositions::noPosition) {
           continue;
         }
 
@@ -565,7 +654,7 @@ namespace osmscout {
         size_t maxLvl=conditional.filter.HasMaxLevel() ? conditional.filter.GetMaxLevel() : maxLevel;
 
         for (size_t level=minLvl; level<=maxLvl; level++) {
-          selectors[type->GetIndex()][level].push_back(selector);
+          selectors[position][level].push_back(selector);
         }
       }
     }
@@ -606,10 +695,12 @@ namespace osmscout {
   }
 
   template<class S, class A>
-  void SortInConditionalsBySlot(const TypeConfig& typeConfig,
+  void SortInConditionalsBySlot(const std::string& family,
                                 const std::list<ConditionalStyle<S,A>>& conditionals,
                                 size_t maxLevel,
-                                std::vector<std::vector<std::vector<std::list<StyleSelector<S,A>>>>>& selectors)
+                                const StyleConfig::LookupPositions& positions,
+                                std::vector<std::vector<std::vector<std::list<StyleSelector<S,A>>>>>& selectors,
+                                StyleConfig::BuildDiagnostics& diagnostics)
   {
     std::unordered_map<std::string,std::list<ConditionalStyle<S,A>>> styleBySlot;
 
@@ -619,13 +710,21 @@ namespace osmscout {
 
     selectors.resize(styleBySlot.size());
 
+    diagnostics.familySlots[family];
+
+    if (!selectors.empty()) {
+      diagnostics.tableBytes+=selectors.size()*sizeof(selectors[0]);
+    }
+
     size_t idx=0;
 
     for (const auto& entry : styleBySlot) {
-      SortInConditionals(typeConfig,
+      SortInConditionals(family,
                          entry.second,
                          maxLevel,
-                         selectors[idx]);
+                         positions,
+                         selectors[idx],
+                         diagnostics);
 
       idx++;
     }
@@ -640,15 +739,26 @@ namespace osmscout {
     GetMaxLevelInConditionals(nodeIconStyleConditionals,
                               maxLevel);
 
-    SortInConditionalsBySlot(*typeConfig,
+    CollectReferencedTypes(*typeConfig,
+                           nodeTextStyleConditionals,
+                           nodeTextStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           nodeIconStyleConditionals,
+                           nodeIconStylePositions);
+
+    SortInConditionalsBySlot("nodeText",
                              nodeTextStyleConditionals,
                              maxLevel,
-                             nodeTextStyleSelectors);
+                             nodeTextStylePositions,
+                             nodeTextStyleSelectors,
+                             buildDiagnostics);
 
-    SortInConditionals(*typeConfig,
+    SortInConditionals("nodeIcon",
                        nodeIconStyleConditionals,
                        maxLevel,
-                       nodeIconStyleSelectors);
+                       nodeIconStylePositions,
+                       nodeIconStyleSelectors,
+                       buildDiagnostics);
 
     nodeTypeSets.reserve(maxLevel);
 
@@ -656,14 +766,16 @@ namespace osmscout {
       nodeTypeSets.emplace_back(*typeConfig);
     }
 
-    CalculateUsedTypes(*typeConfig,
-                       nodeTextStyleConditionals,
+    CalculateUsedTypes(nodeTextStyleConditionals,
                        maxLevel,
-                       nodeTypeSets);
-    CalculateUsedTypes(*typeConfig,
-                       nodeIconStyleConditionals,
+                       nodeTypeSets,
+                       buildDiagnostics);
+    CalculateUsedTypes(nodeIconStyleConditionals,
                        maxLevel,
-                       nodeTypeSets);
+                       nodeTypeSets,
+                       buildDiagnostics);
+
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(nodeTypeSets,*typeConfig);
 
     nodeTextStyleConditionals.clear();
     nodeIconStyleConditionals.clear();
@@ -696,25 +808,46 @@ namespace osmscout {
     GetMaxLevelInConditionals(wayPathShieldStyleConditionals,
                               maxLevel);
 
-    SortInConditionalsBySlot(*typeConfig,
+    CollectReferencedTypes(*typeConfig,
+                           wayLineStyleConditionals,
+                           wayLineStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           wayPathTextStyleConditionals,
+                           wayPathTextStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           wayPathSymbolStyleConditionals,
+                           wayPathSymbolStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           wayPathShieldStyleConditionals,
+                           wayPathShieldStylePositions);
+
+    SortInConditionalsBySlot("wayLine",
                              wayLineStyleConditionals,
                              maxLevel,
-                             wayLineStyleSelectors);
+                             wayLineStylePositions,
+                             wayLineStyleSelectors,
+                             buildDiagnostics);
 
-    SortInConditionalsBySlot(*typeConfig,
+    SortInConditionalsBySlot("wayPathSymbol",
                              wayPathSymbolStyleConditionals,
                              maxLevel,
-                             wayPathSymbolStyleSelectors);
+                             wayPathSymbolStylePositions,
+                             wayPathSymbolStyleSelectors,
+                             buildDiagnostics);
 
-    SortInConditionals(*typeConfig,
+    SortInConditionals("wayPathText",
                        wayPathTextStyleConditionals,
                        maxLevel,
-                       wayPathTextStyleSelectors);
+                       wayPathTextStylePositions,
+                       wayPathTextStyleSelectors,
+                       buildDiagnostics);
 
-    SortInConditionals(*typeConfig,
+    SortInConditionals("wayPathShield",
                        wayPathShieldStyleConditionals,
                        maxLevel,
-                       wayPathShieldStyleSelectors);
+                       wayPathShieldStylePositions,
+                       wayPathShieldStyleSelectors,
+                       buildDiagnostics);
 
     wayTypeSets.reserve(maxLevel);
     wayTextFlags.reserve(maxLevel);
@@ -726,25 +859,27 @@ namespace osmscout {
       wayShieldFlags.emplace_back(HasStyle(wayPathShieldStyleSelectors, level));
     }
 
-    CalculateUsedTypes(*typeConfig,
-                       wayLineStyleConditionals,
+    CalculateUsedTypes(wayLineStyleConditionals,
                        maxLevel,
-                       wayTypeSets);
+                       wayTypeSets,
+                       buildDiagnostics);
 
-    CalculateUsedTypes(*typeConfig,
-                       wayPathTextStyleConditionals,
+    CalculateUsedTypes(wayPathTextStyleConditionals,
                        maxLevel,
-                       wayTypeSets);
+                       wayTypeSets,
+                       buildDiagnostics);
 
-    CalculateUsedTypes(*typeConfig,
-                       wayPathSymbolStyleConditionals,
+    CalculateUsedTypes(wayPathSymbolStyleConditionals,
                        maxLevel,
-                       wayTypeSets);
+                       wayTypeSets,
+                       buildDiagnostics);
 
-    CalculateUsedTypes(*typeConfig,
-                       wayPathShieldStyleConditionals,
+    CalculateUsedTypes(wayPathShieldStyleConditionals,
                        maxLevel,
-                       wayTypeSets);
+                       wayTypeSets,
+                       buildDiagnostics);
+
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(wayTypeSets,*typeConfig);
 
     wayLineStyleConditionals.clear();
     wayPathTextStyleConditionals.clear();
@@ -769,15 +904,38 @@ namespace osmscout {
     GetMaxLevelInConditionals(areaBorderSymbolStyleConditionals,
                               maxLevel);
 
-    SortInConditionals(*typeConfig,
+    CollectReferencedTypes(*typeConfig,
+                           areaFillStyleConditionals,
+                           areaFillStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           areaBorderStyleConditionals,
+                           areaBorderStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           areaTextStyleConditionals,
+                           areaTextStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           areaIconStyleConditionals,
+                           areaIconStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           areaBorderTextStyleConditionals,
+                           areaBorderTextStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           areaBorderSymbolStyleConditionals,
+                           areaBorderSymbolStylePositions);
+
+    SortInConditionals("areaFill",
                        areaFillStyleConditionals,
                        maxLevel,
-                       areaFillStyleSelectors);
+                       areaFillStylePositions,
+                       areaFillStyleSelectors,
+                       buildDiagnostics);
 
-    SortInConditionalsBySlot(*typeConfig,
+    SortInConditionalsBySlot("areaBorder",
                              areaBorderStyleConditionals,
                              maxLevel,
-                             areaBorderStyleSelectors);
+                             areaBorderStylePositions,
+                             areaBorderStyleSelectors,
+                             buildDiagnostics);
 
     // The painter's early visibility decision has to extend an area by at least as much as any per-ring
     // visibility decision can, so collect the widest area border style per level. Iterating the built
@@ -803,25 +961,33 @@ namespace osmscout {
       }
     }
 
-    SortInConditionalsBySlot(*typeConfig,
+    SortInConditionalsBySlot("areaText",
                              areaTextStyleConditionals,
                              maxLevel,
-                             areaTextStyleSelectors);
+                             areaTextStylePositions,
+                             areaTextStyleSelectors,
+                             buildDiagnostics);
 
-    SortInConditionals(*typeConfig,
+    SortInConditionals("areaIcon",
                        areaIconStyleConditionals,
                        maxLevel,
-                       areaIconStyleSelectors);
+                       areaIconStylePositions,
+                       areaIconStyleSelectors,
+                       buildDiagnostics);
 
-    SortInConditionals(*typeConfig,
+    SortInConditionals("areaBorderText",
                        areaBorderTextStyleConditionals,
                        maxLevel,
-                       areaBorderTextStyleSelectors);
+                       areaBorderTextStylePositions,
+                       areaBorderTextStyleSelectors,
+                       buildDiagnostics);
 
-    SortInConditionals(*typeConfig,
+    SortInConditionals("areaBorderSymbol",
                        areaBorderSymbolStyleConditionals,
                        maxLevel,
-                       areaBorderSymbolStyleSelectors);
+                       areaBorderSymbolStylePositions,
+                       areaBorderSymbolStyleSelectors,
+                       buildDiagnostics);
 
     areaTypeSets.reserve(maxLevel);
 
@@ -829,30 +995,32 @@ namespace osmscout {
       areaTypeSets.emplace_back(*typeConfig);
     }
 
-    CalculateUsedTypes(*typeConfig,
-                       areaFillStyleConditionals,
+    CalculateUsedTypes(areaFillStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
-    CalculateUsedTypes(*typeConfig,
-                       areaBorderStyleConditionals,
+                       areaTypeSets,
+                       buildDiagnostics);
+    CalculateUsedTypes(areaBorderStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
-    CalculateUsedTypes(*typeConfig,
-                       areaTextStyleConditionals,
+                       areaTypeSets,
+                       buildDiagnostics);
+    CalculateUsedTypes(areaTextStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
-    CalculateUsedTypes(*typeConfig,
-                       areaIconStyleConditionals,
+                       areaTypeSets,
+                       buildDiagnostics);
+    CalculateUsedTypes(areaIconStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
-    CalculateUsedTypes(*typeConfig,
-                       areaBorderTextStyleConditionals,
+                       areaTypeSets,
+                       buildDiagnostics);
+    CalculateUsedTypes(areaBorderTextStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
-    CalculateUsedTypes(*typeConfig,
-                       areaBorderSymbolStyleConditionals,
+                       areaTypeSets,
+                       buildDiagnostics);
+    CalculateUsedTypes(areaBorderSymbolStyleConditionals,
                        maxLevel,
-                       areaTypeSets);
+                       areaTypeSets,
+                       buildDiagnostics);
+
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(areaTypeSets,*typeConfig);
 
     areaFillStyleConditionals.clear();
     areaBorderStyleConditionals.clear();
@@ -871,10 +1039,19 @@ namespace osmscout {
     GetMaxLevelInConditionals(routePathTextStyleConditionals,
                               maxLevel);
 
-    SortInConditionals(*typeConfig,
+    CollectReferencedTypes(*typeConfig,
+                           routeLineStyleConditionals,
+                           routeLineStylePositions);
+    CollectReferencedTypes(*typeConfig,
+                           routePathTextStyleConditionals,
+                           routePathTextStylePositions);
+
+    SortInConditionals("routePathText",
                        routePathTextStyleConditionals,
                        maxLevel,
-                       routePathTextStyleSelectors);
+                       routePathTextStylePositions,
+                       routePathTextStyleSelectors,
+                       buildDiagnostics);
 
     routeTypeSets.reserve(maxLevel);
 
@@ -882,20 +1059,24 @@ namespace osmscout {
       routeTypeSets.emplace_back(*typeConfig);
     }
 
-    CalculateUsedTypes(*typeConfig,
-                       routeLineStyleConditionals,
+    CalculateUsedTypes(routeLineStyleConditionals,
                        maxLevel,
-                       routeTypeSets);
+                       routeTypeSets,
+                       buildDiagnostics);
 
-    CalculateUsedTypes(*typeConfig,
-                       routePathTextStyleConditionals,
+    CalculateUsedTypes(routePathTextStyleConditionals,
                        maxLevel,
-                       routeTypeSets);
+                       routeTypeSets,
+                       buildDiagnostics);
 
-    SortInConditionalsBySlot(*typeConfig,
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(routeTypeSets,*typeConfig);
+
+    SortInConditionalsBySlot("routeLine",
                              routeLineStyleConditionals,
                              maxLevel,
-                             routeLineStyleSelectors);
+                             routeLineStylePositions,
+                             routeLineStyleSelectors,
+                             buildDiagnostics);
 
     routeLineStyleConditionals.clear();
     routePathTextStyleConditionals.clear();
@@ -1082,6 +1263,8 @@ namespace osmscout {
 
   void StyleConfig::Postprocess()
   {
+    buildDiagnostics=BuildDiagnostics();
+
     PostprocessNodes();
     PostprocessWays();
     PostprocessAreas();
@@ -1322,11 +1505,19 @@ namespace osmscout {
     auto level=magnification.GetLevel();
 
     for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
-      if (level>=nodeTextStyleSelector[type->GetIndex()].size()) {
-        level=static_cast<uint32_t>(nodeTextStyleSelector[type->GetIndex()].size()-1);
+      const auto *row=LookupRow(nodeTextStyleSelector,
+                                nodeTextStylePositions,
+                                type->GetIndex());
+
+      if (row==nullptr) {
+        continue;
       }
 
-      if (!nodeTextStyleSelector[type->GetIndex()][level].empty()) {
+      if (level>=row->size()) {
+        level=static_cast<uint32_t>(row->size()-1);
+      }
+
+      if (!(*row)[level].empty()) {
         return true;
       }
     }
@@ -1343,8 +1534,16 @@ namespace osmscout {
     textStyles.reserve(nodeTextStyleSelectors.size());
 
     for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      const auto *row=LookupRow(nodeTextStyleSelector,
+                                nodeTextStylePositions,
+                                buffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       TextStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         nodeTextStyleSelector[buffer.GetType()->GetIndex()],
+                                         *row,
                                          buffer,
                                          projection);
 
@@ -1360,8 +1559,16 @@ namespace osmscout {
     size_t count=0;
 
     for (const auto& nodeTextStyleSelector : nodeTextStyleSelectors) {
+      const auto *row=LookupRow(nodeTextStyleSelector,
+                                nodeTextStylePositions,
+                                buffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       TextStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         nodeTextStyleSelector[buffer.GetType()->GetIndex()],
+                                         *row,
                                          buffer,
                                          projection);
 
@@ -1376,8 +1583,16 @@ namespace osmscout {
   IconStyleRef StyleConfig::GetNodeIconStyle(const FeatureValueBuffer& buffer,
                                              const Projection& projection) const
   {
+    const auto *row=LookupRow(nodeIconStyleSelectors,
+                              nodeIconStylePositions,
+                              buffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           nodeIconStyleSelectors[buffer.GetType()->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1392,8 +1607,16 @@ namespace osmscout {
     bool requireSort=false;
 
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      const auto *row=LookupRow(wayLineStyleSelector,
+                                wayLineStylePositions,
+                                buffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       LineStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         wayLineStyleSelector[buffer.GetType()->GetIndex()],
+                                         *row,
                                          buffer,
                                          projection);
 
@@ -1426,8 +1649,16 @@ namespace osmscout {
     bool requireSort=false;
 
     for (const auto& routeLineStyleSelector : routeLineStyleSelectors) {
+      const auto *row=LookupRow(routeLineStyleSelector,
+                                routeLineStylePositions,
+                                buffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       LineStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         routeLineStyleSelector[buffer.GetType()->GetIndex()],
+                                         *row,
                                          buffer,
                                          projection);
 
@@ -1457,8 +1688,16 @@ namespace osmscout {
     symbolStyles.clear();
     symbolStyles.reserve(wayLineStyleSelectors.size());
     for (const auto& wayPathSymbolStyleSelector : wayPathSymbolStyleSelectors) {
+      const auto *row=LookupRow(wayPathSymbolStyleSelector,
+                                wayPathSymbolStylePositions,
+                                buffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       PathSymbolStyleRef style=GetFeatureStyle(styleResolveContext,
-                                               wayPathSymbolStyleSelector[buffer.GetType()->GetIndex()],
+                                               *row,
                                                buffer,
                                                projection);
 
@@ -1471,8 +1710,16 @@ namespace osmscout {
   PathTextStyleRef StyleConfig::GetWayPathTextStyle(const FeatureValueBuffer& buffer,
                                                     const Projection& projection) const
   {
+    const auto *row=LookupRow(wayPathTextStyleSelectors,
+                              wayPathTextStylePositions,
+                              buffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           wayPathTextStyleSelectors[buffer.GetType()->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1491,8 +1738,16 @@ namespace osmscout {
   PathTextStyleRef StyleConfig::GetRoutePathTextStyle(const FeatureValueBuffer& buffer,
                                                       const Projection& projection) const
   {
+    const auto *row=LookupRow(routePathTextStyleSelectors,
+                              routePathTextStylePositions,
+                              buffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           routePathTextStyleSelectors[buffer.GetType()->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1500,8 +1755,16 @@ namespace osmscout {
   PathShieldStyleRef StyleConfig::GetWayPathShieldStyle(const FeatureValueBuffer& buffer,
                                                         const Projection& projection) const
   {
+    const auto *row=LookupRow(wayPathShieldStyleSelectors,
+                              wayPathShieldStylePositions,
+                              buffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           wayPathShieldStyleSelectors[buffer.GetType()->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1536,8 +1799,16 @@ namespace osmscout {
                                              const FeatureValueBuffer& buffer,
                                              const Projection& projection) const
   {
+    const auto *row=LookupRow(areaFillStyleSelectors,
+                              areaFillStylePositions,
+                              type->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaFillStyleSelectors[type->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1551,8 +1822,16 @@ namespace osmscout {
     borderStyles.reserve(areaBorderStyleSelectors.size());
 
     for (const auto& areaBorderStyleSelector : areaBorderStyleSelectors) {
+      const auto *row=LookupRow(areaBorderStyleSelector,
+                                areaBorderStylePositions,
+                                type->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       BorderStyleRef style=GetFeatureStyle(styleResolveContext,
-                                           areaBorderStyleSelector[type->GetIndex()],
+                                           *row,
                                            buffer,
                                            projection);
 
@@ -1568,11 +1847,19 @@ namespace osmscout {
     auto level=magnification.GetLevel();
 
     for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
-      if (level>=areaTextStyleSelector[type->GetIndex()].size()) {
-        level=static_cast<uint32_t>(areaTextStyleSelector[type->GetIndex()].size()-1);
+      const auto *row=LookupRow(areaTextStyleSelector,
+                                areaTextStylePositions,
+                                type->GetIndex());
+
+      if (row==nullptr) {
+        continue;
       }
 
-      if (!areaTextStyleSelector[type->GetIndex()][level].empty()) {
+      if (level>=row->size()) {
+        level=static_cast<uint32_t>(row->size()-1);
+      }
+
+      if (!(*row)[level].empty()) {
         return true;
       }
     }
@@ -1589,8 +1876,16 @@ namespace osmscout {
     textStyles.reserve(areaTextStyleSelectors.size());
 
     for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      const auto *row=LookupRow(areaTextStyleSelector,
+                                areaTextStylePositions,
+                                type->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       TextStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         areaTextStyleSelector[type->GetIndex()],
+                                         *row,
                                          buffer,
                                          projection);
 
@@ -1607,8 +1902,16 @@ namespace osmscout {
     size_t count=0;
 
     for (const auto& areaTextStyleSelector : areaTextStyleSelectors) {
+      const auto *row=LookupRow(areaTextStyleSelector,
+                                areaTextStylePositions,
+                                type->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       TextStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         areaTextStyleSelector[type->GetIndex()],
+                                         *row,
                                          buffer,
                                          projection);
 
@@ -1624,8 +1927,16 @@ namespace osmscout {
                                              const FeatureValueBuffer& buffer,
                                              const Projection& projection) const
   {
+    const auto *row=LookupRow(areaIconStyleSelectors,
+                              areaIconStylePositions,
+                              type->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaIconStyleSelectors[type->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1634,8 +1945,16 @@ namespace osmscout {
                                                        const FeatureValueBuffer& buffer,
                                                        const Projection& projection) const
   {
+    const auto *row=LookupRow(areaBorderTextStyleSelectors,
+                              areaBorderTextStylePositions,
+                              type->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaBorderTextStyleSelectors[type->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
@@ -1644,40 +1963,80 @@ namespace osmscout {
                                                            const FeatureValueBuffer& buffer,
                                                            const Projection& projection) const
   {
+    const auto *row=LookupRow(areaBorderSymbolStyleSelectors,
+                              areaBorderSymbolStylePositions,
+                              type->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaBorderSymbolStyleSelectors[type->GetIndex()],
+                           *row,
                            buffer,
                            projection);
   }
 
   FillStyleRef StyleConfig::GetLandFillStyle(const Projection& projection) const
   {
+    const auto *row=LookupRow(areaFillStyleSelectors,
+                              areaFillStylePositions,
+                              tileLandBuffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaFillStyleSelectors[tileLandBuffer.GetType()->GetIndex()],
+                           *row,
                            tileLandBuffer,
                            projection);
   }
 
   FillStyleRef StyleConfig::GetSeaFillStyle(const Projection& projection) const
   {
+    const auto *row=LookupRow(areaFillStyleSelectors,
+                              areaFillStylePositions,
+                              tileSeaBuffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaFillStyleSelectors[tileSeaBuffer.GetType()->GetIndex()],
+                           *row,
                            tileSeaBuffer,
                            projection);
   }
 
   FillStyleRef StyleConfig::GetCoastFillStyle(const Projection& projection) const
   {
+    const auto *row=LookupRow(areaFillStyleSelectors,
+                              areaFillStylePositions,
+                              tileCoastBuffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaFillStyleSelectors[tileCoastBuffer.GetType()->GetIndex()],
+                           *row,
                            tileCoastBuffer,
                            projection);
   }
 
   FillStyleRef StyleConfig::GetUnknownFillStyle(const Projection& projection) const
   {
+    const auto *row=LookupRow(areaFillStyleSelectors,
+                              areaFillStylePositions,
+                              tileUnknownBuffer.GetType()->GetIndex());
+
+    if (row==nullptr) {
+      return nullptr;
+    }
+
     return GetFeatureStyle(styleResolveContext,
-                           areaFillStyleSelectors[tileUnknownBuffer.GetType()->GetIndex()],
+                           *row,
                            tileUnknownBuffer,
                            projection);
   }
@@ -1685,8 +2044,16 @@ namespace osmscout {
   LineStyleRef StyleConfig::GetCoastlineLineStyle(const Projection& projection) const
   {
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      const auto *row=LookupRow(wayLineStyleSelector,
+                                wayLineStylePositions,
+                                coastlineBuffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       LineStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         wayLineStyleSelector[coastlineBuffer.GetType()->GetIndex()],
+                                         *row,
                                          coastlineBuffer,
                                          projection);
 
@@ -1701,8 +2068,16 @@ namespace osmscout {
   LineStyleRef StyleConfig::GetOSMTileBorderLineStyle(const Projection& projection) const
   {
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      const auto *row=LookupRow(wayLineStyleSelector,
+                                wayLineStylePositions,
+                                osmTileBorderBuffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       LineStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         wayLineStyleSelector[osmTileBorderBuffer.GetType()->GetIndex()],
+                                         *row,
                                          osmTileBorderBuffer,
                                          projection);
 
@@ -1717,8 +2092,16 @@ namespace osmscout {
   LineStyleRef StyleConfig::GetOSMSubTileBorderLineStyle(const Projection& projection) const
   {
     for (const auto& wayLineStyleSelector : wayLineStyleSelectors) {
+      const auto *row=LookupRow(wayLineStyleSelector,
+                                wayLineStylePositions,
+                                osmSubTileBorderBuffer.GetType()->GetIndex());
+
+      if (row==nullptr) {
+        continue;
+      }
+
       LineStyleRef style=GetFeatureStyle(styleResolveContext,
-                                         wayLineStyleSelector[osmSubTileBorderBuffer.GetType()->GetIndex()],
+                                         *row,
                                          osmSubTileBorderBuffer,
                                          projection);
 
@@ -1737,13 +2120,21 @@ namespace osmscout {
     selectors.clear();
 
     for (const auto& slotEntry : nodeTextStyleSelectors) {
-      size_t l=level;
+      const auto *row=LookupRow(slotEntry,
+                                nodeTextStylePositions,
+                                type->GetIndex());
 
-      if (l>=slotEntry[type->GetIndex()].size()) {
-        l=slotEntry[type->GetIndex()].size()-1;
+      if (row==nullptr) {
+        continue;
       }
 
-      for (const auto& selector : slotEntry[type->GetIndex()][l]) {
+      size_t l=level;
+
+      if (l>=row->size()) {
+        l=row->size()-1;
+      }
+
+      for (const auto& selector : (*row)[l]) {
         selectors.push_back(selector);
       }
     }
@@ -1755,11 +2146,19 @@ namespace osmscout {
   {
     selectors.clear();
 
-    if (level>=areaFillStyleSelectors[type->GetIndex()].size()) {
-      level=areaFillStyleSelectors[type->GetIndex()].size()-1;
+    const auto *row=LookupRow(areaFillStyleSelectors,
+                              areaFillStylePositions,
+                              type->GetIndex());
+
+    if (row==nullptr) {
+      return;
     }
 
-    for (const auto& selector : areaFillStyleSelectors[type->GetIndex()][level]) {
+    if (level>=row->size()) {
+      level=row->size()-1;
+    }
+
+    for (const auto& selector : (*row)[level]) {
       selectors.push_back(selector);
     }
   }
@@ -1771,13 +2170,21 @@ namespace osmscout {
     selectors.clear();
 
     for (const auto& slotEntry : areaTextStyleSelectors) {
-      size_t l=level;
+      const auto *row=LookupRow(slotEntry,
+                                areaTextStylePositions,
+                                type->GetIndex());
 
-      if (l>=slotEntry[type->GetIndex()].size()) {
-        l=slotEntry[type->GetIndex()].size()-1;
+      if (row==nullptr) {
+        continue;
       }
 
-      for (const auto& selector : slotEntry[type->GetIndex()][l]) {
+      size_t l=level;
+
+      if (l>=row->size()) {
+        l=row->size()-1;
+      }
+
+      for (const auto& selector : (*row)[l]) {
         selectors.push_back(selector);
       }
     }
