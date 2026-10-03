@@ -5958,6 +5958,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      std::vector<double> routeInstructionLats;
+      std::vector<double> routeInstructionLons;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -6101,18 +6103,30 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
+              // Per-instruction positions (spec: route-analysis — every step is
+              // locatable on the map). One entry per line pushed by NextLine(),
+              // so the arrays align with the instruction lines of `lines` (the
+              // "--- Route ---" header is not an instruction).
+              std::vector<double> instructionLats;
+              std::vector<double> instructionLons;
+              double nodeLat = 0.0;
+              double nodeLon = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
                 prevDistance = distance;
                 prevTime = time;
                 distance = node.GetDistance().AsMeter() / 1000.0;
                 time = node.GetTime();
+                nodeLat = node.GetLocation().GetLat();
+                nodeLon = node.GetLocation().GetLon();
               }
 
               void NextLine() {
                 std::ostringstream oss;
                 oss.str("");
                 lines.push_back(oss.str());
+                instructionLats.push_back(nodeLat);
+                instructionLons.push_back(nodeLon);
                 lineCount++;
               }
 
@@ -6211,6 +6225,19 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             generator.GenerateDescription(*descResult.GetDescription(), descCb);
 
             routeDescriptionLines = std::move(descCb.lines);
+            routeInstructionLats = std::move(descCb.instructionLats);
+            routeInstructionLons = std::move(descCb.instructionLons);
+            // The arrays must have one entry per instruction line; a mismatch
+            // would shift every later step, so the positions are dropped instead
+            // (the step list then simply has no map positions).
+            if (routeInstructionLats.size() != descCb.lineCount ||
+                routeInstructionLons.size() != descCb.lineCount) {
+              osmscout::log.Warn() << "calculateRouteWithObjectsWithProfile: instruction position count ("
+                                   << routeInstructionLats.size() << ") does not match instruction line count ("
+                                   << descCb.lineCount << ") - per-step positions dropped";
+              routeInstructionLats.clear();
+              routeInstructionLons.clear();
+            }
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -6307,9 +6334,30 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // Per-instruction positions (spec: route-analysis). The vectors are empty
+      // when the alignment check dropped them, and the Java arrays then stay
+      // null - the app shows no per-step positions instead of shifted ones.
+      jdoubleArray instrLats = nullptr;
+      jdoubleArray instrLons = nullptr;
+      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
+      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size())) {
+        instrLats = threadEnv->NewDoubleArray(instrCount);
+        instrLons = threadEnv->NewDoubleArray(instrCount);
+        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
+        for (jsize i = 0; i < instrCount; i++) {
+          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
+          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
+        }
+        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
+        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
+      }
+
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
+      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
+      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
@@ -6317,6 +6365,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
+      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
+      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -6477,6 +6527,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      std::vector<double> routeInstructionLats;
+      std::vector<double> routeInstructionLons;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -6703,12 +6755,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
               bool lineDrawn = false;
+              // Per-instruction positions (spec: route-analysis — every step is
+              // locatable on the map). One entry per line pushed by NextLine(),
+              // so the arrays align with the instruction lines of `lines` (the
+              // "--- Route ---" header is not an instruction).
+              std::vector<double> instructionLats;
+              std::vector<double> instructionLons;
+              double nodeLat = 0.0;
+              double nodeLon = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
                 prevDistance = distance;
                 prevTime = time;
                 distance = node.GetDistance().AsMeter() / 1000.0;
                 time = node.GetTime();
+                nodeLat = node.GetLocation().GetLat();
+                nodeLon = node.GetLocation().GetLon();
               }
 
               void NextLine() {
@@ -6716,6 +6778,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 // Description text comes first as primary information
                 oss.str("");
                 lines.push_back(oss.str());
+                instructionLats.push_back(nodeLat);
+                instructionLons.push_back(nodeLon);
                 lineCount++;
               }
 
@@ -6813,8 +6877,20 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             osmscout::RouteDescriptionPostprocessor generator;
             generator.GenerateDescription(*descResult.GetDescription(), descCb);
 
-            // Store description lines for marshalling
             routeDescriptionLines = std::move(descCb.lines);
+            routeInstructionLats = std::move(descCb.instructionLats);
+            routeInstructionLons = std::move(descCb.instructionLons);
+            // The arrays must have one entry per instruction line; a mismatch
+            // would shift every later step, so the positions are dropped instead
+            // (the step list then simply has no map positions).
+            if (routeInstructionLats.size() != descCb.lineCount ||
+                routeInstructionLons.size() != descCb.lineCount) {
+              osmscout::log.Warn() << "calculateRouteWithObjectsAsync: instruction position count ("
+                                   << routeInstructionLats.size() << ") does not match instruction line count ("
+                                   << descCb.lineCount << ") - per-step positions dropped";
+              routeInstructionLats.clear();
+              routeInstructionLons.clear();
+            }
             osmscout::log.Warn() << "calculateRouteAsync: generated "
                                  << routeDescriptionLines.size() << " description lines";
 
@@ -6916,9 +6992,30 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // Per-instruction positions (spec: route-analysis). The vectors are empty
+      // when the alignment check dropped them, and the Java arrays then stay
+      // null - the app shows no per-step positions instead of shifted ones.
+      jdoubleArray instrLats = nullptr;
+      jdoubleArray instrLons = nullptr;
+      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
+      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size())) {
+        instrLats = threadEnv->NewDoubleArray(instrCount);
+        instrLons = threadEnv->NewDoubleArray(instrCount);
+        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
+        for (jsize i = 0; i < instrCount; i++) {
+          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
+          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
+        }
+        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
+        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
+      }
+
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
+      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
+      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
@@ -6926,6 +7023,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
+      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
+      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
