@@ -28,6 +28,7 @@
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscout/feature/NameFeature.h>
 #include <osmscout/projection/MercatorProjection.h>
 #include <osmscout/util/Color.h>
 #include <osmscout/util/Magnification.h>
@@ -161,17 +162,48 @@ namespace {
     return buffer;
   }
 
+  /**
+   * A buffer of the given type carrying a name value, which is what a rule that selects by the name
+   * feature is matched against.
+   */
+  osmscout::FeatureValueBuffer MakeNamedBuffer(const osmscout::TypeInfoRef& typeInfo)
+  {
+    osmscout::FeatureValueBuffer buffer;
+    size_t                      nameIndex=0;
+
+    buffer.SetType(typeInfo);
+
+    REQUIRE(typeInfo->GetFeature("Name",nameIndex));
+
+    auto *nameValue=static_cast<osmscout::NameFeatureValue*>(buffer.AllocateValue(nameIndex));
+
+    nameValue->SetName("Test");
+
+    return buffer;
+  }
+
+  /** The fill style the configuration resolves for the given object at the given zoom. */
+  FillStyleRef ResolveFill(const osmscout::StyleConfigRef& styleConfig,
+                           const osmscout::TypeInfoRef& typeInfo,
+                           const osmscout::FeatureValueBuffer& buffer,
+                           const Magnification& magnification)
+  {
+    auto projection=MakeProjection(magnification);
+
+    return styleConfig->GetAreaFillStyle(typeInfo,
+                                         buffer,
+                                         projection);
+  }
+
   /** The fill style the configuration resolves for the area type at the given zoom. */
   FillStyleRef ResolveFill(const osmscout::StyleConfigRef& styleConfig,
                            const osmscout::TypeInfoRef& typeInfo,
                            const Magnification& magnification)
   {
-    auto                      buffer=MakeBuffer(typeInfo);
-    auto                      projection=MakeProjection(magnification);
-
-    return styleConfig->GetAreaFillStyle(typeInfo,
-                                         buffer,
-                                         projection);
+    return ResolveFill(styleConfig,
+                       typeInfo,
+                       MakeBuffer(typeInfo),
+                       magnification);
   }
 
   /** The text styles the configuration resolves for the area type at the given zoom. */
@@ -200,6 +232,39 @@ namespace {
            "      [TYPE test_area] AREA { color: #ff0000; }\n"
            "      [TYPE test_area] AREA.TEXT { label: Name.name; color: #0000ff; size: 1.0; }\n"
            "    }\n";
+  }
+
+  osmscout::FeatureRef GetFeatureRef(const osmscout::TypeConfigRef& typeConfig,
+                                     const std::string& name)
+  {
+    osmscout::FeatureRef feature=typeConfig->GetFeature(name);
+
+    REQUIRE(feature!=nullptr);
+
+    return feature;
+  }
+
+  /**
+   * The type configuration of the feature case: the area type carries the name feature, and one
+   * further area type does not carry it.
+   */
+  TestTypes MakeTypesWithNamedArea()
+  {
+    TestTypes types;
+
+    types.typeConfig=std::make_shared<osmscout::TypeConfig>();
+
+    types.areaType=std::make_shared<osmscout::TypeInfo>(AREA_TYPE_NAME);
+    types.areaType->CanBeArea(true);
+    types.areaType->AddFeature(GetFeatureRef(types.typeConfig,"Name"));
+    types.typeConfig->RegisterType(types.areaType);
+
+    auto unnamedType=std::make_shared<osmscout::TypeInfo>("test_unnamed_area");
+
+    unnamedType->CanBeArea(true);
+    types.typeConfig->RegisterType(unnamedType);
+
+    return types;
   }
 }
 
@@ -283,4 +348,128 @@ TEST_CASE("Two rules for one type compose the declared attributes","[StyleConfig
   REQUIRE(textStyles.front()->GetTextColor().ToHexString()==Color::FromHexString("#0000ff").ToHexString());
   REQUIRE(textStyles.front()->GetPriority()==5);
   REQUIRE(textStyles.front()->GetSize()==1.0);
+}
+
+/**
+ * The build diagnostic of a loaded configuration reports the work the build did, so the cases below
+ * can assert it (spec style-configuration, requirement "Style-configuration build cost is
+ * observable").
+ */
+TEST_CASE("The build diagnostic reports what a style configuration prepared","[StyleConfigLookupCost]")
+{
+  const auto types=MakeTypes();
+  auto       styleConfig=LoadStyleSheet(types.typeConfig,
+                                        WriteStyleSheet("StyleConfigLookupCostDiagnostics.oss",
+                                                        FillAndTextStyleSheet()));
+
+  const auto& diagnostics=styleConfig->GetBuildDiagnostics();
+
+  INFO("slots " << diagnostics.preparedSlots
+                << ", evaluations " << diagnostics.typeConditionEvaluations
+                << ", table bytes " << diagnostics.tableBytes
+                << ", type set bytes " << diagnostics.typeSetBytes);
+
+  REQUIRE(diagnostics.preparedSlots>0);
+  REQUIRE(diagnostics.typeConditionEvaluations>0);
+  REQUIRE(diagnostics.tableBytes>0);
+  REQUIRE(diagnostics.typeSetBytes>0);
+}
+
+/**
+ * Types the style sheet does not reference add no work to the build: neither prepares a slot nor is
+ * evaluated against a type condition (spec style-configuration, requirement "Defined but unreferenced
+ * types add no build work").
+ */
+TEST_CASE("Defined but unreferenced types add no build work","[StyleConfigLookupCost]")
+{
+  const auto smallTypes=MakeTypes();
+  const auto largeTypes=MakeTypes(50);
+
+  auto       small=LoadStyleSheet(smallTypes.typeConfig,
+                                  WriteStyleSheet("StyleConfigLookupCostScalingSmall.oss",
+                                                  FillAndTextStyleSheet()));
+  auto       large=LoadStyleSheet(largeTypes.typeConfig,
+                                  WriteStyleSheet("StyleConfigLookupCostScalingLarge.oss",
+                                                  FillAndTextStyleSheet()));
+
+  const auto& smallDiagnostics=small->GetBuildDiagnostics();
+  const auto& largeDiagnostics=large->GetBuildDiagnostics();
+
+  INFO("small type set: slots " << smallDiagnostics.preparedSlots
+                                << ", evaluations " << smallDiagnostics.typeConditionEvaluations
+                                << ", table bytes " << smallDiagnostics.tableBytes
+                                << ", type set bytes " << smallDiagnostics.typeSetBytes);
+  INFO("large type set: slots " << largeDiagnostics.preparedSlots
+                                << ", evaluations " << largeDiagnostics.typeConditionEvaluations
+                                << ", table bytes " << largeDiagnostics.tableBytes
+                                << ", type set bytes " << largeDiagnostics.typeSetBytes);
+
+  REQUIRE(smallDiagnostics.preparedSlots==largeDiagnostics.preparedSlots);
+  REQUIRE(smallDiagnostics.typeConditionEvaluations==largeDiagnostics.typeConditionEvaluations);
+  REQUIRE(smallDiagnostics.tableBytes==largeDiagnostics.tableBytes);
+
+  // The per-level type sets stay sized by the defined type count until the set representation is
+  // changed (a separate change), so their size is reported, not asserted here
+  INFO("type set bytes: " << smallDiagnostics.typeSetBytes << " vs " << largeDiagnostics.typeSetBytes);
+}
+
+/**
+ * A type the style sheet does not reference resolves to no style, in a debug build as well as in a
+ * release build (spec style-configuration, requirement "A type the stylesheet does not reference
+ * resolves to no style").
+ */
+TEST_CASE("A type the stylesheet does not reference resolves to no style","[StyleConfigLookupCost]")
+{
+  const auto types=MakeTypes(2);
+  auto       styleConfig=LoadStyleSheet(types.typeConfig,
+                                        WriteStyleSheet("StyleConfigLookupCostUnreferenced.oss",
+                                                        FillAndTextStyleSheet()));
+
+  auto       unreferencedType=types.typeConfig->GetTypeInfo("test_unreferenced_0");
+
+  REQUIRE(unreferencedType!=nullptr);
+
+  REQUIRE(ResolveFill(styleConfig,
+                      unreferencedType,
+                      Magnification(Magnification::magDetail))==nullptr);
+  REQUIRE(ResolveTexts(styleConfig,
+                       unreferencedType,
+                       Magnification(Magnification::magDetail)).empty());
+
+  // The same configuration still serves the type the sheet does reference
+  REQUIRE(ResolveFill(styleConfig,
+                      types.areaType,
+                      Magnification(Magnification::magDetail))!=nullptr);
+}
+
+/**
+ * A rule that selects by a feature covers exactly the types that carry the feature (spec
+ * style-configuration, requirement "A rule that selects by feature covers the types that carry the
+ * feature").
+ */
+TEST_CASE("A rule that selects by feature covers the types that carry the feature","[StyleConfigLookupCost]")
+{
+  const auto types=MakeTypesWithNamedArea();
+  auto       styleConfig=LoadStyleSheet(types.typeConfig,
+                                        WriteStyleSheet("StyleConfigLookupCostFeature.oss",
+                                                        "  STYLE\n"
+                                                        "    [MAG detail-] {\n"
+                                                        "      [FEATURE Name] AREA { color: #00ff00; }\n"
+                                                        "    }\n"));
+
+  auto       unnamedType=types.typeConfig->GetTypeInfo("test_unnamed_area");
+
+  REQUIRE(unnamedType!=nullptr);
+
+  FillStyleRef namedFill=ResolveFill(styleConfig,
+                                     types.areaType,
+                                     MakeNamedBuffer(types.areaType),
+                                     Magnification(Magnification::magDetail));
+
+  REQUIRE(namedFill!=nullptr);
+  REQUIRE(namedFill->GetFillColor().ToHexString()==Color::FromHexString("#00ff00").ToHexString());
+
+  REQUIRE(ResolveFill(styleConfig,
+                      unnamedType,
+                      Magnification(Magnification::magDetail))==nullptr);
 }
