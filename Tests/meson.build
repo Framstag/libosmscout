@@ -1233,6 +1233,20 @@ if buildMapOpenGL and glfwDep.found()
   test('Check OpenGL area visibility', OpenGLAreaVisibilityTest)
 endif
 
+if buildMapOpenGL
+  # The triangulation the OpenGL backend uses makes no GL call itself, but the test links the OpenGL
+  # library to reach it. Unlike the visibility test this one needs no GLFW and no GL context.
+  PolygonTriangulationTest = executable('PolygonTriangulationTest',
+               'src/PolygonTriangulationTest.cpp',
+               include_directories: [testIncDir, osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, openGLDep, glmDep, glewDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check polygon triangulation', PolygonTriangulationTest)
+endif
+
 if buildMapQt
   MapPainterShieldQtTest = executable('MapPainterShieldQtTest',
                'src/MapPainterShieldQtTest.cpp',
