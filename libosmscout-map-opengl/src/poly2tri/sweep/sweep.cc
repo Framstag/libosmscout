@@ -112,6 +112,16 @@ void Sweep::EdgeEvent(SweepContext& tcx, Edge* edge, Node* node)
 
 void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangle, Point& point)
 {
+  // Local deviation from upstream poly2tri (libosmscout, TODO §97): the sweep loses the triangle of the
+  // edge it is processing when the neighbour it rotates to does not exist - the assignments of
+  // NeighborAcross below and of NeighborCW/NeighborCCW in the o1 == o2 branch can yield a null
+  // triangle, which upstream then dereferences on the next recursion and crashes the caller. The
+  // library reports the input it cannot sweep by throwing, so a missing triangle does the same, and
+  // the caller skips the polygon instead of terminating. Keep this guard when updating the copy.
+  if (triangle == nullptr) {
+    throw std::runtime_error("EdgeEvent - the sweep lost the triangle of the edge");
+  }
+
   if (IsEdgeSideOfTriangle(*triangle, ep, eq)) {
     return;
   }

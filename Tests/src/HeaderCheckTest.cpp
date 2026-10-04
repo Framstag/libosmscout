@@ -231,7 +231,6 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutmapgdi => osmscout.io",
     "osmscoutmapgdi => osmscoutmap",
 
-    "osmscoutmapopengl => osmscout.system",
     "osmscoutmapopengl => osmscout.log",
     "osmscoutmapopengl => osmscout.util",
     "osmscoutmapopengl => osmscout.projection",

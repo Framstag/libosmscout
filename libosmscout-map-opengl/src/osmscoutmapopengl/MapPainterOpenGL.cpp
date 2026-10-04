@@ -924,6 +924,13 @@ namespace osmscout {
 
             std::vector<GLfloat> points = osmscout::Triangulate::TriangulatePolygon(vertices);
 
+            if (points.empty()) {
+              // The triangulation rejected the polygon, so this node's fill contributes nothing; the
+              // rest of the frame - its icon, its label and every other object - is drawn as before.
+              log.Warn() << "Skipping node " << node->GetFileOffset()
+                         << ", triangulation of its " << vertices.size() << " points failed";
+            }
+
             Color color = fillStyle->GetFillColor();
 
             for (size_t t = 0; t < points.size(); t++) {
