@@ -558,6 +558,9 @@ namespace osmscout {
     double                 maxWayDisplayWidth=0.0; //!< Widest summed display width [mm] of the line styles of the level
     double                 maxIconWidth=0.0;       //!< Widest icon width [pixels] of the icon styles of the level
     double                 maxIconHeight=0.0;      //!< Widest icon height [pixels] of the icon styles of the level
+    double                 maxAreaBorderWidth=0.0; //!< Widest area border width [mm] of the border styles of the level
+    double                 maxAreaBorderDisplayOffset=0.0; //!< Largest area border display offset [mm] of the border styles of the level, as its magnitude
+    double                 maxAreaBorderOffset=0.0;        //!< Largest area border offset [map units] of the border styles of the level, as its magnitude
     std::vector<SymbolRef> symbols;                //!< Symbols the level can resolve, their extent depends on the projection
   };
 
@@ -646,12 +649,6 @@ namespace osmscout {
     IconStyleLookupTable                       areaIconStyleSelectors;
     PathTextStyleLookupTable                   areaBorderTextStyleSelectors;
     PathSymbolStyleLookupTable                 areaBorderSymbolStyleSelectors;
-
-    /**
-     * Maximum width of the area border styles that can be resolved at each magnification level, in
-     * millimetres, indexed by level. Filled by PostprocessAreas().
-     */
-    std::vector<double> maxAreaBorderWidthMM;
 
   public:
     std::vector<TypeInfoSet>                   areaTypeSets;
@@ -852,9 +849,9 @@ namespace osmscout {
      * magnification level, in millimetres.
      *
      * No area border style that GetAreaBorderStyles() can resolve at this level is wider than this
-     * value. The painter uses it as the tolerance of its early visibility decision: an area that is
-     * not visible even when enlarged by half of this width cannot be visible through any of the
-     * border styles of any of its rings. The value is derived from the loaded style sheet and is
+     * value. It is the width of the widest area border style the level can resolve (see
+     * VisibilityBounds::maxAreaBorderWidth), i.e. an upper bound of the width of every border style
+     * a ring of the level resolves. The value is derived from the loaded style sheet and is
      * therefore DPI independent; the caller converts it to pixels with the projection of the frame.
      *
      * @param magnification the magnification to query

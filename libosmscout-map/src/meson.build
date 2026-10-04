@@ -3,6 +3,7 @@ osmscoutmapSrc = [
             'src/osmscoutmap/oss/Parser.cpp',
             'src/osmscoutmap/LabelLayouter.cpp',
             'src/osmscoutmap/LabelLayouterHelper.cpp',
+            'src/osmscoutmap/AreaBorderReach.cpp',
             'src/osmscoutmap/MapPainter.cpp',
             'src/osmscoutmap/MapPainterStatistics.cpp',
             'src/osmscoutmap/MapParameter.cpp',
