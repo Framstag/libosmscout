@@ -6139,17 +6139,24 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                if (segDist > 0.01 && time - prevTime > osmscout::Duration::zero()) {
+                auto dtS = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
+                if (segDist > 0.01 && dtS.count() >= 1) {
                   oss << ", ";
                 }
-                if (time - prevTime > osmscout::Duration::zero()) {
+                if (dtS.count() >= 1) {
                   auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
                   if (dtM.count() >= 60) {
                     auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
                     auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
                     oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else {
+                  } else if (dtM.count() >= 1) {
                     oss << dtM.count() << " min";
+                  } else {
+                    // A segment shorter than a minute used to print "0 min", so every step of
+                    // a city route looked like it took no time (owner finding, 2026-10-03).
+                    // Seconds keep the per-step time meaningful below one minute; a segment
+                    // under a second prints no time at all instead of a meaningless "0 s".
+                    oss << dtS.count() << " s";
                   }
                 }
                 oss << "]";
@@ -6792,17 +6799,24 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                if (segDist > 0.01 && time - prevTime > osmscout::Duration::zero()) {
+                auto dtS = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
+                if (segDist > 0.01 && dtS.count() >= 1) {
                   oss << ", ";
                 }
-                if (time - prevTime > osmscout::Duration::zero()) {
+                if (dtS.count() >= 1) {
                   auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
                   if (dtM.count() >= 60) {
                     auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
                     auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
                     oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else {
+                  } else if (dtM.count() >= 1) {
                     oss << dtM.count() << " min";
+                  } else {
+                    // A segment shorter than a minute used to print "0 min", so every step of
+                    // a city route looked like it took no time (owner finding, 2026-10-03).
+                    // Seconds keep the per-step time meaningful below one minute; a segment
+                    // under a second prints no time at all instead of a meaningless "0 s".
+                    oss << dtS.count() << " s";
                   }
                 }
                 oss << "]";
