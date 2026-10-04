@@ -5637,6 +5637,15 @@ private:
   jobject callback;
   RouteCallbackMethods methods;
 
+  // Rate limit, see Progress(): the last percentage handed over to Java and when
+  // it was handed over. -1 means "nothing reported yet", so the first call goes
+  // through immediately.
+  int lastPercent = -1;
+  std::chrono::steady_clock::time_point lastReport;
+
+  /** Minimum interval between two progress reports (rate limit, see Progress()). */
+  static constexpr std::chrono::milliseconds minReportInterval{100};
+
 public:
   JavaRoutingProgress(JavaVM *jvm, jobject callback, const RouteCallbackMethods &methods)
     : jvm(jvm), callback(callback), methods(methods)
@@ -5648,20 +5657,42 @@ public:
     // no-op
   }
 
+  /**
+   * The router calls this once per successfully relaxed edge — thousands to
+   * millions of times for a long route, and always from the routing worker
+   * thread. Every call would cross JNI into Java, so only a *changed*
+   * percentage is reported, and at most once per rate-limit interval: the
+   * callback then means "the progress moved" instead of "a node was visited",
+   * and the routing thread keeps its time for routing. The percentage is capped
+   * at 99 — 100 % stays reserved for the route that actually arrived.
+   */
   void Progress(const osmscout::Distance &currentMaxDistance,
                 const osmscout::Distance &overallDistance) override
   {
-    JNIEnv *env;
-    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
-      return;
-    }
-
-    int percent = 0;
     double overall = overallDistance.AsMeter();
+    int percent = 0;
     if (overall > 0.0) {
       percent = static_cast<int>(
           currentMaxDistance.AsMeter() / overall * 100.0);
       if (percent > 99) percent = 99;
+    }
+
+    // currentMaxDistance only grows, so a repeated or lower value carries no news.
+    if (percent <= lastPercent) {
+      return;
+    }
+
+    auto now = std::chrono::steady_clock::now();
+    if (lastPercent >= 0 && (now - lastReport) < minReportInterval) {
+      return;
+    }
+
+    lastPercent = percent;
+    lastReport = now;
+
+    JNIEnv *env;
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+      return;
     }
 
     env->CallVoidMethod(callback, methods.onProgress, percent);
