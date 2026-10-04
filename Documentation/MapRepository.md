@@ -447,6 +447,14 @@ filesystem (a cross-filesystem rename would fail with EXDEV).
   The tunables are `MAPGEN_CONNECT_TIMEOUT`, `MAPGEN_HASH_TIMEOUT`,
   `MAPGEN_IDLE_TIMEOUT`, `MAPGEN_IDLE_SPEED_LIMIT`, `MAPGEN_DOWNLOAD_ATTEMPTS`
   and `MAPGEN_DOWNLOAD_RETRY_WAIT`.
+- A kept source is resumed only while it belongs to the source being fetched. The
+  work area records which published hash a source file belongs to, beside the
+  file (the record is written before the transfer starts, because the run that is
+  killed mid-download is the run that leaves a partial behind). A file whose
+  record names another source - the complete source of an earlier check, left by
+  a failed import - is discarded before the transfer: resuming onto it would
+  append the new source to the old one and produce a download that matches no
+  hash, which then reads in the log as a corrupt download that never was one.
 - A source that a failed run left in the work area is reused if it still matches
   the published hash, so a failed import does not cost the download again. A run
   that placed the database removes the source and the import output, so the work
