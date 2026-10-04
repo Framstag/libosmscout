@@ -576,6 +576,16 @@ else()
   message("Skip OpenGLAreaVisibilityTest test, libosmscout-map-opengl is missing.")
 endif()
 
+#---- PolygonTriangulationTest
+#
+# The triangulation the OpenGL backend uses makes no GL call itself, but the test links the OpenGL
+# library to reach it, so it is registered under the same condition as that backend's other tests.
+if(${OSMSCOUT_BUILD_MAP_OPENGL} AND TARGET OSMScout::MapOpenGL)
+  osmscout_test_project(NAME PolygonTriangulationTest SOURCES src/PolygonTriangulationTest.cpp TARGET OSMScout::MapOpenGL)
+else()
+  message("Skip PolygonTriangulationTest, libosmscout-map-opengl is missing.")
+endif()
+
 #---- StyleConfigVisibilityBoundsTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME StyleConfigVisibilityBoundsTest SOURCES src/StyleConfigVisibilityBoundsTest.cpp TARGET OSMScout::Map)
