@@ -6133,6 +6133,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
           }
 
           routeData = std::move(result.GetRoute());
+          // The router's own accumulated distance - the fallback for a route whose description
+          // produced nothing, never the route's length (spec: osmscout-jni - One route length for a
+          // calculated route; measured on device 2026-10-05 at 0.748x of the drawn polyline on a
+          // ~70 km route, so the length is taken from the description below).
           totalDistance = result.GetOverallDistance().AsMeter();
           success = true;
 
@@ -6215,12 +6219,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               std::vector<double> instructionLons;
               double nodeLat = 0.0;
               double nodeLon = 0.0;
+              // The description's own total - the cumulative distance at its last node, in metres.
+              // The route's length is taken from the description, not from the router's separately
+              // accumulated distance (spec: osmscout-jni - One route length for a calculated route).
+              double lastNodeDistanceMeters = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
                 // The per-step reference is advanced when a LINE is emitted (see
                 // AppendDistanceTime), never here: this callback runs for every route node,
                 // while only the nodes carrying a description produce a line.
                 distance = node.GetDistance().AsMeter() / 1000.0;
+                // The nodes are walked in order, so the largest cumulative distance seen is the
+                // description's total, which is the route's length (see the derivation below).
+                if (distance * 1000.0 > lastNodeDistanceMeters) {
+                  lastNodeDistanceMeters = distance * 1000.0;
+                }
                 time = node.GetTime();
                 nodeLat = node.GetLocation().GetLat();
                 nodeLon = node.GetLocation().GetLon();
@@ -6368,6 +6381,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               routeInstructionLons.clear();
               routeInstructionDistances.clear();
               routeInstructionTimes.clear();
+            }
+
+            // The route's length is the description's own total (spec: osmscout-jni - One route
+            // length for a calculated route): the figure the step list sums to and the geometry the
+            // app draws, lists and highlights. The per-step arrays are aligned here (the guard above
+            // cleared them otherwise), so the published total is exactly what the step list sums to.
+            if (!routeInstructionDistances.empty()) {
+              double legsSumMeters = 0.0;
+              for (double leg : routeInstructionDistances) {
+                legsSumMeters += leg;
+              }
+              if (legsSumMeters > 0.0) {
+                totalDistance = legsSumMeters;
+              }
+            } else if (descCb.lastNodeDistanceMeters > 0.0) {
+              totalDistance = descCb.lastNodeDistanceMeters;
             }
 
             // Keep a copy of the route description for live navigation
@@ -6816,6 +6845,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           osmscout::log.Warn() << "calculateRouteAsync: route OK, distance="
                                << result.GetOverallDistance().AsMeter() << "m";
           routeData = std::move(result.GetRoute());
+          // The router's own accumulated distance - the fallback for a route whose description
+          // produced nothing, never the route's length (spec: osmscout-jni - One route length for a
+          // calculated route; measured on device 2026-10-05 at 0.748x of the drawn polyline on a
+          // ~70 km route, so the length is taken from the description below).
           totalDistance = result.GetOverallDistance().AsMeter();
           success = true;
 
@@ -6907,6 +6940,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
               bool lineDrawn = false;
+              // The description's own total - the cumulative distance at its last node, in metres.
+              // The route's length is taken from the description, not from the router's separately
+              // accumulated distance (spec: osmscout-jni - One route length for a calculated route).
+              double lastNodeDistanceMeters = 0.0;
               // Per-step values (spec: osmscout-jni — Per-step leg values on a calculated
               // route). One entry per line pushed by NextLine(), index-aligned with the
               // instruction lines and with the positions below; the distance is the leg that
@@ -6927,6 +6964,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 // AppendDistanceTime), never here: this callback runs for every route node,
                 // while only the nodes carrying a description produce a line.
                 distance = node.GetDistance().AsMeter() / 1000.0;
+                // The nodes are walked in order, so the largest cumulative distance seen is the
+                // description's total, which is the route's length (see the derivation below).
+                if (distance * 1000.0 > lastNodeDistanceMeters) {
+                  lastNodeDistanceMeters = distance * 1000.0;
+                }
                 time = node.GetTime();
                 nodeLat = node.GetLocation().GetLat();
                 nodeLon = node.GetLocation().GetLon();
@@ -7075,6 +7117,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               routeInstructionLons.clear();
               routeInstructionDistances.clear();
               routeInstructionTimes.clear();
+            }
+
+            // The route's length is the description's own total (spec: osmscout-jni - One route
+            // length for a calculated route): the figure the step list sums to and the geometry the
+            // app draws, lists and highlights. The per-step arrays are aligned here (the guard above
+            // cleared them otherwise), so the published total is exactly what the step list sums to.
+            if (!routeInstructionDistances.empty()) {
+              double legsSumMeters = 0.0;
+              for (double leg : routeInstructionDistances) {
+                legsSumMeters += leg;
+              }
+              if (legsSumMeters > 0.0) {
+                totalDistance = legsSumMeters;
+              }
+            } else if (descCb.lastNodeDistanceMeters > 0.0) {
+              totalDistance = descCb.lastNodeDistanceMeters;
             }
             osmscout::log.Warn() << "calculateRouteAsync: generated "
                                  << routeDescriptionLines.size() << " description lines";
