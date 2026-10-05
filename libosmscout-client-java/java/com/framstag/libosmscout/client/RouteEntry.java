@@ -41,6 +41,27 @@ public class RouteEntry {
      */
     public double[] instructionLons;
 
+    /**
+     * Distance in meters of the leg that <em>ends</em> at each description line's manoeuvre.
+     * <p>
+     * Index-aligned with {@link #instructionLats} and with the instruction lines of
+     * {@link #descriptions}. The value is the route distance from the previous instruction's
+     * manoeuvre to this one, so the entries add up to {@link #distance} (the start line owns a
+     * zero-length leg). It is never a distance between two route nodes that carry no
+     * instruction, and the array is {@code null} under the same condition as
+     * {@link #instructionLats}.
+     */
+    public double[] instructionDistances;
+
+    /**
+     * Estimated travel time in seconds of that same leg, index-aligned with
+     * {@link #instructionDistances}. The entries add up to {@link #duration}.
+     * <p>
+     * Zero for a leg whose travel time is below a second, and {@code null} under the same
+     * condition as {@link #instructionLats}.
+     */
+    public double[] instructionTimes;
+
     /** Opaque handle for starting live navigation on this route. Zero if navigation is not available. */
     public long routeHandle;
 
