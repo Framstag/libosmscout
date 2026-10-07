@@ -6133,11 +6133,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
           }
 
           routeData = std::move(result.GetRoute());
-          // The router's own accumulated distance - the fallback for a route whose description
-          // produced nothing, never the route's length (spec: osmscout-jni - One route length for a
-          // calculated route; measured on device 2026-10-05 at 0.748x of the drawn polyline on a
-          // ~70 km route, so the length is taken from the description below).
-          totalDistance = result.GetOverallDistance().AsMeter();
+          // The route's length is decided from the route itself, never from
+          // result.GetOverallDistance(): that figure is the start/target air-line estimate the
+          // router computes for its cost limit and its progress denominator
+          // (AbstractRoutingService.cpp:1088-1094; upstream prints it as "Air-line distance" in
+          // Demos/src/Routing.cpp), and publishing it as a length under-counted a ~70 km route by
+          // 25 % (spec: osmscout-jni - The published route length is a length of that route;
+          // measured on device 2026-10-05 at 0.748x of the drawn polyline). Below: the
+          // description's own total, else the length of the polyline this call publishes.
           success = true;
 
           // Generate route description
@@ -6494,6 +6497,25 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // The route's own length when its description produced nothing: the great-circle length of the
+      // polyline this call publishes, so a client that falls back to the total still receives a route
+      // length and never the start/target air-line estimate (spec: osmscout-jni - The published route
+      // length is a length of that route). With a description present, the total is already the
+      // description's own sum above.
+      if (totalDistance <= 0.0 && count > 1) {
+        double polylineMeters = 0.0;
+        for (jsize i = 1; i < count; i++) {
+          polylineMeters += osmscout::GetEllipsoidalDistance(
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
+                                 lonValues[static_cast<size_t>(i - 1)]),
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
+                                 lonValues[static_cast<size_t>(i)])).AsMeter();
+        }
+        if (polylineMeters > 0.0) {
+          totalDistance = polylineMeters;
+        }
+      }
+
       // Per-step values and per-instruction positions (spec: osmscout-jni - Per-step leg values
       // on a calculated route; spec: route-analysis - every step is locatable on the map). All
       // four vectors are empty when the alignment check dropped them, and the Java arrays then
@@ -6842,14 +6864,17 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             return;
           }
 
-          osmscout::log.Warn() << "calculateRouteAsync: route OK, distance="
+          osmscout::log.Warn() << "calculateRouteAsync: route OK, air-line estimate="
                                << result.GetOverallDistance().AsMeter() << "m";
           routeData = std::move(result.GetRoute());
-          // The router's own accumulated distance - the fallback for a route whose description
-          // produced nothing, never the route's length (spec: osmscout-jni - One route length for a
-          // calculated route; measured on device 2026-10-05 at 0.748x of the drawn polyline on a
-          // ~70 km route, so the length is taken from the description below).
-          totalDistance = result.GetOverallDistance().AsMeter();
+          // The route's length is decided from the route itself, never from
+          // result.GetOverallDistance(): that figure is the start/target air-line estimate the
+          // router computes for its cost limit and its progress denominator
+          // (AbstractRoutingService.cpp:1088-1094; upstream prints it as "Air-line distance" in
+          // Demos/src/Routing.cpp), and publishing it as a length under-counted a ~70 km route by
+          // 25 % (spec: osmscout-jni - The published route length is a length of that route;
+          // measured on device 2026-10-05 at 0.748x of the drawn polyline). Below: the
+          // description's own total, else the length of the polyline this call publishes.
           success = true;
 
           // Generate route description
@@ -7234,6 +7259,25 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
         lonValues[i] = points[static_cast<size_t>(i)].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
+
+      // The route's own length when its description produced nothing: the great-circle length of the
+      // polyline this call publishes, so a client that falls back to the total still receives a route
+      // length and never the start/target air-line estimate (spec: osmscout-jni - The published route
+      // length is a length of that route). With a description present, the total is already the
+      // description's own sum above.
+      if (totalDistance <= 0.0 && count > 1) {
+        double polylineMeters = 0.0;
+        for (jsize i = 1; i < count; i++) {
+          polylineMeters += osmscout::GetEllipsoidalDistance(
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
+                                 lonValues[static_cast<size_t>(i - 1)]),
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
+                                 lonValues[static_cast<size_t>(i)])).AsMeter();
+        }
+        if (polylineMeters > 0.0) {
+          totalDistance = polylineMeters;
+        }
+      }
 
       // Per-step values and per-instruction positions (spec: osmscout-jni - Per-step leg values
       // on a calculated route; spec: route-analysis - every step is locatable on the map). All
