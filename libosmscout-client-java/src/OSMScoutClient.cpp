@@ -2237,7 +2237,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -2266,7 +2266,10 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
 struct JavaRouteInstruction
 {
   double distanceTo{0.0};       // meters to next manoeuvre
-  double timeTo{0.0};           // seconds for this segment (per-step time)
+  double timeTo{0.0};           // seconds of the leg ending at this manoeuvre
+  double legDistance{0.0};      // meters of that leg (0 = unknown, see legStartKnown)
+  double nodeTimeSeconds{0.0};  // C++ internal: seconds from the route start at this
+                                // manoeuvre's node; the remaining-time estimate needs it
   std::string turnType;         // "sharpLeft", "left", "straightOn", etc.
   std::string streetName;       // street to turn into
   std::string description;      // "Turn left into Hauptstrasse"
@@ -2366,6 +2369,20 @@ public:
     double raw = nextAbs - nodeDist - travelled;
     next.distanceTo = (raw > 0.0) ? raw : 0.0;
 
+    // The next manoeuvre's time is the *remaining* time of its leg, consistent with the remaining
+    // distance above: interpolate the description's own node times at the current position (the
+    // same abscissa the distance path uses) and take the difference to the instruction's node.
+    // Publishing the leg's whole time instead left an arrival estimate that did not shrink while
+    // the manoeuvre was approached, next to a distance that did.
+    double timeAtPosition = TimeSeconds(previous->GetTime());
+    if (abscissa > 0.0 && nextNode != last) {
+      double nodeTime = timeAtPosition;
+      double nextNodeTime = TimeSeconds(nextNode->GetTime());
+      timeAtPosition = nodeTime + std::min(abscissa, 1.0) * (nextNodeTime - nodeTime);
+    }
+    double remainingTime = next.nodeTimeSeconds - timeAtPosition;
+    next.timeTo = (remainingTime > 0.0) ? remainingTime : 0.0;
+
     // Populate "next next" hint
     if (hasNextNext) {
       double nnAbs = it->distanceTo;
@@ -2382,6 +2399,13 @@ public:
   }
 
 private:
+  /** Whole seconds of a description duration (the granularity the route description has). */
+  static double TimeSeconds(const osmscout::Duration &duration)
+  {
+    return static_cast<double>(
+        std::chrono::duration_cast<std::chrono::seconds>(duration).count());
+  }
+
   // -- Turn type helpers (mirrors Demos/src/Navigation.cpp::MoveToTurnCommand) --
 
   static std::string MoveToTurnType(osmscout::RouteDescription::DirectionDescription::Move move)
@@ -2429,8 +2453,13 @@ private:
     osmscout::Distance stopAfter; // < 0 = unlimited
     osmscout::GeoCoord coord;
     osmscout::Distance distance;
+    osmscout::Distance prevInstructionDistance{osmscout::Distance::Zero()};
     osmscout::Duration prevTime{osmscout::Duration::zero()};
     osmscout::Duration time{osmscout::Duration::zero()};
+    // True while the walk contains the beginning of the leg that ends at the next emitted
+    // instruction. It does unless the walk starts mid-leg (see BeforeNode).
+    bool legStartKnown{true};
+    bool firstNode{true};
     std::string currentStreet;
 
   public:
@@ -2440,18 +2469,51 @@ private:
 
     void BeforeNode(const osmscout::RouteDescription::Node &node) override
     {
-      prevTime = time;
+      if (firstNode) {
+        // The walk's first node begins a leg only when it is the route's start: only then is
+        // the instruction before it part of the walk. A window that starts mid-leg (the
+        // instruction list is rebuilt from the current node on a route change, and the next
+        // instruction is generated from the current node) cannot know that leg, so its first
+        // emitted instruction reports unknown values instead of a cumulative-from-the-route-
+        // start number (owner finding 2026-10-04: "14 m / 2 s" per step).
+        legStartKnown = node.GetDistance().AsMeter() <= 0.0;
+        firstNode = false;
+      }
       time = node.GetTime();
       distance = node.GetDistance();
       coord = node.GetLocation();
     }
 
-    // Per-step time in seconds: time at this node minus time at the previous
-    // node (same segment semantics as the "[1.2 km, 5 min]" description suffix).
-    double SegmentTimeSeconds() const
+    /**
+     * Fill the leg values of one instruction: its distance and time are measured from the
+     * previous *emitted instruction*, not from the previous route node.
+     *
+     * A node-based delta is the last geometry edge before the manoeuvre, so the per-step values
+     * never added up to the route's distance or duration (device: "14 m" + "2 s" for one step of
+     * a 17,3 km route, 2026-10-04). Qt's RouteDescriptionBuilder::MkStep advances its reference
+     * per emitted step; this is the same rule. Call it once per emitted instruction - it advances
+     * the reference.
+     */
+    void FillLeg(JavaRouteInstruction &instr)
     {
       auto dt = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
-      return static_cast<double>(dt.count());
+      osmscout::Distance legDistance = distance - prevInstructionDistance;
+
+      instr.nodeTimeSeconds = static_cast<double>(
+          std::chrono::duration_cast<std::chrono::seconds>(time).count());
+
+      if (legStartKnown) {
+        instr.legDistance = static_cast<double>(legDistance.AsMeter());
+        instr.timeTo = static_cast<double>(dt.count());
+      }
+      else {
+        instr.legDistance = 0.0;
+        instr.timeTo = 0.0;
+      }
+
+      prevTime = time;
+      prevInstructionDistance = distance;
+      legStartKnown = true;
     }
 
     bool Continue() const override
@@ -2468,7 +2530,7 @@ private:
       currentStreet = NameOrRef(nameDesc);
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "start";
       instr.streetName = currentStreet;
       instr.description = startDesc ? startDesc->GetDescription() : "Start";
@@ -2486,7 +2548,7 @@ private:
       // behind the current node, so the arrival was skipped and a client got an
       // empty instruction after the last manoeuvre instead of "Arrive - X m".
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "targetReached";
       instr.description = targetDesc ? targetDesc->GetDescription() : "Destination reached";
       instr.shortDescription = "Arrive";
@@ -2510,7 +2572,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = MoveToTurnType(move);
       instr.streetName = street;
       instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
@@ -2523,7 +2585,7 @@ private:
     {
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "roundaboutEnter";
       instr.description = "Enter roundabout";
       instr.shortDescription = "Roundabout";
@@ -2539,7 +2601,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "roundaboutLeave";
       instr.streetName = street;
       instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
@@ -2555,7 +2617,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "motorwayEnter";
       instr.streetName = motorway;
       instr.description = "Enter " + (motorway.empty() ? "motorway" : motorway);
@@ -2575,7 +2637,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = MoveToTurnType(move);
       instr.streetName = toMotorway;
       instr.description = "Keep " + MoveToDescription(move) + " onto " + (toMotorway.empty() ? "motorway" : toMotorway);
@@ -2595,7 +2657,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = MoveToTurnType(move);
       instr.streetName = street;
       instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
@@ -3048,6 +3110,7 @@ private:
         static_cast<jclass>(methods.instructionClsGlobal), methods.instructionCtor,
         instr.distanceTo,
         instr.timeTo,
+        instr.legDistance,
         turnTypeObj,
         streetNameJ,
         descriptionJ,
@@ -5998,6 +6061,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
+      // with the instruction lines of routeDescriptionLines. All four are published as a set and
+      // dropped as a set when the alignment cannot be shown (see the check after the callback).
+      std::vector<double> routeInstructionLats;
+      std::vector<double> routeInstructionLons;
+      std::vector<double> routeInstructionDistances;
+      std::vector<double> routeInstructionTimes;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -6141,18 +6211,36 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
+              // Per-step leg values (spec: route-calculation - per-step leg values on a
+              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
+              // with the instruction lines and with the positions below; the distance is the leg
+              // that ENDS at that line's manoeuvre.
+              std::vector<double> instructionDistances;
+              std::vector<double> instructionTimes;
+              // Per-instruction positions (spec: route-calculation - per-instruction positions).
+              // One entry per line pushed by NextLine(), so the arrays align with the instruction
+              // lines of `lines` (the "--- Route ---" header is not an instruction).
+              std::vector<double> instructionLats;
+              std::vector<double> instructionLons;
+              double nodeLat = 0.0;
+              double nodeLon = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                prevDistance = distance;
-                prevTime = time;
+                // The per-step reference is advanced when a LINE is emitted (see
+                // AppendDistanceTime), never here: this callback runs for every route node,
+                // while only the nodes carrying a description produce a line.
                 distance = node.GetDistance().AsMeter() / 1000.0;
                 time = node.GetTime();
+                nodeLat = node.GetLocation().GetLat();
+                nodeLon = node.GetLocation().GetLon();
               }
 
               void NextLine() {
                 std::ostringstream oss;
                 oss.str("");
                 lines.push_back(oss.str());
+                instructionLats.push_back(nodeLat);
+                instructionLons.push_back(nodeLon);
                 lineCount++;
               }
 
@@ -6175,6 +6263,20 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 }
                 oss << "]";
                 line += oss.str();
+                // The values belong to the leg that ENDS here, so the reference advances when a
+                // line is emitted - not per route node as BeforeNode does it (Qt's
+                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
+                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
+                // the rows never added up to the route's distance or duration (device: "14 m"
+                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
+                // the positions (spec: route-calculation - per-step leg values on a calculated
+                // route).
+                instructionDistances.push_back(segDist * 1000.0);
+                instructionTimes.push_back(
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
+                        time - prevTime).count()));
+                prevDistance = distance;
+                prevTime = time;
               }
 
               void BeforeRoute() override {
@@ -6246,6 +6348,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             generator.GenerateDescription(*descResult.GetDescription(), descCb);
 
             routeDescriptionLines = std::move(descCb.lines);
+            routeInstructionLats = std::move(descCb.instructionLats);
+            routeInstructionLons = std::move(descCb.instructionLons);
+            routeInstructionDistances = std::move(descCb.instructionDistances);
+            routeInstructionTimes = std::move(descCb.instructionTimes);
+            // Every array must have one entry per instruction line; a mismatch would shift every
+            // later step, so the per-step values and the positions are dropped together instead
+            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
+            // aligned).
+            if (routeInstructionLats.size() != descCb.lineCount ||
+                routeInstructionLons.size() != descCb.lineCount ||
+                routeInstructionDistances.size() != descCb.lineCount ||
+                routeInstructionTimes.size() != descCb.lineCount) {
+              osmscout::log.Warn() << "calculateRouteWithObjectsWithProfile: per-step value count ("
+                                   << routeInstructionDistances.size() << ", position count "
+                                   << routeInstructionLats.size() << ") does not match instruction line count ("
+                                   << descCb.lineCount << ") - per-step values and positions dropped";
+              routeInstructionLats.clear();
+              routeInstructionLons.clear();
+              routeInstructionDistances.clear();
+              routeInstructionTimes.clear();
+            }
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -6342,9 +6465,44 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
+      // are empty when the alignment check dropped them, and the Java arrays then stay null - the
+      // app shows no per-step values or positions instead of shifted ones.
+      jdoubleArray instrLats = nullptr;
+      jdoubleArray instrLons = nullptr;
+      jdoubleArray instrDists = nullptr;
+      jdoubleArray instrTimes = nullptr;
+      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
+      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
+        instrLats = threadEnv->NewDoubleArray(instrCount);
+        instrLons = threadEnv->NewDoubleArray(instrCount);
+        instrDists = threadEnv->NewDoubleArray(instrCount);
+        instrTimes = threadEnv->NewDoubleArray(instrCount);
+        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
+        for (jsize i = 0; i < instrCount; i++) {
+          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
+          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
+          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
+          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
+        }
+        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
+        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
+        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
+        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
+      }
+
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
+      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
+      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
+      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
+      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
@@ -6352,6 +6510,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
+      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
+      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
+      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
+      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -6512,6 +6674,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
+      // with the instruction lines of routeDescriptionLines. All four are published as a set and
+      // dropped as a set when the alignment cannot be shown (see the check after the callback).
+      std::vector<double> routeInstructionLats;
+      std::vector<double> routeInstructionLons;
+      std::vector<double> routeInstructionDistances;
+      std::vector<double> routeInstructionTimes;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -6737,13 +6906,29 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
+              // Per-step leg values (spec: route-calculation - per-step leg values on a
+              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
+              // with the instruction lines and with the positions below; the distance is the leg
+              // that ENDS at that line's manoeuvre.
+              std::vector<double> instructionDistances;
+              std::vector<double> instructionTimes;
+              // Per-instruction positions (spec: route-calculation - per-instruction positions).
+              // One entry per line pushed by NextLine(), so the arrays align with the instruction
+              // lines of `lines` (the "--- Route ---" header is not an instruction).
+              std::vector<double> instructionLats;
+              std::vector<double> instructionLons;
+              double nodeLat = 0.0;
+              double nodeLon = 0.0;
               bool lineDrawn = false;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                prevDistance = distance;
-                prevTime = time;
+                // The per-step reference is advanced when a LINE is emitted (see
+                // AppendDistanceTime), never here: this callback runs for every route node,
+                // while only the nodes carrying a description produce a line.
                 distance = node.GetDistance().AsMeter() / 1000.0;
                 time = node.GetTime();
+                nodeLat = node.GetLocation().GetLat();
+                nodeLon = node.GetLocation().GetLon();
               }
 
               void NextLine() {
@@ -6751,6 +6936,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 // Description text comes first as primary information
                 oss.str("");
                 lines.push_back(oss.str());
+                instructionLats.push_back(nodeLat);
+                instructionLons.push_back(nodeLon);
                 lineCount++;
               }
 
@@ -6773,6 +6960,20 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 }
                 oss << "]";
                 line += oss.str();
+                // The values belong to the leg that ENDS here, so the reference advances when a
+                // line is emitted - not per route node as BeforeNode does it (Qt's
+                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
+                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
+                // the rows never added up to the route's distance or duration (device: "14 m"
+                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
+                // the positions (spec: route-calculation - per-step leg values on a calculated
+                // route).
+                instructionDistances.push_back(segDist * 1000.0);
+                instructionTimes.push_back(
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
+                        time - prevTime).count()));
+                prevDistance = distance;
+                prevTime = time;
               }
 
               void BeforeRoute() override {
@@ -6845,6 +7046,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
             // Store description lines for marshalling
             routeDescriptionLines = std::move(descCb.lines);
+            routeInstructionLats = std::move(descCb.instructionLats);
+            routeInstructionLons = std::move(descCb.instructionLons);
+            routeInstructionDistances = std::move(descCb.instructionDistances);
+            routeInstructionTimes = std::move(descCb.instructionTimes);
+            // Every array must have one entry per instruction line; a mismatch would shift every
+            // later step, so the per-step values and the positions are dropped together instead
+            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
+            // aligned).
+            if (routeInstructionLats.size() != descCb.lineCount ||
+                routeInstructionLons.size() != descCb.lineCount ||
+                routeInstructionDistances.size() != descCb.lineCount ||
+                routeInstructionTimes.size() != descCb.lineCount) {
+              osmscout::log.Warn() << "calculateRouteWithObjectsAsync: per-step value count ("
+                                   << routeInstructionDistances.size() << ", position count "
+                                   << routeInstructionLats.size() << ") does not match instruction line count ("
+                                   << descCb.lineCount << ") - per-step values and positions dropped";
+              routeInstructionLats.clear();
+              routeInstructionLons.clear();
+              routeInstructionDistances.clear();
+              routeInstructionTimes.clear();
+            }
             osmscout::log.Warn() << "calculateRouteAsync: generated "
                                  << routeDescriptionLines.size() << " description lines";
 
@@ -6946,9 +7168,44 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
+      // are empty when the alignment check dropped them, and the Java arrays then stay null - the
+      // app shows no per-step values or positions instead of shifted ones.
+      jdoubleArray instrLats = nullptr;
+      jdoubleArray instrLons = nullptr;
+      jdoubleArray instrDists = nullptr;
+      jdoubleArray instrTimes = nullptr;
+      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
+      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
+        instrLats = threadEnv->NewDoubleArray(instrCount);
+        instrLons = threadEnv->NewDoubleArray(instrCount);
+        instrDists = threadEnv->NewDoubleArray(instrCount);
+        instrTimes = threadEnv->NewDoubleArray(instrCount);
+        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
+        for (jsize i = 0; i < instrCount; i++) {
+          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
+          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
+          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
+          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
+        }
+        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
+        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
+        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
+        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
+      }
+
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
+      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
+      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
+      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
+      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
@@ -6956,6 +7213,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
+      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
+      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
+      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
+      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 

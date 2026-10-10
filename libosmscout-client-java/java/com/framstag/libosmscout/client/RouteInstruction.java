@@ -14,8 +14,24 @@ public class RouteInstruction {
     /** Distance to the next manoeuvre in meters. */
     public final double distanceTo;
 
-    /** Time for this segment in seconds (per-step time, 0 if unknown). */
+    /**
+     * Travel time in seconds of the leg that ends at this instruction's manoeuvre, measured from
+     * the previous instruction (0 if unknown). It is never the time between two route nodes that
+     * carry no instruction, so a step of a city route reports minutes, not the seconds of a single
+     * geometry edge. For the next instruction - the one the engine reports ahead of the current
+     * position - this is the <em>remaining</em> time of the leg, reaching zero at the manoeuvre.
+     */
     public final double timeTo;
+
+    /**
+     * Length in meters of the leg that ends at this instruction's manoeuvre (0 if unknown).
+     * <p>
+     * Independent of whether {@link #distanceTo} carries an absolute or a remaining distance: this
+     * is the leg's own length, so a client can relate the remaining distance to it. Zero when the
+     * leg is unknown - the instruction list is rebuilt from the current position on a route change,
+     * and the first instruction of such a rebuild has its leg's beginning behind it.
+     */
+    public final double legDistance;
 
     /** Type of turn at the next manoeuvre. */
     public final TurnType turnType;
@@ -57,15 +73,16 @@ public class RouteInstruction {
                             String streetName,
                             String description,
                             String shortDescription) {
-        this(distanceTo, 0.0, turnType, streetName, description, shortDescription,
+        this(distanceTo, 0.0, 0.0, turnType, streetName, description, shortDescription,
              0.0, TurnType.STRAIGHT_ON, "", "");
     }
 
     /**
-     * Full constructor including per-step time and optional "next next" hint.
+     * Full constructor including per-step values and optional "next next" hint.
      *
      * @param distanceTo              distance to next manoeuvre in meters
-     * @param timeTo                  time for this segment in seconds (0 if unknown)
+     * @param timeTo                  travel time of the leg ending at this manoeuvre in seconds (0 if unknown)
+     * @param legDistance             length of that leg in meters (0 if unknown)
      * @param turnType                type of turn
      * @param streetName              street to turn into (may be empty)
      * @param description             human-readable description
@@ -77,6 +94,7 @@ public class RouteInstruction {
      */
     public RouteInstruction(double distanceTo,
                             double timeTo,
+                            double legDistance,
                             TurnType turnType,
                             String streetName,
                             String description,
@@ -87,6 +105,7 @@ public class RouteInstruction {
                             String nextNextShortDescription) {
         this.distanceTo = distanceTo;
         this.timeTo = timeTo;
+        this.legDistance = legDistance;
         this.turnType = turnType;
         this.streetName = streetName != null ? streetName : "";
         this.description = description != null ? description : "";
@@ -111,6 +130,7 @@ public class RouteInstruction {
         return "RouteInstruction{"
             + "distanceTo=" + distanceTo
             + ", timeTo=" + timeTo
+            + ", legDistance=" + legDistance
             + ", turnType=" + turnType
             + ", streetName='" + streetName + '\''
             + ", description='" + description + '\''
