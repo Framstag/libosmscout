@@ -427,7 +427,6 @@ namespace osmscout {
     size_t GetCacheSize() const;
     size_t GetCurrentCacheSize() const;
 
-    void CleanupTileCache();
     void FlushTileCache();
     void InvalidateTileCache();
 
