@@ -60,6 +60,7 @@
 #include <osmscout/projection/MercatorProjection.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/GeoBox.h>
 
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
@@ -3178,6 +3179,68 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
   }
 }
 
+// Derives the geographic extent of a resolved search scope from the object that
+// represents the region (change client-java-search-scope-extent, design D2).
+// An admin region carries no coordinates of its own: the extent therefore comes
+// from its object - an area or a way contributes its bounding box, a node
+// region only a point, which is approximated by the documented fallback box.
+// Every other outcome (no region, no database, the object not loadable, an
+// invalid box) leaves the extent unset, which makes the filter admit every
+// position. That is deliberate: a scope whose extent cannot be established must
+// degrade to the unscoped behaviour, never silently empty the search.
+static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
+                                            const osmscout::AdminRegionRef &region)
+{
+  if (!region) {
+    return naviveylin::UnsetGeoBox();
+  }
+
+  auto database = db->GetDatabase();
+  if (!database) {
+    osmscout::log.Warn() << "search scope: no database to derive the extent of region '"
+                         << region->name << "' from - filtering disabled";
+    return naviveylin::UnsetGeoBox();
+  }
+
+  osmscout::GeoBox box;
+  bool             loaded = false;
+
+  if (region->object.GetType() == osmscout::RefType::refArea) {
+    osmscout::AreaRef area;
+    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
+      box = area->GetBoundingBox();
+      loaded = box.IsValid();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refWay) {
+    osmscout::WayRef way;
+    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
+      box = way->GetBoundingBox();
+      loaded = box.IsValid();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refNode) {
+    osmscout::NodeRef node;
+    loaded = database->GetNodeByOffset(region->object.GetFileOffset(), node);
+    if (loaded) {
+      return naviveylin::BoxAroundPoint(node->GetCoords().GetLat(),
+                                       node->GetCoords().GetLon());
+    }
+  }
+
+  if (loaded) {
+    return naviveylin::BoxFromCorners(box.GetMinCoord().GetLat(),
+                                      box.GetMinCoord().GetLon(),
+                                      box.GetMaxCoord().GetLat(),
+                                      box.GetMaxCoord().GetLon());
+  }
+
+  // Identity in the line, never a coordinate.
+  osmscout::log.Warn() << "search scope: no extent for region '" << region->name
+                       << "' (object type " << static_cast<int>(region->object.GetType())
+                       << ") - filtering disabled";
+
+  return naviveylin::UnsetGeoBox();
+}
+
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -3257,7 +3320,8 @@ std::vector<jobject> SerializeStructuredEntries(
     JNIEnv *env, ClientData *data,
     const std::vector<ResultWithDb> &results,
     bool hasCoordinate, const std::string &query,
-    double coordLat, double coordLon)
+    double coordLat, double coordLon,
+    const naviveylin::GeoBox &scopeExtent)
 {
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
   if (entryCls == nullptr) {
@@ -3290,6 +3354,7 @@ std::vector<jobject> SerializeStructuredEntries(
   jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
   jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
   jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
+  jfieldID inSearchScopeField = env->GetFieldID(entryCls, "inSearchScope", "Z");
 
   // Resolve each result's object reference before building the Java array.
   // A stale or inconsistent search index can reference objects that cannot be
@@ -3453,6 +3518,13 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetBooleanField(jEntry, hasHouseNumberField, JNI_FALSE);
     env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(query.c_str()));
     env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("coordinate"));
+    // The result follows its own position like any other entry: a coordinate
+    // query is answered regardless of the scope, and the scope key only orders
+    // close matches (change client-java-search-scope-extent, design D4).
+    env->SetBooleanField(jEntry, inSearchScopeField,
+                         naviveylin::IsInsideGeoBox(scopeExtent, coordLat, coordLon)
+                           ? JNI_TRUE
+                           : JNI_FALSE);
     env->SetObjectField(jEntry, regionField,
                         env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr));
     serializedEntries.push_back(jEntry);
@@ -3579,6 +3651,16 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(objectType.c_str()));
     env->SetDoubleField(jEntry, latField, resolvedEntry.lat);
     env->SetDoubleField(jEntry, lonField, resolvedEntry.lon);
+    // Whether the entry lies inside the active scope. An entry of a database
+    // that was searched unconstrained is reported by where it is: outside the
+    // scope's extent it is out of scope, inside it is not demoted
+    // (change client-java-search-scope-extent, design D1/D3).
+    env->SetBooleanField(jEntry, inSearchScopeField,
+                         naviveylin::IsInsideGeoBox(scopeExtent,
+                                                    resolvedEntry.lat,
+                                                    resolvedEntry.lon)
+                           ? JNI_TRUE
+                           : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(resolvedEntry.objectTypeName.c_str()));
     env->SetObjectField(jEntry, nameField, env->NewStringUTF(resolvedEntry.objectName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, resolvedEntry.objectFileOffset);
@@ -3722,7 +3804,11 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
   );
 
   std::vector<jobject> serializedEntries =
-      SerializeStructuredEntries(env, data, results, false, "", 0.0, 0.0);
+      SerializeStructuredEntries(env, data, results, false, "", 0.0, 0.0,
+                                 // The form-based lookup takes region names, not a
+                                 // resolved scope, so it has no extent: every entry
+                                 // is inside.
+                                 naviveylin::UnsetGeoBox());
 
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
   if (entryCls == nullptr) {
@@ -3822,6 +3908,15 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     }
   }
 
+  // Geographic extent of the resolved search scope, derived from the scope
+  // region's own object in the database that resolved it (change
+  // client-java-search-scope-extent, design D2). Computed once per search call,
+  // because the scope is a single region and does not depend on the database
+  // being walked. Unset means "no scope is active" or "the extent could not be
+  // established" - neither filters anything.
+  naviveylin::GeoBox scopeExtent = naviveylin::UnsetGeoBox();
+  bool               scopeExtentResolved = false;
+
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
       osmscout::BreakerRef breaker;
@@ -3883,6 +3978,15 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         std::vector<osmscout::AdminRegionRef> scope;
         if (effectiveRegion && db == adminRegionDb) {
           ResolveSearchScope(db, effectiveRegion, scope);
+          // Once per search call: the scope does not change while the databases
+          // are walked, so its extent is derived from the resolving database only.
+          if (!scopeExtentResolved) {
+            scopeExtent = DeriveScopeExtent(db,
+                                            scope.empty()
+                                              ? osmscout::AdminRegionRef()
+                                              : scope.front());
+            scopeExtentResolved = true;
+          }
         } else if (effectiveRegion && !adminRegionDb) {
           scope.push_back(effectiveRegion);
         } else {
@@ -4001,6 +4105,34 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                        return seenOffsets[e.db].count(static_cast<osmscout::FileOffset>(e.objectFileOffset)) != 0;
                      }),
       freeTextEntries.end());
+
+  // Free-text hits must respect the active search scope. The text index itself
+  // has no region attribution, so the scope is applied geographically: a hit
+  // outside the scope's extent is dropped, whichever database produced it,
+  // including the database that resolved the region. A hit inside the extent is
+  // kept even when a different database holds it, because the extent is
+  // comparable across databases while region offsets are not. An unset extent
+  // (no scope, or an extent that could not be established) drops nothing.
+  if (scopeExtent.isSet) {
+    const size_t freeTextBeforeFilter = freeTextEntries.size();
+
+    freeTextEntries.erase(
+        std::remove_if(freeTextEntries.begin(), freeTextEntries.end(),
+                       [&](const FreeTextEntry &e) {
+                         return !naviveylin::IsInsideGeoBox(scopeExtent, e.lat, e.lon);
+                       }),
+        freeTextEntries.end());
+
+    // Counts and identity only, never a coordinate. Debug-gated: enable with
+    // osmscout::log.Debug(true) when a device check needs to see how much the
+    // scope filtered.
+    if (freeTextEntries.size() != freeTextBeforeFilter) {
+      osmscout::log.Debug() << "search scope: dropped "
+                            << (freeTextBeforeFilter - freeTextEntries.size())
+                            << " of " << freeTextBeforeFilter
+                            << " free-text hit(s) outside the scope";
+    }
+  }
 #endif
 
   // Cap each source at the requested candidate count: structured results first,
@@ -4022,7 +4154,8 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   // Serialize structured results (defensively resolved) plus the optional
   // coordinate result; free-text hits are appended below.
   std::vector<jobject> serializedEntries =
-      SerializeStructuredEntries(env, data, results, hasCoordinate, query, coordLat, coordLon);
+      SerializeStructuredEntries(env, data, results, hasCoordinate, query, coordLat, coordLon,
+                                 scopeExtent);
 
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
   if (entryCls == nullptr) {
@@ -4053,6 +4186,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
   jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
   jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
+  jfieldID inSearchScopeField = env->GetFieldID(entryCls, "inSearchScope", "Z");
 
   // A text-index hit has no component attribution: the query matched the whole
   // indexed name (or a prefix of it), so the only honest signal is whether the
@@ -4078,6 +4212,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(entry.objectType.c_str()));
     env->SetDoubleField(jEntry, latField, entry.lat);
     env->SetDoubleField(jEntry, lonField, entry.lon);
+    // Whether the hit lies inside the active scope. Only hits inside it reach
+    // this loop once the scope filter has run; without a scope every hit is
+    // inside by definition (change client-java-search-scope-extent, design D3).
+    env->SetBooleanField(jEntry, inSearchScopeField,
+                         naviveylin::IsInsideGeoBox(scopeExtent, entry.lat, entry.lon)
+                           ? JNI_TRUE
+                           : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(entry.objectTypeName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, entry.objectFileOffset);
     bool exactNameMatch = freeTextMatcher != nullptr &&
