@@ -194,6 +194,23 @@ find_package(LibLZMA)
 find_package(PNG)
 target_exists(PNG::PNG HAVE_LIB_PNG)
 
+# A library that includes png.h has to compile against the header of the libpng it links. The
+# include directories of an imported target are system include directories of its consumers, and
+# the compiler searches those only after the consumer's own ones, so a directory that another
+# dependency contributes and that happens to hold a png.h silently shadows the header of the
+# linked library. The macOS CI runner is such a host: the Headers directory of its Mono framework
+# holds a png.h of 1.4.12 next to the fontconfig and FreeType headers, and the Cairo backend
+# includes png.h (LoaderPNG, for a pattern image) while linking both for its font support. The
+# backend then decoded against a header older than its library, png_create_read_struct returned
+# NULL and MapPainterCairoPatternTest reported a pattern it could serve as unloadable
+# (the OS X cmake job failed with "libpng warning: Application built with libpng-1.4.12 but
+# running with 1.6.58"). Asking for no system treatment keeps the png.h of the linked libpng in
+# front, whatever else a host puts on the include path (the property needs CMake 3.23; an older
+# configure ignores it, and a host with such a directory in front would keep the old behaviour).
+if(TARGET PNG::PNG)
+  set_property(TARGET PNG::PNG PROPERTY IMPORTED_NO_SYSTEM TRUE)
+endif()
+
 find_package(Cairo)
 if(CAIRO_FOUND)
   option(CAIRO_STATIC "Switch on if the found cairo library is static" OFF)
