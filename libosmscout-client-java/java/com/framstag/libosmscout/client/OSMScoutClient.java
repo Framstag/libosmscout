@@ -1,6 +1,7 @@
 package com.framstag.libosmscout.client;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -696,6 +697,68 @@ public class OSMScoutClient {
                                                double searchSelLon,
                                                double[] trackLats,
                                                double[] trackLons);
+
+    /**
+     * Render the current map view directly into pixel storage the caller owns, with
+     * optional route, track, and POI marker overlays.
+     * <p>
+     * Runs the same rendering as
+     * {@link #renderWithRouteAndPois(int, int, double, double, double, double, double, double[], double[], double[], double[], double, double, double[], double[])}
+     * but writes the frame into {@code pixels} instead of allocating and returning an
+     * {@code int[]}, so the bridge allocates no frame-sized storage of its own on this
+     * path. Use this when the destination already owns its pixels — for example a
+     * reused Android bitmap buffer.
+     * <p>
+     * {@code pixels} must be a <b>direct</b> {@link ByteBuffer} (as returned by
+     * {@link ByteBuffer#allocateDirect(int)}) with a capacity of at least
+     * {@code width * height * 4} bytes; a non-direct or too small buffer is rejected and
+     * nothing is written. The frame is written as four bytes per pixel, {@code R, G, B, A} — the
+     * byte order a bitmap's own storage uses (the little-endian word {@code 0xAABBGGRR},
+     * e.g. an {@code ARGB_8888} bitmap read with {@code Bitmap.copyPixelsFromBuffer}).
+     * This is <b>not</b> the {@code 0xAARRGGBB} word layout the allocating entry point
+     * returns; each destination gets the layout it reads. Pixels the style leaves
+     * unpainted are opaque black.
+     * <p>
+     * The buffer belongs to the caller: the bridge writes it only while this call runs
+     * and keeps no reference to it afterwards, so the caller may release, reuse or
+     * display it once the call returns. The bridge does not guard the storage against
+     * concurrent use, so one buffer must not serve two renders at once.
+     *
+     * @param width        viewport width in pixels
+     * @param height       viewport height in pixels
+     * @param lat          center latitude in degrees
+     * @param lon          center longitude in degrees
+     * @param angle        map rotation angle in radians (0 = north-up)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
+     * @param dpi          physical DPI of the display the frame is rendered for; {@code Double.NaN}
+     *                     or a non-positive value renders with the DPI configured on the client
+     * @param routeLats    array of route waypoint latitudes, or null for no route
+     * @param routeLons    array of route waypoint longitudes, or null for no route
+     * @param favoriteLats array of favorite latitudes, or null for no favorites
+     * @param favoriteLons array of favorite longitudes, or null for no favorites
+     * @param searchSelLat latitude of the selected search result, or {@code Double.NaN}
+     * @param searchSelLon longitude of the selected search result, ignored when no selection
+     * @param trackLats        array of imported track latitudes, or null for no track
+     * @param trackLons        array of imported track longitudes, or null for no track
+     * @param pixels       direct buffer of at least {@code width * height * 4} bytes that
+     *                     receives the frame as {@code R, G, B, A} bytes per pixel
+     * @return true if a frame was written, false for an unusable request (not initialised,
+     *         invalid viewport or magnification, or a missing, non-direct or too small buffer)
+     */
+    public native boolean renderInto(int width, int height,
+                                     double lat, double lon,
+                                     double angle,
+                                     double magnification,
+                                     double dpi,
+                                     double[] routeLats,
+                                     double[] routeLons,
+                                     double[] favoriteLats,
+                                     double[] favoriteLons,
+                                     double searchSelLat,
+                                     double searchSelLon,
+                                     double[] trackLats,
+                                     double[] trackLons,
+                                     ByteBuffer pixels);
 
     /**
      * Render the current map view to an ARGB pixel array, with optional route,
