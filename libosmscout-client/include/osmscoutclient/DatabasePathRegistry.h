@@ -68,11 +68,12 @@ struct OSMSCOUT_CLIENT_API DatabasePathRegistration
  * a case the contract already covers with a false result. A symbolic link to a
  * directory counts as a directory.
  *
- * This is the one place the client inspects what the filesystem says about a
- * path, and it is deliberately not used by the batch entry: RegisterAll()
- * registers what it was handed, so a directory that disappears between a scan
- * and the call cannot fail the batch. Only the single-path entry
- * RegisterOpenable() validates.
+ * This is the client's only path check, and only the single-path entry
+ * RegisterOpenable() acts on its answer. RegisterAll() deliberately does not:
+ * it registers the paths it was handed, so a directory that disappears between
+ * a caller's scan and the call cannot fail the batch. A caller may ask the
+ * predicate about a path of a batch to report it, but that report changes
+ * nothing about what the batch registers (spec: database-path-registry).
  */
 OSMSCOUT_CLIENT_API bool IsOpenableDatabaseDirectory(const std::filesystem::path &path) noexcept;
 

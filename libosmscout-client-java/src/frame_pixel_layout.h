@@ -19,12 +19,12 @@
 
 /*
  * frame_pixel_layout.h — the pixel layouts of the JNI render entry points
- * (NaviVeylin change "reduce-render-peak-memory", design D1b).
+ * (openspec change "client-java-render-into-buffer", design D2).
  *
  * The two destinations of one render do NOT share a layout:
  *
  *   * FrameLayout::ArgbInt — one 0xAARRGGBB word per pixel, which is what
- *     Bitmap.setPixels(int[]) takes. The allocating entry point
+ *     Bitmap.setPixels(int[]) reads. The allocating entry point
  *     (renderWithRouteAndPois) hands Java an int[] in this layout.
  *   * FrameLayout::RgbaBytes — four bytes per pixel, R,G,B,A, which is the byte order
  *     Bitmap.copyPixelsFromBuffer reads out of an ARGB_8888 bitmap (the NDK names that
@@ -33,10 +33,11 @@
  *     buffer.
  *
  * Writing one layout into the other destination is a red/blue channel swap, not a
- * rounding difference. It shipped once: the buffer path wrote the int[] layout, so
- * motorways rendered red (#7d7af5 became #f57a7d) and rivers orange (#9acffd became
- * #fdcf9a) on the device on 2026-09-29. FrameDestination is therefore the only place a
- * frame pixel is written, and each entry point states the layout its destination needs.
+ * rounding difference. It shipped once, because the buffer path wrote the int[] layout
+ * into the caller's storage and every frame of that path arrived with red and blue
+ * swapped — the defect this change exists to fix. FrameDestination is therefore the only
+ * place a frame pixel is written, and each entry point states the layout its destination
+ * needs.
  *
  * Kept dependency-free (no JNI, no libosmscout includes) so it is unit-tested on the
  * host — see Tests/src/FramePixelLayoutTest.cpp.
@@ -100,4 +101,4 @@ struct FrameDestination {
 
 } // namespace naviveylin
 
-#endif
+#endif // NAVIVEYLIN_FRAME_PIXEL_LAYOUT_H

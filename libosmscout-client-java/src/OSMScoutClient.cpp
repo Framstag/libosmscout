@@ -71,6 +71,9 @@
 
 #include "admin_region_hierarchy.h"
 #include "frame_pixel_layout.h"
+#include "route_length.h"
+#include "route_step_time.h"
+#include "routing_progress_throttle.h"
 #include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -722,11 +725,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
   // Register the path (all opened maps stay loaded: libosmscout renders
   // whichever database(s) cover the current viewport, so multiple maps can be
   // used simultaneously without switching (fix-download)). Only an existing
-  // directory is accepted (spec native-database-open - Single-database open
-  // keeps its contract): a rejected path enters no set and counts no set
-  // change, so nothing is published and every database already loaded stays
-  // open. The report names the directory only - a diagnostics line carries
-  // identity, never a position or a path (spec auto-diagnostics).
+  // directory is accepted (spec client-java-database-paths - The
+  // single-directory call rejects a path that is not a database directory): a
+  // rejected path enters no set and counts no set change, so nothing is
+  // published and every database already loaded stays open. The report names
+  // the directory only.
   // The registry serialises concurrent openers: the path list is not mutated
   // while another thread (or the database thread) reads it.
   if (!data->knownPaths.RegisterOpenable(fsPath)) {
@@ -760,9 +763,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
 // string is reported false and is not registered; a null array or an empty
 // array returns an empty array. A client that is not usable (no database
 // thread) reports every requested directory as false instead of faulting.
-// A directory that is not an existing directory is registered and reported all
-// the same (spec native-database-open - One directory cannot be opened), so the
-// batch never fails because of one bad entry.
+// A path that is not an existing directory is registered and reported all the
+// same (spec client-java-database-paths - The batch call keeps its tolerance),
+// so the batch never fails because of one bad entry.
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jbooleanArray JNICALL
@@ -808,7 +811,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabases(JNIEnv *env, j
     // The batch keeps its documented tolerance: a directory that disappears
     // between the app's scan and this call must not fail the batch, so the path
     // is registered all the same and merely reported here. The directory name
-    // only, never the path (spec auto-diagnostics).
+    // only, and the report changes nothing about what is registered or about
+    // the array returned below.
     for (const auto &path : paths) {
       if (!osmscout::IsOpenableDatabaseDirectory(path)) {
         osmscout::log.Warn() << "[JNI] openDatabases: not an existing map database directory: "
@@ -1315,7 +1319,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_importGpxTrack(JNIEnv *env,
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::render(int width, int height, double lat, double lon, double angle,
-//                        double magnificationScale, double dpi)
+//                        double mag, double dpi)
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -1347,10 +1351,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 //     0xAABBGGRR.
 //
 // Writing one layout into the other destination is a red/blue channel swap, not a
-// rounding difference: that is how motorways rendered red and rivers orange on the
-// device on 2026-09-29 (openspec change reduce-render-peak-memory, design D1b).
-// [naviveylin::FrameDestination] (frame_pixel_layout.h) is therefore the only place a frame
-// pixel is written, and each entry point states the layout its destination needs.
+// rounding difference — the defect this change fixes. [naviveylin::FrameDestination]
+// (frame_pixel_layout.h) is therefore the only place a frame pixel is written, and each
+// entry point states the layout its destination needs.
+//
 // Renders one frame into [destination] and returns whether a frame was drawn.
 //
 // The allocating entry point (renderWithRouteAndPois) and the buffer-taking one
@@ -1414,9 +1418,9 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
   // of the display it draws on, so no frame depends on a value another surface
   // configured. Each display has its own physical DPI — a head unit rendering at
   // the phone's density is scaled ~1.8x too zoomed, and a phone rendering at the
-  // head unit's density is equally wrong.
-  // A request without one (the desktop client's convenience overloads pass none)
-  // falls back to the DPI configured on the client.
+  // head unit's density is equally wrong. A request that states none — the Java
+  // convenience overloads pass none — falls back to the DPI configured on the
+  // client, so it renders as before instead of being rejected.
   if (!(dpi > 0.0)) {
     dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
   }
@@ -1893,9 +1897,10 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
 //                                         double[] trackLats, double[] trackLons)
 // --------------------------------------------------------------------------
 
-// The allocating entry point. Its signature, behaviour and error semantics are
-// unchanged (upstream API, used outside this app): it allocates the frame's pixel
-// array and returns it, and reports an unusable request as null.
+// The allocating entry point. Its signature, behaviour, error semantics and result are
+// unchanged: it allocates the frame's pixel array, hands it to Java as int[] elements
+// (the 0xAARRGGBB layout Bitmap.setPixels reads) and reports an unusable request as
+// null.
 extern "C" JNIEXPORT jintArray JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEnv *env, jobject self,
                                                                              jint width, jint height,
@@ -1954,10 +1959,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
 // The buffer-taking entry point: it renders into pixel storage the caller owns and
 // allocates no frame-sized storage of its own (no int[], no intermediate pixel
-// vector). [pixels] must be a DIRECT buffer with at least width*height*4 bytes
-// remaining, and the frame is written in the layout Bitmap.copyPixelsFromBuffer
+// vector). [pixels] must be a DIRECT buffer with a capacity of at least
+// width*height*4 bytes, and the frame is written in the layout Bitmap.copyPixelsFromBuffer
 // reads: four bytes R,G,B,A per pixel, the bitmap's own byte order. That is NOT the
-// allocating entry point's 0xAARRGGBB int[] layout — see [FrameLayout].
+// allocating entry point's 0xAARRGGBB int[] layout — see [naviveylin::FrameLayout].
 //
 // Ownership: the caller owns the storage. The bridge writes it only while this
 // call runs and retains no reference, so the caller may release, reuse or display
@@ -2054,7 +2059,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setGpsMarker(JNIEnv *env,
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::projectToPixel(int width, int height, double centerLat,
-//                                 double centerLon, double magnificationScale, double dpi,
+//                                 double centerLon, double mag, double dpi,
 //                                 double angle, double lat, double lon)
 // --------------------------------------------------------------------------
 
@@ -3385,7 +3390,7 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
 }
 
 // Derives the geographic extent of a resolved search scope from the object that
-// represents the region (change fix-cross-database-search-scope, design D2).
+// represents the region (change client-java-search-scope-extent, design D2).
 // An admin region carries no coordinates of its own: the extent therefore comes
 // from its object - an area or a way contributes its bounding box, a node
 // region only a point, which is approximated by the documented fallback box.
@@ -3394,7 +3399,7 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
 // position. That is deliberate: a scope whose extent cannot be established must
 // degrade to the unscoped behaviour, never silently empty the search.
 static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
-                                           const osmscout::AdminRegionRef &region)
+                                            const osmscout::AdminRegionRef &region)
 {
   if (!region) {
     return naviveylin::UnsetGeoBox();
@@ -3438,7 +3443,7 @@ static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
                                       box.GetMaxCoord().GetLon());
   }
 
-  // Identity in the line, never a coordinate (spec: auto-diagnostics).
+  // Identity in the line, never a coordinate.
   osmscout::log.Warn() << "search scope: no extent for region '" << region->name
                        << "' (object type " << static_cast<int>(region->object.GetType())
                        << ") - filtering disabled";
@@ -3560,6 +3565,8 @@ std::vector<jobject> SerializeStructuredEntries(
   jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
   jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
   jfieldID inSearchScopeField = env->GetFieldID(entryCls, "inSearchScope", "Z");
+
+  // Resolve each result's object reference before building the Java array.
   // A stale or inconsistent search index can reference objects that cannot be
   // read (e.g. out-of-range type id after a partial download or dataset
   // update); such entries are dropped instead of being returned with invalid
@@ -3723,8 +3730,7 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("coordinate"));
     // The result follows its own position like any other entry: a coordinate
     // query is answered regardless of the scope, and the scope key only orders
-    // close matches (spec: osmscout-jni - a result states whether it lies
-    // inside the active scope).
+    // close matches (change client-java-search-scope-extent, design D4).
     env->SetBooleanField(jEntry, inSearchScopeField,
                          naviveylin::IsInsideGeoBox(scopeExtent, coordLat, coordLon)
                            ? JNI_TRUE
@@ -3858,11 +3864,11 @@ std::vector<jobject> SerializeStructuredEntries(
     // Whether the entry lies inside the active scope. An entry of a database
     // that was searched unconstrained is reported by where it is: outside the
     // scope's extent it is out of scope, inside it is not demoted
-    // (change fix-cross-database-search-scope, design D1/D3).
+    // (change client-java-search-scope-extent, design D1/D3).
     env->SetBooleanField(jEntry, inSearchScopeField,
                          naviveylin::IsInsideGeoBox(scopeExtent,
-                                                   resolvedEntry.lat,
-                                                   resolvedEntry.lon)
+                                                    resolvedEntry.lat,
+                                                    resolvedEntry.lon)
                            ? JNI_TRUE
                            : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(resolvedEntry.objectTypeName.c_str()));
@@ -4010,8 +4016,8 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
   std::vector<jobject> serializedEntries =
       SerializeStructuredEntries(env, data, results, false, "", 0.0, 0.0,
                                  // The form-based lookup takes region names, not a
-                                 // resolved scope, so it has no extent: every entry is
-                                 // inside (spec: osmscout-jni).
+                                 // resolved scope, so it has no extent: every entry
+                                 // is inside.
                                  naviveylin::UnsetGeoBox());
 
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
@@ -4114,7 +4120,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // Geographic extent of the resolved search scope, derived from the scope
   // region's own object in the database that resolved it (change
-  // fix-cross-database-search-scope, design D2). Computed once per search call,
+  // client-java-search-scope-extent, design D2). Computed once per search call,
   // because the scope is a single region and does not depend on the database
   // being walked. Unset means "no scope is active" or "the extent could not be
   // established" - neither filters anything.
@@ -4310,14 +4316,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                      }),
       freeTextEntries.end());
 
-  // Free-text hits must respect the active search scope (spec: search-free-text -
-  // free-text hits respect the active search scope). The text index itself has
-  // no region attribution, so the scope is applied geographically: a hit outside
-  // the scope's extent is dropped, whichever database produced it, including the
-  // database that resolved the region. A hit inside the extent is kept even when
-  // a different database holds it, because the extent is comparable across
-  // databases while region offsets are not. An unset extent (no scope, or an
-  // extent that could not be established) drops nothing.
+  // Free-text hits must respect the active search scope. The text index itself
+  // has no region attribution, so the scope is applied geographically: a hit
+  // outside the scope's extent is dropped, whichever database produced it,
+  // including the database that resolved the region. A hit inside the extent is
+  // kept even when a different database holds it, because the extent is
+  // comparable across databases while region offsets are not. An unset extent
+  // (no scope, or an extent that could not be established) drops nothing.
   if (scopeExtent.isSet) {
     const size_t freeTextBeforeFilter = freeTextEntries.size();
 
@@ -4328,14 +4333,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                        }),
         freeTextEntries.end());
 
-    // Counts and identity only, never a coordinate (spec: auto-diagnostics).
-    // Debug-gated: enable with osmscout::log.Debug(true) when a device check
-    // needs to see how much the scope filtered.
+    // Counts and identity only, never a coordinate. Debug-gated: enable with
+    // osmscout::log.Debug(true) when a device check needs to see how much the
+    // scope filtered.
     if (freeTextEntries.size() != freeTextBeforeFilter) {
       osmscout::log.Debug() << "search scope: dropped "
-                             << (freeTextBeforeFilter - freeTextEntries.size())
-                             << " of " << freeTextBeforeFilter
-                             << " free-text hit(s) outside the scope";
+                            << (freeTextBeforeFilter - freeTextEntries.size())
+                            << " of " << freeTextBeforeFilter
+                            << " free-text hit(s) outside the scope";
     }
   }
 #endif
@@ -4419,7 +4424,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetDoubleField(jEntry, lonField, entry.lon);
     // Whether the hit lies inside the active scope. Only hits inside it reach
     // this loop once the scope filter has run; without a scope every hit is
-    // inside by definition (change fix-cross-database-search-scope, design D3).
+    // inside by definition (change client-java-search-scope-extent, design D3).
     env->SetBooleanField(jEntry, inSearchScopeField,
                          naviveylin::IsInsideGeoBox(scopeExtent, entry.lat, entry.lon)
                            ? JNI_TRUE
@@ -5723,14 +5728,8 @@ private:
   jobject callback;
   RouteCallbackMethods methods;
 
-  // Rate limit, see Progress(): the last percentage handed over to Java and when
-  // it was handed over. -1 means "nothing reported yet", so the first call goes
-  // through immediately.
-  int lastPercent = -1;
-  std::chrono::steady_clock::time_point lastReport;
-
-  /** Minimum interval between two progress reports (rate limit, see Progress()). */
-  static constexpr std::chrono::milliseconds minReportInterval{100};
+  /** Change detection and rate limit for the reports handed to Java, see Progress(). */
+  naviveylin::RoutingProgressThrottle throttle;
 
 public:
   JavaRoutingProgress(JavaVM *jvm, jobject callback, const RouteCallbackMethods &methods)
@@ -5747,34 +5746,22 @@ public:
    * The router calls this once per successfully relaxed edge — thousands to
    * millions of times for a long route, and always from the routing worker
    * thread. Every call would cross JNI into Java, so only a *changed*
-   * percentage is reported, and at most once per rate-limit interval: the
-   * callback then means "the progress moved" instead of "a node was visited",
-   * and the routing thread keeps its time for routing. The percentage is capped
-   * at 99 — 100 % stays reserved for the route that actually arrived.
+   * percentage is reported, and at most once per rate-limit interval (see
+   * routing_progress_throttle.h): the callback then means "the progress moved"
+   * instead of "a node was visited", and the routing thread keeps its time for
+   * routing. The percentage is capped below completion — 100 % stays reserved
+   * for the route that actually arrived. The attach and the Java call happen
+   * only for an accepted report, so a dropped one costs no JNI crossing.
    */
   void Progress(const osmscout::Distance &currentMaxDistance,
                 const osmscout::Distance &overallDistance) override
   {
-    double overall = overallDistance.AsMeter();
-    int percent = 0;
-    if (overall > 0.0) {
-      percent = static_cast<int>(
-          currentMaxDistance.AsMeter() / overall * 100.0);
-      if (percent > 99) percent = 99;
-    }
+    int percent = naviveylin::ProgressPercent(currentMaxDistance.AsMeter(),
+                                              overallDistance.AsMeter());
 
-    // currentMaxDistance only grows, so a repeated or lower value carries no news.
-    if (percent <= lastPercent) {
+    if (!throttle.ShouldReport(percent, std::chrono::steady_clock::now())) {
       return;
     }
-
-    auto now = std::chrono::steady_clock::now();
-    if (lastPercent >= 0 && (now - lastReport) < minReportInterval) {
-      return;
-    }
-
-    lastPercent = percent;
-    lastReport = now;
 
     JNIEnv *env;
     if (AttachCurrentThread(&env, jvm) != JNI_OK) {
@@ -6075,10 +6062,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
+      // with the instruction lines of routeDescriptionLines. All four are published as a set and
+      // dropped as a set when the alignment cannot be shown (see the check after the callback).
       std::vector<double> routeInstructionLats;
       std::vector<double> routeInstructionLons;
-      // Per-step leg values (spec: osmscout-jni — Per-step leg values on a calculated route),
-      // index-aligned with the instruction lines and with the positions above.
       std::vector<double> routeInstructionDistances;
       std::vector<double> routeInstructionTimes;
 
@@ -6158,12 +6146,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
           routeData = std::move(result.GetRoute());
           // The route's length is decided from the route itself, never from
           // result.GetOverallDistance(): that figure is the start/target air-line estimate the
-          // router computes for its cost limit and its progress denominator
-          // (AbstractRoutingService.cpp:1088-1094; upstream prints it as "Air-line distance" in
-          // Demos/src/Routing.cpp), and publishing it as a length under-counted a ~70 km route by
-          // 25 % (spec: osmscout-jni - The published route length is a length of that route;
-          // measured on device 2026-10-05 at 0.748x of the drawn polyline). Below: the
-          // description's own total, else the length of the polyline this call publishes.
+          // router computes for its cost limit and its progress denominator, not a length of the
+          // route (spec: route-calculation - The published route length is a length of that route;
+          // measured at 0.748x of the drawn polyline on a ~70 km route). Below: the description's
+          // own total, else the length of the polyline this call publishes.
           success = true;
 
           // Generate route description
@@ -6231,23 +6217,23 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
-              // Per-step values (spec: osmscout-jni — Per-step leg values on a calculated
-              // route). One entry per line pushed by NextLine(), index-aligned with the
-              // instruction lines and with the positions below; the distance is the leg that
-              // ENDS at that line's manoeuvre (see AppendDistanceTime).
+              // Per-step leg values (spec: route-calculation - per-step leg values on a
+              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
+              // with the instruction lines and with the positions below; the distance is the leg
+              // that ENDS at that line's manoeuvre.
               std::vector<double> instructionDistances;
               std::vector<double> instructionTimes;
-              // Per-instruction positions (spec: route-analysis — every step is
-              // locatable on the map). One entry per line pushed by NextLine(),
-              // so the arrays align with the instruction lines of `lines` (the
-              // "--- Route ---" header is not an instruction).
+              // Per-instruction positions (spec: route-calculation - per-instruction positions).
+              // One entry per line pushed by NextLine(), so the arrays align with the instruction
+              // lines of `lines` (the "--- Route ---" header is not an instruction).
               std::vector<double> instructionLats;
               std::vector<double> instructionLons;
               double nodeLat = 0.0;
               double nodeLon = 0.0;
               // The description's own total - the cumulative distance at its last node, in metres.
               // The route's length is taken from the description, not from the router's separately
-              // accumulated distance (spec: osmscout-jni - One route length for a calculated route).
+              // accumulated distance (spec: route-calculation - The published route length is a
+              // length of that route).
               double lastNodeDistanceMeters = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
@@ -6283,25 +6269,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                auto dtS = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
-                if (segDist > 0.01 && dtS.count() >= 1) {
+                auto timeText = naviveylin::FormatRouteStepTime(
+                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
+                if (segDist > 0.01 && timeText.has_value()) {
                   oss << ", ";
                 }
-                if (dtS.count() >= 1) {
-                  auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
-                  if (dtM.count() >= 60) {
-                    auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
-                    auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
-                    oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else if (dtM.count() >= 1) {
-                    oss << dtM.count() << " min";
-                  } else {
-                    // A segment shorter than a minute used to print "0 min", so every step of
-                    // a city route looked like it took no time (owner finding, 2026-10-03).
-                    // Seconds keep the per-step time meaningful below one minute; a segment
-                    // under a second prints no time at all instead of a meaningless "0 s".
-                    oss << dtS.count() << " s";
-                  }
+                if (timeText.has_value()) {
+                  oss << *timeText;
                 }
                 oss << "]";
                 line += oss.str();
@@ -6311,9 +6285,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 // rule). A node-based delta is the last geometry edge before the manoeuvre, so
                 // the rows never added up to the route's distance or duration (device: "14 m"
                 // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
-                // the positions (spec: osmscout-jni — Per-step leg values on a calculated route).
+                // the positions (spec: route-calculation - per-step leg values on a calculated
+                // route).
                 instructionDistances.push_back(segDist * 1000.0);
-                instructionTimes.push_back(static_cast<double>(dtS.count()));
+                instructionTimes.push_back(
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
+                        time - prevTime).count()));
                 prevDistance = distance;
                 prevTime = time;
               }
@@ -6391,10 +6368,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             routeInstructionLons = std::move(descCb.instructionLons);
             routeInstructionDistances = std::move(descCb.instructionDistances);
             routeInstructionTimes = std::move(descCb.instructionTimes);
-            // Every array must have one entry per instruction line; a mismatch would shift
-            // every later step, so the per-step values and the positions are dropped together
-            // instead (the step list then has no per-step values and no map positions, spec:
-            // osmscout-jni - Per-step leg values on a calculated route).
+            // Every array must have one entry per instruction line; a mismatch would shift every
+            // later step, so the per-step values and the positions are dropped together instead
+            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
+            // aligned).
             if (routeInstructionLats.size() != descCb.lineCount ||
                 routeInstructionLons.size() != descCb.lineCount ||
                 routeInstructionDistances.size() != descCb.lineCount ||
@@ -6409,21 +6386,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               routeInstructionTimes.clear();
             }
 
-            // The route's length is the description's own total (spec: osmscout-jni - One route
-            // length for a calculated route): the figure the step list sums to and the geometry the
-            // app draws, lists and highlights. The per-step arrays are aligned here (the guard above
-            // cleared them otherwise), so the published total is exactly what the step list sums to.
-            if (!routeInstructionDistances.empty()) {
-              double legsSumMeters = 0.0;
-              for (double leg : routeInstructionDistances) {
-                legsSumMeters += leg;
-              }
-              if (legsSumMeters > 0.0) {
-                totalDistance = legsSumMeters;
-              }
-            } else if (descCb.lastNodeDistanceMeters > 0.0) {
-              totalDistance = descCb.lastNodeDistanceMeters;
-            }
+            // The route's length is the description's own total (spec: route-calculation - The
+            // published route length is a length of that route): the cumulative distance at the
+            // description's last node, which is the sum of its steps and tracks the geometry the
+            // app draws, lists and highlights to within 0.4 %.
+            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -6520,29 +6487,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
-      // The route's own length when its description produced nothing: the great-circle length of the
-      // polyline this call publishes, so a client that falls back to the total still receives a route
-      // length and never the start/target air-line estimate (spec: osmscout-jni - The published route
-      // length is a length of that route). With a description present, the total is already the
-      // description's own sum above.
-      if (totalDistance <= 0.0 && count > 1) {
-        double polylineMeters = 0.0;
-        for (jsize i = 1; i < count; i++) {
-          polylineMeters += osmscout::GetEllipsoidalDistance(
-              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
-                                 lonValues[static_cast<size_t>(i - 1)]),
-              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
-                                 lonValues[static_cast<size_t>(i)])).AsMeter();
-        }
-        if (polylineMeters > 0.0) {
-          totalDistance = polylineMeters;
-        }
-      }
-
-      // Per-step values and per-instruction positions (spec: osmscout-jni - Per-step leg values
-      // on a calculated route; spec: route-analysis - every step is locatable on the map). All
-      // four vectors are empty when the alignment check dropped them, and the Java arrays then
-      // stay null - the app shows no per-step values or positions instead of shifted ones.
+      // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
+      // are empty when the alignment check dropped them, and the Java arrays then stay null - the
+      // app shows no per-step values or positions instead of shifted ones.
       jdoubleArray instrLats = nullptr;
       jdoubleArray instrLons = nullptr;
       jdoubleArray instrDists = nullptr;
@@ -6570,6 +6517,23 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
         threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
         threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
       }
+
+      // The route's own length when its description produced nothing: the great-circle length of the
+      // polyline this call publishes, so a client that falls back to the total still receives a route
+      // length and never the start/target air-line estimate (spec: route-calculation - The published
+      // route length is a length of that route). With a description present, the total is already the
+      // description's own total above; a single-point route has no geometry to measure and stays 0.
+      double polylineMeters = 0.0;
+      if (count > 1) {
+        for (jsize i = 1; i < count; i++) {
+          polylineMeters += osmscout::GetEllipsoidalDistance(
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
+                                 lonValues[static_cast<size_t>(i - 1)]),
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
+                                 lonValues[static_cast<size_t>(i)])).AsMeter();
+        }
+      }
+      totalDistance = naviveylin::RouteLengthMeters(totalDistance, polylineMeters);
 
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
@@ -6749,10 +6713,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
+      // with the instruction lines of routeDescriptionLines. All four are published as a set and
+      // dropped as a set when the alignment cannot be shown (see the check after the callback).
       std::vector<double> routeInstructionLats;
       std::vector<double> routeInstructionLons;
-      // Per-step leg values (spec: osmscout-jni — Per-step leg values on a calculated route),
-      // index-aligned with the instruction lines and with the positions above.
       std::vector<double> routeInstructionDistances;
       std::vector<double> routeInstructionTimes;
 
@@ -6892,12 +6857,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           routeData = std::move(result.GetRoute());
           // The route's length is decided from the route itself, never from
           // result.GetOverallDistance(): that figure is the start/target air-line estimate the
-          // router computes for its cost limit and its progress denominator
-          // (AbstractRoutingService.cpp:1088-1094; upstream prints it as "Air-line distance" in
-          // Demos/src/Routing.cpp), and publishing it as a length under-counted a ~70 km route by
-          // 25 % (spec: osmscout-jni - The published route length is a length of that route;
-          // measured on device 2026-10-05 at 0.748x of the drawn polyline). Below: the
-          // description's own total, else the length of the polyline this call publishes.
+          // router computes for its cost limit and its progress denominator, not a length of the
+          // route (spec: route-calculation - The published route length is a length of that route;
+          // measured at 0.748x of the drawn polyline on a ~70 km route). Below: the description's
+          // own total, else the length of the polyline this call publishes.
           success = true;
 
           // Generate route description
@@ -6987,25 +6950,25 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
-              bool lineDrawn = false;
-              // The description's own total - the cumulative distance at its last node, in metres.
-              // The route's length is taken from the description, not from the router's separately
-              // accumulated distance (spec: osmscout-jni - One route length for a calculated route).
-              double lastNodeDistanceMeters = 0.0;
-              // Per-step values (spec: osmscout-jni — Per-step leg values on a calculated
-              // route). One entry per line pushed by NextLine(), index-aligned with the
-              // instruction lines and with the positions below; the distance is the leg that
-              // ENDS at that line's manoeuvre (see AppendDistanceTime).
+              // Per-step leg values (spec: route-calculation - per-step leg values on a
+              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
+              // with the instruction lines and with the positions below; the distance is the leg
+              // that ENDS at that line's manoeuvre.
               std::vector<double> instructionDistances;
               std::vector<double> instructionTimes;
-              // Per-instruction positions (spec: route-analysis — every step is
-              // locatable on the map). One entry per line pushed by NextLine(),
-              // so the arrays align with the instruction lines of `lines` (the
-              // "--- Route ---" header is not an instruction).
+              // Per-instruction positions (spec: route-calculation - per-instruction positions).
+              // One entry per line pushed by NextLine(), so the arrays align with the instruction
+              // lines of `lines` (the "--- Route ---" header is not an instruction).
               std::vector<double> instructionLats;
               std::vector<double> instructionLons;
               double nodeLat = 0.0;
               double nodeLon = 0.0;
+              bool lineDrawn = false;
+              // The description's own total - the cumulative distance at its last node, in metres.
+              // The route's length is taken from the description, not from the router's separately
+              // accumulated distance (spec: route-calculation - The published route length is a
+              // length of that route).
+              double lastNodeDistanceMeters = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
                 // The per-step reference is advanced when a LINE is emitted (see
@@ -7041,25 +7004,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                auto dtS = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
-                if (segDist > 0.01 && dtS.count() >= 1) {
+                auto timeText = naviveylin::FormatRouteStepTime(
+                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
+                if (segDist > 0.01 && timeText.has_value()) {
                   oss << ", ";
                 }
-                if (dtS.count() >= 1) {
-                  auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
-                  if (dtM.count() >= 60) {
-                    auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
-                    auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
-                    oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else if (dtM.count() >= 1) {
-                    oss << dtM.count() << " min";
-                  } else {
-                    // A segment shorter than a minute used to print "0 min", so every step of
-                    // a city route looked like it took no time (owner finding, 2026-10-03).
-                    // Seconds keep the per-step time meaningful below one minute; a segment
-                    // under a second prints no time at all instead of a meaningless "0 s".
-                    oss << dtS.count() << " s";
-                  }
+                if (timeText.has_value()) {
+                  oss << *timeText;
                 }
                 oss << "]";
                 line += oss.str();
@@ -7069,9 +7020,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 // rule). A node-based delta is the last geometry edge before the manoeuvre, so
                 // the rows never added up to the route's distance or duration (device: "14 m"
                 // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
-                // the positions (spec: osmscout-jni — Per-step leg values on a calculated route).
+                // the positions (spec: route-calculation - per-step leg values on a calculated
+                // route).
                 instructionDistances.push_back(segDist * 1000.0);
-                instructionTimes.push_back(static_cast<double>(dtS.count()));
+                instructionTimes.push_back(
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
+                        time - prevTime).count()));
                 prevDistance = distance;
                 prevTime = time;
               }
@@ -7144,15 +7098,16 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             osmscout::RouteDescriptionPostprocessor generator;
             generator.GenerateDescription(*descResult.GetDescription(), descCb);
 
+            // Store description lines for marshalling
             routeDescriptionLines = std::move(descCb.lines);
             routeInstructionLats = std::move(descCb.instructionLats);
             routeInstructionLons = std::move(descCb.instructionLons);
             routeInstructionDistances = std::move(descCb.instructionDistances);
             routeInstructionTimes = std::move(descCb.instructionTimes);
-            // Every array must have one entry per instruction line; a mismatch would shift
-            // every later step, so the per-step values and the positions are dropped together
-            // instead (the step list then has no per-step values and no map positions, spec:
-            // osmscout-jni - Per-step leg values on a calculated route).
+            // Every array must have one entry per instruction line; a mismatch would shift every
+            // later step, so the per-step values and the positions are dropped together instead
+            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
+            // aligned).
             if (routeInstructionLats.size() != descCb.lineCount ||
                 routeInstructionLons.size() != descCb.lineCount ||
                 routeInstructionDistances.size() != descCb.lineCount ||
@@ -7166,24 +7121,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               routeInstructionDistances.clear();
               routeInstructionTimes.clear();
             }
-
-            // The route's length is the description's own total (spec: osmscout-jni - One route
-            // length for a calculated route): the figure the step list sums to and the geometry the
-            // app draws, lists and highlights. The per-step arrays are aligned here (the guard above
-            // cleared them otherwise), so the published total is exactly what the step list sums to.
-            if (!routeInstructionDistances.empty()) {
-              double legsSumMeters = 0.0;
-              for (double leg : routeInstructionDistances) {
-                legsSumMeters += leg;
-              }
-              if (legsSumMeters > 0.0) {
-                totalDistance = legsSumMeters;
-              }
-            } else if (descCb.lastNodeDistanceMeters > 0.0) {
-              totalDistance = descCb.lastNodeDistanceMeters;
-            }
             osmscout::log.Warn() << "calculateRouteAsync: generated "
                                  << routeDescriptionLines.size() << " description lines";
+
+            // The route's length is the description's own total (spec: route-calculation - The
+            // published route length is a length of that route): the cumulative distance at the
+            // description's last node, which is the sum of its steps and tracks the geometry the
+            // app draws, lists and highlights to within 0.4 %.
+            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -7283,29 +7228,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
-      // The route's own length when its description produced nothing: the great-circle length of the
-      // polyline this call publishes, so a client that falls back to the total still receives a route
-      // length and never the start/target air-line estimate (spec: osmscout-jni - The published route
-      // length is a length of that route). With a description present, the total is already the
-      // description's own sum above.
-      if (totalDistance <= 0.0 && count > 1) {
-        double polylineMeters = 0.0;
-        for (jsize i = 1; i < count; i++) {
-          polylineMeters += osmscout::GetEllipsoidalDistance(
-              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
-                                 lonValues[static_cast<size_t>(i - 1)]),
-              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
-                                 lonValues[static_cast<size_t>(i)])).AsMeter();
-        }
-        if (polylineMeters > 0.0) {
-          totalDistance = polylineMeters;
-        }
-      }
-
-      // Per-step values and per-instruction positions (spec: osmscout-jni - Per-step leg values
-      // on a calculated route; spec: route-analysis - every step is locatable on the map). All
-      // four vectors are empty when the alignment check dropped them, and the Java arrays then
-      // stay null - the app shows no per-step values or positions instead of shifted ones.
+      // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
+      // are empty when the alignment check dropped them, and the Java arrays then stay null - the
+      // app shows no per-step values or positions instead of shifted ones.
       jdoubleArray instrLats = nullptr;
       jdoubleArray instrLons = nullptr;
       jdoubleArray instrDists = nullptr;
@@ -7333,6 +7258,23 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
         threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
         threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
       }
+
+      // The route's own length when its description produced nothing: the great-circle length of the
+      // polyline this call publishes, so a client that falls back to the total still receives a route
+      // length and never the start/target air-line estimate (spec: route-calculation - The published
+      // route length is a length of that route). With a description present, the total is already the
+      // description's own total above; a single-point route has no geometry to measure and stays 0.
+      double polylineMeters = 0.0;
+      if (count > 1) {
+        for (jsize i = 1; i < count; i++) {
+          polylineMeters += osmscout::GetEllipsoidalDistance(
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
+                                 lonValues[static_cast<size_t>(i - 1)]),
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
+                                 lonValues[static_cast<size_t>(i)])).AsMeter();
+        }
+      }
+      totalDistance = naviveylin::RouteLengthMeters(totalDistance, polylineMeters);
 
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");

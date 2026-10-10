@@ -46,8 +46,8 @@ public class RouteEntry {
      * <p>
      * Index-aligned with {@link #instructionLats} and with the instruction lines of
      * {@link #descriptions}. The value is the route distance from the previous instruction's
-     * manoeuvre to this one, so the entries add up to {@link #distance} (the start line owns a
-     * zero-length leg). It is never a distance between two route nodes that carry no
+     * manoeuvre to this one, so the entries add up to the route's own total distance (the start
+     * line owns a zero-length leg). It is never a distance between two route nodes that carry no
      * instruction, and the array is {@code null} under the same condition as
      * {@link #instructionLats}.
      */
@@ -55,7 +55,7 @@ public class RouteEntry {
 
     /**
      * Estimated travel time in seconds of that same leg, index-aligned with
-     * {@link #instructionDistances}. The entries add up to {@link #duration}.
+     * {@link #instructionDistances}, so the entries add up to the route's own total duration.
      * <p>
      * Zero for a leg whose travel time is below a second, and {@code null} under the same
      * condition as {@link #instructionLats}.

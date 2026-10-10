@@ -1,7 +1,7 @@
 /*
  * search_scope.h — pure helpers for the sibling-region search scope decision
  * (NaviVeylin change "regional-search") and for the geographic extent that a
- * scoped search admits (NaviVeylin change "fix-cross-database-search-scope").
+ * scoped search admits.
  *
  * The expansion rule: when a default admin region is in effect, the search
  * scope may widen from that region to its sibling subregions (children of the
@@ -55,9 +55,7 @@ inline bool ShouldExpandScope(uint8_t parentLevel, uint8_t maxLevel)
   return parentLevel != 0 && parentLevel >= maxLevel;
 }
 
-// ---------------------------------------------------------------------------
 // Geographic extent of a resolved search scope
-// ---------------------------------------------------------------------------
 
 // A latitude/longitude box for the search-scope filter. `isSet == false` means
 // "no extent available": the filter then admits every position, because a scope
@@ -65,18 +63,18 @@ inline bool ShouldExpandScope(uint8_t parentLevel, uint8_t maxLevel)
 // instead of returning nothing.
 struct GeoBox
 {
-  double minLat=0.0;
-  double minLon=0.0;
-  double maxLat=0.0;
-  double maxLon=0.0;
-  bool   isSet=false;
+  double minLat = 0.0;
+  double minLon = 0.0;
+  double maxLat = 0.0;
+  double maxLon = 0.0;
+  bool   isSet  = false;
 };
 
 // Half-size of the extent used for a region that is represented by a single
 // node rather than by an area or a way: such a region has no outline, so its
 // extent is approximated by a box around the point. 0.25 deg is about 28 km of
 // latitude — wider than a city, narrower than a district.
-inline constexpr double kNodeRegionFallbackDegrees=0.25;
+inline constexpr double kNodeRegionFallbackDegrees = 0.25;
 
 // An extent that filters nothing (see GeoBox::isSet).
 inline GeoBox UnsetGeoBox()
@@ -87,34 +85,34 @@ inline GeoBox UnsetGeoBox()
 // Builds a set extent from two corners, normalizing the corner order so a
 // caller may pass them in any arrangement, and clamping the latitude to its
 // valid range. A box crossing the antimeridian is not supported (no installed
-// data needs it), so the longitude is kept as passed.
+// data needs one), so the longitude is kept as passed.
 inline GeoBox BoxFromCorners(double lat1, double lon1, double lat2, double lon2)
 {
   GeoBox box;
 
-  box.minLat=lat1<lat2 ? lat1 : lat2;
-  box.maxLat=lat1<lat2 ? lat2 : lat1;
-  box.minLon=lon1<lon2 ? lon1 : lon2;
-  box.maxLon=lon1<lon2 ? lon2 : lon1;
+  box.minLat = lat1 < lat2 ? lat1 : lat2;
+  box.maxLat = lat1 < lat2 ? lat2 : lat1;
+  box.minLon = lon1 < lon2 ? lon1 : lon2;
+  box.maxLon = lon1 < lon2 ? lon2 : lon1;
 
   if (box.minLat < -90.0) {
-    box.minLat=-90.0;
+    box.minLat = -90.0;
   }
   if (box.maxLat > 90.0) {
-    box.maxLat=90.0;
+    box.maxLat = 90.0;
   }
 
-  box.isSet=true;
+  box.isSet = true;
 
   return box;
 }
 
 // The extent of a region known only by a point (see kNodeRegionFallbackDegrees).
 inline GeoBox BoxAroundPoint(double lat, double lon,
-                             double halfSizeDegrees=kNodeRegionFallbackDegrees)
+                             double halfSizeDegrees = kNodeRegionFallbackDegrees)
 {
-  return BoxFromCorners(lat-halfSizeDegrees, lon-halfSizeDegrees,
-                        lat+halfSizeDegrees, lon+halfSizeDegrees);
+  return BoxFromCorners(lat - halfSizeDegrees, lon - halfSizeDegrees,
+                        lat + halfSizeDegrees, lon + halfSizeDegrees);
 }
 
 // Whether a position lies inside the extent. An unset extent admits every
@@ -126,13 +124,11 @@ inline bool IsInsideGeoBox(const GeoBox &box, double lat, double lon)
   if (!box.isSet) {
     return true;
   }
-
   if (!std::isfinite(lat) || !std::isfinite(lon)) {
     return false;
   }
-
-  return lat>=box.minLat && lat<=box.maxLat &&
-         lon>=box.minLon && lon<=box.maxLon;
+  return lat >= box.minLat && lat <= box.maxLat &&
+         lon >= box.minLon && lon <= box.maxLon;
 }
 
 // Whether every position inside `inner` also lies inside `outer`. This is the
@@ -146,11 +142,10 @@ inline bool GeoBoxContains(const GeoBox &outer, const GeoBox &inner)
     return !outer.isSet;
   }
   if (!outer.isSet) {
-    return true;
+    return false;
   }
-
-  return outer.minLat<=inner.minLat && outer.maxLat>=inner.maxLat &&
-         outer.minLon<=inner.minLon && outer.maxLon>=inner.maxLon;
+  return outer.minLat <= inner.minLat && outer.maxLat >= inner.maxLat &&
+         outer.minLon <= inner.minLon && outer.maxLon >= inner.maxLon;
 }
 
 } // namespace naviveylin

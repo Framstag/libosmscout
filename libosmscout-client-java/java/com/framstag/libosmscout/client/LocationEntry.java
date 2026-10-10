@@ -81,8 +81,7 @@ public class LocationEntry {
      * entry as inside it, and a bridge that does not set the field leaves it
      * true — the pre-change behaviour — so an app and a library of different
      * vintages keep working together. A caller ordering results places entries
-     * outside the scope below entries inside it (spec:
-     * search-result-ranking).
+     * outside the scope below entries inside it.
      */
     public boolean inSearchScope = true;
 

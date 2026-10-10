@@ -57,7 +57,8 @@ TEST_CASE("Scope expansion stops at the cap and at an unknown parent level")
   REQUIRE_FALSE(naviveylin::ShouldExpandScope(7,8));
 }
 
-TEST_CASE("The search cap admits a district parent but not a state parent"){
+TEST_CASE("The search cap admits a district parent but not a state parent")
+{
   /*
    * search_scope.h pins the cap at level 5 (Regierungsbezirk / district) so that
    * the common "one up, one down" case is covered: a kreisfreie Stadt and the
@@ -88,7 +89,6 @@ TEST_CASE("A scoped search admits a position inside the extent and rejects one o
   REQUIRE(naviveylin::IsInsideGeoBox(box, 51.5136, 7.4653));   // the city centre
   REQUIRE(naviveylin::IsInsideGeoBox(box, 51.40, 7.30));       // the corner is inside
   REQUIRE(naviveylin::IsInsideGeoBox(box, 51.70, 7.70));       // and so is its opposite
-
   REQUIRE_FALSE(naviveylin::IsInsideGeoBox(box, 64.1466, -21.9426)); // Reykjavik
   REQUIRE_FALSE(naviveylin::IsInsideGeoBox(box, 51.40, 7.29));       // a step west
   REQUIRE_FALSE(naviveylin::IsInsideGeoBox(box, 51.71, 7.50));       // a step north
@@ -171,4 +171,3 @@ TEST_CASE("A region's bounding box never drops a position inside the region")
   REQUIRE_FALSE(naviveylin::GeoBoxContains(region, unset));
   REQUIRE(naviveylin::GeoBoxContains(unset, unset));
 }
-

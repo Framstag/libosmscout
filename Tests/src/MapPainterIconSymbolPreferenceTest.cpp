@@ -195,6 +195,11 @@ namespace {
       return iconQueries;
     }
 
+    bool HasRegisteredLabel() const
+    {
+      return registered;
+    }
+
     const osmscout::LabelData& RegisteredLabel() const
     {
       REQUIRE(registered);
@@ -260,6 +265,27 @@ namespace {
   }
 
   /**
+   * Prepares one frame with a single node of the given style. The label data the stage registered
+   * is read from the painter afterwards, so a caller can prepare several frames of one stylesheet
+   * and compare them.
+   */
+  void PrepareOneNodeFrame(TestPainter& painter,
+                           const osmscout::StyleConfigRef& styleConfig,
+                           const osmscout::TypeInfoRef& nodeType,
+                           const osmscout::MercatorProjection& projection,
+                           const osmscout::MapParameter& parameter,
+                           bool iconAvailable=true)
+  {
+    painter.SetIconAvailable(iconAvailable);
+
+    osmscout::MapData data=MakeData(styleConfig);
+
+    data.nodes.push_back(MakeNode(nodeType,projection.GetCenter()));
+
+    PrepareFrame(painter,projection,parameter,data);
+  }
+
+  /**
    * Prepares one frame with a single node of a style carrying the given renderings and returns the
    * label data the stage registered.
    */
@@ -269,20 +295,14 @@ namespace {
                                      bool preferSymbolIcons,
                                      bool iconAvailable=true)
   {
-    const auto               types=MakeTypes();
+    const auto                     types=MakeTypes();
     const osmscout::StyleConfigRef styleConfig=MakeStyles(types,hasIconName,hasSymbol);
-    const auto               projection=MakeProjection();
-    osmscout::MapParameter   parameter;
+    const auto                     projection=MakeProjection();
+    osmscout::MapParameter         parameter;
 
     parameter.SetPreferSymbolIcons(preferSymbolIcons);
 
-    painter.SetIconAvailable(iconAvailable);
-
-    osmscout::MapData data=MakeData(styleConfig);
-
-    data.nodes.push_back(MakeNode(types.nodeType,projection.GetCenter()));
-
-    PrepareFrame(painter,projection,parameter,data);
+    PrepareOneNodeFrame(painter,styleConfig,types.nodeType,projection,parameter,iconAvailable);
 
     return painter.RegisteredLabel();
   }
@@ -350,4 +370,66 @@ TEST_CASE("An unavailable icon image falls back to the symbol without the prefer
 
   REQUIRE(label.type==osmscout::LabelData::Type::Symbol);
   REQUIRE(painter.IconQueries()==1);
+}
+
+TEST_CASE("An icon-only entry whose image cannot be served registers no label","[MapPainterIconSymbolPreference]")
+{
+  for (bool preferSymbolIcons : {false,true}) {
+    TestPainter                     painter;
+    const auto                      types=MakeTypes();
+    const osmscout::StyleConfigRef  styleConfig=MakeStyles(types,true,false);
+    const auto                      projection=MakeProjection();
+    osmscout::MapParameter          parameter;
+
+    parameter.SetPreferSymbolIcons(preferSymbolIcons);
+
+    PrepareOneNodeFrame(painter,styleConfig,types.nodeType,projection,parameter,false);
+
+    REQUIRE(painter.IconQueries()==1);
+    REQUIRE_FALSE(painter.HasRegisteredLabel());
+  }
+}
+
+TEST_CASE("The next frame follows a changed preference without a stylesheet reload","[MapPainterIconSymbolPreference]")
+{
+  TestPainter                    painter;
+  const auto                     types=MakeTypes();
+  const osmscout::StyleConfigRef styleConfig=MakeStyles(types,true,true);
+  const auto                     projection=MakeProjection();
+  osmscout::MapParameter         parameter;
+
+  PrepareOneNodeFrame(painter,styleConfig,types.nodeType,projection,parameter);
+
+  const osmscout::IconStyle*     styleOfRasterIconFrame=painter.RegisteredLabel().iconStyle.get();
+
+  REQUIRE(painter.RegisteredLabel().type==osmscout::LabelData::Type::Icon);
+
+  parameter.SetPreferSymbolIcons(true);
+
+  // The same stylesheet object is used again, so the changed preference alone has to change the
+  // rendering; a reload would replace the style the labels point to.
+  PrepareOneNodeFrame(painter,styleConfig,types.nodeType,projection,parameter);
+
+  REQUIRE(painter.RegisteredLabel().type==osmscout::LabelData::Type::Symbol);
+  REQUIRE(painter.RegisteredLabel().iconStyle.get()==styleOfRasterIconFrame);
+}
+
+TEST_CASE("An earlier frame keeps the label it was prepared with","[MapPainterIconSymbolPreference]")
+{
+  TestPainter                    painter;
+  const auto                     types=MakeTypes();
+  const osmscout::StyleConfigRef styleConfig=MakeStyles(types,true,true);
+  const auto                     projection=MakeProjection();
+  osmscout::MapParameter         parameter;
+
+  PrepareOneNodeFrame(painter,styleConfig,types.nodeType,projection,parameter);
+
+  const osmscout::LabelData earlierFrameLabel=painter.RegisteredLabel();
+
+  parameter.SetPreferSymbolIcons(true);
+
+  PrepareOneNodeFrame(painter,styleConfig,types.nodeType,projection,parameter);
+
+  REQUIRE(painter.RegisteredLabel().type==osmscout::LabelData::Type::Symbol);
+  REQUIRE(earlierFrameLabel.type==osmscout::LabelData::Type::Icon);
 }

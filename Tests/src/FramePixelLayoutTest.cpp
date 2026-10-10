@@ -17,6 +17,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -29,10 +30,39 @@
  * same layout: Bitmap.setPixels reads 0xAARRGGBB int[] elements, and
  * Bitmap.copyPixelsFromBuffer reads the bitmap's own byte order (R,G,B,A on ARGB_8888).
  * This test pins both, because getting it wrong is a colour change that no Kotlin-side
- * test can see — the 2026-09-29 defect wrote the int[] layout into the direct buffer, so
- * the daylight palette's motorway colour #7d7af5 arrived as #f57a7d (red) and the water
- * colour #9acffd as #fdcf9a (orange) on the device.
+ * test can see — the defect wrote the int[] layout into the direct buffer, so a pixel
+ * arrived with red and blue swapped.
  */
+
+namespace {
+
+// Reads a pixel back the way the destination's own consumer reads it: an int[] element is
+// a 0xAARRGGBB word, a bitmap buffer is the bytes R,G,B,A. Returning the three colour
+// components makes the two layouts comparable, which is exactly the property a channel
+// swap breaks.
+struct Color {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+};
+
+Color ReadArgbPixel(const uint32_t *pixels, size_t index)
+{
+  uint32_t word = pixels[index];
+
+  return Color{static_cast<uint8_t>((word >> 16) & 0xFFu),
+               static_cast<uint8_t>((word >> 8) & 0xFFu),
+               static_cast<uint8_t>(word & 0xFFu)};
+}
+
+Color ReadRgbaPixel(const uint8_t *bytes, size_t index)
+{
+  const uint8_t *pixel = bytes + index * 4;
+
+  return Color{pixel[0], pixel[1], pixel[2]};
+}
+
+} // namespace
 
 TEST_CASE("The int[] destination writes 0xAARRGGBB words")
 {
@@ -50,6 +80,11 @@ TEST_CASE("The int[] destination writes 0xAARRGGBB words")
 
   REQUIRE(pixels[0] == 0xFF7D7AF5u);
   REQUIRE(pixels[1] == 0xFF000000u);      // the other pixel is untouched
+
+  Color readBack = ReadArgbPixel(pixels.data(), 0);
+  REQUIRE(readBack.r == 0x7d);
+  REQUIRE(readBack.g == 0x7a);
+  REQUIRE(readBack.b == 0xf5);
 }
 
 TEST_CASE("The direct-buffer destination writes the bytes R,G,B,A")
@@ -75,6 +110,39 @@ TEST_CASE("The direct-buffer destination writes the bytes R,G,B,A")
   REQUIRE(bytes[2] == 0xf5);
   REQUIRE(bytes[3] == 0xFF);
   REQUIRE(bytes[4] == 0x00); // the other pixel is untouched
+
+  Color readBack = ReadRgbaPixel(bytes.data(), 0);
+  REQUIRE(readBack.r == 0x7d);
+  REQUIRE(readBack.g == 0x7a);
+  REQUIRE(readBack.b == 0xf5);
+}
+
+TEST_CASE("The same colour reads back identically from both destinations")
+{
+  uint32_t argbPixels[2] = {0, 0};
+  uint8_t rgbaBytes[2 * 4] = {0};
+
+  naviveylin::FrameDestination intDestination{argbPixels,
+                                              naviveylin::FrameLayout::ArgbInt};
+  naviveylin::FrameDestination byteDestination{rgbaBytes,
+                                               naviveylin::FrameLayout::RgbaBytes};
+
+  // The two colours that made the channel swap visible: a motorway and a river.
+  intDestination.Write(0, 0x7d, 0x7a, 0xf5);
+  byteDestination.Write(0, 0x7d, 0x7a, 0xf5);
+  intDestination.Write(1, 0x9a, 0xcf, 0xfd);
+  byteDestination.Write(1, 0x9a, 0xcf, 0xfd);
+
+  for (size_t i = 0; i < 2; i++) {
+    Color fromInt = ReadArgbPixel(argbPixels, i);
+    Color fromBytes = ReadRgbaPixel(rgbaBytes, i);
+
+    // Each destination is read in its own layout; if one were written in the other's
+    // layout, red and blue would come back swapped here.
+    REQUIRE(fromInt.r == fromBytes.r);
+    REQUIRE(fromInt.g == fromBytes.g);
+    REQUIRE(fromInt.b == fromBytes.b);
+  }
 }
 
 TEST_CASE("The two destinations do not share a layout")
@@ -87,7 +155,6 @@ TEST_CASE("The two destinations do not share a layout")
   naviveylin::FrameDestination byteDestination{rgbaBytes,
                                                naviveylin::FrameLayout::RgbaBytes};
 
-  // The two colours that made the defect visible on the device.
   intDestination.Write(0, 0x7d, 0x7a, 0xf5); // motorwayColor
   byteDestination.Write(0, 0x7d, 0x7a, 0xf5);
   intDestination.Write(1, 0x9a, 0xcf, 0xfd); // waterColor
