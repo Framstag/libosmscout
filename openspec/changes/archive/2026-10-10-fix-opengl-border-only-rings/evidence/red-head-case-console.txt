@@ -1,0 +1,22 @@
+Filters: "A ring drawn only by a border is kept"
+Randomness seeded to: 2921156466
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OpenGLAreaVisibilityTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+A ring drawn only by a border is kept
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/OpenGLAreaVisibilityTest.cpp:525
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/OpenGLAreaVisibilityTest.cpp:581: FAILED:
+  CHECK( painter.GetKeptRingCount()==1 )
+with expansion:
+  0 == 1
+
+===============================================================================
+test cases:  1 |  0 passed | 1 failed
+assertions: 15 | 14 passed | 1 failed
+

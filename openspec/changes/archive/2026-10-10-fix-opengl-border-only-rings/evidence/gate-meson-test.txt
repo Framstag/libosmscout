@@ -1,0 +1,156 @@
+ninja: Entering directory `/home/tim/projects/libosmscout/build-meson'
+ninja: no work to do.
+  1/149 libosmscout:Check FavoriteLocationService                       OK               0.06s
+  2/149 libosmscout:Check parsing of access rights                      OK               0.05s
+  3/149 libosmscout:Check area index lookup                             OK               0.04s
+  4/149 libosmscout:Check Base64 code                                   OK               0.02s
+  5/149 libosmscout:Check calculation of bearing                        OK               0.02s
+  6/149 libosmscout:Check style report condensation                     OK               0.10s
+  7/149 libosmscout:Check encoding of numbers                           OK               0.08s
+  8/149 libosmscout:Check database path registration                    OK               0.14s
+  9/149 libosmscout:Check type resolution                               OK               0.12s
+ 10/149 libosmscout:Check std_byte behaviour                            OK               0.10s
+ 11/149 libosmscout:Check cache functionality with CachePerformance     OK               0.10s
+ 12/149 libosmscout:Check position accuracy with coordinate bits        OK               0.09s
+ 13/149 libosmscout:Check cancelable future                             OK               0.08s
+ 14/149 libosmscout:Check parsing of command line args                  OK               0.07s
+ 15/149 libosmscout:Check parsing of colors                             OK               0.10s
+ 16/149 libosmscout:Check coordinate buffer conversions                 OK               0.10s
+ 17/149 libosmscout:Check encoding of numbers                           OK               0.09s
+ 18/149 libosmscout:Check label formatting                              OK               0.08s
+ 19/149 libosmscout:Check FileFormatVersion APIs                        OK               0.08s
+ 20/149 libosmscout:Check parsing of ways.dat                           OK               0.12s
+ 21/149 libosmscout:Check File utilities                                OK               0.09s
+ 22/149 libosmscout:Check handling of geo box intersection              OK               0.09s
+ 23/149 libosmscout:Check type resolution performance                   OK               0.32s
+ 24/149 libosmscout:Check FavoriteStore                                 OK               0.34s
+ 25/149 libosmscout:Check JNI signature parity                          OK               0.35s
+ 26/149 libosmscout:Check parsing of geo coordinates                    OK               0.10s
+ 27/149 libosmscout:Check impl. of geometric functions                  OK               0.11s
+ 28/149 libosmscout:Check HighwayMilestone feature parsing and labeling OK               0.09s
+ 29/149 libosmscout:Check LabelLayouter code                            OK               0.10s
+ 30/149 libosmscout:Check LabelPath code                                OK               0.10s
+ 31/149 libosmscout:Check style load resilience                         OK               0.44s
+ 32/149 libosmscout:Check HighwayMilestone location description         OK               0.08s
+ 33/149 libosmscout:Check object description service                    OK               0.07s
+ 34/149 libosmscout:Check rotation of maps                              OK               0.09s
+ 35/149 libosmscout:Check MercatorProjection                            OK               0.08s
+ 36/149 libosmscout:Check routing                                       OK               0.09s
+ 37/149 libosmscout:Check map manager                                   OK               0.32s
+ 38/149 libosmscout:Check navigation agents                             OK               0.09s
+ 39/149 libosmscout:Check correctness of NumberSet class                OK               0.08s
+ 40/149 libosmscout:Check speed agent                                   OK               0.08s
+ 41/149 libosmscout:Check parsing of opening hours                      OK               0.09s
+ 42/149 libosmscout:Check OSS/T file boundaries.oss                     OK               0.06s
+ 43/149 libosmscout:Check OSS/T file railways.oss                       OK               0.05s
+ 44/149 libosmscout:Check OSS/T file motorways.oss                      OK               0.06s
+ 45/149 libosmscout:Check OSS/T file public-transport.oss               OK               0.07s
+ 46/149 libosmscout:Check MapDownloadService APIs                       OK               0.49s
+ 47/149 libosmscout:Check OSS/T file standard.oss                       OK               0.21s
+ 48/149 libosmscout:Check OSS/T file winter-sports.oss                  OK               0.22s
+ 49/149 libosmscout:PerformanceTest-noop-boundaries.oss                 OK               0.13s
+ 50/149 libosmscout:PerformanceTest-noop-railways.oss                   OK               0.15s
+ 51/149 libosmscout:PerformanceTest-noop-motorways.oss                  OK               0.13s
+ 52/149 libosmscout:Check OSS/T file cycle.oss                          OK               0.26s
+ 53/149 libosmscout:PerformanceTest-noop-public-transport.oss           OK               0.18s
+ 54/149 libosmscout:PerformanceTest-none-boundaries.oss                 OK               0.13s
+ 55/149 libosmscout:PerformanceTest-noop-winter-sports.oss              OK               0.38s
+ 56/149 libosmscout:PerformanceTest-noop-standard.oss                   OK               0.40s
+ 57/149 libosmscout:PerformanceTest-none-railways.oss                   OK               0.21s
+ 58/149 libosmscout:PerformanceTest-none-standard.oss                   OK               0.30s
+ 59/149 libosmscout:PerformanceTest-none-motorways.oss                  OK               0.17s
+ 60/149 libosmscout:PerformanceTest-noop-cycle.oss                      OK               0.40s
+ 61/149 libosmscout:PerformanceTest-none-winter-sports.oss              OK               0.36s
+ 62/149 libosmscout:PerformanceTest-none-public-transport.oss           OK               0.22s
+ 63/149 libosmscout:PerformanceTest-none-cycle.oss                      OK               0.25s
+ 64/149 libosmscout:PerformanceTest-cairo-boundaries.oss                OK               0.20s
+ 65/149 libosmscout:PerformanceTest-cairo-motorways.oss                 OK               0.18s
+ 66/149 libosmscout:PerformanceTest-cairo-railways.oss                  OK               0.24s
+ 67/149 libosmscout:PerformanceTest-cairo-public-transport.oss          OK               0.27s
+ 68/149 libosmscout:PerformanceTest-cairo-standard.oss                  OK               0.45s
+ 69/149 libosmscout:Check asynchronous worker                           OK               1.43s
+ 70/149 libosmscout:PerformanceTest-Qt-boundaries.oss                   OK               0.24s
+ 71/149 libosmscout:PerformanceTest-cairo-winter-sports.oss             OK               0.53s
+ 72/149 libosmscout:PerformanceTest-Qt-railways.oss                     OK               0.28s
+ 73/149 libosmscout:Check use of '<'...'>' for includes                 OK               1.38s
+ 74/149 libosmscout:PerformanceTest-cairo-cycle.oss                     OK               0.50s
+ 75/149 libosmscout:PerformanceTest-Qt-motorways.oss                    OK               0.27s
+ 76/149 libosmscout:PerformanceTest-Qt-public-transport.oss             OK               0.32s
+ 77/149 libosmscout:PerformanceTest-Qt-standard.oss                     OK               0.59s
+ 78/149 libosmscout:Check latch consistency                             OK               1.54s
+ 79/149 libosmscout:Check reader scanner performance                    OK               0.06s
+ 80/149 libosmscout:PerformanceTest-Qt-winter-sports.oss                OK               0.66s
+ 81/149 libosmscout:Check PolygonCenter utility                         OK               0.13s
+ 82/149 libosmscout:Check route postprocessor                           OK               0.05s
+ 83/149 libosmscout:Check scan conversion code                          OK               0.05s
+ 84/149 libosmscout:Check ScreenBox functionality                       OK               0.06s
+ 85/149 libosmscout:Check ScreenMask functionality                      OK               0.06s
+ 86/149 libosmscout:Check signal                                        OK               0.07s
+ 87/149 libosmscout:PerformanceTest-Qt-cycle.oss                        OK               0.62s
+ 88/149 libosmscout:Check string utils                                  OK               0.10s
+ 89/149 libosmscout:Check string matcher                                OK               0.10s
+ 90/149 libosmscout:Check search scope                                  OK               0.10s
+ 91/149 libosmscout:Check routing progress throttle                     OK               0.08s
+ 92/149 libosmscout:Check frame pixel layout                            OK               0.08s
+ 93/149 libosmscout:Check route step time                               OK               0.07s
+ 94/149 libosmscout:Check SymbolRenderer SVG backend                    OK               0.07s
+ 95/149 libosmscout:Check SymbolRenderer Cairo backend                  OK               0.07s
+ 96/149 libosmscout:Check Cairo pattern report                          OK               0.08s
+ 97/149 libosmscout:Check pattern image lookup                          OK               0.06s
+ 98/149 libosmscout:Check MapPainterFrameBuffers compilation            OK               0.05s
+ 99/149 libosmscout:Check MapPainterAreaPreparation compilation         OK               0.08s
+100/149 libosmscout:Check MapPainterAreaVisibilityCull compilation      OK               0.07s
+101/149 libosmscout:Check StyleConfigVisibilityBounds compilation       OK               0.04s
+102/149 libosmscout:Check MapPainterWayCulling compilation              OK               0.08s
+103/149 libosmscout:Check MapPainterPointObjectCulling compilation      OK               0.06s
+104/149 libosmscout:PerformanceTest-opengl-public-transport.oss         OK               1.02s
+105/149 libosmscout:PerformanceTest-opengl-railways.oss                 OK               1.11s
+106/149 libosmscout:Check MapPainterLabelCulling compilation            OK               0.11s
+107/149 libosmscout:PerformanceTest-opengl-boundaries.oss               OK               1.20s
+108/149 libosmscout:PerformanceTest-opengl-motorways.oss                OK               1.16s
+109/149 libosmscout:Check MapPainterIconSymbolPreference compilation    OK               0.19s
+110/149 libosmscout:Check MapPainterLabelReuse compilation              OK               0.16s
+111/149 libosmscout:Check SunriseSunset utility                         OK               0.12s
+112/149 libosmscout:Check text lookup - vysoka                          OK               0.09s
+113/149 libosmscout:Check text lookup - Vysoká                          OK               0.13s
+114/149 libosmscout:Check text lookup - bosyne                          OK               0.13s
+115/149 libosmscout:Check StyleConfig symbol enumeration                OK               0.86s
+116/149 libosmscout:Check Thread utilities                              OK               0.14s
+117/149 libosmscout:Check tiling calculation code                       OK               0.12s
+118/149 libosmscout:Check parsing of time string                        OK               0.17s
+119/149 libosmscout:Check polygon transformation code                   OK               0.21s
+120/149 libosmscout:Check water index import code                       OK               0.21s
+121/149 libosmscout:Check JSON writer                                   OK               0.26s
+122/149 libosmscout:Check db.json writer                                OK               0.27s
+123/149 libosmscout:Check WString<=>String conversion code              OK               0.05s
+124/149 libosmscout:Check MapPainterRoute compilation                   OK               0.07s
+125/149 libosmscout:Check MapPainterShield compilation                  OK               0.08s
+126/149 libosmscout:Check polygon triangulation                         OK               0.07s
+127/149 libosmscout:PerformanceTest-opengl-standard.oss                 OK               2.15s
+128/149 libosmscout:Check route style colours                           OK               1.49s
+129/149 libosmscout:Check MapPainterShieldQt compilation                OK               0.21s
+130/149 libosmscout:Check TextMetricsReference compilation              OK               0.03s
+131/149 libosmscout:PerformanceTest-opengl-winter-sports.oss            OK               2.28s
+132/149 libosmscout:Check MapPainterSkia compilation                    OK               0.18s
+133/149 libosmscout:PerformanceTest-opengl-cycle.oss                    OK               2.18s
+134/149 libosmscout:Check TextMetrics compilation                       OK               0.26s
+135/149 libosmscout:Check TextMetricsCairo compilation                  OK               0.21s
+136/149 libosmscout:Check TextMetricsSVG compilation                    OK               0.18s
+137/149 libosmscout:Check client update check contract                  OK               0.87s
+138/149 libosmscout:Check TextMetricsCrossBackend compilation           OK               0.24s
+139/149 libosmscout:Check TextMetricsQt compilation                     OK               0.17s
+140/149 libosmscout:Check implementation of work queue                  OK               1.11s
+141/149 libosmscout:Check OpenGL area visibility                        OK               0.96s
+142/149 libosmscout:Check road style colours                            OK               3.55s
+143/149 libosmscout:Check LocationService                               OK               5.91s
+144/149 libosmscout:Check File access implementation                    OK               6.32s
+145/149 libosmscout:Check basemap generation contract                   OK               6.02s
+146/149 libosmscout:Check vector self append                            OK              10.48s
+147/149 libosmscout:Check asynchronous processing                       OK              10.79s
+148/149 libosmscout:Check threaded database                             OK              37.98s
+149/149 libosmscout:Check number set performance                        OK              54.87s
+
+Ok:                149 
+Fail:              0   
+
+Full log written to /home/tim/projects/libosmscout/build-meson/meson-logs/testlog.txt

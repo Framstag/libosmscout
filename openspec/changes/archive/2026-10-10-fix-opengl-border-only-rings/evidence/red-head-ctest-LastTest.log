@@ -1,0 +1,41 @@
+Start testing: Oct 10 14:00 CEST
+----------------------------------------------------------
+134/149 Testing: OpenGLAreaVisibilityTest
+134/149 Test: OpenGLAreaVisibilityTest
+Command: "/home/tim/projects/libosmscout/build/Tests/OpenGLAreaVisibilityTest"
+Directory: /home/tim/projects/libosmscout/Tests
+"OpenGLAreaVisibilityTest" start time: Oct 10 14:00 CEST
+Output:
+----------------------------------------------------------
+Randomness seeded to: 146637586
+
+(OpenGLAreaVisibilityTest:2471301): Gtk-WARNING **: 14:00:33.415: gtk_disable_setlocale() must be called before gtk_init()
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OpenGLAreaVisibilityTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+A ring drawn only by a border is kept
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/OpenGLAreaVisibilityTest.cpp:525
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/OpenGLAreaVisibilityTest.cpp:581: FAILED:
+  CHECK( painter.GetKeptRingCount()==1 )
+with expansion:
+  0 == 1
+
+===============================================================================
+test cases:   6 |   5 passed | 1 failed
+assertions: 116 | 115 passed | 1 failed
+
+<end of output>
+Test time =   0.18 sec
+----------------------------------------------------------
+Test Failed.
+"OpenGLAreaVisibilityTest" end time: Oct 10 14:00 CEST
+"OpenGLAreaVisibilityTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 10 14:00 CEST

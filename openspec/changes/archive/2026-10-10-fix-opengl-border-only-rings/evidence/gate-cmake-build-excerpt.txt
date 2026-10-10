@@ -1,0 +1,8 @@
+[1/255] Compiling Java sources and generating JNI headers
+[2/255] Building CXX object Demos/CMakeFiles/DumpOSS.dir/src/DumpOSS.cpp.o
+  [... 253 other build steps omitted]
+45
+[252/255] Linking CXX executable Tests/QtFileDownloaderTest-1.1.1
+[253/255] Creating executable symlink Tests/QtFileDownloaderTest
+[254/255] Building CXX object libosmscout-client-java/CMakeFiles/osmscout_client_java.dir/src/OSMScoutClient.cpp.o
+[255/255] Linking CXX shared library libosmscout-client-java/libosmscout_client_java.so

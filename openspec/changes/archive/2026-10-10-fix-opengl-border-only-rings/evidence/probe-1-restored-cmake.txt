@@ -1,0 +1,7 @@
+Test project /home/tim/projects/libosmscout/build
+    Start 134: OpenGLAreaVisibilityTest
+1/1 Test #134: OpenGLAreaVisibilityTest .........   Passed    0.18 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =   0.18 sec
