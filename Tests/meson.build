@@ -990,6 +990,16 @@ MapPainterLabelCullingTest = executable('MapPainterLabelCullingTest',
 
 test('Check MapPainterLabelCulling compilation', MapPainterLabelCullingTest)
 
+MapPainterIconSymbolPreferenceTest = executable('MapPainterIconSymbolPreferenceTest',
+                               'src/MapPainterIconSymbolPreferenceTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterIconSymbolPreference compilation', MapPainterIconSymbolPreferenceTest)
+
 MapPainterLabelReuseTest = executable('MapPainterLabelReuseTest',
                                'src/MapPainterLabelReuseTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
