@@ -817,6 +817,15 @@ SearchScopeTest = executable('SearchScopeTest',
 
 test('Check search scope', SearchScopeTest)
 
+RoutingProgressThrottleTest = executable('RoutingProgressThrottleTest',
+             'src/RoutingProgressThrottleTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check routing progress throttle', RoutingProgressThrottleTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
@@ -980,6 +989,16 @@ MapPainterLabelCullingTest = executable('MapPainterLabelCullingTest',
                                install_dir: testInstallDir)
 
 test('Check MapPainterLabelCulling compilation', MapPainterLabelCullingTest)
+
+MapPainterIconSymbolPreferenceTest = executable('MapPainterIconSymbolPreferenceTest',
+                               'src/MapPainterIconSymbolPreferenceTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterIconSymbolPreference compilation', MapPainterIconSymbolPreferenceTest)
 
 MapPainterLabelReuseTest = executable('MapPainterLabelReuseTest',
                                'src/MapPainterLabelReuseTest.cpp',

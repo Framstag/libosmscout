@@ -70,6 +70,7 @@
 #include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
+#include "routing_progress_throttle.h"
 #include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -437,6 +438,7 @@ struct ClientData
   osmscout::FavoriteStore favoriteStore;             //!< Favorite store; owns the service and serialises wholesale replacement
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
+  bool preferSymbolIcons{false};                      //!< Draw the vector symbol of an entry that carries a raster icon, too
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   osmscout::DatabasePathRegistry knownPaths;          //!< Registered map database paths, guarded by the registry's own mutex
 
@@ -717,12 +719,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
   std::filesystem::path fsPath(pathCStr);
   env->ReleaseStringUTFChars(pathJStr, pathCStr);
 
-  // Add to known paths if not already present. All opened maps stay loaded:
-  // libosmscout renders whichever database(s) cover the current viewport, so
-  // multiple maps can be used simultaneously without switching (fix-download).
-  // The registry serialises concurrent openers: the path list is no longer
-  // mutated while another thread (or the database thread) reads it.
-  data->knownPaths.Register(fsPath);
+  // Register the path (all opened maps stay loaded: libosmscout renders
+  // whichever database(s) cover the current viewport, so multiple maps can be
+  // used simultaneously without switching (fix-download)). Only an existing
+  // directory is accepted (spec client-java-database-paths - The
+  // single-directory call rejects a path that is not a database directory): a
+  // rejected path enters no set and counts no set change, so nothing is
+  // published and every database already loaded stays open. The report names
+  // the directory only.
+  // The registry serialises concurrent openers: the path list is not mutated
+  // while another thread (or the database thread) reads it.
+  if (!data->knownPaths.RegisterOpenable(fsPath)) {
+    osmscout::log.Warn() << "[JNI] openDatabase: not an existing map database directory: "
+                         << fsPath.filename().string();
+
+    return JNI_FALSE;
+  }
 
   // Trigger DBThread to process the updated path list. The snapshot is a value
   // copy taken under the registry's own lock, so the database thread never
@@ -748,6 +760,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
 // string is reported false and is not registered; a null array or an empty
 // array returns an empty array. A client that is not usable (no database
 // thread) reports every requested directory as false instead of faulting.
+// A path that is not an existing directory is registered and reported all the
+// same (spec client-java-database-paths - The batch call keeps its tolerance),
+// so the batch never fails because of one bad entry.
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jbooleanArray JNICALL
@@ -790,6 +805,18 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabases(JNIEnv *env, j
   ClientData *data = getClientData(env, self);
 
   if (data != nullptr && data->dbThread != nullptr && !paths.empty()) {
+    // The batch keeps its documented tolerance: a directory that disappears
+    // between the app's scan and this call must not fail the batch, so the path
+    // is registered all the same and merely reported here. The directory name
+    // only, and the report changes nothing about what is registered or about
+    // the array returned below.
+    for (const auto &path : paths) {
+      if (!osmscout::IsOpenableDatabaseDirectory(path)) {
+        osmscout::log.Warn() << "[JNI] openDatabases: not an existing map database directory: "
+                             << path.filename().string();
+      }
+    }
+
     auto registration = data->knownPaths.RegisterAll(paths);
 
     for (size_t k=0; k<paths.size(); k++) {
@@ -1078,27 +1105,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::setMapDpi(double dpi)
-//
-// Overrides the physical DPI used for rendering. Each display (phone vs car
-// surface) has its own physical DPI; the client is built with the phone
-// metrics, so Android Auto must switch to the car surface DPI before its
-// first render (otherwise the map is scaled ~1.8x too zoomed on a 236-dpi
-// head unit). Mirrors Settings::SetMapDPI; the next render picks it up.
-// --------------------------------------------------------------------------
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobject self, jdouble dpi)
-{
-  ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->settings == nullptr || dpi <= 0.0) {
-    return;
-  }
-  osmscout::log.Debug() << "[JNI] setMapDpi(" << dpi << ")";
-  data->settings->SetMapDPI(dpi);
-}
-
-// --------------------------------------------------------------------------
 // OSMScoutClient::setNativeDataCacheSize(int cacheSize)
 //
 // Configures the capacity of libosmscout's per-database tile data caches
@@ -1117,6 +1123,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEn
   }
   data->tileDataCacheSize = (cacheSize > 0) ? static_cast<std::size_t>(cacheSize) : 0;
   osmscout::log.Debug() << "[JNI] setNativeDataCacheSize(" << cacheSize << ")";
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::setPreferSymbolIcons(boolean preferSymbolIcons)
+//
+// Selects which of a style entry's two renderings is drawn when the
+// stylesheet carries both a raster icon name and a vector symbol. Off by
+// default: the raster icon keeps its precedence and the symbol stays the
+// fallback. The render path reads the value when it builds its parameters, so
+// the next frame follows it without a stylesheet reload.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setPreferSymbolIcons(JNIEnv *env, jobject self, jboolean preferSymbolIcons)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+  data->preferSymbolIcons = (preferSymbolIcons == JNI_TRUE);
+  osmscout::log.Debug() << "[JNI] setPreferSymbolIcons(" << (data->preferSymbolIcons ? "true" : "false") << ")";
 }
 
 // --------------------------------------------------------------------------
@@ -1199,6 +1226,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
                                                                              jdouble magnificationScale,
+                                                                             jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1287,7 +1315,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_importGpxTrack(JNIEnv *env,
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::render(int width, int height, double lat, double lon, double angle, double mag)
+// OSMScoutClient::render(int width, int height, double lat, double lon, double angle,
+//                        double mag, double dpi)
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -1295,10 +1324,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
                                                            jint width, jint height,
                                                            jdouble lat, jdouble lon,
                                                            jdouble angle,
-                                                           jdouble magnificationScale)
+                                                           jdouble magnificationScale,
+                                                           jdouble dpi)
 {
   return Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(
-      env, self, width, height, lat, lon, angle, magnificationScale, nullptr, nullptr, nullptr, nullptr,
+      env, self, width, height, lat, lon, angle, magnificationScale, dpi, nullptr, nullptr, nullptr, nullptr,
       std::numeric_limits<jdouble>::quiet_NaN(),
       std::numeric_limits<jdouble>::quiet_NaN(),
       nullptr, nullptr);
@@ -1306,7 +1336,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
 
 // --------------------------------------------------------------------------
 // OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
-//                                         double angle, double mag, double[] routeLats, double[] routeLons,
+//                                         double angle, double mag, double dpi,
+//                                         double[] routeLats, double[] routeLons,
 //                                         double[] favoriteLats, double[] favoriteLons,
 //                                         double searchSelLat, double searchSelLon)
 // --------------------------------------------------------------------------
@@ -1317,6 +1348,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
                                                                              jdouble magnificationScale,
+                                                                             jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1359,7 +1391,16 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
 
   osmscout::Magnification magnification(magnificationScale);
 
-  double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
+  // The projection DPI is part of the render request: each surface passes the DPI
+  // of the display it draws on, so no frame depends on a value another surface
+  // configured. Each display has its own physical DPI — a head unit rendering at
+  // the phone's density is scaled ~1.8x too zoomed, and a phone rendering at the
+  // head unit's density is equally wrong. A request that states none — the Java
+  // convenience overloads pass none — falls back to the DPI configured on the
+  // client, so it renders as before instead of being rejected.
+  if (!(dpi > 0.0)) {
+    dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
+  }
   // Verbose render logging disabled; re-enable only when debugging native renderer
   // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
   //                      << " height=" << height << " mag=" << magnificationScale;
@@ -1479,6 +1520,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
       params.SetRenderBackground(true);
       params.SetRenderUnknowns(true);
       params.SetIconMode(osmscout::MapParameter::IconMode::ScaledPixmap);
+      params.SetPreferSymbolIcons(data->preferSymbolIcons);
 
       std::string iconDir = data->dbThread->GetIconDirectory();
       if (!iconDir.empty()) {
@@ -5476,6 +5518,9 @@ private:
   jobject callback;
   RouteCallbackMethods methods;
 
+  /** Change detection and rate limit for the reports handed to Java, see Progress(). */
+  naviveylin::RoutingProgressThrottle throttle;
+
 public:
   JavaRoutingProgress(JavaVM *jvm, jobject callback, const RouteCallbackMethods &methods)
     : jvm(jvm), callback(callback), methods(methods)
@@ -5487,20 +5532,30 @@ public:
     // no-op
   }
 
+  /**
+   * The router calls this once per successfully relaxed edge — thousands to
+   * millions of times for a long route, and always from the routing worker
+   * thread. Every call would cross JNI into Java, so only a *changed*
+   * percentage is reported, and at most once per rate-limit interval (see
+   * routing_progress_throttle.h): the callback then means "the progress moved"
+   * instead of "a node was visited", and the routing thread keeps its time for
+   * routing. The percentage is capped below completion — 100 % stays reserved
+   * for the route that actually arrived. The attach and the Java call happen
+   * only for an accepted report, so a dropped one costs no JNI crossing.
+   */
   void Progress(const osmscout::Distance &currentMaxDistance,
                 const osmscout::Distance &overallDistance) override
   {
-    JNIEnv *env;
-    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+    int percent = naviveylin::ProgressPercent(currentMaxDistance.AsMeter(),
+                                              overallDistance.AsMeter());
+
+    if (!throttle.ShouldReport(percent, std::chrono::steady_clock::now())) {
       return;
     }
 
-    int percent = 0;
-    double overall = overallDistance.AsMeter();
-    if (overall > 0.0) {
-      percent = static_cast<int>(
-          currentMaxDistance.AsMeter() / overall * 100.0);
-      if (percent > 99) percent = 99;
+    JNIEnv *env;
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+      return;
     }
 
     env->CallVoidMethod(callback, methods.onProgress, percent);

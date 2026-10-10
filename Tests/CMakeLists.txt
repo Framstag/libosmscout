@@ -262,6 +262,9 @@ osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
 #---- SearchScope
 osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RoutingProgressThrottle
+osmscout_test_project(NAME RoutingProgressThrottleTest SOURCES src/RoutingProgressThrottleTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
@@ -605,6 +608,13 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME MapPainterPointObjectCullingTest SOURCES src/MapPainterPointObjectCullingTest.cpp TARGET OSMScout::Map)
 else()
   message("Skip MapPainterPointObjectCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterIconSymbolPreferenceTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterIconSymbolPreferenceTest SOURCES src/MapPainterIconSymbolPreferenceTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterIconSymbolPreference test, libosmscout-map is missing.")
 endif()
 
 #---- MapPainterLabelCullingTest
