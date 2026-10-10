@@ -131,7 +131,7 @@ public class OSMScoutClient {
      * application runs takes effect without a restart; this call returns
      * without waiting for that reload to finish. Whether a basemap is drawn
      * afterwards is observable from {@link #render(int, int, double, double,
-     * double, int)} and from {@link #wasLastStyleLoadSuccessful()}.
+     * double, double, double)} and from {@link #wasLastStyleLoadSuccessful()}.
      *
      * @param directory path to the basemap OSMScout data, or an empty value to
      *                  unload the basemap
@@ -199,12 +199,35 @@ public class OSMScoutClient {
      * @param lon          center longitude in degrees
      * @param angle        map rotation angle in radians (0 = north-up)
      * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
+     * @param dpi          physical DPI of the display the frame is rendered for; {@code Double.NaN}
+     *                     or a non-positive value renders with the DPI configured on the client
      * @return int[] ARGB pixel data, or null if not initialised or invalid params
      */
     public native int[] render(int width, int height,
                                double lat, double lon,
                                double angle,
-                               double magnification);
+                               double magnification,
+                               double dpi);
+
+    /**
+     * Render the current map view to an ARGB pixel array.
+     * <p>
+     * Convenience overload that renders with the DPI configured on the client.
+     *
+     * @param width        viewport width in pixels
+     * @param height       viewport height in pixels
+     * @param lat          center latitude in degrees
+     * @param lon          center longitude in degrees
+     * @param angle        map rotation angle in radians (0 = north-up)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
+     * @return int[] ARGB pixel data, or null if not initialised or invalid params
+     */
+    public int[] render(int width, int height,
+                        double lat, double lon,
+                        double angle,
+                        double magnification) {
+        return render(width, height, lat, lon, angle, magnification, Double.NaN);
+    }
 
     /**
      * Sentinel for "no default admin region" — pass to
@@ -621,11 +644,49 @@ public class OSMScoutClient {
      * Render the current map view to an ARGB pixel array, with optional route,
      * track, and POI marker overlays.
      * <p>
-     * Same as {@link #render(int, int, double, double, double, int)} but also draws a route
+     * Same as {@link #render(int, int, double, double, double, double, double)} but also draws a route
      * polyline, an imported track polyline, start/end markers, favorite markers, and
      * a selected-search marker on the map. The route, track, and favorite waypoints are
      * passed as parallel arrays of latitudes and longitudes. The selected search
      * coordinate uses {@code Double.NaN} for latitude to mean "no selection".
+     *
+     * @param width        viewport width in pixels
+     * @param height       viewport height in pixels
+     * @param lat          center latitude in degrees
+     * @param lon          center longitude in degrees
+     * @param angle        map rotation angle in radians (0 = north-up)
+     * @param magnification magnification scale factor (2^zoom level, 1 = world, fractional values supported)
+     * @param dpi          physical DPI of the display the frame is rendered for; {@code Double.NaN}
+     *                     or a non-positive value renders with the DPI configured on the client
+     * @param routeLats    array of route waypoint latitudes, or null for no route
+     * @param routeLons    array of route waypoint longitudes, or null for no route
+     * @param favoriteLats array of favorite latitudes, or null for no favorites
+     * @param favoriteLons array of favorite longitudes, or null for no favorites
+     * @param searchSelLat latitude of the selected search result, or {@code Double.NaN}
+     * @param searchSelLon longitude of the selected search result, ignored when no selection
+     * @param trackLats        array of imported track latitudes, or null for no track
+     * @param trackLons        array of imported track longitudes, or null for no track
+     * @return int[] ARGB pixel data, or null if not initialised or invalid params
+     */
+    public native int[] renderWithRouteAndPois(int width, int height,
+                                               double lat, double lon,
+                                               double angle,
+                                               double magnification,
+                                               double dpi,
+                                               double[] routeLats,
+                                               double[] routeLons,
+                                               double[] favoriteLats,
+                                               double[] favoriteLons,
+                                               double searchSelLat,
+                                               double searchSelLon,
+                                               double[] trackLats,
+                                               double[] trackLons);
+
+    /**
+     * Render the current map view to an ARGB pixel array, with optional route,
+     * track, and POI marker overlays.
+     * <p>
+     * Convenience overload that renders with the DPI configured on the client.
      *
      * @param width        viewport width in pixels
      * @param height       viewport height in pixels
@@ -643,24 +704,28 @@ public class OSMScoutClient {
      * @param trackLons        array of imported track longitudes, or null for no track
      * @return int[] ARGB pixel data, or null if not initialised or invalid params
      */
-    public native int[] renderWithRouteAndPois(int width, int height,
-                                               double lat, double lon,
-                                               double angle,
-                                               double magnification,
-                                               double[] routeLats,
-                                               double[] routeLons,
-                                               double[] favoriteLats,
-                                               double[] favoriteLons,
-                                               double searchSelLat,
-                                               double searchSelLon,
-                                               double[] trackLats,
-                                               double[] trackLons);
+    public int[] renderWithRouteAndPois(int width, int height,
+                                        double lat, double lon,
+                                        double angle,
+                                        double magnification,
+                                        double[] routeLats,
+                                        double[] routeLons,
+                                        double[] favoriteLats,
+                                        double[] favoriteLons,
+                                        double searchSelLat,
+                                        double searchSelLon,
+                                        double[] trackLats,
+                                        double[] trackLons) {
+        return renderWithRouteAndPois(width, height, lat, lon, angle, magnification, Double.NaN,
+                                      routeLats, routeLons, favoriteLats, favoriteLons,
+                                      searchSelLat, searchSelLon, trackLats, trackLons);
+    }
 
     /**
      * Render the current map view to an ARGB pixel array, with optional route overlay.
      * <p>
      * Convenience overload that calls {@link #renderWithRouteAndPois(int, int, double,
-     * double, double, double, double[], double[], double[], double[], double, double, double[], double[])}
+     * double, double, double, double, double[], double[], double[], double[], double, double, double[], double[])}
      * with no track, favorite, or selected-search markers.
      *
      * @param width        viewport width in pixels
