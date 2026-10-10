@@ -69,6 +69,7 @@
 #include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
+#include "routing_progress_throttle.h"
 #include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -5376,6 +5377,9 @@ private:
   jobject callback;
   RouteCallbackMethods methods;
 
+  /** Change detection and rate limit for the reports handed to Java, see Progress(). */
+  naviveylin::RoutingProgressThrottle throttle;
+
 public:
   JavaRoutingProgress(JavaVM *jvm, jobject callback, const RouteCallbackMethods &methods)
     : jvm(jvm), callback(callback), methods(methods)
@@ -5387,20 +5391,30 @@ public:
     // no-op
   }
 
+  /**
+   * The router calls this once per successfully relaxed edge — thousands to
+   * millions of times for a long route, and always from the routing worker
+   * thread. Every call would cross JNI into Java, so only a *changed*
+   * percentage is reported, and at most once per rate-limit interval (see
+   * routing_progress_throttle.h): the callback then means "the progress moved"
+   * instead of "a node was visited", and the routing thread keeps its time for
+   * routing. The percentage is capped below completion — 100 % stays reserved
+   * for the route that actually arrived. The attach and the Java call happen
+   * only for an accepted report, so a dropped one costs no JNI crossing.
+   */
   void Progress(const osmscout::Distance &currentMaxDistance,
                 const osmscout::Distance &overallDistance) override
   {
-    JNIEnv *env;
-    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+    int percent = naviveylin::ProgressPercent(currentMaxDistance.AsMeter(),
+                                              overallDistance.AsMeter());
+
+    if (!throttle.ShouldReport(percent, std::chrono::steady_clock::now())) {
       return;
     }
 
-    int percent = 0;
-    double overall = overallDistance.AsMeter();
-    if (overall > 0.0) {
-      percent = static_cast<int>(
-          currentMaxDistance.AsMeter() / overall * 100.0);
-      if (percent > 99) percent = 99;
+    JNIEnv *env;
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+      return;
     }
 
     env->CallVoidMethod(callback, methods.onProgress, percent);

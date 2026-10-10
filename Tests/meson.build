@@ -817,6 +817,15 @@ SearchScopeTest = executable('SearchScopeTest',
 
 test('Check search scope', SearchScopeTest)
 
+RoutingProgressThrottleTest = executable('RoutingProgressThrottleTest',
+             'src/RoutingProgressThrottleTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check routing progress throttle', RoutingProgressThrottleTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
