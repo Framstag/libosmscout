@@ -607,6 +607,13 @@ else()
   message("Skip MapPainterPointObjectCulling test, libosmscout-map is missing.")
 endif()
 
+#---- MapPainterIconSymbolPreferenceTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterIconSymbolPreferenceTest SOURCES src/MapPainterIconSymbolPreferenceTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterIconSymbolPreference test, libosmscout-map is missing.")
+endif()
+
 #---- MapPainterLabelCullingTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME MapPainterLabelCullingTest SOURCES src/MapPainterLabelCullingTest.cpp TARGET OSMScout::Map)
