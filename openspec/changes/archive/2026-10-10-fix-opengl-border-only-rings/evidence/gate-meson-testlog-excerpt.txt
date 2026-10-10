@@ -1,0 +1,39 @@
+Log of Meson test suite run on 2026-10-10T14:15:26.013406
+
+  [... environment block and 148 other tests omitted; full log not retained - it is overwritten by any later meson test run]
+test:         libosmscout:Check OpenGL area visibility
+start time:   12:15:29
+duration:     0.96s
+result:       exit status 0
+command:      MESON_TEST_ITERATION=1 MALLOC_PERTURB_=97 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 LD_LIBRARY_PATH=/home/tim/projects/libosmscout/build-meson/libosmscout-map:/home/tim/projects/libosmscout/build-meson/libosmscout-map-opengl:/home/tim/projects/libosmscout/build-meson/libosmscout /home/tim/projects/libosmscout/build-meson/Tests/OpenGLAreaVisibilityTest
+----------------------------------- stdout -----------------------------------
+Randomness seeded to: 3864717484
+===============================================================================
+All tests passed (116 assertions in 6 test cases)
+
+----------------------------------- stderr -----------------------------------
+
+(OpenGLAreaVisibilityTest:2483852): Gtk-WARNING **: 14:15:30.209: gtk_disable_setlocale() must be called before gtk_init()
+==============================================================================
+
+================================== 142/149 ===================================
+test:         libosmscout:Check road style colours
+start time:   12:15:28
+duration:     3.55s
+result:       exit status 0
+command:      TESTS_TMP_DIR=/home/tim/projects/libosmscout/build-meson/Tests MALLOC_PERTURB_=220 MESON_TEST_ITERATION=1 TESTS_TOP_DIR=/home/tim/projects/libosmscout/Tests LD_LIBRARY_PATH=/home/tim/projects/libosmscout/build-meson/libosmscout-map:/home/tim/projects/libosmscout/build-meson/libosmscout UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 /home/tim/projects/libosmscout/build-meson/Tests/RoadStyleColorsTest
+----------------------------------- stdout -----------------------------------
+Randomness seeded to: 3235385867
+===============================================================================
+All tests passed (123 assertions in 5 test cases)
+
+----------------------------------- stderr -----------------------------------
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/natural.oss': 1 (natural_waterfall)
+  [...]
+Testing 50000000 ids in NumberSet took 0.198
+==============================================================================
+
+
+Ok:                149 
+Fail:              0   

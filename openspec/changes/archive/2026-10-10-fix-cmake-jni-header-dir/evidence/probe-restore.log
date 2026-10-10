@@ -1,0 +1,29 @@
+timestamp: 2026-10-10T14:48:37+02:00
+probe restore: TEMP-REVERT-PROBE marker removed, the rm -rf command is active again; the same construction repeated
+--- cmake --build build --target java_compile
+-- Generating done (1.0s)
+-- Build files have been written to: /home/tim/projects/libosmscout/build
+[1/2] Compiling Java sources and generating JNI headers
+--- headers after the build
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+PROBE RESTORE OK: sentinel gone again
+--- git diff of the touched file (expect the fix alone):
+diff --git a/libosmscout-client-java/CMakeLists.txt b/libosmscout-client-java/CMakeLists.txt
+index d1b6f0fb2..9fff128c2 100644
+--- a/libosmscout-client-java/CMakeLists.txt
++++ b/libosmscout-client-java/CMakeLists.txt
+@@ -58,6 +58,9 @@ add_custom_command(
+   # jar forever; start from an empty directory so the jar mirrors the sources.
+   COMMAND ${CMAKE_COMMAND} -E rm -rf ${JAVA_CLASSES_DIR}
+   COMMAND ${CMAKE_COMMAND} -E make_directory ${JAVA_CLASSES_DIR}
++  # javac -h only adds headers, so a removed or renamed native method would leave its
++  # header behind in the directory the C++ library includes; start from an empty one.
++  COMMAND ${CMAKE_COMMAND} -E rm -rf ${JNI_HEADERS_DIR}
+   COMMAND ${CMAKE_COMMAND} -E make_directory ${JNI_HEADERS_DIR}
+   COMMAND ${Java_JAVAC_EXECUTABLE} -h ${JNI_HEADERS_DIR} -d ${JAVA_CLASSES_DIR} ${JAVA_SOURCES}
+   COMMAND ${CMAKE_COMMAND} -E touch ${JAVA_CLASSES_STAMP}
+--- marker grep (expect none):
+none

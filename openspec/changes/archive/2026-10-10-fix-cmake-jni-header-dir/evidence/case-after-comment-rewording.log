@@ -1,0 +1,10 @@
+timestamp: 2026-10-10T15:12:58+02:00
+re-run of the case on the final tree, after the comment rewording (the command line is unchanged)
+-- Build files have been written to: /home/tim/projects/libosmscout/build
+[1/2] Compiling Java sources and generating JNI headers
+rc=0
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+GREEN: stale sentinel removed

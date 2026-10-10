@@ -1,0 +1,7 @@
+ninja: Entering directory `/home/tim/projects/libosmscout/build-meson'
+[1/397] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/meson-generated_osmscout_import-unity1.cpp.o
+  [... 391 other build steps omitted]
+[392/393] Compiling C++ object libosmscout-client-java/src/libosmscout_client_java.so.1.1.1.p/meson-generated_osmscout_client_java-unity0.cpp.o
+[393/393] Linking target libosmscout-client-java/src/libosmscout_client_java.so.1.1.1
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /home/tim/projects/libosmscout/build-meson

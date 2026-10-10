@@ -1,0 +1,201 @@
+timestamp: 2026-10-10T14:45:57+02:00
+sentinel:  build/libosmscout-client-java/java/headers/com_framstag_libosmscout_client_OSMScoutClient_removedMethod.h (written before the build)
+forced by: rm -f build/libosmscout-client-java/java/headers/com_framstag_libosmscout_client_OSMScoutClient.h
+--- cmake --build build --target java_compile
+[0/1] Re-running CMake...
+-- Could NOT find LibAgg (missing: LIBAGG_INCLUDE_DIRS LIBAGG_LIBRARIES) 
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Glib2) does
+  not match the name of the calling package (GLIB2).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindGLIB2.cmake:58 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/FindPango.cmake:57 (FIND_PACKAGE)
+  cmake/features.cmake:213 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Gobject)
+  does not match the name of the calling package (GObject).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindGObject.cmake:58 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/FindPango.cmake:63 (FIND_PACKAGE)
+  cmake/features.cmake:213 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Pangocairo)
+  does not match the name of the calling package (Pango).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindPango.cmake:96 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/features.cmake:213 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Pangoft2)
+  does not match the name of the calling package (Pango).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindPango.cmake:133 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/features.cmake:213 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Checking Qt6 availability (implicitly preferred version)...
+-- Choosing Qt6, since implicitly preferred
+-- Qt version used: 6
+-- Qt6 map dependencies found
+-- Qt6 client dependencies found
+-- Direct2D_INCLUDE_DIRS: Direct2D_INCLUDE_DIRS-NOTFOUND
+-- Direct2D_D2D1_LIBRARY: Direct2D_D2D1_LIBRARY-NOTFOUND
+-- Direct2D_DWRITE_LIBRARY: Direct2D_DWRITE_LIBRARY-NOTFOUND
+-- Could NOT find Direct2D (missing: Direct2D_LIBRARIES Direct2D_INCLUDE_DIRS) 
+-- Checking for module 'skia'
+--   Package 'skia' not found
+-- Skia SVG headers not found — nanosvg fallback
+-- Detected g++ 16
+
+-- Enabling GCC visibility flags
+Template dir: osmscout/lib
+-- Preconditions for building libosmscout-map-agg MISSING
+-- Preconditions for building libosmscout-map-cairo OK
+-- Checking preconditions for libosmscout-map-cairo...
+-- Checking preconditions for libosmscout-map-cairo...OK
+Template dir: osmscoutmapcairo
+Template dir: osmscoutmapopengl
+-- Preconditions for building libosmscout-map-qt OK
+-- Checking preconditions for libosmscout-map-qt...
+-- Checking preconditions for libosmscout-map-qt...OK
+Template dir: osmscoutmapqt
+Template dir: osmscoutmapsvg
+-- Preconditions for building libosmscout-map-skia OK
+-- Checking preconditions for libosmscout-map-skia...
+-- Checking preconditions for libosmscout-map-skia...OK
+Template dir: osmscoutmapskia
+Template dir: osmscoutclientqt
+Skip Tiler and DrawMapAgg demos, libosmscout-map-agg is missing.
+CMake Warning at Demos/CMakeLists.txt:219 (message):
+  Skip RoutingParameters demo, QML needs to be ported for Qt6 for this demo.
+
+
+Skip DrawMapDirectX demo, libosmscout-map-directx is missing.
+Skip DrawMapGDI demo, libosmscout-map-gdi is missing.
+-- 
+-- libosmscout 1.1.1 build configuration:
+-- Shared libraries:                ON
+-- 
+-- Dependencies:
+-- - Freetype::Freetype             TRUE
+-- - glm::glm                       TRUE
+-- - glfw                           TRUE
+-- - harfbuzz::harfbuzz             TRUE
+-- - LibLZMA::LibLZMA               TRUE
+-- - LibXml2::LibXml2               TRUE
+-- - PNG::PNG                       TRUE
+-- - protobuf::libprotobuf          TRUE
+-- - protobuf:                      TRUE
+-- - ZLIB::ZLIB                     TRUE
+-- - nlohmann_json::nlohmann_json   TRUE
+-- - httplib:                       TRUE
+-- - piper:                         FALSE
+-- 
+-- Qt5 libraries ():
+-- - Core                           FALSE
+-- - Svg                            FALSE
+-- - Gui                            FALSE
+-- - Widgets                        FALSE
+-- - Qml                            FALSE
+-- - Quick                          FALSE
+-- - Network                        FALSE
+-- - Location                       FALSE
+-- - Multimedia                     FALSE
+-- - Positioning                    FALSE
+-- - LinguistTools                  FALSE
+-- 
+-- Qt6 libraries (1):
+-- - Core                           TRUE
+-- - Core5Compat                    TRUE
+-- - Svg                            TRUE
+-- - Gui                            TRUE
+-- - Widgets                        TRUE
+-- - Qml                            TRUE
+-- - Quick                          TRUE
+-- - Network                        TRUE
+-- - Multimedia                     TRUE
+-- - Positioning                    TRUE
+-- - LinguistTools                  TRUE
+-- 
+-- Using Qt in version:             6
+-- Qt map dependencies found:       1
+-- Qt client dependencies found:    1
+-- 
+-- Tests:                           ON
+-- - Catch2::Catch2                TRUE
+-- - Catch2::Catch2WithMain        TRUE
+-- 
+-- core library:                    ON
+--  - marisa support:              TRUE
+-- 
+-- import library:                  ON
+--  - C++17 parallel execution:     1
+-- 
+-- gpx library:                     ON
+-- 
+-- map drawing interface:           ON
+--  - Agg map drawing backend:      OFF
+--  - Cairo map drawing backend:    ON
+--  - OpenGL map drawing backend:   ON
+--  - DirectX map drawing backend:  OFF
+--  - Qt map drawing backend:       ON
+--  - SVG map drawing backend:      ON
+--  - Skia map drawing backend:     ON
+--  - OS X/iOS map drawing backend: OFF
+--  - GDI+ map drawing backend:     OFF
+-- 
+-- client libraries:
+--  - Qt client library:            ON
+--  - Java client library:          ON
+-- 
+-- tools:
+--  - Import/Import:                ON
+--  - Import/BasemapImport:         ON
+--  - DumpData:                     ON
+--  - MCPServer:                    ON
+--  - OSMScout2:                    OFF
+--  - OSMScoutOpenGL:               OFF
+--  - StyleEditor:                  OFF
+--  - JavaScout:                    ON
+-- 
+-- demos:                           ON
+--  - heap profiler (Gperftools)    ON
+-- 
+-- bindings:
+--  - Java binding:                 OFF
+--  - C# binding:                   
+-- 
+-- external interfaces:
+--  - MATLAB mex function:          OFF
+-- 
+-- doxygen:                         YES
+-- documentation:                   ON
+-- webpage:                         ON
+-- Configuring done (8.2s)
+-- Generating done (0.9s)
+-- Build files have been written to: /home/tim/projects/libosmscout/build
+[1/2] Compiling Java sources and generating JNI headers
+rc=0
+--- headers after the build
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+GREEN: stale sentinel header removed, directory mirrors the current sources

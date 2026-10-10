@@ -1,0 +1,10 @@
+timestamp: 2026-10-10T15:02:27+02:00
+state of the header directory (no sentinel present):
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+git-tracked files in the directory (expect none):
+(empty = none; build/ is git-ignored, so accumulation is invisible to the tree)
+before this iteration's construction, at 14:44:2x, the directory held exactly these four headers and
+no stale one, so the defect is latent today and the red case constructs the stale header.
