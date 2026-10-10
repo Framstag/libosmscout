@@ -334,4 +334,13 @@ namespace osmscout {
       std::cout << "Prefilling from children..." << std::endl;
     }*/
   }
+
+  // Instantiate the tile data of every kind as a whole, so that every member of the exported class
+  // template is part of the library on Windows: MSVC does not let a client instantiate a member of a
+  // dllimport class, so a client that uses a member the library itself does not call would fail to
+  // link against the import library.
+  template class TileData<NodeRef>;
+  template class TileData<WayRef>;
+  template class TileData<AreaRef>;
+  template class TileData<RouteRef>;
 }

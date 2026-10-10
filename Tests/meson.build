@@ -112,8 +112,12 @@ TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
              install: true,
              install_dir: testInstallDir)
 
+# A performance test that runs on a loaded machine: on the coverage build of a slow CI runner the
+# default timeout of 30 seconds is not enough (measured: 7 s on an idle runner, more than 30 s on a
+# loaded one).
 test('Check type resolution performance', TypeResolutionPerformanceTest,
-     args: [meson.current_source_dir() + '/../stylesheets/map.ost'])
+     args: [meson.current_source_dir() + '/../stylesheets/map.ost'],
+     timeout: 120)
 
 AsyncProcessingTest =  executable('AsyncProcessingTest',
              'src/AsyncProcessingTest.cpp',
@@ -575,6 +579,37 @@ foreach stylesheet : stylesheets
                meson.current_source_dir() + '/../stylesheets/map.ost',
                meson.current_source_dir() + '/../stylesheets/' + stylesheet])
 endforeach
+
+TileDataConversionTest = executable('TileDataConversionTest',
+             ['src/TileDataConversionTest.cpp', 'src/TestAllocationCounter.cpp'],
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check tile data conversion', TileDataConversionTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+# Compares the conversion with the conversion it replaces, so it measures durations and is a
+# performance test: the sanitizer job excludes the tests whose name contains 'PerformanceTest'.
+TileDataConversionPerformanceTest = executable('TileDataConversionPerformanceTest',
+             'src/TileDataConversionPerformanceTest.cpp',
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+# The comparison is not registered in a build instrumented for coverage. The instrumentation slows
+# the conversion under test - it lives in libosmscout-map - far more than the hash map baseline it is
+# compared with - that one lives in the standard library and is not instrumented - so the comparison
+# reports the instrumentation instead of the conversion (measured in the coverage build of the sonar
+# job: a share of 4.0 to 5.8 instead of the expected well below one).
+if not get_option('b_coverage')
+  test('Check tile data conversion performance', TileDataConversionPerformanceTest,
+       env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+endif
 
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [osmscoutIncDir, osmscoutmapIncDir]
@@ -1080,11 +1115,15 @@ ThreadedDatabaseTest = executable('ThreadedDatabaseTest',
              install: true,
              install_dir: testInstallDir)
 
+# Drives the database from 100 threads, so it is slow on a loaded machine: on the coverage build of
+# a CI runner the default timeout of 30 seconds is not enough (measured: 17.5 s on an idle runner,
+# more than 30 s on a loaded one).
 test('Check threaded database', ThreadedDatabaseTest, args : [
         '--threads', '100',
         '--iterations', '1000',
         meson.current_source_dir() + '/data/testregion',
-        meson.current_source_dir() + '/../stylesheets/standard.oss'])
+        meson.current_source_dir() + '/../stylesheets/standard.oss'],
+        timeout: 120)
 
 ThreadTest = executable('ThreadTest',
                     'src/ThreadTest.cpp',
