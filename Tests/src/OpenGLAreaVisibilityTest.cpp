@@ -228,6 +228,37 @@ namespace {
   }
 
   /**
+   * A style sheet that draws the area type by a border and by no fill: the shape of a ring the OpenGL
+   * area step used to drop although the other backends draw its border.
+   */
+  osmscout::StyleConfigRef MakeBorderOnlyStyleConfig(const osmscout::TypeConfigRef& typeConfig,
+                                                     const osmscout::TypeInfoRef& areaType,
+                                                     double borderWidthMM)
+  {
+    osmscout::StyleConfigRef styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
+
+    osmscout::TypeInfoSet areaTypes(*typeConfig);
+
+    areaTypes.Set(areaType);
+
+    osmscout::StyleFilter borderFilter;
+
+    borderFilter.SetTypes(areaTypes);
+    borderFilter.SetMinLevel(0);
+    borderFilter.SetMaxLevel(25);
+
+    osmscout::BorderPartialStyle borderStyle;
+
+    borderStyle.SetDoubleValue(osmscout::BorderStyle::attrWidth,borderWidthMM);
+    borderStyle.SetColorValue(osmscout::BorderStyle::attrColor,osmscout::Color(1.0,0.0,0.0));
+    styleConfig->AddAreaBorderStyle(borderFilter,borderStyle);
+
+    styleConfig->Postprocess();
+
+    return styleConfig;
+  }
+
+  /**
    * Area with one outer ring that is an axis parallel rectangle covering the given box.
    */
   osmscout::AreaRef MakeArea(const osmscout::TypeInfoRef& type,
@@ -374,6 +405,37 @@ namespace {
     // no code
   }
 
+  /**
+   * An invisible offscreen context with the core profile the painter's shaders need. Returns nullptr
+   * when GLFW or the driver cannot provide one; the caller skips its case then.
+   */
+  GLFWwindow *CreateOffscreenContext()
+  {
+    glfwSetErrorCallback(SilentGlfwError);
+
+    if (glfwInit()!=GLFW_TRUE) {
+      return nullptr;
+    }
+
+    glfwWindowHint(GLFW_VISIBLE,GLFW_FALSE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow *context=glfwCreateWindow((int)viewportSize,(int)viewportSize,"",nullptr,nullptr);
+
+    if (context==nullptr) {
+      glfwTerminate();
+
+      return nullptr;
+    }
+
+    glfwMakeContextCurrent(context);
+
+    return context;
+  }
+
 }
 
 /**
@@ -419,26 +481,11 @@ TEST_CASE("The per-ring work of the area step follows the rings it keeps")
 
   parameter.SetAreaMinDimensionMM(minDimensionMM);
 
-  glfwSetErrorCallback(SilentGlfwError);
-
-  if (glfwInit()!=GLFW_TRUE) {
-    SKIP("GLFW could not be initialized");
-  }
-
-  glfwWindowHint(GLFW_VISIBLE,GLFW_FALSE);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,2);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-
-  GLFWwindow *context=glfwCreateWindow((int)viewportSize,(int)viewportSize,"",nullptr,nullptr);
+  GLFWwindow *context=CreateOffscreenContext();
 
   if (context==nullptr) {
-    glfwTerminate();
     SKIP("no offscreen OpenGL context");
   }
-
-  glfwMakeContextCurrent(context);
 
   {
     osmscout::MapPainterOpenGL painter((int)viewportSize,
@@ -460,6 +507,77 @@ TEST_CASE("The per-ring work of the area step follows the rings it keeps")
 
     // One ring per area, and only the ring of the visible area is prepared
     CHECK(painter.GetExaminedRingCount()==1+outsideAreaCount);
+    CHECK(painter.GetKeptRingCount()==1);
+  }
+
+  glfwDestroyWindow(context);
+  glfwTerminate();
+}
+
+/**
+ * The scenario "a painter keeps the border of a ring the loaded style sheet draws by a border only":
+ * a ring that resolves no fill style and a border style contributes its border geometry, while a ring
+ * that resolves neither fill nor border still contributes nothing.
+ *
+ * The step needs an OpenGL context to be constructed, so the case skips - it never fails - when no
+ * offscreen context can be created.
+ */
+TEST_CASE("A ring drawn only by a border is kept")
+{
+  constexpr double borderWidthMM=10.0;
+  constexpr double minDimensionMM=1.0;
+  constexpr double halfSizePx=50.0;
+
+  osmscout::MercatorProjection projection=MakeProjectionWithDpi(referenceDpi);
+
+  osmscout::TypeConfigRef typeConfig=std::make_shared<osmscout::TypeConfig>();
+  osmscout::TypeInfoRef areaType=std::make_shared<osmscout::TypeInfo>("test_area_border_only");
+  osmscout::TypeInfoRef unstyledType=std::make_shared<osmscout::TypeInfo>("test_area_unstyled");
+
+  areaType->CanBeArea(true);
+  unstyledType->CanBeArea(true);
+  typeConfig->RegisterType(areaType);
+  typeConfig->RegisterType(unstyledType);
+
+  osmscout::StyleConfigRef styleConfig=MakeBorderOnlyStyleConfig(typeConfig,areaType,borderWidthMM);
+
+  osmscout::MapData data;
+
+  data.styleConfig=styleConfig;
+  data.areas.push_back(MakeArea(areaType,BoxInView(projection,halfSizePx,halfSizePx)));
+  data.areas.push_back(MakeArea(unstyledType,BoxInView(projection,halfSizePx,halfSizePx)));
+
+  osmscout::MapParameter parameter;
+
+  parameter.SetAreaMinDimensionMM(minDimensionMM);
+
+  GLFWwindow *context=CreateOffscreenContext();
+
+  if (context==nullptr) {
+    SKIP("no offscreen OpenGL context");
+  }
+
+  {
+    osmscout::MapPainterOpenGL painter((int)viewportSize,
+                                       (int)viewportSize,
+                                       referenceDpi,
+                                       OPENGL_TEST_FONT_FILE,
+                                       OPENGL_TEST_SHADER_DIR,
+                                       parameter);
+
+    if (!painter.IsInitialized()) {
+      glfwDestroyWindow(context);
+      glfwTerminate();
+      SKIP("the OpenGL painter could not be initialized");
+    }
+
+    painter.SetCenter(projection.GetCenter());
+    painter.SetMagnification(projection.GetMagnification());
+    painter.ProcessData(data,projection,styleConfig);
+
+    // Only the border-only ring of the two areas reaches the decision, and the step keeps it for its
+    // border; the unstyled ring contributes nothing.
+    CHECK(painter.GetExaminedRingCount()==1);
     CHECK(painter.GetKeptRingCount()==1);
   }
 
