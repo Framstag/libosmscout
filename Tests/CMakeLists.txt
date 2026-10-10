@@ -273,6 +273,9 @@ osmscout_test_project(NAME RoutingProgressThrottleTest SOURCES src/RoutingProgre
 # through a fake client and cannot see a byte order at all.
 osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RouteStepTime
+osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 

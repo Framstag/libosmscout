@@ -71,6 +71,7 @@
 
 #include "admin_region_hierarchy.h"
 #include "frame_pixel_layout.h"
+#include "route_step_time.h"
 #include "routing_progress_throttle.h"
 #include "search_scope.h"
 
@@ -6164,18 +6165,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                if (segDist > 0.01 && time - prevTime > osmscout::Duration::zero()) {
+                auto timeText = naviveylin::FormatRouteStepTime(
+                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
+                if (segDist > 0.01 && timeText.has_value()) {
                   oss << ", ";
                 }
-                if (time - prevTime > osmscout::Duration::zero()) {
-                  auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
-                  if (dtM.count() >= 60) {
-                    auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
-                    auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
-                    oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else {
-                    oss << dtM.count() << " min";
-                  }
+                if (timeText.has_value()) {
+                  oss << *timeText;
                 }
                 oss << "]";
                 line += oss.str();
@@ -6767,18 +6763,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                if (segDist > 0.01 && time - prevTime > osmscout::Duration::zero()) {
+                auto timeText = naviveylin::FormatRouteStepTime(
+                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
+                if (segDist > 0.01 && timeText.has_value()) {
                   oss << ", ";
                 }
-                if (time - prevTime > osmscout::Duration::zero()) {
-                  auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
-                  if (dtM.count() >= 60) {
-                    auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
-                    auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
-                    oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else {
-                    oss << dtM.count() << " min";
-                  }
+                if (timeText.has_value()) {
+                  oss << *timeText;
                 }
                 oss << "]";
                 line += oss.str();
