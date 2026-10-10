@@ -436,6 +436,7 @@ struct ClientData
   osmscout::FavoriteStore favoriteStore;             //!< Favorite store; owns the service and serialises wholesale replacement
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
+  bool preferSymbolIcons{false};                      //!< Draw the vector symbol of an entry that carries a raster icon, too
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   osmscout::DatabasePathRegistry knownPaths;          //!< Registered map database paths, guarded by the registry's own mutex
 
@@ -1119,6 +1120,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_setNativeDataCacheSize(JNIEn
 }
 
 // --------------------------------------------------------------------------
+// OSMScoutClient::setPreferSymbolIcons(boolean preferSymbolIcons)
+//
+// Selects which of a style entry's two renderings is drawn when the
+// stylesheet carries both a raster icon name and a vector symbol. Off by
+// default: the raster icon keeps its precedence and the symbol stays the
+// fallback. The render path reads the value when it builds its parameters, so
+// the next frame follows it without a stylesheet reload.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setPreferSymbolIcons(JNIEnv *env, jobject self, jboolean preferSymbolIcons)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+  data->preferSymbolIcons = (preferSymbolIcons == JNI_TRUE);
+  osmscout::log.Debug() << "[JNI] setPreferSymbolIcons(" << (data->preferSymbolIcons ? "true" : "false") << ")";
+}
+
+// --------------------------------------------------------------------------
 
 // OSMScoutClient::close()
 // --------------------------------------------------------------------------
@@ -1478,6 +1500,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
       params.SetRenderBackground(true);
       params.SetRenderUnknowns(true);
       params.SetIconMode(osmscout::MapParameter::IconMode::ScaledPixmap);
+      params.SetPreferSymbolIcons(data->preferSymbolIcons);
 
       std::string iconDir = data->dbThread->GetIconDirectory();
       if (!iconDir.empty()) {
