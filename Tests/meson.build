@@ -835,6 +835,15 @@ FramePixelLayoutTest = executable('FramePixelLayoutTest',
 
 test('Check frame pixel layout', FramePixelLayoutTest)
 
+RouteStepTimeTest = executable('RouteStepTimeTest',
+             'src/RouteStepTimeTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route step time', RouteStepTimeTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
