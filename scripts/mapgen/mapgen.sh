@@ -15,7 +15,9 @@
 # Integrity: source data is verified against the hash published by the
 # download service (md5 sidecar). Output files carry CRC-32 (zlib-compatible)
 # in db.json; POSIX `cksum` uses a different CRC and must NOT be used to
-# verify them.
+# verify them. A source file kept in the work area records the published hash it
+# belongs to beside it, so a later run resumes a partial of the source it is
+# fetching and discards what is left of another one.
 #
 # Environment:
 #   MAPGEN_CONFIG_DIR   directory with imports.json (default: /config)
@@ -233,6 +235,38 @@ fetch_published_hash()
     | awk '{print $1}'
 }
 
+# Which source a file in the work area belongs to is recorded beside it. A
+# partial download of the source being fetched and the complete source of an
+# earlier check are indistinguishable by content - both fail the published-hash
+# check - and only this record tells them apart. Without it, resuming onto a file
+# kept from an earlier check would append the new source to the old one and
+# produce a download that matches no hash at all.
+source_record() { echo "$1.source-md5"; }
+
+record_source()
+{
+  printf '%s\n' "$2" > "$(source_record "$1")"
+}
+
+# May this file be resumed? Only when the record beside it names the source that
+# is being fetched now; everything else is discarded before the transfer.
+source_belongs_to()
+{
+  local record
+  record=$(source_record "$1")
+
+  [[ -f "$1" ]] || return 1
+  [[ -f "$record" ]] || return 1
+  [[ "$(cat "$record")" = "$2" ]]
+}
+
+# A source file and its record are removed together, so what is left in the work
+# area always describes itself.
+discard_source()
+{
+  rm -f "$1" "$(source_record "$1")"
+}
+
 # Download the source, recovering from what is recoverable on its own:
 #   - a stalled transfer ends through the idle timeout instead of holding the
 #     run (and the lock) forever
@@ -242,9 +276,19 @@ fetch_published_hash()
 #   - a transient failure is retried a few times within the same run; an import
 #     is never retried this way, because it is expensive and usually fails for a
 #     reason that a retry cannot fix
+#
+# Whether the file it finds may be resumed onto is decided by the caller: this
+# function records the source it is fetching, and resuming is only ever correct
+# for a file that belongs to it (see source_belongs_to).
 download_source()
 {
-  local url="$1" pbf="$2" attempt=0 rc=0
+  local url="$1" pbf="$2" published_hash="$3" attempt=0 rc=0
+
+  # Recorded before the transfer, not after it: a run that is killed in the
+  # middle of a download leaves a partial behind, and this record is what makes
+  # that partial resumable by the next run - and what keeps a source from an
+  # earlier check from being appended to.
+  record_source "$pbf" "$published_hash"
 
   while [[ "$attempt" -lt "$DOWNLOAD_ATTEMPTS" ]]; do
     attempt=$((attempt + 1))
@@ -260,7 +304,9 @@ download_source()
 
     if [[ "$rc" = "33" ]]; then
       # the service does not support byte ranges: resuming can never work, so
-      # start over rather than fail every attempt the same way
+      # start over rather than fail every attempt the same way. The record stays:
+      # it still names the source, and an attempt that leaves a partial behind is
+      # resumable by the next one.
       log "$url: service cannot resume, restarting the download"
       rm -f "$pbf"
     fi
@@ -362,12 +408,25 @@ process_import()
 
   # A source that a previous run already downloaded and that still matches the
   # published hash is reused: after a failed import that saves the whole
-  # download, and resuming a complete file would just be rejected by the service.
+  # download. Anything else is either a partial of this source or the source of
+  # another check; only the former may be resumed onto (see below).
   if [[ -f "$pbf" ]] && (cd "$WORK_DIR" && printf '%s  %s\n' "$published_hash" "$pbf" | md5sum -c - >/dev/null 2>&1); then
     log "$id: reusing the verified source from the work area"
-  elif ! download_source "$url" "$pbf"; then
-    error "$id: download failed after $DOWNLOAD_ATTEMPTS attempts"
-    return 1
+  else
+    # A kept file that does not match the published hash is not automatically this
+    # download's to resume: it is either a partial transfer of the source being
+    # fetched - the case the resume exists for - or the complete source of an
+    # earlier check, which `curl -C -` would append the new source to, producing a
+    # file that matches no hash at all. The record beside it says which it is.
+    if [[ -f "$pbf" ]] && ! source_belongs_to "$pbf" "$published_hash"; then
+      log "$id: discarding a source kept from another check"
+      discard_source "$pbf"
+    fi
+
+    if ! download_source "$url" "$pbf" "$published_hash"; then
+      error "$id: download failed after $DOWNLOAD_ATTEMPTS attempts"
+      return 1
+    fi
   fi
 
   # The download service (e.g. Geofabrik) publishes an md5 sidecar file;
@@ -378,7 +437,7 @@ process_import()
     # Resuming from an unverified partial is how corrupt data would reach an
     # import, so the file goes and the next attempt downloads it again.
     error "$id: downloaded source failed verification, discarding it"
-    rm -f "$pbf"
+    discard_source "$pbf"
     return 1
   fi
 
@@ -432,7 +491,7 @@ process_import()
   # area does not have to keep the source or the import output. A failed import
   # keeps them, because a later attempt can resume the source.
   rm -rf "$out_dir"
-  rm -f "$pbf"
+  discard_source "$pbf"
 
   if [[ "$history" -gt 0 ]]; then
     kept=$(ls -d "$PUBLIC_DIR/$path"/v* 2>/dev/null | sort -V | head -n -"$history" || true)

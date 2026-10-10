@@ -24,13 +24,29 @@
 
 #include <iostream>
 
+#include <osmscoutmapopengl/MapOpenGLImportExport.h>
+
 #include <osmscoutmap/MapPainter.h>
 
 #include <glm/vec3.hpp>
 
 namespace osmscout{
 
-  class Triangulate {
+  /**
+   * Triangulation of the polygons a renderer draws. Exported like the backend's other free
+   * functions (`AreaVisibility.h`), so a caller outside this library - and its tests - can reach it.
+   *
+   * A polygon is normalized before it is triangulated: a point that repeats its predecessor, a closing
+   * point that repeats the first point and a point that is no corner of the ring are removed, so input
+   * that repeats a point is triangulated rather than rejected.
+   *
+   * A polygon the triangulation cannot handle - fewer than three distinct corners remain, or the
+   * vendored triangulator refuses the shape - is rejected: the entry points log the reason and return no
+   * triangle instead of terminating the process or letting an exception escape, and the caller may
+   * continue with the next polygon. The triangles of an accepted polygon are unchanged by the
+   * normalization.
+   */
+  class OSMSCOUT_MAP_OPENGL_API Triangulate {
   public:
 
     /**

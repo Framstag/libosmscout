@@ -436,6 +436,25 @@ else()
   set(GPERFTOOLS_USAGE OFF)
 endif()
 
+# A sanitizer runtime interposes malloc/free just as gperftools' tcmalloc does, so a binary that links
+# both lets each allocator free the other's pointers: the mismatch shows up as
+# "Attempt to free invalid pointer" of the tool's own allocator, with the offending free in the first
+# library that frees a pointer the other allocator handed out (see
+# openspec/changes/fix-sanitizer-allocator-conflict). The heap profiler is therefore off in a
+# configuration that enables a sanitizer; -DPERF_TEST_GPERFTOOLS_USAGE=ON overrides that deliberately.
+set(OSMSCOUT_SANITIZER_USAGE OFF)
+if(LLVM_USE_SANITIZER)
+  set(OSMSCOUT_SANITIZER_USAGE ON)
+endif()
+if("${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_MODULE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}"
+   MATCHES "fsanitize")
+  set(OSMSCOUT_SANITIZER_USAGE ON)
+endif()
+if(OSMSCOUT_SANITIZER_USAGE AND GPERFTOOLS_USAGE)
+  message(STATUS "heap profiler (Gperftools) disabled: this configuration enables a sanitizer runtime, whose allocator has to be the only interposer")
+  set(GPERFTOOLS_USAGE OFF)
+endif()
+
 find_package(Direct2D)
 
 find_package(Threads)

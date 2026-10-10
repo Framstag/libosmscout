@@ -1,6 +1,7 @@
 osmscoutmapopenglIncDir = include_directories('.')
 
 osmscoutmapopenglHeader = [
+            'osmscoutmapopengl/AreaVisibility.h',
             'osmscoutmapopengl/MapOpenGLImportExport.h',
             'osmscoutmapopengl/MapPainterOpenGL.h',
             'osmscoutmapopengl/OpenGLMapData.h',

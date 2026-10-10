@@ -81,7 +81,7 @@ jobs:
       - name: Build project
         run: cmake --build build
       - name: Run tests
-        run: LC_ALL=C env "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-map-skia:$PWD/libosmscout-map-svg:$PWD/libosmscout-test:$PWD/libosmscout-client:$PWD/libosmscout-map-cairo:$PWD/libosmscout-map-agg:$PWD/libosmscout-map-directx:$PWD/libosmscout-map-gdi:$PWD/libosmscout-gpx:$PWD/libosmscout-client-qt:${MINGW_PREFIX}/bin" ctest -j 4 --output-on-failure --exclude-regex PerformanceTest
+        run: LC_ALL=C env "PATH=$PATH:$PWD/libosmscout:$PWD/libosmscout-import:$PWD/libosmscout-map:$PWD/libosmscout-map-opengl:$PWD/libosmscout-map-skia:$PWD/libosmscout-map-svg:$PWD/libosmscout-test:$PWD/libosmscout-client:$PWD/libosmscout-map-cairo:$PWD/libosmscout-map-agg:$PWD/libosmscout-map-directx:$PWD/libosmscout-map-gdi:$PWD/libosmscout-gpx:$PWD/libosmscout-client-qt:${MINGW_PREFIX}/bin" ctest -j 4 --output-on-failure --exclude-regex PerformanceTest
         env:
           LANG: en_US.utf8
         working-directory: build

@@ -159,7 +159,40 @@ echo "${last_output}" | grep -q "failed verification" || fail "an unverified dow
 [[ -e "${DOWNLOADED}" ]] && fail "an unverified download must be discarded"
 ( cd "${SOURCE_DIR}" && md5sum berlin.osm.pbf > berlin.osm.pbf.md5 )
 
+start_case "a source kept from an earlier check is not resumed onto"
+rm -rf "${CHECK_DIR}"; build_fixture
+# An earlier check failed after its source was downloaded, so the complete source
+# of that version is still in the work area ...
+head -c 4096 /dev/urandom > "${DOWNLOADED}"
+# ... and the source was re-published since, so that file is not this source. A
+# resume would append the new source to the old one and produce a file of neither
+# version, which is what the check has to make impossible.
+printf 'x' >> "${SOURCE_DIR}/berlin.osm.pbf"
+( cd "${SOURCE_DIR}" && md5sum berlin.osm.pbf > berlin.osm.pbf.md5 )
+run_pass import-ok
+echo "${last_output}" | grep -q "discarding a source kept from another check" \
+  || fail "a source kept from another check must be discarded"
+echo "${last_output}" | grep -q "failed verification" \
+  && fail "a source kept from another check must not be resumed onto"
+[[ -f "${PUBLIC_SLOT}/map.lib" ]] || fail "the import must still place its database"
+[[ -e "${DOWNLOADED}" ]] && fail "a placed database must leave no source behind"
+[[ -e "${DOWNLOADED}.source-md5" ]] && fail "a placed database must leave no source record behind"
+
+start_case "a partial of the same source is resumed"
+rm -rf "${CHECK_DIR}"; build_fixture
+# A run was interrupted in the middle of its download: part of the current source
+# is in the work area, with the record of the source it belongs to.
+head -c 1024 "${SOURCE_DIR}/berlin.osm.pbf" > "${DOWNLOADED}"
+( cd "${SOURCE_DIR}" && md5sum berlin.osm.pbf | awk '{print $1}' ) > "${DOWNLOADED}.source-md5"
+run_pass import-ok
+echo "${last_output}" | grep -q "discarding a source kept from another check" \
+  && fail "a partial of the source being fetched must be resumable"
+[[ -f "${PUBLIC_SLOT}/map.lib" ]] || fail "the resumed download must be imported and placed"
+
 start_case "a download that fails is retried within the run"
+# A fixture of its own: the case before it ends with a recorded check, and this one
+# needs a due import to reach a download at all.
+rm -rf "${CHECK_DIR}"; build_fixture
 chmod 000 "${SOURCE_DIR}/berlin.osm.pbf"
 run_pass import-ok
 chmod 644 "${SOURCE_DIR}/berlin.osm.pbf"
