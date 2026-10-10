@@ -58,6 +58,9 @@ add_custom_command(
   # jar forever; start from an empty directory so the jar mirrors the sources.
   COMMAND ${CMAKE_COMMAND} -E rm -rf ${JAVA_CLASSES_DIR}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${JAVA_CLASSES_DIR}
+  # javac -h only adds headers, so a removed or renamed class would leave its
+  # header behind in the directory the C++ library includes; start from an empty one.
+  COMMAND ${CMAKE_COMMAND} -E rm -rf ${JNI_HEADERS_DIR}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${JNI_HEADERS_DIR}
   COMMAND ${Java_JAVAC_EXECUTABLE} -h ${JNI_HEADERS_DIR} -d ${JAVA_CLASSES_DIR} ${JAVA_SOURCES}
   COMMAND ${CMAKE_COMMAND} -E touch ${JAVA_CLASSES_STAMP}
