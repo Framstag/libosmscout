@@ -1,0 +1,20 @@
+--- cmake --build build --target java_compile
+[1/1] Compiling Java sources and generating JNI headers
+java_compile rc=0
+--- headers after the build:
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+a OK: stale sentinel gone
+b OK: all four headers of the current sources exist
+--- touch libosmscout-client-java/src/OSMScoutClient.cpp (mtime only), then cmake --build build -j 16
+full build rc=0
+error lines: 0
+--- last lines of the full build:
+finished...
+[4/5] Building CXX object libosmscout-client-java/CMakeFiles/osmscout_client_java.dir/src/OSMScoutClient.cpp.o
+[5/5] Linking CXX shared library libosmscout-client-java/libosmscout_client_java.so
+-rwxr-xr-x 1 tim tim 1176856 10. Okt 15:02 build/libosmscout-client-java/libosmscout_client_java.so
+--- touched source content unchanged:
+(empty above = no content change)
