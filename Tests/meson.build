@@ -826,6 +826,15 @@ RoutingProgressThrottleTest = executable('RoutingProgressThrottleTest',
 
 test('Check routing progress throttle', RoutingProgressThrottleTest)
 
+FramePixelLayoutTest = executable('FramePixelLayoutTest',
+             'src/FramePixelLayoutTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check frame pixel layout', FramePixelLayoutTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
