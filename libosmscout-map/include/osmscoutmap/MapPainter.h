@@ -164,6 +164,7 @@ namespace osmscout {
       VisibilityBounds             visibilityBounds;       //!< Style reach of the level of the current frame
       double                       wayReachPixel{0.0};     //!< Widest line reach a way of this database can draw [pixels]
       double                       pointReachPixel{0.0};   //!< Widest icon and symbol extent a point object of this database can draw [pixels]
+      double           areaReachPixel{0.0};                //!< Widest reach of an area border of this database, as half the width plus the offset it is drawn at [pixels]
       //@}
 
     public:

@@ -464,6 +464,13 @@ else()
   message("Skip SymbolRendererSVG test, libosmscout-map-svg is missing.")
 endif()
 
+#---- MapPainterAreaBorderRender
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map AND TARGET OSMScout::MapSVG)
+  osmscout_test_project(NAME MapPainterAreaBorderRenderTest SOURCES src/MapPainterAreaBorderRenderTest.cpp TARGET OSMScout::Map OSMScout::MapSVG)
+else()
+  message("Skip MapPainterAreaBorderRender test, libosmscout-map-svg is missing.")
+endif()
+
 #---- StyleConfigSymbols
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME StyleConfigSymbolsTest SOURCES src/StyleConfigSymbolsTest.cpp TARGET OSMScout::Map)

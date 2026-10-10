@@ -20,8 +20,11 @@
 #include <osmscoutmap/MapPainter.h>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <sstream>
+
+#include <osmscoutmap/AreaBorderReach.h>
 
 #include <osmscout/system/Math.h>
 
@@ -340,6 +343,18 @@ constexpr bool debugGroundTiles = false;
                                        std::max(symbol->GetWidth(projection)+symbol->GetMaxBorderWidth(projection),
                                                 symbol->GetHeight(projection)+symbol->GetMaxBorderWidth(projection)));
       }
+
+      // A ring draws each of its border styles at half of the declared width plus the offset the
+      // style declares, so the reach of an area of this database is the largest of those sums. The
+      // three maxima of the level are collected separately - the width and the display offset in
+      // millimetres, the offset in map units - and their sum is an upper bound of every per-style
+      // sum, for the same reason the way reach sums two separate maxima.
+      constexpr double borderReachFactor=0.5;
+
+      entry.areaReachPixel=projection.ConvertWidthToPixel((bounds.maxAreaBorderWidth*borderReachFactor)+
+                                                          bounds.maxAreaBorderDisplayOffset);
+      entry.areaReachPixel+=GetProjectedWidth(projection,
+                                              bounds.maxAreaBorderOffset);
     }
   }
 
@@ -1354,20 +1369,29 @@ constexpr bool debugGroundTiles = false;
       ++borderStyleIndex;
     }
 
-    double borderWidth=borderStyle ? borderStyle->GetWidth() : 0.0;
-
     // The early decision of ProcessAreas rejects an area that no ring of it could keep visible. It
-    // therefore has to extend an area at least as far as this per-ring decision extends a ring. Both
-    // tolerances are half of a border width of the same style sheet, converted from millimetres to
-    // pixels with the same projection, so the invariant below cannot be violated by a style sheet -
-    // only by a logic error in deriving the bound. The assert compares the two widths before the
-    // conversion, i.e. in the unit the style sheet declares them in.
-    assert(borderWidth<=styleConfig.GetMaxAreaBorderWidthMM(projection.GetMagnification()));
+    // therefore has to extend an area at least as far as this per-ring decision extends a ring, and
+    // the frame-wide reach of the style sheet is the bound of every term of that tolerance. The
+    // asserts compare each term with its bound in the unit the style sheet declares it in, so a
+    // postprocess that stops collecting one of them is caught here - in a Debug or sanitizer build -
+    // instead of a visible ring being rejected.
+    const VisibilityBounds bounds=styleConfig.GetVisibilityBounds(projection.GetMagnification());
 
-    // IsVisibleArea expects a screen offset, so the width of the style sheet has to be converted
+    for (const auto& resolvedBorderStyle : borderStyles) {
+      if (!resolvedBorderStyle) {
+        continue;
+      }
+
+      assert(resolvedBorderStyle->GetWidth()<=bounds.maxAreaBorderWidth);
+      assert(std::fabs(resolvedBorderStyle->GetDisplayOffset())<=bounds.maxAreaBorderDisplayOffset);
+      assert(std::fabs(resolvedBorderStyle->GetOffset())<=bounds.maxAreaBorderOffset);
+    }
+
+    // IsVisibleArea expects a screen offset, so the tolerance of the ring has to be converted, which
+    // the helper does for every border style the ring draws
     if (!IsVisibleArea(projection,
                        ring.GetBoundingBox(),
-                       projection.ConvertWidthToPixel(borderWidth/2.0))) {
+                       GetAreaRingTolerancePixel(projection,borderStyles))) {
       // Outside of the current view, so there is no need to transform the ring
       return false;
     }
@@ -1541,12 +1565,12 @@ constexpr bool debugGroundTiles = false;
       const auto& styleConfig=*mapData.styleConfig;
 
       // An area is only prepared ring by ring if it can contribute to the frame at all. The tolerance
-      // is half of the widest area border style the style sheet can resolve at this level, converted
-      // from millimetres to pixels, which is the same expression the per-ring visibility decision uses
-      // for one border style, so a rejected area cannot have a ring that decision would keep.
-      constexpr double borderWidthToTolerance=0.5;
-      double           maxAreaBorderWidthMM=styleConfig.GetMaxAreaBorderWidthMM(projection.GetMagnification());
-      double           earlyOffset=projection.ConvertWidthToPixel(maxAreaBorderWidthMM*borderWidthToTolerance);
+      // is the reach of the area borders of this database for the level of the frame, which covers
+      // every term of every per-ring visibility decision (see UpdateVisibilityBounds), so a rejected
+      // area cannot have a ring that decision would keep.
+      assert(dbIndex<databaseCache.size());
+
+      const double earlyOffset=databaseCache[dbIndex].areaReachPixel;
 
       //Areas
       for (const auto& area : mapData.areas) {
@@ -3257,7 +3281,6 @@ constexpr bool debugGroundTiles = false;
                 wd.endIsClosed=false;
 
                 DrawWay(projection,parameter,wd);
-
               }
             }
           }

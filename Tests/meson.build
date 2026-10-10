@@ -845,6 +845,32 @@ if buildMapSVG
                                install_dir: testInstallDir)
 
   test('Check SymbolRenderer SVG backend', SymbolRendererSVGTest)
+
+  # The SVG painter's header includes the pango stack, so the test lists the dependencies the
+  # library itself links (the CMake target propagates them, a meson link_with does not)
+  areaBorderRenderDeps = [mathDep, openmpDep, catch2MainDep]
+
+  if pangoft2Dep.found()
+    areaBorderRenderDeps += pangoft2Dep
+  endif
+
+  if ftDep.found()
+    areaBorderRenderDeps += ftDep
+  endif
+
+  if fontconfigDep.found()
+    areaBorderRenderDeps += fontconfigDep
+  endif
+
+  MapPainterAreaBorderRenderTest = executable('MapPainterAreaBorderRenderTest',
+                               'src/MapPainterAreaBorderRenderTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutmapsvgIncDir],
+                               dependencies: areaBorderRenderDeps,
+                               link_with: [osmscout, osmscoutmap, osmscoutmapsvg],
+                               install: true,
+                               install_dir: testInstallDir)
+
+  test('Check MapPainterAreaBorderRender compilation', MapPainterAreaBorderRenderTest)
 endif
 
 if buildMapCairo

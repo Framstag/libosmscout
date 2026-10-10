@@ -28,29 +28,29 @@
 namespace osmscout {
 
   /**
-   * Decides whether an area ring can contribute to the frame, given the border the ring is drawn
-   * with.
+   * Decides whether an area ring can contribute to the frame, given the tolerance the ring is
+   * decided with.
    *
    * The ring's bounding box is projected into the frame's screen space, the resulting screen box is
-   * enlarged by half of the declared border width and intersected with the frame's view. A ring is
-   * rejected when that enlarged box does not intersect the view, or when it is not larger than the
-   * smallest dimension the draw parameters draw an area with.
+   * enlarged by the given tolerance and intersected with the frame's view. A ring is rejected when
+   * that enlarged box does not intersect the view, or when it is not larger than the smallest
+   * dimension the draw parameters draw an area with.
    *
-   * Both lengths are lengths a style sheet or the draw parameters declare in millimetres; they are
-   * converted with the frame's projection here, so the tolerance this decision enlarges a ring by is
-   * a screen-space length that grows with the DPI of the frame.
+   * The tolerance is a length in the pixels of the frame, because the units a style sheet declares
+   * have to be converted before a length can enlarge a screen box: the caller converts them, see
+   * GetAreaRingTolerancePixel in libosmscout-map. The smallest dimension is a length a draw
+   * parameter declares in millimetres and is converted here.
    *
    * @param projection the projection of the frame to decide for
    * @param boundingBox the bounding box of the ring, in geographical coordinates
-   * @param borderWidthMM the width of the ring's border style, in millimetres as the style sheet
-   *                      declares it; half of it is the tolerance of the decision
+   * @param tolerancePixel the tolerance the ring is enlarged by, in pixels of the frame
    * @param minDimensionMM the smallest dimension a drawn area may have, in millimetres as the draw
    *                      parameters declare it
    * @return true if the ring can contribute to the frame
    */
   bool OSMSCOUT_MAP_OPENGL_API IsAreaRingVisible(const Projection& projection,
                                                  const GeoBox& boundingBox,
-                                                 double borderWidthMM,
+                                                 double tolerancePixel,
                                                  double minDimensionMM);
 
 }

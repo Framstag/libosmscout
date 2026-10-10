@@ -21,6 +21,7 @@
 
 #include <set>
 #include <algorithm>
+#include <cmath>
 
 #include <osmscout/system/Assert.h>
 
@@ -361,7 +362,6 @@ namespace osmscout {
     areaBorderTextStyleSelectors.clear();
     areaBorderSymbolStyleSelectors.clear();
     areaTypeSets.clear();
-    maxAreaBorderWidthMM.clear();
 
     routeTypeSets.clear();
     routeLineStyleSelectors.clear();
@@ -780,28 +780,8 @@ namespace osmscout {
                              areaBorderStyleSelectors);
 
     // The painter's early visibility decision has to extend an area by at least as much as any per-ring
-    // visibility decision can, so collect the widest area border style per level. Iterating the built
-    // selectors rather than the conditionals guarantees that the bound covers exactly the styles the
-    // per-ring decision can read.
-    maxAreaBorderWidthMM.assign(maxLevel,0.0);
-
-    for (const auto& ruleSelectors : areaBorderStyleSelectors) {
-      for (const auto& typeSelectors : ruleSelectors) {
-        size_t levelCount=std::min(typeSelectors.size(),
-                                   maxLevel);
-
-        for (size_t level=0; level<levelCount; level++) {
-          double & maxWidth=maxAreaBorderWidthMM.at(level);
-
-          for (const auto& selector : typeSelectors.at(level)) {
-            if (selector.style &&
-                selector.style->GetWidth()>maxWidth) {
-              maxWidth=selector.style->GetWidth();
-            }
-          }
-        }
-      }
-    }
+    // visibility decision can, so the reach of the area border styles per level is collected with the
+    // other visibility bounds in PostprocessVisibilityBounds().
 
     SortInConditionalsBySlot(*typeConfig,
                              areaTextStyleConditionals,
@@ -1005,6 +985,41 @@ namespace osmscout {
     }
 
     /**
+     * Widest area border reach of the border styles of one level. The width and the display offset
+     * are in millimetres, the offset is in map units, and the three maxima are collected separately
+     * because the painter converts them with the projection of its frame. Iterating the built
+     * selectors rather than the conditionals guarantees that the bound covers exactly the styles a
+     * per-ring decision can read.
+     */
+    void UpdateAreaBorderReach(const std::vector<BorderStyleLookupTable>& selectors,
+                               size_t level,
+                               VisibilityBounds& bounds)
+    {
+      for (const auto& selectorsByRule : selectors) {
+        for (const auto& selectorsForType : selectorsByRule) {
+          if (level>=selectorsForType.size()) {
+            continue;
+          }
+
+          for (const auto& selector : selectorsForType[level]) {
+            if (!selector.style) {
+              continue;
+            }
+
+            const BorderStyle & style=*selector.style;
+
+            bounds.maxAreaBorderWidth=std::max(bounds.maxAreaBorderWidth,
+                                               style.GetWidth());
+            bounds.maxAreaBorderDisplayOffset=std::max(bounds.maxAreaBorderDisplayOffset,
+                                                       std::fabs(style.GetDisplayOffset()));
+            bounds.maxAreaBorderOffset=std::max(bounds.maxAreaBorderOffset,
+                                                std::fabs(style.GetOffset()));
+          }
+        }
+      }
+    }
+
+    /**
      * Widest icon and symbol reach of the icon styles of one level
      */
     void UpdateIconReach(const IconStyleLookupTable& selectors,
@@ -1047,6 +1062,12 @@ namespace osmscout {
       levelCount=std::max(levelCount,selectorsForType.size());
     }
 
+    for (const auto& selectorsByRule : areaBorderStyleSelectors) {
+      for (const auto& selectorsForType : selectorsByRule) {
+        levelCount=std::max(levelCount,selectorsForType.size());
+      }
+    }
+
     visibilityBounds.clear();
     visibilityBounds.resize(levelCount);
 
@@ -1062,6 +1083,10 @@ namespace osmscout {
       UpdateIconReach(nodeIconStyleSelectors,
                       level,
                       bounds);
+
+      UpdateAreaBorderReach(areaBorderStyleSelectors,
+                            level,
+                            bounds);
     }
   }
 
@@ -1519,17 +1544,7 @@ namespace osmscout {
 
   double StyleConfig::GetMaxAreaBorderWidthMM(const Magnification& magnification) const
   {
-    if (maxAreaBorderWidthMM.empty()) {
-      return 0.0;
-    }
-
-    size_t level=magnification.GetLevel();
-
-    if (level>=maxAreaBorderWidthMM.size()) {
-      level=maxAreaBorderWidthMM.size()-1;
-    }
-
-    return maxAreaBorderWidthMM.at(level);
+    return GetVisibilityBounds(magnification).maxAreaBorderWidth;
   }
 
   FillStyleRef StyleConfig::GetAreaFillStyle(const TypeInfoRef& type,
