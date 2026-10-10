@@ -844,6 +844,15 @@ RouteStepTimeTest = executable('RouteStepTimeTest',
 
 test('Check route step time', RouteStepTimeTest)
 
+RouteLengthTest = executable('RouteLengthTest',
+             'src/RouteLengthTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route length', RouteLengthTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
