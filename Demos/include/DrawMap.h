@@ -61,6 +61,7 @@ struct Arguments {
 
   osmscout::MapParameter::IconMode iconMode{osmscout::MapParameter::IconMode::FixedSizePixmap};
   std::list<std::string> iconPaths;
+  std::list<std::string> patternPaths;
   double iconSize{3.7};
 
   double fontSize{3.0};
@@ -161,6 +162,12 @@ public:
               }),
               "iconPath",
               "Icon lookup directory",
+              false);
+    AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
+                args.patternPaths.push_back(value);
+              }),
+              "patternPath",
+              "Pattern lookup directory (defaults to the icon directories)",
               false);
     AddOption(osmscout::CmdLineStringOption([this](const std::string& value) {
 
@@ -355,6 +362,16 @@ public:
 
     drawParameter.SetIconMode(args.iconMode);
     drawParameter.SetIconPaths(args.iconPaths);
+
+    // A pattern is drawn from the same images as an icon, so the icon directories are the
+    // default source for patterns as well; a caller can name its own directories instead.
+    if (args.patternPaths.empty()) {
+      drawParameter.SetPatternPaths(args.iconPaths);
+    }
+    else {
+      drawParameter.SetPatternPaths(args.patternPaths);
+    }
+
     drawParameter.SetIconSize(args.iconSize);
 
     if (!args.iconPaths.empty() &&

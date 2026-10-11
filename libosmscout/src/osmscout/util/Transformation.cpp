@@ -576,7 +576,9 @@ namespace osmscout {
     }
 
     if (isArea) {
-      optimised.push_back(optimised.front());
+      const auto first=optimised.front();
+
+      optimised.push_back(first);
     }
 
     bool modified=false;
@@ -608,9 +610,11 @@ namespace osmscout {
             unionBox.Include(endBox);
 
             if (middleBox.GetSize() > unionBox.GetSize()){
+              const auto first=optimised.front();
+
               optimised.erase(optimised.begin()+j+1, optimised.end());
               optimised.erase(optimised.begin(), optimised.begin()+i);
-              optimised.push_back(optimised.front());
+              optimised.push_back(first);
               i=0;
             }
             else {

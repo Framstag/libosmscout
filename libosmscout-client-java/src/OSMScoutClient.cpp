@@ -60,6 +60,7 @@
 #include <osmscout/projection/MercatorProjection.h>
 
 #include <osmscout/util/Geometry.h>
+#include <osmscout/util/GeoBox.h>
 
 #include <osmscout/location/LocationService.h>
 #include <osmscout/location/LocationDescriptionService.h>
@@ -69,6 +70,10 @@
 #include <osmscout/FeatureReader.h>
 
 #include "admin_region_hierarchy.h"
+#include "frame_pixel_layout.h"
+#include "route_length.h"
+#include "route_step_time.h"
+#include "routing_progress_throttle.h"
 #include "search_scope.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -443,6 +448,7 @@ struct ClientData
   osmscout::FavoriteStore favoriteStore;             //!< Favorite store; owns the service and serialises wholesale replacement
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
+  bool preferSymbolIcons{false};                      //!< Draw the vector symbol of an entry that carries a raster icon, too
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   std::set<std::string> cacheSizedDatabases;          //!< Paths whose per-database cache size was applied already
   std::size_t dataCacheBudget{defaultDataCacheBudget};//!< Memory budget of the caches of all databases
@@ -727,12 +733,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
   std::filesystem::path fsPath(pathCStr);
   env->ReleaseStringUTFChars(pathJStr, pathCStr);
 
-  // Add to known paths if not already present. All opened maps stay loaded:
-  // libosmscout renders whichever database(s) cover the current viewport, so
-  // multiple maps can be used simultaneously without switching (fix-download).
-  // The registry serialises concurrent openers: the path list is no longer
-  // mutated while another thread (or the database thread) reads it.
-  data->knownPaths.Register(fsPath);
+  // Register the path (all opened maps stay loaded: libosmscout renders
+  // whichever database(s) cover the current viewport, so multiple maps can be
+  // used simultaneously without switching (fix-download)). Only an existing
+  // directory is accepted (spec client-java-database-paths - The
+  // single-directory call rejects a path that is not a database directory): a
+  // rejected path enters no set and counts no set change, so nothing is
+  // published and every database already loaded stays open. The report names
+  // the directory only.
+  // The registry serialises concurrent openers: the path list is not mutated
+  // while another thread (or the database thread) reads it.
+  if (!data->knownPaths.RegisterOpenable(fsPath)) {
+    osmscout::log.Warn() << "[JNI] openDatabase: not an existing map database directory: "
+                         << fsPath.filename().string();
+
+    return JNI_FALSE;
+  }
 
   // Trigger DBThread to process the updated path list. The snapshot is a value
   // copy taken under the registry's own lock, so the database thread never
@@ -758,6 +774,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabase(JNIEnv *env, jo
 // string is reported false and is not registered; a null array or an empty
 // array returns an empty array. A client that is not usable (no database
 // thread) reports every requested directory as false instead of faulting.
+// A path that is not an existing directory is registered and reported all the
+// same (spec client-java-database-paths - The batch call keeps its tolerance),
+// so the batch never fails because of one bad entry.
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jbooleanArray JNICALL
@@ -800,6 +819,18 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_openDatabases(JNIEnv *env, j
   ClientData *data = getClientData(env, self);
 
   if (data != nullptr && data->dbThread != nullptr && !paths.empty()) {
+    // The batch keeps its documented tolerance: a directory that disappears
+    // between the app's scan and this call must not fail the batch, so the path
+    // is registered all the same and merely reported here. The directory name
+    // only, and the report changes nothing about what is registered or about
+    // the array returned below.
+    for (const auto &path : paths) {
+      if (!osmscout::IsOpenableDatabaseDirectory(path)) {
+        osmscout::log.Warn() << "[JNI] openDatabases: not an existing map database directory: "
+                             << path.filename().string();
+      }
+    }
+
     auto registration = data->knownPaths.RegisterAll(paths);
 
     for (size_t k=0; k<paths.size(); k++) {
@@ -1088,27 +1119,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, 
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::setMapDpi(double dpi)
-//
-// Overrides the physical DPI used for rendering. Each display (phone vs car
-// surface) has its own physical DPI; the client is built with the phone
-// metrics, so Android Auto must switch to the car surface DPI before its
-// first render (otherwise the map is scaled ~1.8x too zoomed on a 236-dpi
-// head unit). Mirrors Settings::SetMapDPI; the next render picks it up.
-// --------------------------------------------------------------------------
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_setMapDpi(JNIEnv *env, jobject self, jdouble dpi)
-{
-  ClientData *data = getClientData(env, self);
-  if (data == nullptr || data->settings == nullptr || dpi <= 0.0) {
-    return;
-  }
-  osmscout::log.Debug() << "[JNI] setMapDpi(" << dpi << ")";
-  data->settings->SetMapDPI(dpi);
-}
-
-// --------------------------------------------------------------------------
 // OSMScoutClient::setNativeDataCacheSize(int cacheSize)
 //
 // Configures the capacity of libosmscout's per-database tile data caches
@@ -1178,6 +1188,28 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getNativeDataCacheUsage(JNIE
   }
 
   return static_cast<jlong>(data->dbThread->GetDataCacheBudget()->GetUsage());
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::setPreferSymbolIcons(boolean preferSymbolIcons)
+//
+// Selects which of a style entry's two renderings is drawn when the
+// stylesheet carries both a raster icon name and a vector symbol. Off by
+// default: the raster icon keeps its precedence and the symbol stays the
+// fallback. The render path reads the value when it builds its parameters, so
+// the next frame follows it without a stylesheet reload.
+// --------------------------------------------------------------------------
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setPreferSymbolIcons(JNIEnv *env, jobject self, jboolean preferSymbolIcons)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr) {
+    return;
+  }
+
+  data->preferSymbolIcons = (preferSymbolIcons == JNI_TRUE);
+  osmscout::log.Debug() << "[JNI] setPreferSymbolIcons(" << (data->preferSymbolIcons ? "true" : "false") << ")";
 }
 
 // --------------------------------------------------------------------------
@@ -1260,6 +1292,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                                                                              jdouble lat, jdouble lon,
                                                                              jdouble angle,
                                                                              jdouble magnificationScale,
+                                                                             jdouble dpi,
                                                                              jdoubleArray routeLats,
                                                                              jdoubleArray routeLons,
                                                                              jdoubleArray favoriteLats,
@@ -1348,7 +1381,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_importGpxTrack(JNIEnv *env,
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::render(int width, int height, double lat, double lon, double angle, double mag)
+// OSMScoutClient::render(int width, int height, double lat, double lon, double angle,
+//                        double mag, double dpi)
 // --------------------------------------------------------------------------
 
 extern "C" JNIEXPORT jintArray JNICALL
@@ -1356,50 +1390,73 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_render(JNIEnv *env, jobject 
                                                            jint width, jint height,
                                                            jdouble lat, jdouble lon,
                                                            jdouble angle,
-                                                           jdouble magnificationScale)
+                                                           jdouble magnificationScale,
+                                                           jdouble dpi)
 {
   return Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(
-      env, self, width, height, lat, lon, angle, magnificationScale, nullptr, nullptr, nullptr, nullptr,
+      env, self, width, height, lat, lon, angle, magnificationScale, dpi, nullptr, nullptr, nullptr, nullptr,
       std::numeric_limits<jdouble>::quiet_NaN(),
       std::numeric_limits<jdouble>::quiet_NaN(),
       nullptr, nullptr);
 }
 
 // --------------------------------------------------------------------------
-// OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
-//                                         double angle, double mag, double[] routeLats, double[] routeLons,
-//                                         double[] favoriteLats, double[] favoriteLons,
-//                                         double searchSelLat, double searchSelLon)
+// Shared render body of both render entry points.
 // --------------------------------------------------------------------------
 
-extern "C" JNIEXPORT jintArray JNICALL
-Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEnv *env, jobject self,
-                                                                             jint width, jint height,
-                                                                             jdouble lat, jdouble lon,
-                                                                             jdouble angle,
-                                                                             jdouble magnificationScale,
-                                                                             jdoubleArray routeLats,
-                                                                             jdoubleArray routeLons,
-                                                                             jdoubleArray favoriteLats,
-                                                                             jdoubleArray favoriteLons,
-                                                                             jdouble searchSelLat,
-                                                                             jdouble searchSelLon,
-                                                                             jdoubleArray trackLats,
-                                                                             jdoubleArray trackLons)
+// The frame's pixel layout depends on the destination, and the two layouts are NOT the
+// same:
+//
+//   * an int[] element is one 0xAARRGGBB word — what Bitmap.setPixels reads;
+//   * a direct buffer is consumed by Bitmap.copyPixelsFromBuffer, which reads the
+//     bitmap's own byte order — R,G,B,A on Android's ARGB_8888 (the NDK names that
+//     format ANDROID_BITMAP_FORMAT_RGBA_8888), i.e. the little-endian word
+//     0xAABBGGRR.
+//
+// Writing one layout into the other destination is a red/blue channel swap, not a
+// rounding difference — the defect this change fixes. [naviveylin::FrameDestination]
+// (frame_pixel_layout.h) is therefore the only place a frame pixel is written, and each
+// entry point states the layout its destination needs.
+//
+// Renders one frame into [destination] and returns whether a frame was drawn.
+//
+// The allocating entry point (renderWithRouteAndPois) and the buffer-taking one
+// (renderInto) run EXACTLY this code and differ only in where the pixels end up and
+// in the layout [destination] states, so the two cannot render different frames. The
+// storage belongs to the caller: this function writes it for the duration of the
+// call and retains no reference.
+//
+// Never throws into Java: an invalid request (no client, no database thread, a
+// rejected viewport, an unusable magnification) reports `false`.
+static bool renderMapIntoPixels(JNIEnv *env, jobject self,
+                                jint width, jint height,
+                                jdouble lat, jdouble lon,
+                                jdouble angle,
+                                jdouble magnificationScale,
+                                jdouble dpi,
+                                jdoubleArray routeLats,
+                                jdoubleArray routeLons,
+                                jdoubleArray favoriteLats,
+                                jdoubleArray favoriteLons,
+                                jdouble searchSelLat,
+                                jdouble searchSelLon,
+                                jdoubleArray trackLats,
+                                jdoubleArray trackLons,
+                                const naviveylin::FrameDestination &destination)
 {
 
   ClientData *data = getClientData(env, self);
   if (data == nullptr || data->dbThread == nullptr) {
-    return nullptr;
+    return false;
   }
 
-  if (width <= 0 || height <= 0) {
-    return nullptr;
+  if (width <= 0 || height <= 0 || destination.data == nullptr) {
+    return false;
   }
 
   osmscout::GeoCoord center(lat, lon);
   if (!center.IsValid()) {
-    return nullptr;
+    return false;
   }
 
   // The Java API passes the magnification as a scale factor (2^zoom level); fractional values are
@@ -1408,19 +1465,28 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
   if (!std::isfinite(magnificationScale) || magnificationScale<1.0) {
     osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
                          << " is not a usable scale factor (>= 1 required)";
-    return nullptr;
+    return false;
   }
 
   if (std::floor(std::log2(magnificationScale))>static_cast<double>(osmscout::CELL_DIMENSION_MAX)) {
     osmscout::log.Warn() << "[JNI] render: magnification scale " << magnificationScale
                          << " is above the supported range (2^" << osmscout::CELL_DIMENSION_MAX
                          << ")";
-    return nullptr;
+    return false;
   }
 
   osmscout::Magnification magnification(magnificationScale);
 
-  double dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
+  // The projection DPI is part of the render request: each surface passes the DPI
+  // of the display it draws on, so no frame depends on a value another surface
+  // configured. Each display has its own physical DPI — a head unit rendering at
+  // the phone's density is scaled ~1.8x too zoomed, and a phone rendering at the
+  // head unit's density is equally wrong. A request that states none — the Java
+  // convenience overloads pass none — falls back to the DPI configured on the
+  // client, so it renders as before instead of being rejected.
+  if (!(dpi > 0.0)) {
+    dpi = data->settings ? data->settings->GetMapDPI() : 96.0;
+  }
   // Verbose render logging disabled; re-enable only when debugging native renderer
   // osmscout::log.Debug() << "[JNI] render: dpi=" << dpi << " width=" << width
   //                      << " height=" << height << " mag=" << magnificationScale;
@@ -1511,9 +1577,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     }
   }
 
-  // Pixel buffer for result
+  // The caller's pixel storage, filled with opaque black so an unpainted area is black
+  // exactly as the allocating path left it.
   size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
-  std::vector<uint32_t> argbPixels(pixelCount, 0xFF000000); // default: opaque black
+  destination.Clear(pixelCount);
 
   bool rendered = false;
 
@@ -1540,6 +1607,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
       params.SetRenderBackground(true);
       params.SetRenderUnknowns(true);
       params.SetIconMode(osmscout::MapParameter::IconMode::ScaledPixmap);
+      params.SetPreferSymbolIcons(data->preferSymbolIcons);
 
       std::string iconDir = data->dbThread->GetIconDirectory();
       if (!iconDir.empty()) {
@@ -1868,10 +1936,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
           uint8_t b = cairoData[offset + 0];
           uint8_t g = cairoData[offset + 1];
           uint8_t r = cairoData[offset + 2];
-          // Alpha is ignored in CAIRO_FORMAT_RGB24, set to fully opaque
-          argbPixels[static_cast<size_t>(y) * width + x] =
-              0xFF000000 | (static_cast<uint32_t>(r) << 16) |
-              (static_cast<uint32_t>(g) << 8) | b;
+          // Cairo's own order is B,G,R,X, which is neither destination's layout: the
+          // swap happens here, once, into the layout the destination states.
+          destination.Write(static_cast<size_t>(y) * width + x, r, g, b);
         }
       }
 
@@ -1884,7 +1951,53 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
     }
   );
 
-  if (!rendered) {
+  return rendered;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::renderWithRouteAndPois(int width, int height, double lat, double lon,
+//                                         double angle, double magnificationScale, double dpi,
+//                                         double[] routeLats, double[] routeLons,
+//                                         double[] favoriteLats, double[] favoriteLons,
+//                                         double searchSelLat, double searchSelLon,
+//                                         double[] trackLats, double[] trackLons)
+// --------------------------------------------------------------------------
+
+// The allocating entry point. Its signature, behaviour, error semantics and result are
+// unchanged: it allocates the frame's pixel array, hands it to Java as int[] elements
+// (the 0xAARRGGBB layout Bitmap.setPixels reads) and reports an unusable request as
+// null.
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEnv *env, jobject self,
+                                                                             jint width, jint height,
+                                                                             jdouble lat, jdouble lon,
+                                                                             jdouble angle,
+                                                                             jdouble magnificationScale,
+                                                                             jdouble dpi,
+                                                                             jdoubleArray routeLats,
+                                                                             jdoubleArray routeLons,
+                                                                             jdoubleArray favoriteLats,
+                                                                             jdoubleArray favoriteLons,
+                                                                             jdouble searchSelLat,
+                                                                             jdouble searchSelLon,
+                                                                             jdoubleArray trackLats,
+                                                                             jdoubleArray trackLons)
+{
+  if (width <= 0 || height <= 0) {
+    return nullptr;
+  }
+
+  size_t pixelCount = static_cast<size_t>(width) * static_cast<size_t>(height);
+  std::vector<uint32_t> argbPixels(pixelCount, 0xFF000000); // default: opaque black
+
+  // The allocating path hands the frame to Java as int[] elements, which is the
+  // 0xAARRGGBB layout Bitmap.setPixels reads.
+  naviveylin::FrameDestination destination{argbPixels.data(), naviveylin::FrameLayout::ArgbInt};
+
+  if (!renderMapIntoPixels(env, self, width, height, lat, lon, angle, magnificationScale, dpi,
+                           routeLats, routeLons, favoriteLats, favoriteLons,
+                           searchSelLat, searchSelLon, trackLats, trackLons,
+                           destination)) {
     return nullptr;
   }
 
@@ -1898,6 +2011,84 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderWithRouteAndPois(JNIEn
                          reinterpret_cast<const jint *>(argbPixels.data()));
 
   return result;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::renderInto(int width, int height, double lat, double lon,
+//                            double angle, double magnificationScale, double dpi,
+//                            double[] routeLats, double[] routeLons,
+//                            double[] favoriteLats, double[] favoriteLons,
+//                            double searchSelLat, double searchSelLon,
+//                            double[] trackLats, double[] trackLons,
+//                            ByteBuffer pixels)
+// --------------------------------------------------------------------------
+
+// The buffer-taking entry point: it renders into pixel storage the caller owns and
+// allocates no frame-sized storage of its own (no int[], no intermediate pixel
+// vector). [pixels] must be a DIRECT buffer with a capacity of at least
+// width*height*4 bytes, and the frame is written in the layout Bitmap.copyPixelsFromBuffer
+// reads: four bytes R,G,B,A per pixel, the bitmap's own byte order. That is NOT the
+// allocating entry point's 0xAARRGGBB int[] layout — see [naviveylin::FrameLayout].
+//
+// Ownership: the caller owns the storage. The bridge writes it only while this
+// call runs and retains no reference, so the caller may release, reuse or display
+// it afterwards — and must not hand the same storage to two renders at once (the
+// bridge does not guard the caller's storage against the caller's own misuse).
+//
+// Returns true when the frame was written, false for an unusable request (no
+// client/database thread, a rejected viewport or magnification, a missing, non-direct
+// or too small buffer). A failed render never reports success, faults, or touches the
+// caller's storage beyond the documented write.
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_renderInto(JNIEnv *env, jobject self,
+                                                               jint width, jint height,
+                                                               jdouble lat, jdouble lon,
+                                                               jdouble angle,
+                                                               jdouble magnificationScale,
+                                                               jdouble dpi,
+                                                               jdoubleArray routeLats,
+                                                               jdoubleArray routeLons,
+                                                               jdoubleArray favoriteLats,
+                                                               jdoubleArray favoriteLons,
+                                                               jdouble searchSelLat,
+                                                               jdouble searchSelLon,
+                                                               jdoubleArray trackLats,
+                                                               jdoubleArray trackLons,
+                                                               jobject pixels)
+{
+  if (pixels == nullptr) {
+    osmscout::log.Warn() << "[JNI] renderInto: no pixel buffer";
+    return JNI_FALSE;
+  }
+
+  if (width <= 0 || height <= 0) {
+    return JNI_FALSE;
+  }
+
+  void *address = env->GetDirectBufferAddress(pixels);
+  if (address == nullptr) {
+    osmscout::log.Warn() << "[JNI] renderInto: pixel buffer is not a direct buffer";
+    return JNI_FALSE;
+  }
+
+  // The capacity is a jlong; the frame's byte count is bounded by the pixel count of a
+  // 32-bit size, so the comparison cannot overflow.
+  size_t neededBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * sizeof(uint32_t);
+  jlong capacity = env->GetDirectBufferCapacity(pixels);
+  if (capacity < static_cast<jlong>(neededBytes)) {
+    osmscout::log.Warn() << "[JNI] renderInto: pixel buffer holds " << capacity
+                         << " bytes, the frame needs " << neededBytes;
+    return JNI_FALSE;
+  }
+
+  // The caller hands this storage to Bitmap.copyPixelsFromBuffer, so the frame is
+  // written in the bitmap's own byte order, not the int[] layout.
+  naviveylin::FrameDestination destination{address, naviveylin::FrameLayout::RgbaBytes};
+
+  return renderMapIntoPixels(env, self, width, height, lat, lon, angle, magnificationScale, dpi,
+                             routeLats, routeLons, favoriteLats, favoriteLons,
+                             searchSelLat, searchSelLon, trackLats, trackLons,
+                             destination) ? JNI_TRUE : JNI_FALSE;
 }
 
 // --------------------------------------------------------------------------
@@ -2113,7 +2304,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -2142,7 +2333,10 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
 struct JavaRouteInstruction
 {
   double distanceTo{0.0};       // meters to next manoeuvre
-  double timeTo{0.0};           // seconds for this segment (per-step time)
+  double timeTo{0.0};           // seconds of the leg ending at this manoeuvre
+  double legDistance{0.0};      // meters of that leg (0 = unknown, see legStartKnown)
+  double nodeTimeSeconds{0.0};  // C++ internal: seconds from the route start at this
+                                // manoeuvre's node; the remaining-time estimate needs it
   std::string turnType;         // "sharpLeft", "left", "straightOn", etc.
   std::string streetName;       // street to turn into
   std::string description;      // "Turn left into Hauptstrasse"
@@ -2242,6 +2436,20 @@ public:
     double raw = nextAbs - nodeDist - travelled;
     next.distanceTo = (raw > 0.0) ? raw : 0.0;
 
+    // The next manoeuvre's time is the *remaining* time of its leg, consistent with the remaining
+    // distance above: interpolate the description's own node times at the current position (the
+    // same abscissa the distance path uses) and take the difference to the instruction's node.
+    // Publishing the leg's whole time instead left an arrival estimate that did not shrink while
+    // the manoeuvre was approached, next to a distance that did.
+    double timeAtPosition = TimeSeconds(previous->GetTime());
+    if (abscissa > 0.0 && nextNode != last) {
+      double nodeTime = timeAtPosition;
+      double nextNodeTime = TimeSeconds(nextNode->GetTime());
+      timeAtPosition = nodeTime + std::min(abscissa, 1.0) * (nextNodeTime - nodeTime);
+    }
+    double remainingTime = next.nodeTimeSeconds - timeAtPosition;
+    next.timeTo = (remainingTime > 0.0) ? remainingTime : 0.0;
+
     // Populate "next next" hint
     if (hasNextNext) {
       double nnAbs = it->distanceTo;
@@ -2258,6 +2466,13 @@ public:
   }
 
 private:
+  /** Whole seconds of a description duration (the granularity the route description has). */
+  static double TimeSeconds(const osmscout::Duration &duration)
+  {
+    return static_cast<double>(
+        std::chrono::duration_cast<std::chrono::seconds>(duration).count());
+  }
+
   // -- Turn type helpers (mirrors Demos/src/Navigation.cpp::MoveToTurnCommand) --
 
   static std::string MoveToTurnType(osmscout::RouteDescription::DirectionDescription::Move move)
@@ -2305,8 +2520,13 @@ private:
     osmscout::Distance stopAfter; // < 0 = unlimited
     osmscout::GeoCoord coord;
     osmscout::Distance distance;
+    osmscout::Distance prevInstructionDistance{osmscout::Distance::Zero()};
     osmscout::Duration prevTime{osmscout::Duration::zero()};
     osmscout::Duration time{osmscout::Duration::zero()};
+    // True while the walk contains the beginning of the leg that ends at the next emitted
+    // instruction. It does unless the walk starts mid-leg (see BeforeNode).
+    bool legStartKnown{true};
+    bool firstNode{true};
     std::string currentStreet;
 
   public:
@@ -2316,18 +2536,51 @@ private:
 
     void BeforeNode(const osmscout::RouteDescription::Node &node) override
     {
-      prevTime = time;
+      if (firstNode) {
+        // The walk's first node begins a leg only when it is the route's start: only then is
+        // the instruction before it part of the walk. A window that starts mid-leg (the
+        // instruction list is rebuilt from the current node on a route change, and the next
+        // instruction is generated from the current node) cannot know that leg, so its first
+        // emitted instruction reports unknown values instead of a cumulative-from-the-route-
+        // start number (owner finding 2026-10-04: "14 m / 2 s" per step).
+        legStartKnown = node.GetDistance().AsMeter() <= 0.0;
+        firstNode = false;
+      }
       time = node.GetTime();
       distance = node.GetDistance();
       coord = node.GetLocation();
     }
 
-    // Per-step time in seconds: time at this node minus time at the previous
-    // node (same segment semantics as the "[1.2 km, 5 min]" description suffix).
-    double SegmentTimeSeconds() const
+    /**
+     * Fill the leg values of one instruction: its distance and time are measured from the
+     * previous *emitted instruction*, not from the previous route node.
+     *
+     * A node-based delta is the last geometry edge before the manoeuvre, so the per-step values
+     * never added up to the route's distance or duration (device: "14 m" + "2 s" for one step of
+     * a 17,3 km route, 2026-10-04). Qt's RouteDescriptionBuilder::MkStep advances its reference
+     * per emitted step; this is the same rule. Call it once per emitted instruction - it advances
+     * the reference.
+     */
+    void FillLeg(JavaRouteInstruction &instr)
     {
       auto dt = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
-      return static_cast<double>(dt.count());
+      osmscout::Distance legDistance = distance - prevInstructionDistance;
+
+      instr.nodeTimeSeconds = static_cast<double>(
+          std::chrono::duration_cast<std::chrono::seconds>(time).count());
+
+      if (legStartKnown) {
+        instr.legDistance = static_cast<double>(legDistance.AsMeter());
+        instr.timeTo = static_cast<double>(dt.count());
+      }
+      else {
+        instr.legDistance = 0.0;
+        instr.timeTo = 0.0;
+      }
+
+      prevTime = time;
+      prevInstructionDistance = distance;
+      legStartKnown = true;
     }
 
     bool Continue() const override
@@ -2344,7 +2597,7 @@ private:
       currentStreet = NameOrRef(nameDesc);
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "start";
       instr.streetName = currentStreet;
       instr.description = startDesc ? startDesc->GetDescription() : "Start";
@@ -2362,7 +2615,7 @@ private:
       // behind the current node, so the arrival was skipped and a client got an
       // empty instruction after the last manoeuvre instead of "Arrive - X m".
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "targetReached";
       instr.description = targetDesc ? targetDesc->GetDescription() : "Destination reached";
       instr.shortDescription = "Arrive";
@@ -2386,7 +2639,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = MoveToTurnType(move);
       instr.streetName = street;
       instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
@@ -2399,7 +2652,7 @@ private:
     {
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "roundaboutEnter";
       instr.description = "Enter roundabout";
       instr.shortDescription = "Roundabout";
@@ -2415,7 +2668,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "roundaboutLeave";
       instr.streetName = street;
       instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
@@ -2431,7 +2684,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = "motorwayEnter";
       instr.streetName = motorway;
       instr.description = "Enter " + (motorway.empty() ? "motorway" : motorway);
@@ -2451,7 +2704,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = MoveToTurnType(move);
       instr.streetName = toMotorway;
       instr.description = "Keep " + MoveToDescription(move) + " onto " + (toMotorway.empty() ? "motorway" : toMotorway);
@@ -2471,7 +2724,7 @@ private:
 
       JavaRouteInstruction instr;
       instr.distanceTo = distance.AsMeter();
-      instr.timeTo = SegmentTimeSeconds();
+      FillLeg(instr);
       instr.turnType = MoveToTurnType(move);
       instr.streetName = street;
       instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
@@ -2924,6 +3177,7 @@ private:
         static_cast<jclass>(methods.instructionClsGlobal), methods.instructionCtor,
         instr.distanceTo,
         instr.timeTo,
+        instr.legDistance,
         turnTypeObj,
         streetNameJ,
         descriptionJ,
@@ -3201,6 +3455,68 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
   }
 }
 
+// Derives the geographic extent of a resolved search scope from the object that
+// represents the region (change client-java-search-scope-extent, design D2).
+// An admin region carries no coordinates of its own: the extent therefore comes
+// from its object - an area or a way contributes its bounding box, a node
+// region only a point, which is approximated by the documented fallback box.
+// Every other outcome (no region, no database, the object not loadable, an
+// invalid box) leaves the extent unset, which makes the filter admit every
+// position. That is deliberate: a scope whose extent cannot be established must
+// degrade to the unscoped behaviour, never silently empty the search.
+static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
+                                            const osmscout::AdminRegionRef &region)
+{
+  if (!region) {
+    return naviveylin::UnsetGeoBox();
+  }
+
+  auto database = db->GetDatabase();
+  if (!database) {
+    osmscout::log.Warn() << "search scope: no database to derive the extent of region '"
+                         << region->name << "' from - filtering disabled";
+    return naviveylin::UnsetGeoBox();
+  }
+
+  osmscout::GeoBox box;
+  bool             loaded = false;
+
+  if (region->object.GetType() == osmscout::RefType::refArea) {
+    osmscout::AreaRef area;
+    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
+      box = area->GetBoundingBox();
+      loaded = box.IsValid();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refWay) {
+    osmscout::WayRef way;
+    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
+      box = way->GetBoundingBox();
+      loaded = box.IsValid();
+    }
+  } else if (region->object.GetType() == osmscout::RefType::refNode) {
+    osmscout::NodeRef node;
+    loaded = database->GetNodeByOffset(region->object.GetFileOffset(), node);
+    if (loaded) {
+      return naviveylin::BoxAroundPoint(node->GetCoords().GetLat(),
+                                       node->GetCoords().GetLon());
+    }
+  }
+
+  if (loaded) {
+    return naviveylin::BoxFromCorners(box.GetMinCoord().GetLat(),
+                                      box.GetMinCoord().GetLon(),
+                                      box.GetMaxCoord().GetLat(),
+                                      box.GetMaxCoord().GetLon());
+  }
+
+  // Identity in the line, never a coordinate.
+  osmscout::log.Warn() << "search scope: no extent for region '" << region->name
+                       << "' (object type " << static_cast<int>(region->object.GetType())
+                       << ") - filtering disabled";
+
+  return naviveylin::UnsetGeoBox();
+}
+
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -3280,7 +3596,8 @@ std::vector<jobject> SerializeStructuredEntries(
     JNIEnv *env, ClientData *data,
     const std::vector<ResultWithDb> &results,
     bool hasCoordinate, const std::string &query,
-    double coordLat, double coordLon)
+    double coordLat, double coordLon,
+    const naviveylin::GeoBox &scopeExtent)
 {
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
   if (entryCls == nullptr) {
@@ -3313,6 +3630,7 @@ std::vector<jobject> SerializeStructuredEntries(
   jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
   jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
   jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
+  jfieldID inSearchScopeField = env->GetFieldID(entryCls, "inSearchScope", "Z");
 
   // Resolve each result's object reference before building the Java array.
   // A stale or inconsistent search index can reference objects that cannot be
@@ -3476,6 +3794,13 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetBooleanField(jEntry, hasHouseNumberField, JNI_FALSE);
     env->SetObjectField(jEntry, matchedNameField, env->NewStringUTF(query.c_str()));
     env->SetObjectField(jEntry, matchedComponentField, env->NewStringUTF("coordinate"));
+    // The result follows its own position like any other entry: a coordinate
+    // query is answered regardless of the scope, and the scope key only orders
+    // close matches (change client-java-search-scope-extent, design D4).
+    env->SetBooleanField(jEntry, inSearchScopeField,
+                         naviveylin::IsInsideGeoBox(scopeExtent, coordLat, coordLon)
+                           ? JNI_TRUE
+                           : JNI_FALSE);
     env->SetObjectField(jEntry, regionField,
                         env->NewObjectArray(0, env->FindClass("java/lang/String"), nullptr));
     serializedEntries.push_back(jEntry);
@@ -3602,6 +3927,16 @@ std::vector<jobject> SerializeStructuredEntries(
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(objectType.c_str()));
     env->SetDoubleField(jEntry, latField, resolvedEntry.lat);
     env->SetDoubleField(jEntry, lonField, resolvedEntry.lon);
+    // Whether the entry lies inside the active scope. An entry of a database
+    // that was searched unconstrained is reported by where it is: outside the
+    // scope's extent it is out of scope, inside it is not demoted
+    // (change client-java-search-scope-extent, design D1/D3).
+    env->SetBooleanField(jEntry, inSearchScopeField,
+                         naviveylin::IsInsideGeoBox(scopeExtent,
+                                                    resolvedEntry.lat,
+                                                    resolvedEntry.lon)
+                           ? JNI_TRUE
+                           : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(resolvedEntry.objectTypeName.c_str()));
     env->SetObjectField(jEntry, nameField, env->NewStringUTF(resolvedEntry.objectName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, resolvedEntry.objectFileOffset);
@@ -3745,7 +4080,11 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
   );
 
   std::vector<jobject> serializedEntries =
-      SerializeStructuredEntries(env, data, results, false, "", 0.0, 0.0);
+      SerializeStructuredEntries(env, data, results, false, "", 0.0, 0.0,
+                                 // The form-based lookup takes region names, not a
+                                 // resolved scope, so it has no extent: every entry
+                                 // is inside.
+                                 naviveylin::UnsetGeoBox());
 
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
   if (entryCls == nullptr) {
@@ -3845,6 +4184,15 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     }
   }
 
+  // Geographic extent of the resolved search scope, derived from the scope
+  // region's own object in the database that resolved it (change
+  // client-java-search-scope-extent, design D2). Computed once per search call,
+  // because the scope is a single region and does not depend on the database
+  // being walked. Unset means "no scope is active" or "the extent could not be
+  // established" - neither filters anything.
+  naviveylin::GeoBox scopeExtent = naviveylin::UnsetGeoBox();
+  bool               scopeExtentResolved = false;
+
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
       osmscout::BreakerRef breaker;
@@ -3906,6 +4254,15 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         std::vector<osmscout::AdminRegionRef> scope;
         if (effectiveRegion && db == adminRegionDb) {
           ResolveSearchScope(db, effectiveRegion, scope);
+          // Once per search call: the scope does not change while the databases
+          // are walked, so its extent is derived from the resolving database only.
+          if (!scopeExtentResolved) {
+            scopeExtent = DeriveScopeExtent(db,
+                                            scope.empty()
+                                              ? osmscout::AdminRegionRef()
+                                              : scope.front());
+            scopeExtentResolved = true;
+          }
         } else if (effectiveRegion && !adminRegionDb) {
           scope.push_back(effectiveRegion);
         } else {
@@ -4024,6 +4381,34 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                        return seenOffsets[e.db].count(static_cast<osmscout::FileOffset>(e.objectFileOffset)) != 0;
                      }),
       freeTextEntries.end());
+
+  // Free-text hits must respect the active search scope. The text index itself
+  // has no region attribution, so the scope is applied geographically: a hit
+  // outside the scope's extent is dropped, whichever database produced it,
+  // including the database that resolved the region. A hit inside the extent is
+  // kept even when a different database holds it, because the extent is
+  // comparable across databases while region offsets are not. An unset extent
+  // (no scope, or an extent that could not be established) drops nothing.
+  if (scopeExtent.isSet) {
+    const size_t freeTextBeforeFilter = freeTextEntries.size();
+
+    freeTextEntries.erase(
+        std::remove_if(freeTextEntries.begin(), freeTextEntries.end(),
+                       [&](const FreeTextEntry &e) {
+                         return !naviveylin::IsInsideGeoBox(scopeExtent, e.lat, e.lon);
+                       }),
+        freeTextEntries.end());
+
+    // Counts and identity only, never a coordinate. Debug-gated: enable with
+    // osmscout::log.Debug(true) when a device check needs to see how much the
+    // scope filtered.
+    if (freeTextEntries.size() != freeTextBeforeFilter) {
+      osmscout::log.Debug() << "search scope: dropped "
+                            << (freeTextBeforeFilter - freeTextEntries.size())
+                            << " of " << freeTextBeforeFilter
+                            << " free-text hit(s) outside the scope";
+    }
+  }
 #endif
 
   // Cap each source at the requested candidate count: structured results first,
@@ -4045,7 +4430,8 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   // Serialize structured results (defensively resolved) plus the optional
   // coordinate result; free-text hits are appended below.
   std::vector<jobject> serializedEntries =
-      SerializeStructuredEntries(env, data, results, hasCoordinate, query, coordLat, coordLon);
+      SerializeStructuredEntries(env, data, results, hasCoordinate, query, coordLat, coordLon,
+                                 scopeExtent);
 
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/LocationEntry");
   if (entryCls == nullptr) {
@@ -4076,6 +4462,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   jfieldID hasHouseNumberField = env->GetFieldID(entryCls, "hasHouseNumber", "Z");
   jfieldID matchedNameField = env->GetFieldID(entryCls, "matchedName", "Ljava/lang/String;");
   jfieldID matchedComponentField = env->GetFieldID(entryCls, "matchedComponent", "Ljava/lang/String;");
+  jfieldID inSearchScopeField = env->GetFieldID(entryCls, "inSearchScope", "Z");
 
   // A text-index hit has no component attribution: the query matched the whole
   // indexed name (or a prefix of it), so the only honest signal is whether the
@@ -4101,6 +4488,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(entry.objectType.c_str()));
     env->SetDoubleField(jEntry, latField, entry.lat);
     env->SetDoubleField(jEntry, lonField, entry.lon);
+    // Whether the hit lies inside the active scope. Only hits inside it reach
+    // this loop once the scope filter has run; without a scope every hit is
+    // inside by definition (change client-java-search-scope-extent, design D3).
+    env->SetBooleanField(jEntry, inSearchScopeField,
+                         naviveylin::IsInsideGeoBox(scopeExtent, entry.lat, entry.lon)
+                           ? JNI_TRUE
+                           : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(entry.objectTypeName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, entry.objectFileOffset);
     bool exactNameMatch = freeTextMatcher != nullptr &&
@@ -5400,6 +5794,9 @@ private:
   jobject callback;
   RouteCallbackMethods methods;
 
+  /** Change detection and rate limit for the reports handed to Java, see Progress(). */
+  naviveylin::RoutingProgressThrottle throttle;
+
 public:
   JavaRoutingProgress(JavaVM *jvm, jobject callback, const RouteCallbackMethods &methods)
     : jvm(jvm), callback(callback), methods(methods)
@@ -5411,20 +5808,30 @@ public:
     // no-op
   }
 
+  /**
+   * The router calls this once per successfully relaxed edge — thousands to
+   * millions of times for a long route, and always from the routing worker
+   * thread. Every call would cross JNI into Java, so only a *changed*
+   * percentage is reported, and at most once per rate-limit interval (see
+   * routing_progress_throttle.h): the callback then means "the progress moved"
+   * instead of "a node was visited", and the routing thread keeps its time for
+   * routing. The percentage is capped below completion — 100 % stays reserved
+   * for the route that actually arrived. The attach and the Java call happen
+   * only for an accepted report, so a dropped one costs no JNI crossing.
+   */
   void Progress(const osmscout::Distance &currentMaxDistance,
                 const osmscout::Distance &overallDistance) override
   {
-    JNIEnv *env;
-    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+    int percent = naviveylin::ProgressPercent(currentMaxDistance.AsMeter(),
+                                              overallDistance.AsMeter());
+
+    if (!throttle.ShouldReport(percent, std::chrono::steady_clock::now())) {
       return;
     }
 
-    int percent = 0;
-    double overall = overallDistance.AsMeter();
-    if (overall > 0.0) {
-      percent = static_cast<int>(
-          currentMaxDistance.AsMeter() / overall * 100.0);
-      if (percent > 99) percent = 99;
+    JNIEnv *env;
+    if (AttachCurrentThread(&env, jvm) != JNI_OK) {
+      return;
     }
 
     env->CallVoidMethod(callback, methods.onProgress, percent);
@@ -5721,6 +6128,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
+      // with the instruction lines of routeDescriptionLines. All four are published as a set and
+      // dropped as a set when the alignment cannot be shown (see the check after the callback).
+      std::vector<double> routeInstructionLats;
+      std::vector<double> routeInstructionLons;
+      std::vector<double> routeInstructionDistances;
+      std::vector<double> routeInstructionTimes;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -5796,7 +6210,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
           }
 
           routeData = std::move(result.GetRoute());
-          totalDistance = result.GetOverallDistance().AsMeter();
+          // The route's length is decided from the route itself, never from
+          // result.GetOverallDistance(): that figure is the start/target air-line estimate the
+          // router computes for its cost limit and its progress denominator, not a length of the
+          // route (spec: route-calculation - The published route length is a length of that route;
+          // measured at 0.748x of the drawn polyline on a ~70 km route). Below: the description's
+          // own total, else the length of the polyline this call publishes.
           success = true;
 
           // Generate route description
@@ -5864,18 +6283,46 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
+              // Per-step leg values (spec: route-calculation - per-step leg values on a
+              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
+              // with the instruction lines and with the positions below; the distance is the leg
+              // that ENDS at that line's manoeuvre.
+              std::vector<double> instructionDistances;
+              std::vector<double> instructionTimes;
+              // Per-instruction positions (spec: route-calculation - per-instruction positions).
+              // One entry per line pushed by NextLine(), so the arrays align with the instruction
+              // lines of `lines` (the "--- Route ---" header is not an instruction).
+              std::vector<double> instructionLats;
+              std::vector<double> instructionLons;
+              double nodeLat = 0.0;
+              double nodeLon = 0.0;
+              // The description's own total - the cumulative distance at its last node, in metres.
+              // The route's length is taken from the description, not from the router's separately
+              // accumulated distance (spec: route-calculation - The published route length is a
+              // length of that route).
+              double lastNodeDistanceMeters = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                prevDistance = distance;
-                prevTime = time;
+                // The per-step reference is advanced when a LINE is emitted (see
+                // AppendDistanceTime), never here: this callback runs for every route node,
+                // while only the nodes carrying a description produce a line.
                 distance = node.GetDistance().AsMeter() / 1000.0;
+                // The nodes are walked in order, so the largest cumulative distance seen is the
+                // description's total, which is the route's length (see the derivation below).
+                if (distance * 1000.0 > lastNodeDistanceMeters) {
+                  lastNodeDistanceMeters = distance * 1000.0;
+                }
                 time = node.GetTime();
+                nodeLat = node.GetLocation().GetLat();
+                nodeLon = node.GetLocation().GetLon();
               }
 
               void NextLine() {
                 std::ostringstream oss;
                 oss.str("");
                 lines.push_back(oss.str());
+                instructionLats.push_back(nodeLat);
+                instructionLons.push_back(nodeLon);
                 lineCount++;
               }
 
@@ -5888,21 +6335,30 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                if (segDist > 0.01 && time - prevTime > osmscout::Duration::zero()) {
+                auto timeText = naviveylin::FormatRouteStepTime(
+                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
+                if (segDist > 0.01 && timeText.has_value()) {
                   oss << ", ";
                 }
-                if (time - prevTime > osmscout::Duration::zero()) {
-                  auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
-                  if (dtM.count() >= 60) {
-                    auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
-                    auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
-                    oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else {
-                    oss << dtM.count() << " min";
-                  }
+                if (timeText.has_value()) {
+                  oss << *timeText;
                 }
                 oss << "]";
                 line += oss.str();
+                // The values belong to the leg that ENDS here, so the reference advances when a
+                // line is emitted - not per route node as BeforeNode does it (Qt's
+                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
+                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
+                // the rows never added up to the route's distance or duration (device: "14 m"
+                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
+                // the positions (spec: route-calculation - per-step leg values on a calculated
+                // route).
+                instructionDistances.push_back(segDist * 1000.0);
+                instructionTimes.push_back(
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
+                        time - prevTime).count()));
+                prevDistance = distance;
+                prevTime = time;
               }
 
               void BeforeRoute() override {
@@ -5974,6 +6430,33 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             generator.GenerateDescription(*descResult.GetDescription(), descCb);
 
             routeDescriptionLines = std::move(descCb.lines);
+            routeInstructionLats = std::move(descCb.instructionLats);
+            routeInstructionLons = std::move(descCb.instructionLons);
+            routeInstructionDistances = std::move(descCb.instructionDistances);
+            routeInstructionTimes = std::move(descCb.instructionTimes);
+            // Every array must have one entry per instruction line; a mismatch would shift every
+            // later step, so the per-step values and the positions are dropped together instead
+            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
+            // aligned).
+            if (routeInstructionLats.size() != descCb.lineCount ||
+                routeInstructionLons.size() != descCb.lineCount ||
+                routeInstructionDistances.size() != descCb.lineCount ||
+                routeInstructionTimes.size() != descCb.lineCount) {
+              osmscout::log.Warn() << "calculateRouteWithObjectsWithProfile: per-step value count ("
+                                   << routeInstructionDistances.size() << ", position count "
+                                   << routeInstructionLats.size() << ") does not match instruction line count ("
+                                   << descCb.lineCount << ") - per-step values and positions dropped";
+              routeInstructionLats.clear();
+              routeInstructionLons.clear();
+              routeInstructionDistances.clear();
+              routeInstructionTimes.clear();
+            }
+
+            // The route's length is the description's own total (spec: route-calculation - The
+            // published route length is a length of that route): the cumulative distance at the
+            // description's last node, which is the sum of its steps and tracks the geometry the
+            // app draws, lists and highlights to within 0.4 %.
+            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -6070,9 +6553,61 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
+      // are empty when the alignment check dropped them, and the Java arrays then stay null - the
+      // app shows no per-step values or positions instead of shifted ones.
+      jdoubleArray instrLats = nullptr;
+      jdoubleArray instrLons = nullptr;
+      jdoubleArray instrDists = nullptr;
+      jdoubleArray instrTimes = nullptr;
+      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
+      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
+        instrLats = threadEnv->NewDoubleArray(instrCount);
+        instrLons = threadEnv->NewDoubleArray(instrCount);
+        instrDists = threadEnv->NewDoubleArray(instrCount);
+        instrTimes = threadEnv->NewDoubleArray(instrCount);
+        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
+        for (jsize i = 0; i < instrCount; i++) {
+          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
+          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
+          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
+          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
+        }
+        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
+        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
+        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
+        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
+      }
+
+      // The route's own length when its description produced nothing: the great-circle length of the
+      // polyline this call publishes, so a client that falls back to the total still receives a route
+      // length and never the start/target air-line estimate (spec: route-calculation - The published
+      // route length is a length of that route). With a description present, the total is already the
+      // description's own total above; a single-point route has no geometry to measure and stays 0.
+      double polylineMeters = 0.0;
+      if (count > 1) {
+        for (jsize i = 1; i < count; i++) {
+          polylineMeters += osmscout::GetEllipsoidalDistance(
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
+                                 lonValues[static_cast<size_t>(i - 1)]),
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
+                                 lonValues[static_cast<size_t>(i)])).AsMeter();
+        }
+      }
+      totalDistance = naviveylin::RouteLengthMeters(totalDistance, polylineMeters);
+
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
+      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
+      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
+      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
+      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
@@ -6080,6 +6615,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
+      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
+      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
+      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
+      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -6240,6 +6779,13 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
       std::vector<std::string> routeDescriptionLines;
+      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
+      // with the instruction lines of routeDescriptionLines. All four are published as a set and
+      // dropped as a set when the alignment cannot be shown (see the check after the callback).
+      std::vector<double> routeInstructionLats;
+      std::vector<double> routeInstructionLons;
+      std::vector<double> routeInstructionDistances;
+      std::vector<double> routeInstructionTimes;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -6372,10 +6918,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             return;
           }
 
-          osmscout::log.Warn() << "calculateRouteAsync: route OK, distance="
+          osmscout::log.Warn() << "calculateRouteAsync: route OK, air-line estimate="
                                << result.GetOverallDistance().AsMeter() << "m";
           routeData = std::move(result.GetRoute());
-          totalDistance = result.GetOverallDistance().AsMeter();
+          // The route's length is decided from the route itself, never from
+          // result.GetOverallDistance(): that figure is the start/target air-line estimate the
+          // router computes for its cost limit and its progress denominator, not a length of the
+          // route (spec: route-calculation - The published route length is a length of that route;
+          // measured at 0.748x of the drawn polyline on a ~70 km route). Below: the description's
+          // own total, else the length of the polyline this call publishes.
           success = true;
 
           // Generate route description
@@ -6465,13 +7016,39 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
               osmscout::Duration prevTime = osmscout::Duration::zero();
               double distance = 0.0;
               osmscout::Duration time = osmscout::Duration::zero();
+              // Per-step leg values (spec: route-calculation - per-step leg values on a
+              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
+              // with the instruction lines and with the positions below; the distance is the leg
+              // that ENDS at that line's manoeuvre.
+              std::vector<double> instructionDistances;
+              std::vector<double> instructionTimes;
+              // Per-instruction positions (spec: route-calculation - per-instruction positions).
+              // One entry per line pushed by NextLine(), so the arrays align with the instruction
+              // lines of `lines` (the "--- Route ---" header is not an instruction).
+              std::vector<double> instructionLats;
+              std::vector<double> instructionLons;
+              double nodeLat = 0.0;
+              double nodeLon = 0.0;
               bool lineDrawn = false;
+              // The description's own total - the cumulative distance at its last node, in metres.
+              // The route's length is taken from the description, not from the router's separately
+              // accumulated distance (spec: route-calculation - The published route length is a
+              // length of that route).
+              double lastNodeDistanceMeters = 0.0;
 
               void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                prevDistance = distance;
-                prevTime = time;
+                // The per-step reference is advanced when a LINE is emitted (see
+                // AppendDistanceTime), never here: this callback runs for every route node,
+                // while only the nodes carrying a description produce a line.
                 distance = node.GetDistance().AsMeter() / 1000.0;
+                // The nodes are walked in order, so the largest cumulative distance seen is the
+                // description's total, which is the route's length (see the derivation below).
+                if (distance * 1000.0 > lastNodeDistanceMeters) {
+                  lastNodeDistanceMeters = distance * 1000.0;
+                }
                 time = node.GetTime();
+                nodeLat = node.GetLocation().GetLat();
+                nodeLon = node.GetLocation().GetLon();
               }
 
               void NextLine() {
@@ -6479,6 +7056,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 // Description text comes first as primary information
                 oss.str("");
                 lines.push_back(oss.str());
+                instructionLats.push_back(nodeLat);
+                instructionLons.push_back(nodeLon);
                 lineCount++;
               }
 
@@ -6491,21 +7070,30 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 } else if (segDist > 0.01) {
                   oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
                 }
-                if (segDist > 0.01 && time - prevTime > osmscout::Duration::zero()) {
+                auto timeText = naviveylin::FormatRouteStepTime(
+                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
+                if (segDist > 0.01 && timeText.has_value()) {
                   oss << ", ";
                 }
-                if (time - prevTime > osmscout::Duration::zero()) {
-                  auto dtM = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime);
-                  if (dtM.count() >= 60) {
-                    auto dtH = std::chrono::duration_cast<std::chrono::hours>(time - prevTime);
-                    auto dtRem = std::chrono::duration_cast<std::chrono::minutes>(time - prevTime - dtH);
-                    oss << dtH.count() << " h " << dtRem.count() << " min";
-                  } else {
-                    oss << dtM.count() << " min";
-                  }
+                if (timeText.has_value()) {
+                  oss << *timeText;
                 }
                 oss << "]";
                 line += oss.str();
+                // The values belong to the leg that ENDS here, so the reference advances when a
+                // line is emitted - not per route node as BeforeNode does it (Qt's
+                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
+                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
+                // the rows never added up to the route's distance or duration (device: "14 m"
+                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
+                // the positions (spec: route-calculation - per-step leg values on a calculated
+                // route).
+                instructionDistances.push_back(segDist * 1000.0);
+                instructionTimes.push_back(
+                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
+                        time - prevTime).count()));
+                prevDistance = distance;
+                prevTime = time;
               }
 
               void BeforeRoute() override {
@@ -6578,8 +7166,35 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
             // Store description lines for marshalling
             routeDescriptionLines = std::move(descCb.lines);
+            routeInstructionLats = std::move(descCb.instructionLats);
+            routeInstructionLons = std::move(descCb.instructionLons);
+            routeInstructionDistances = std::move(descCb.instructionDistances);
+            routeInstructionTimes = std::move(descCb.instructionTimes);
+            // Every array must have one entry per instruction line; a mismatch would shift every
+            // later step, so the per-step values and the positions are dropped together instead
+            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
+            // aligned).
+            if (routeInstructionLats.size() != descCb.lineCount ||
+                routeInstructionLons.size() != descCb.lineCount ||
+                routeInstructionDistances.size() != descCb.lineCount ||
+                routeInstructionTimes.size() != descCb.lineCount) {
+              osmscout::log.Warn() << "calculateRouteWithObjectsAsync: per-step value count ("
+                                   << routeInstructionDistances.size() << ", position count "
+                                   << routeInstructionLats.size() << ") does not match instruction line count ("
+                                   << descCb.lineCount << ") - per-step values and positions dropped";
+              routeInstructionLats.clear();
+              routeInstructionLons.clear();
+              routeInstructionDistances.clear();
+              routeInstructionTimes.clear();
+            }
             osmscout::log.Warn() << "calculateRouteAsync: generated "
                                  << routeDescriptionLines.size() << " description lines";
+
+            // The route's length is the description's own total (spec: route-calculation - The
+            // published route length is a length of that route): the cumulative distance at the
+            // description's last node, which is the sum of its steps and tracks the geometry the
+            // app draws, lists and highlights to within 0.4 %.
+            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -6679,9 +7294,61 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
+      // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
+      // are empty when the alignment check dropped them, and the Java arrays then stay null - the
+      // app shows no per-step values or positions instead of shifted ones.
+      jdoubleArray instrLats = nullptr;
+      jdoubleArray instrLons = nullptr;
+      jdoubleArray instrDists = nullptr;
+      jdoubleArray instrTimes = nullptr;
+      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
+      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
+          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
+        instrLats = threadEnv->NewDoubleArray(instrCount);
+        instrLons = threadEnv->NewDoubleArray(instrCount);
+        instrDists = threadEnv->NewDoubleArray(instrCount);
+        instrTimes = threadEnv->NewDoubleArray(instrCount);
+        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
+        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
+        for (jsize i = 0; i < instrCount; i++) {
+          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
+          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
+          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
+          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
+        }
+        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
+        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
+        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
+        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
+      }
+
+      // The route's own length when its description produced nothing: the great-circle length of the
+      // polyline this call publishes, so a client that falls back to the total still receives a route
+      // length and never the start/target air-line estimate (spec: route-calculation - The published
+      // route length is a length of that route). With a description present, the total is already the
+      // description's own total above; a single-point route has no geometry to measure and stays 0.
+      double polylineMeters = 0.0;
+      if (count > 1) {
+        for (jsize i = 1; i < count; i++) {
+          polylineMeters += osmscout::GetEllipsoidalDistance(
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i - 1)],
+                                 lonValues[static_cast<size_t>(i - 1)]),
+              osmscout::GeoCoord(latValues[static_cast<size_t>(i)],
+                                 lonValues[static_cast<size_t>(i)])).AsMeter();
+        }
+      }
+      totalDistance = naviveylin::RouteLengthMeters(totalDistance, polylineMeters);
+
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
+      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
+      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
+      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
+      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
@@ -6689,6 +7356,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
+      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
+      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
+      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
+      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 

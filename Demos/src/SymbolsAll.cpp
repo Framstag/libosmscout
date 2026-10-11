@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -715,11 +716,17 @@ int main(int argc, char* argv[])
 
   auto styleConfig=std::make_shared<osmscout::StyleConfig>(typeConfig);
 
+  auto loadStart=std::chrono::steady_clock::now();
+
   if (!styleConfig->Load(args.stylesheet)) {
     std::cerr << "ERROR: Cannot load stylesheet '" << args.stylesheet << "'." << std::endl;
 
     return 1;
   }
+
+  auto                     loadEnd=std::chrono::steady_clock::now();
+
+  double                   loadMilliseconds=std::chrono::duration<double,std::milli>(loadEnd-loadStart).count();
 
   std::vector<std::string> names=styleConfig->GetSymbolNames();
   std::vector<std::string> patternNames=styleConfig->GetPatternNames();
@@ -729,6 +736,20 @@ int main(int argc, char* argv[])
             << args.stylesheet << "'" << std::endl;
 
   if (args.list) {
+    // The cost of building the style configuration goes to stderr, so the symbol list on stdout stays a
+    // plain list of names
+    const osmscout::StyleConfig::BuildDiagnostics & diagnostics=styleConfig->GetBuildDiagnostics();
+
+    std::cerr << "Style configuration built in " << loadMilliseconds << " ms: "
+              << diagnostics.preparedSlots << " slots, "
+              << diagnostics.typeConditionEvaluations << " type condition evaluations, "
+              << diagnostics.tableBytes << " table bytes, "
+              << diagnostics.typeSetBytes << " type set bytes" << std::endl;
+
+    for (const auto& entry : diagnostics.familySlots) {
+      std::cerr << "  family " << entry.first << ": " << entry.second << " slots" << std::endl;
+    }
+
     for (const auto& name : names) {
       std::cout << name << std::endl;
     }

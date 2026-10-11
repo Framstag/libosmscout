@@ -30,6 +30,7 @@
  */
 #include "poly2tri/common/shapes.h"
 #include <iostream>
+#include <stdexcept>
 
 namespace p2t {
 
@@ -344,16 +345,31 @@ void Triangle::SetDelunayEdgeCW(Point& p, bool e)
 }
 
 // The neighbor across to given point
+//
+// Local deviation from upstream poly2tri (libosmscout, TODO §97): an absent neighbour was an assert
+// here, which release builds compile out and then dereference the null, crashing the caller instead of
+// reporting the polygon the sweep cannot handle. The library reports such input by throwing, so it
+// throws here too. Keep this when updating the vendored copy.
 Triangle& Triangle::NeighborAcross(Point& opoint)
 {
   if (&opoint == points_[0]) {
-    assert(neighbors_[0] != nullptr);
+    if (neighbors_[0] == nullptr) {
+      throw std::runtime_error("NeighborAcross - no triangle across the point");
+    }
+
     return *neighbors_[0];
   } else if (&opoint == points_[1]) {
-    assert(neighbors_[1] != nullptr);
+    if (neighbors_[1] == nullptr) {
+      throw std::runtime_error("NeighborAcross - no triangle across the point");
+    }
+
     return *neighbors_[1];
   }
-  assert(neighbors_[2] != nullptr);
+
+  if (neighbors_[2] == nullptr) {
+    throw std::runtime_error("NeighborAcross - no triangle across the point");
+  }
+
   return *neighbors_[2];
 }
 

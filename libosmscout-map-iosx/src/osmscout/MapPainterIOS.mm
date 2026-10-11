@@ -27,6 +27,8 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/util/String.h>
 
+#include <osmscoutmap/PatternLookup.h>
+
 #if ! __has_feature(objc_arc)
 #error This file must be compiled with ARC. Either turn on ARC for the project or use -fobjc-arc flag
 #endif
@@ -220,16 +222,18 @@ namespace osmscout {
             return true;
         }
 
-        for (std::list<std::string>::const_iterator path=parameter.GetPatternPaths().begin();
-             path!=parameter.GetPatternPaths().end();
-             ++path) {
-            std::string filename;
-            if(contentScale == 1){
-                filename = *path+"/"+style.GetPatternName()+".png";
-            } else {
-                filename = *path+"/"+style.GetPatternName()+"@"+std::to_string((int)contentScale)+"x.png";
-            }
+        const std::string patternName=style.GetPatternName();
+        const std::string extension=contentScale == 1
+                                    ? ".png"
+                                    : "@"+std::to_string((int)contentScale)+"x.png";
+        std::string       filename;
 
+        auto status=PatternLookup::Resolve(parameter.GetPatternPaths(),
+                                           patternName,
+                                           extension,
+                                           filename);
+
+        if (status==PatternLookup::Status::Found) {
             Image *image = [[Image alloc] initWithContentsOfFile:[NSString stringWithUTF8String: filename.c_str()]];
             if (image) {
 #if TARGET_OS_IPHONE
@@ -248,10 +252,18 @@ namespace osmscout {
                 style.SetPatternId(patternImages.size());
                 return true;
             }
+
+            log.Warn() << "ERROR while loading pattern image '" << filename << "'";
+        }
+        else {
+            log.Error() << PatternLookup::Describe(parameter.GetPatternPaths(),
+                                                   patternName,
+                                                   extension,
+                                                   status);
         }
 
-        log.Warn() << "ERROR while loading icon file '" << style.GetPatternName() << "'";
-        style.SetPatternId(std::numeric_limits<size_t>::max());
+        // A pattern that cannot be served is not searched again, so the report stays one per pattern
+        style.SetPatternId(0);
 
         return false;
     }

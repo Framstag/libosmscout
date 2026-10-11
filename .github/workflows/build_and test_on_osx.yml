@@ -48,7 +48,7 @@ jobs:
       - name: Install Liberation fonts (needed by text metrics tests)
         run: brew install --cask font-liberation
       - name: Configure build project
-        run: cmake -B build -DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 -DCMAKE_UNITY_BUILD=ON -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF -Wno-dev -G "Ninja"
+        run: cmake -B build -DQt5_DIR=$(brew --prefix qt@5)/lib/cmake/Qt5 -DPNG_PNG_INCLUDE_DIR=$(brew --prefix libpng)/include -DPNG_LIBRARY=$(brew --prefix libpng)/lib/libpng.dylib -DCMAKE_UNITY_BUILD=ON -DOSMSCOUT_BUILD_CLIENT_JAVA=OFF -Wno-dev -G "Ninja"
         env:
           PKG_CONFIG_PATH: "/usr/local/opt/qt@5/lib/pkgconfig:/usr/local/opt/libxml2/lib/pkgconfig"
       - name: Build project

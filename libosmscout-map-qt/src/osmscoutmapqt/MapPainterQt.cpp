@@ -36,6 +36,8 @@
 #include <osmscout/util/Geometry.h>
 #include <osmscout/log/Logger.h>
 
+#include <osmscoutmap/PatternLookup.h>
+
 #include <osmscoutmapqt/SymbolRendererQt.h>
 
 namespace osmscout {
@@ -184,17 +186,25 @@ namespace osmscout {
       return true;
     }
 
-    std::list<std::string> erronousPaths;
+    const std::string patternName=style.GetPatternName();
+    const std::string extension=parameter.GetPatternMode()==MapParameter::PatternMode::Scalable
+                                ? ".svg"
+                                : ".png";
+    std::string       filename;
+    QImage            image;
 
-    for (const auto& path : parameter.GetPatternPaths()) {
+    auto status=PatternLookup::Resolve(parameter.GetPatternPaths(),
+                                       patternName,
+                                       extension,
+                                       filename);
+
+    if (status==PatternLookup::Status::Found) {
       bool success = false;
-      std::string filename;
-      QImage image;
-      if (parameter.GetPatternMode()==MapParameter::PatternMode::Scalable){
-        filename=AppendFileToDir(path,style.GetPatternName()+".svg");
 
+      if (parameter.GetPatternMode()==MapParameter::PatternMode::Scalable){
         // Load SVG
         QSvgRenderer renderer(QString::fromStdString(filename));
+
         if (renderer.isValid()) {
           int dimension = std::round(projection.ConvertWidthToPixel(parameter.GetPatternSize()));
           image = QImage(dimension, dimension, QImage::Format_ARGB32);
@@ -210,8 +220,8 @@ namespace osmscout {
           painter.end();
           success = !image.isNull();
         }
-      }else {
-        filename = AppendFileToDir(path, style.GetPatternName() + ".png");
+      }
+      else {
         success = image.load(filename.c_str());
       }
 
@@ -228,18 +238,18 @@ namespace osmscout {
 
         patterns[idx].setTextureImage(image);
 
-        log.Info() << "Loaded pattern '" << style.GetPatternName() << "' from \"" << filename << "\"";
+        log.Info() << "Loaded pattern '" << patternName << "' from \"" << filename << "\"";
 
         return true;
       }
 
-      erronousPaths.push_back(filename);
+      log.Warn() << "Cannot load pattern '" << patternName << "' from \"" << filename << "\"";
     }
-
-    log.Warn() << "Cannot find pattern '" << style.GetPatternName() << "'";
-
-    for (const auto& path : erronousPaths) {
-      log.Warn() <<  "Search path '" << path << "'";
+    else {
+      log.Error() << PatternLookup::Describe(parameter.GetPatternPaths(),
+                                             patternName,
+                                             extension,
+                                             status);
     }
 
     style.SetPatternId(0);

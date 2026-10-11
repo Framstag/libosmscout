@@ -1,0 +1,13 @@
+timestamp: 2026-10-10T14:44:58+02:00
+sentinel:  build/libosmscout-client-java/java/headers/com_framstag_libosmscout_client_OSMScoutClient_removedMethod.h
+forced by: rm -f build/libosmscout-client-java/java/headers/com_framstag_libosmscout_client_OSMScoutClient.h (the declared OUTPUT of the rule)
+--- cmake --build build --target java_compile
+[1/1] Compiling Java sources and generating JNI headers
+rc=0
+--- headers after the build
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+com_framstag_libosmscout_client_OSMScoutClient_removedMethod.h
+RED: stale sentinel header survived the header-generating target

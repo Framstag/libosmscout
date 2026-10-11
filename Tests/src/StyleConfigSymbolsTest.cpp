@@ -19,6 +19,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -26,6 +27,7 @@
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
+#include <osmscoutmap/PatternLookup.h>
 #include <osmscoutmap/StyleConfig.h>
 
 namespace {
@@ -134,4 +136,68 @@ TEST_CASE("StyleConfig returns empty pattern list for stylesheet without pattern
 
   REQUIRE(styleConfig.Load(oss.string()));
   REQUIRE(styleConfig.GetPatternNames().empty());
+}
+
+TEST_CASE("Shipped stylesheets resolve every pattern reference to a shipped image", "[StyleConfig]")
+{
+  std::filesystem::path styleDir=std::filesystem::path(GetEnv("TESTS_TOP_DIR",
+                                                             "..")) / ".." / "stylesheets";
+  std::filesystem::path imageDir=std::filesystem::path(GetEnv("TESTS_TOP_DIR",
+                                                             "..")) / ".." / "libosmscout" / "data" / "icons" / "14x14" / "standard";
+
+  REQUIRE(std::filesystem::is_directory(styleDir));
+  REQUIRE(std::filesystem::is_directory(imageDir));
+
+  // The set of stylesheets that ship with the library, so a new one is covered as well
+  std::vector<std::string> stylesheets;
+
+  for (const auto& entry : std::filesystem::directory_iterator(styleDir)) {
+    if (entry.is_regular_file() &&
+        entry.path().extension()==".oss") {
+      stylesheets.push_back(entry.path().filename().string());
+    }
+  }
+
+  REQUIRE(!stylesheets.empty());
+
+  std::sort(stylesheets.begin(),
+            stylesheets.end());
+
+  std::vector<std::string> unresolved;
+  size_t                   patternCount=0;
+
+  for (const auto& name : stylesheets) {
+    osmscout::StyleConfig styleConfig(LoadTypeConfig());
+
+    INFO("stylesheet " << name);
+
+    REQUIRE(styleConfig.Load((styleDir / name).string()));
+
+    for (const auto& patternName : styleConfig.GetPatternNames()) {
+      std::string filename;
+
+      patternCount++;
+
+      if (osmscout::PatternLookup::Resolve({imageDir.string()},
+                                           patternName,
+                                           ".png",
+                                           filename)!=osmscout::PatternLookup::Status::Found) {
+        unresolved.push_back(name + ": " + patternName);
+      }
+    }
+  }
+
+  // The check has to see patterns, else it would pass vacuously
+  REQUIRE(patternCount>0);
+
+  std::string unresolvedList;
+
+  for (const auto& entry : unresolved) {
+    unresolvedList+=entry + "; ";
+  }
+
+  INFO("unresolved pattern references: " << unresolvedList);
+  INFO("patterns checked: " << patternCount);
+
+  REQUIRE(unresolved.empty());
 }

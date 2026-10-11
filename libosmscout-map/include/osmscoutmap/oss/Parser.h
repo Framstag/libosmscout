@@ -23,6 +23,7 @@
 
 #include <limits>
 #include <list>
+#include <set>
 #include <sstream>
 
 #include <osmscout/Pixel.h>
@@ -79,6 +80,7 @@ public:
   void Error(int line, int col, const char *s);
   void Warning(int line, int col, const char *s);
   void Warning(const char *s);
+  void RecordWarning(int line, int col, const char *s);
   void Exception(const char *s);
 
 };
@@ -123,6 +125,13 @@ std::string                           filename;
 StyleConfig&                          config;
 MagnificationConverter                magnificationConverter;
 bool                                  state;
+
+/**
+ * Distinct type names that could not be resolved against the type configuration
+ * while this parser ran; reported once at the end of the parse (see
+ * Parser::ReportUnresolvedTypes) instead of once per occurrence.
+ */
+std::set<std::string>                 unresolvedTypeNames;
 
 enum class ValueType
 {
@@ -226,6 +235,8 @@ void AddFeatureToFilter(StyleFilter& filter,
 
   void SemErr(const char* msg);
   void SemWarning(const char* msg);
+  void NoteUnresolvedType(const std::string& name, const std::string& message);
+  void ReportUnresolvedTypes();
 
 	void OSS();
 	void IMPORTS();

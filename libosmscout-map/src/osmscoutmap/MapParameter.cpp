@@ -45,6 +45,7 @@ namespace osmscout {
     iconSize(1.8),
     iconPixelSize(14),
     iconPadding(1.0),
+    preferSymbolIcons(false),
     patternMode(PatternMode::OriginalPixmap),
     patternSize(3.7),
     labelLayouterOverlap(30),
@@ -174,6 +175,11 @@ namespace osmscout {
   void MapParameter::SetIconPadding(double padding)
   {
     this->iconPadding=padding;
+  }
+
+  void MapParameter::SetPreferSymbolIcons(bool preferSymbolIcons)
+  {
+    this->preferSymbolIcons=preferSymbolIcons;
   }
 
   void MapParameter::SetPatternMode(const PatternMode &mode)

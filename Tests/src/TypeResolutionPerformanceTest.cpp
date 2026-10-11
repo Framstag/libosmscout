@@ -276,7 +276,9 @@ int main(int argc, char* argv[])
      {{"natural","water"}}},
     {"no match (full scan, registered keys)",
      {{"highway","foobar"},
-      {"amenity","foobar"}}}
+      {"amenity","foobar"}}},
+    {"no match on a crowded key (amenity=foobar)",
+     {{"amenity","foobar"}}}
   };
 
   // Way/area tag sets
@@ -307,7 +309,9 @@ int main(int argc, char* argv[])
      {{"building","yes"}}},
     {"no match (full scan, registered keys)",
      {{"highway","foobar"},
-      {"amenity","foobar"}}}
+      {"amenity","foobar"}}},
+    {"no match on a crowded key (shop=foobar, 377 shop conditions)",
+     {{"shop","foobar"}}}
   };
 
   // Relation tag sets

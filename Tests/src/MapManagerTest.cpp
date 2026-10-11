@@ -302,10 +302,15 @@ TEST_CASE("Destroying the manager while a scan runs is safe, repeatedly") {
     // letting it run against released state.
     manager.reset();
 
-    std::this_thread::sleep_for(10ms);
-  }
+    // A scan that outran the teardown and published while the manager was still
+    // alive is not a defect, so the count is taken after the teardown. What must
+    // hold is that no publication follows it: the signal died with the manager, so
+    // a scan the teardown stopped can only stay silent, and a publication on behalf
+    // of one would grow the count or fault.
+    size_t publicationsAfterTeardown=log.Count();
 
-  // A scan that was stopped by its own teardown publishes nothing. The signal dies
-  // with the manager, so a publication on behalf of a stopped scan would fault.
-  REQUIRE(log.Count()==0);
+    std::this_thread::sleep_for(10ms);
+
+    REQUIRE(log.Count()==publicationsAfterTeardown);
+  }
 }

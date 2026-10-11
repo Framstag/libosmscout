@@ -305,6 +305,8 @@ int main(int argc, char *argv[]) {
   std::list<std::string>       paths;
   paths.push_back(args.iconDirectory);
   drawParameter.SetIconPaths(paths);
+  // A pattern is drawn from the same images as an icon, so the icon directory serves both
+  drawParameter.SetPatternPaths(paths);
 
   glfwWindowHint(GLFW_SAMPLES, 4);
   GLFWwindow *window;

@@ -725,7 +725,9 @@ namespace osmscout {
       return false;
     }
 
-    points.push_back(points[0]);
+    const auto first=points[0];
+
+    points.push_back(first);
 
     size_t edgesIntersect=0;
 
@@ -875,9 +877,13 @@ namespace osmscout {
 
     // temporarily wrap around vertices
     // (first == last) to generate edge lists
-    outerPoints.push_back(outerPoints[0]);
+    const auto outerFirst=outerPoints[0];
+
+    outerPoints.push_back(outerFirst);
     for (size_t i=0; i<innerPoints.size(); i++) {
-      innerPoints[i].push_back(innerPoints[i][0]);
+      const auto innerFirst=innerPoints[i][0];
+
+      innerPoints[i].push_back(innerFirst);
     }
 
     // outer poly

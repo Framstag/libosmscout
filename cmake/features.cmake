@@ -194,6 +194,23 @@ find_package(LibLZMA)
 find_package(PNG)
 target_exists(PNG::PNG HAVE_LIB_PNG)
 
+# A library that includes png.h has to compile against the header of the libpng it links. The
+# include directories of an imported target are system include directories of its consumers, and
+# the compiler searches those only after the consumer's own ones, so a directory that another
+# dependency contributes and that happens to hold a png.h silently shadows the header of the
+# linked library. The macOS CI runner is such a host: the Headers directory of its Mono framework
+# holds a png.h of 1.4.12 next to the fontconfig and FreeType headers, and the Cairo backend
+# includes png.h (LoaderPNG, for a pattern image) while linking both for its font support. The
+# backend then decoded against a header older than its library, png_create_read_struct returned
+# NULL and MapPainterCairoPatternTest reported a pattern it could serve as unloadable
+# (the OS X cmake job failed with "libpng warning: Application built with libpng-1.4.12 but
+# running with 1.6.58"). Asking for no system treatment keeps the png.h of the linked libpng in
+# front, whatever else a host puts on the include path (the property needs CMake 3.23; an older
+# configure ignores it, and a host with such a directory in front would keep the old behaviour).
+if(TARGET PNG::PNG)
+  set_property(TARGET PNG::PNG PROPERTY IMPORTED_NO_SYSTEM TRUE)
+endif()
+
 find_package(Cairo)
 if(CAIRO_FOUND)
   option(CAIRO_STATIC "Switch on if the found cairo library is static" OFF)
@@ -210,10 +227,49 @@ set(HAVE_LIB_AGG ${LIBAGG_FOUND})
 find_package(Freetype)
 target_exists(Freetype::Freetype HAVE_LIB_FREETYPE)
 
+# The pango-less cairo path can draw the face of a configured font file directly, when the
+# cairo build offers the FreeType font backend. The header and the symbol are both checked,
+# because the FreeType backend of cairo is a build option of cairo itself.
+if(FREETYPE_FOUND AND CAIRO_FOUND)
+  include(CheckCXXSourceCompiles)
+
+  set(CMAKE_REQUIRED_INCLUDES ${CAIRO_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_LIBRARIES ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
+
+  check_cxx_source_compiles(
+    "#include <cairo-ft.h>
+     #include <ft2build.h>
+     #include FT_FREETYPE_H
+     int main() {
+       FT_Library library;
+       if (FT_Init_FreeType(&library) != 0) { return 1; }
+       FT_Face face;
+       cairo_font_face_t *fontFace = cairo_ft_font_face_create_for_ft_face(face, 0);
+       return fontFace != nullptr ? 0 : 1;
+     }"
+    OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT
+  )
+
+  unset(CMAKE_REQUIRED_INCLUDES)
+  unset(CMAKE_REQUIRED_LIBRARIES)
+endif()
+
 find_package(Pango)
 set(HAVE_LIB_PANGO ${PANGO_FOUND})
 set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO ${PANGOCAIRO_FOUND})
 set(OSMSCOUT_MAP_SVG_HAVE_LIB_PANGO ${PANGOFT2_FOUND})
+
+# The font configuration is what the Cairo backend falls back to where its text stack cannot be
+# handed a configured font file (Pango before 1.56); it is not a build requirement
+find_package(Fontconfig QUIET)
+
+# A configured font name may be a font family or a font file. The map library
+# reads the family out of a file where FreeType is available; the Cairo backend
+# additionally makes the file itself resolvable to its text stack, with the
+# font configuration where the stack cannot be handed a file directly.
+set(OSMSCOUT_MAP_HAVE_LIB_FREETYPE ${HAVE_LIB_FREETYPE})
+set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FREETYPE ${HAVE_LIB_FREETYPE})
+set(OSMSCOUT_MAP_CAIRO_HAVE_LIB_FONTCONFIG ${Fontconfig_FOUND})
 
 find_package(harfbuzz)
 target_exists(harfbuzz::harfbuzz HAVE_LIB_HARFBUZZ)
@@ -433,6 +489,25 @@ set(HAVE_LIB_GPERFTOOLS ${GPERFTOOLS_FOUND})
 if(GPERFTOOLS_FOUND)
   set(GPERFTOOLS_USAGE ON)
 else()
+  set(GPERFTOOLS_USAGE OFF)
+endif()
+
+# A sanitizer runtime interposes malloc/free just as gperftools' tcmalloc does, so a binary that links
+# both lets each allocator free the other's pointers: the mismatch shows up as
+# "Attempt to free invalid pointer" of the tool's own allocator, with the offending free in the first
+# library that frees a pointer the other allocator handed out (see
+# openspec/changes/fix-sanitizer-allocator-conflict). The heap profiler is therefore off in a
+# configuration that enables a sanitizer; -DPERF_TEST_GPERFTOOLS_USAGE=ON overrides that deliberately.
+set(OSMSCOUT_SANITIZER_USAGE OFF)
+if(LLVM_USE_SANITIZER)
+  set(OSMSCOUT_SANITIZER_USAGE ON)
+endif()
+if("${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} ${CMAKE_EXE_LINKER_FLAGS} ${CMAKE_MODULE_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}"
+   MATCHES "fsanitize")
+  set(OSMSCOUT_SANITIZER_USAGE ON)
+endif()
+if(OSMSCOUT_SANITIZER_USAGE AND GPERFTOOLS_USAGE)
+  message(STATUS "heap profiler (Gperftools) disabled: this configuration enables a sanitizer runtime, whose allocator has to be the only interposer")
   set(GPERFTOOLS_USAGE OFF)
 endif()
 

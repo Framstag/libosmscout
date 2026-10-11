@@ -1,0 +1,7 @@
+timestamp: 2026-10-10T14:46:13+02:00
+--- cmake --build build --target osmscout_client_java java_jar -j 16
+[1/1] Packaging Java classes into jar
+rc=0
+--- header the C++ source includes:
+-rw-r--r-- 1 tim tim 17407 10. Okt 14:46 build/libosmscout-client-java/java/headers/com_framstag_libosmscout_client_OSMScoutClient.h
+--- jar entries count:     82646                     40 files

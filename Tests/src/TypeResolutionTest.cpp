@@ -38,17 +38,17 @@ namespace osmscout {
    */
   struct TypeResolutionIndexTestAccess
   {
-    static const std::unordered_map<TagId,std::vector<TypeConfig::TypeConditionEntry>>& GetNodeIndex(const TypeConfig& config)
+    static const std::unordered_map<TagId,TypeConfig::TypeKeyIndex>& GetNodeIndex(const TypeConfig& config)
     {
       return config.nodeTypeIndex;
     }
 
-    static const std::unordered_map<TagId,std::vector<TypeConfig::TypeConditionEntry>>& GetWayAreaIndex(const TypeConfig& config)
+    static const std::unordered_map<TagId,TypeConfig::TypeKeyIndex>& GetWayAreaIndex(const TypeConfig& config)
     {
       return config.wayAreaTypeIndex;
     }
 
-    static const std::unordered_map<TagId,std::vector<TypeConfig::TypeConditionEntry>>& GetRelationIndex(const TypeConfig& config)
+    static const std::unordered_map<TagId,TypeConfig::TypeKeyIndex>& GetRelationIndex(const TypeConfig& config)
     {
       return config.relationTypeIndex;
     }
@@ -81,12 +81,29 @@ namespace osmscout {
       return true;
     }
 
-    static void CollectCovered(const std::unordered_map<TagId,std::vector<TypeConfig::TypeConditionEntry>>& index,
+    static bool IsSorted(const TypeConfig::TypeKeyIndex& index)
+    {
+      for (const auto& bucket : index.valueBuckets) {
+        if (!IsSorted(bucket.second)) {
+          return false;
+        }
+      }
+
+      return IsSorted(index.keyOnly);
+    }
+
+    static void CollectCovered(const std::unordered_map<TagId,TypeConfig::TypeKeyIndex>& index,
                                const std::vector<TypeConfig::TypeConditionEntry>& fallback,
                                std::set<std::pair<size_t,size_t>>& covered)
     {
       for (const auto& entry : index) {
-        for (const auto& condition : entry.second) {
+        for (const auto& bucket : entry.second.valueBuckets) {
+          for (const auto& condition : bucket.second) {
+            covered.emplace(condition.typeIndex,condition.conditionIndex);
+          }
+        }
+
+        for (const auto& condition : entry.second.keyOnly) {
           covered.emplace(condition.typeIndex,condition.conditionIndex);
         }
       }
@@ -280,6 +297,20 @@ namespace osmscout {
 
 using namespace osmscout;
 
+/**
+ * Runs the value introspection of a condition and returns the reported pairs as a set.
+ */
+static std::set<TagValue> CollectValues(const TagCondition& condition,
+                                        bool& exhaustive)
+{
+  std::vector<TagValue> values;
+
+  condition.CollectTagValues(values,
+                             exhaustive);
+
+  return {values.begin(),values.end()};
+}
+
 TEST_CASE("Leaf conditions report their tag as guaranteed key", "[TypeResolution]")
 {
   TagRegistry registry;
@@ -403,6 +434,90 @@ TEST_CASE("OR condition with negation is not guaranteed", "[TypeResolution]")
   REQUIRE(!guaranteed);
 }
 
+TEST_CASE("Value introspection: comparison and IsIn declare their values", "[TypeResolution]")
+{
+  TagRegistry registry;
+  TagId       highway=registry.RegisterTag("highway");
+  TagId       bus=registry.RegisterTag("bus");
+
+  bool exhaustive=false;
+
+  TagBinaryCondition equal(highway,operatorEqual,"primary");
+  auto               equalValues=CollectValues(equal,exhaustive);
+  REQUIRE(exhaustive);
+  REQUIRE(equalValues==std::set<TagValue>{{highway,"primary"}});
+
+  TagBinaryCondition notEqual(highway,operatorNotEqual,"primary");
+  auto               notEqualValues=CollectValues(notEqual,exhaustive);
+  REQUIRE(!exhaustive);
+  REQUIRE(notEqualValues.empty());
+
+  TagIsInCondition isIn(bus);
+  isIn.AddTagValue("yes");
+  isIn.AddTagValue("no");
+  auto isInValues=CollectValues(isIn,exhaustive);
+  REQUIRE(exhaustive);
+  REQUIRE(isInValues==std::set<TagValue>{{bus,"yes"},{bus,"no"}});
+}
+
+TEST_CASE("Value introspection: EXISTS and NOT declare no value", "[TypeResolution]")
+{
+  TagRegistry registry;
+  TagId       entrance=registry.RegisterTag("entrance");
+  TagId       barrier=registry.RegisterTag("barrier");
+
+  bool exhaustive=true;
+
+  TagExistsCondition exists(entrance);
+  auto               existsValues=CollectValues(exists,exhaustive);
+  REQUIRE(!exhaustive);
+  REQUIRE(existsValues.empty());
+
+  TagNotCondition notCondition(std::make_shared<TagBinaryCondition>(barrier,operatorEqual,"bollard"));
+  auto            notValues=CollectValues(notCondition,exhaustive);
+  REQUIRE(!exhaustive);
+  REQUIRE(notValues.empty());
+}
+
+TEST_CASE("Value introspection: AND is exhaustive if a child is", "[TypeResolution]")
+{
+  TagRegistry registry;
+  TagId       landuse=registry.RegisterTag("landuse");
+  TagId       building=registry.RegisterTag("building");
+
+  TagBoolCondition andCondition(TagBoolCondition::boolAnd);
+  andCondition.AddCondition(std::make_shared<TagBinaryCondition>(landuse,operatorEqual,"farmland"));
+  andCondition.AddCondition(std::make_shared<TagExistsCondition>(building));
+
+  bool exhaustive=false;
+  auto values=CollectValues(andCondition,exhaustive);
+  REQUIRE(exhaustive);
+  REQUIRE(values==std::set<TagValue>{{landuse,"farmland"}});
+}
+
+TEST_CASE("Value introspection: OR is exhaustive only if every child is", "[TypeResolution]")
+{
+  TagRegistry registry;
+  TagId       waterway=registry.RegisterTag("waterway");
+  TagId       natural=registry.RegisterTag("natural");
+
+  TagBoolCondition exhaustiveOr(TagBoolCondition::boolOr);
+  exhaustiveOr.AddCondition(std::make_shared<TagBinaryCondition>(waterway,operatorEqual,"riverbank"));
+  exhaustiveOr.AddCondition(std::make_shared<TagBinaryCondition>(natural,operatorEqual,"water"));
+
+  bool exhaustive=false;
+  auto values=CollectValues(exhaustiveOr,exhaustive);
+  REQUIRE(exhaustive);
+  REQUIRE(values==std::set<TagValue>{{waterway,"riverbank"},{natural,"water"}});
+
+  TagBoolCondition mixedOr(TagBoolCondition::boolOr);
+  mixedOr.AddCondition(std::make_shared<TagBinaryCondition>(waterway,operatorEqual,"riverbank"));
+  mixedOr.AddCondition(std::make_shared<TagExistsCondition>(natural));
+
+  values=CollectValues(mixedOr,exhaustive);
+  REQUIRE(!exhaustive);
+}
+
 static TypeConfigRef BuildSyntheticConfig()
 {
   TypeConfigRef config=std::make_shared<TypeConfig>();
@@ -484,34 +599,36 @@ TEST_CASE("Dispatch index is built from synthetic type definition", "[TypeResolu
   const auto& wayAreaIndex=TypeResolutionIndexTestAccess::GetWayAreaIndex(*config);
   const auto& relationIndex=TypeResolutionIndexTestAccess::GetRelationIndex(*config);
 
-  // highway_node keyed on highway
-  REQUIRE(nodeIndex.at(highway).size()==1);
-  REQUIRE(nodeIndex.at(highway)[0].type->GetName()=="highway_node");
+  // highway_node is keyed on the declared value highway==primary
+  REQUIRE(nodeIndex.at(highway).valueBuckets.at("primary").size()==1);
+  REQUIRE(nodeIndex.at(highway).valueBuckets.at("primary")[0].type->GetName()=="highway_node");
+  REQUIRE(nodeIndex.at(highway).keyOnly.empty());
 
-  // barrier_node is keyed on barrier (EXISTS sibling is guaranteed)
-  REQUIRE(nodeIndex.at(config->GetTagId("barrier")).size()==1);
-  REQUIRE(nodeIndex.at(config->GetTagId("barrier"))[0].type->GetName()=="barrier_node");
+  // barrier_node has no declared value (AND with a negated value) -> keyOnly
+  REQUIRE(nodeIndex.at(config->GetTagId("barrier")).valueBuckets.empty());
+  REQUIRE(nodeIndex.at(config->GetTagId("barrier")).keyOnly.size()==1);
+  REQUIRE(nodeIndex.at(config->GetTagId("barrier")).keyOnly[0].type->GetName()=="barrier_node");
 
   // all synthetic conditions are guaranteed -> no fallback entries in this config
   REQUIRE(TypeResolutionIndexTestAccess::GetNodeFallback(*config).empty());
   REQUIRE(TypeResolutionIndexTestAccess::GetWayAreaFallback(*config).empty());
   REQUIRE(TypeResolutionIndexTestAccess::GetRelationFallback(*config).empty());
 
-  // landuse_farmland keyed on landuse (first guaranteed AND child), in way+area index
-  REQUIRE(wayAreaIndex.at(landuse).size()==1);
-  REQUIRE(wayAreaIndex.at(landuse)[0].type->GetName()=="landuse_farmland");
-  REQUIRE((wayAreaIndex.at(landuse)[0].types & TypeInfo::typeWay)!=0);
-  REQUIRE((wayAreaIndex.at(landuse)[0].types & TypeInfo::typeArea)!=0);
+  // landuse_farmland keyed on landuse==farmland (first guaranteed AND child), in way+area index
+  REQUIRE(wayAreaIndex.at(landuse).valueBuckets.at("farmland").size()==1);
+  REQUIRE(wayAreaIndex.at(landuse).valueBuckets.at("farmland")[0].type->GetName()=="landuse_farmland");
+  REQUIRE((wayAreaIndex.at(landuse).valueBuckets.at("farmland")[0].types & TypeInfo::typeWay)!=0);
+  REQUIRE((wayAreaIndex.at(landuse).valueBuckets.at("farmland")[0].types & TypeInfo::typeArea)!=0);
 
-  // natural_water keyed on natural, in way+area index
-  REQUIRE(wayAreaIndex.at(natural).size()==1);
-  REQUIRE(wayAreaIndex.at(natural)[0].type->GetName()=="natural_water");
+  // natural_water keyed on natural==water, in way+area index
+  REQUIRE(wayAreaIndex.at(natural).valueBuckets.at("water").size()==1);
+  REQUIRE(wayAreaIndex.at(natural).valueBuckets.at("water")[0].type->GetName()=="natural_water");
 
-  // route_bicycle keyed on type (first guaranteed AND child)
-  REQUIRE(relationIndex.at(type).size()==1);
-  REQUIRE(relationIndex.at(type)[0].type->GetName()=="route_bicycle");
+  // route_bicycle keyed on type==route (first guaranteed AND child)
+  REQUIRE(relationIndex.at(type).valueBuckets.at("route").size()==1);
+  REQUIRE(relationIndex.at(type).valueBuckets.at("route")[0].type->GetName()=="route_bicycle");
 
-  // All key lists are sorted by (typeIndex, conditionIndex)
+  // All value buckets and key-only lists are sorted by (typeIndex, conditionIndex)
   for (const auto& entry : nodeIndex) {
     REQUIRE(TypeResolutionIndexTestAccess::IsSorted(entry.second));
   }
@@ -592,6 +709,97 @@ TEST_CASE("Dispatch matches linear scan on synthetic type definition", "[TypeRes
     {{"type","route"},{"route","bicycle"}},
     {{"type","multipolygon"},{"natural","water"}},
     {{"place","village"}},
+    {{"name","test"}},
+    {}
+  };
+
+  for (const auto& tags : tagSets) {
+    TagMap tagMap=MakeTagMap(*config,tags);
+
+    CheckNodeEquivalence(*config,tagMap);
+    CheckWayAreaEquivalence(*config,tagMap);
+    CheckRelationEquivalence(*config,tagMap);
+  }
+}
+
+/**
+ * Builds a type config in which every declared value of one crowded key owns its
+ * own node type, so the key-level candidate set grows with the type count while
+ * each value bucket holds exactly one condition.
+ */
+static TypeConfigRef BuildCrowdedKeyConfig(size_t valueCount,
+                                           size_t extraValueCount=0)
+{
+  TypeConfigRef config=std::make_shared<TypeConfig>();
+
+  TagId amenity=config->GetTagRegistry().RegisterTag("amenity");
+
+  for (size_t i=0; i<valueCount+extraValueCount; i++) {
+    TypeInfoRef type=std::make_shared<TypeInfo>("amenity_value_"+std::to_string(i));
+    type->CanBeNode(true);
+    type->AddCondition(TypeInfo::typeNode,
+                       std::make_shared<TagBinaryCondition>(amenity,
+                                                            operatorEqual,
+                                                            "value_"+std::to_string(i)));
+    config->RegisterType(type);
+  }
+
+  return config;
+}
+
+/**
+ * Asserts the crowded-key contract of one type config: every declared value owns its own
+ * condition, the key carries no value-less condition, an undeclared value reaches no
+ * condition and resolves to ignore, and a declared value resolves to its own type.
+ */
+static void CheckCrowdedKeyConfig(const TypeConfigRef& config,
+                                  size_t declaredValues,
+                                  const std::string& declaredValue)
+{
+  TagId amenity=config->GetTagId("amenity");
+
+  const auto& nodeIndex=TypeResolutionIndexTestAccess::GetNodeIndex(*config);
+
+  REQUIRE(nodeIndex.at(amenity).valueBuckets.size()==declaredValues);
+  REQUIRE(nodeIndex.at(amenity).keyOnly.empty());
+  REQUIRE(nodeIndex.at(amenity).valueBuckets.count("undeclared")==0);
+
+  TagMap noMatch=MakeTagMap(*config,{{"amenity","undeclared"}});
+  REQUIRE(config->GetNodeType(noMatch)==config->typeInfoIgnore);
+
+  TagMap match=MakeTagMap(*config,{{"amenity",declaredValue}});
+  REQUIRE(config->GetNodeType(match)->GetName()=="amenity_"+declaredValue);
+}
+
+TEST_CASE("No-match value on a crowded key reaches no condition", "[TypeResolution]")
+{
+  CheckCrowdedKeyConfig(BuildCrowdedKeyConfig(50),
+                        50,
+                        "value_7");
+}
+
+TEST_CASE("Type growth on one key leaves a no-match value's candidates unchanged", "[TypeResolution]")
+{
+  // Four times as many types on the same key: the undeclared value still reaches
+  // nothing and a declared value still resolves to its own type
+  CheckCrowdedKeyConfig(BuildCrowdedKeyConfig(10),
+                        10,
+                        "value_3");
+  CheckCrowdedKeyConfig(BuildCrowdedKeyConfig(10,40),
+                        50,
+                        "value_3");
+}
+
+TEST_CASE("Dispatch matches linear scan on a crowded key", "[TypeResolution]")
+{
+  TypeConfigRef config=BuildCrowdedKeyConfig(50);
+
+  std::vector<std::pair<std::string,std::string>> tagSets[]={
+    {{"amenity","value_0"}},
+    {{"amenity","value_7"}},
+    {{"amenity","value_49"}},
+    {{"amenity","undeclared"}},
+    {{"amenity","value_7"},{"name","test"}},
     {{"name","test"}},
     {}
   };

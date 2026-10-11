@@ -1,0 +1,5 @@
+Fixture of scripts/check-vector-self-append.sh.
+The next line reads the element it appends out of the sequence it appends to and must be reported.
+optimised.push_back(optimised.front());
+The next line appends an element of a different object into its own sequence and must not be reported.
+nodeBuffer.push_back(ring->nodes[0]);

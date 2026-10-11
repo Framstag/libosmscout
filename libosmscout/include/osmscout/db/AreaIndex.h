@@ -19,6 +19,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <atomic>
+#include <cstdint>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <unordered_set>
@@ -64,7 +67,24 @@ namespace osmscout {
 
     std::vector<TypeData> typeData;
 
-    mutable std::mutex    lookupMutex;
+    /**
+     * Position of the entry of a type within `typeData`, addressed by the type's index in
+     * the type configuration (`TypeInfo::GetIndex()`), or `kNoEntry` when this index
+     * carries no entry for that type. Built by `Open()`, so a lookup does not have to walk
+     * the entries to find the ones a request names.
+     */
+    std::vector<uint32_t>     entryOfType;
+
+    static constexpr uint32_t kNoEntry=std::numeric_limits<uint32_t>::max();
+
+    /**
+     * Entries the last lookup examined - that is, the entries of requested types this index
+     * carries. A diagnostic for tests; concurrent lookups make it the count of whichever
+     * lookup finished last.
+     */
+    mutable std::atomic<size_t> examinedEntryCount{0};
+
+    mutable std::mutex          lookupMutex;
 
   protected:
     mutable FileScanner   scanner;            //!< Scanner instance for reading this file
@@ -109,6 +129,23 @@ namespace osmscout {
                     const TypeInfoSet& types,
                     std::vector<FileOffset>& offsets,
                     TypeInfoSet& loadedTypes) const;
+
+    /**
+     * The number of entries this index carries; the index file holds one entry per type it
+     * indexed.
+     */
+    size_t GetEntryCount() const
+    {
+      return typeData.size();
+    }
+
+    /**
+     * The number of entries the last lookup examined (diagnostic for tests).
+     */
+    size_t GetExaminedEntryCount() const
+    {
+      return examinedEntryCount.load(std::memory_order_relaxed);
+    }
   };
 }
 
