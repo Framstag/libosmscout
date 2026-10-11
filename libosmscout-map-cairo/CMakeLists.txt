@@ -24,6 +24,17 @@ osmscout_library_project(
 )
 target_include_directories(OSMScoutMapCairo INTERFACE ${CAIRO_INCLUDE_DIRS})
 
+# A configured font file is drawn and measured as the face it holds: loaded
+# directly where the backend has no text stack to hand it to, and registered
+# with the font configuration where a text stack cannot be handed a file
+if(TARGET Freetype::Freetype)
+	target_link_libraries(OSMScoutMapCairo Freetype::Freetype)
+endif()
+
+if(TARGET Fontconfig::Fontconfig)
+	target_link_libraries(OSMScoutMapCairo Fontconfig::Fontconfig)
+endif()
+
 if(PANGOCAIRO_FOUND)
   target_include_directories(OSMScoutMapCairo PUBLIC ${PANGO_INCLUDE_DIRS})
   target_link_libraries(OSMScoutMapCairo ${PANGO_LIBRARIES})
