@@ -386,15 +386,16 @@ TEST_CASE("Defined but unreferenced types add no build work","[StyleConfigLookup
   const auto smallTypes=MakeTypes();
   const auto largeTypes=MakeTypes(50);
 
-  auto       small=LoadStyleSheet(smallTypes.typeConfig,
-                                  WriteStyleSheet("StyleConfigLookupCostScalingSmall.oss",
-                                                  FillAndTextStyleSheet()));
-  auto large=LoadStyleSheet(largeTypes.typeConfig,
-                            WriteStyleSheet("StyleConfigLookupCostScalingLarge.oss",
-                                            FillAndTextStyleSheet()));
+  // `small` is a macro of the Windows SDK headers, so the loaded sheets carry their own names
+  auto smallSheet=LoadStyleSheet(smallTypes.typeConfig,
+                                 WriteStyleSheet("StyleConfigLookupCostScalingSmall.oss",
+                                                 FillAndTextStyleSheet()));
+  auto largeSheet=LoadStyleSheet(largeTypes.typeConfig,
+                                 WriteStyleSheet("StyleConfigLookupCostScalingLarge.oss",
+                                                 FillAndTextStyleSheet()));
 
-  const auto & smallDiagnostics=small->GetBuildDiagnostics();
-  const auto & largeDiagnostics=large->GetBuildDiagnostics();
+  const auto & smallDiagnostics=smallSheet->GetBuildDiagnostics();
+  const auto & largeDiagnostics=largeSheet->GetBuildDiagnostics();
 
   INFO("small type set: slots " << smallDiagnostics.preparedSlots
                                 << ", evaluations " << smallDiagnostics.typeConditionEvaluations
