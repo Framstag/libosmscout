@@ -1,4 +1,5 @@
 osmscoutmapopenglSrc = [
+            'src/osmscoutmapopengl/AreaVisibility.cpp',
             'src/osmscoutmapopengl/MapPainterOpenGL.cpp',
             'src/osmscoutmapopengl/Triangulate.cpp',
             'src/osmscoutmapopengl/PNGLoaderOpenGL.cpp',

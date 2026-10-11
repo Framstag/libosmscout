@@ -175,6 +175,8 @@ if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
+	osmscout_test_project(NAME OptimizeAreaWayIdsTest SOURCES src/OptimizeAreaWayIdsTest.cpp TARGET OSMScout::Import)
+
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
 
 	# The basemap step needs a GNU userland (md5sum, GNU coreutils); it reports
@@ -262,6 +264,23 @@ osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
 #---- SearchScope
 osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RoutingProgressThrottle
+osmscout_test_project(NAME RoutingProgressThrottleTest SOURCES src/RoutingProgressThrottleTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
+#---- FramePixelLayout
+# The JNI render entry points hand the frame to two consumers that read different layouts
+# (Bitmap.setPixels reads 0xAARRGGBB words, Bitmap.copyPixelsFromBuffer reads the bitmap's own
+# byte order). Writing one layout into the other destination is a red/blue channel swap, so the
+# helper is unit-tested here rather than only covered by the Kotlin-side seam tests, which go
+# through a fake client and cannot see a byte order at all.
+osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
+#---- RouteStepTime
+osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
+#---- RouteLength
+osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
@@ -305,6 +324,20 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
 	endforeach()
 else()
     message("Skip OSTAndOSS test, libosmscout-map is missing.")
+endif()
+
+#---- TileDataConversionTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+	osmscout_test_project(NAME TileDataConversionTest SOURCES src/TileDataConversionTest.cpp src/TestAllocationCounter.cpp TARGET OSMScout::OSMScout OSMScout::Map Catch2::Catch2WithMain)
+	set_tests_properties(TileDataConversionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
+	# The comparison holds the previous conversion as its baseline and measures durations, so it is a
+	# performance test: it is excluded from the sanitizer configuration the same way PerformanceTest is
+	# (ctest --exclude-regex "PerformanceTest" matches this name as well).
+	osmscout_test_project(NAME TileDataConversionPerformanceTest SOURCES src/TileDataConversionPerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map Catch2::Catch2WithMain)
+	set_tests_properties(TileDataConversionPerformanceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+else()
+    message("Skip TileDataConversionTest, libosmscout-map is missing.")
 endif()
 
 #---- PerformanceTest
@@ -544,6 +577,31 @@ else()
   message("Skip MapPainterAreaVisibilityCull test, libosmscout-map is missing.")
 endif()
 
+#---- OpenGLAreaVisibilityTest
+#
+# The decision of the OpenGL backend's area step is a free function, but the test needs a GL link to
+# reach it, so it is registered under the same condition as the OpenGL driver of PerformanceTest.
+if(${OSMSCOUT_BUILD_MAP_OPENGL} AND TARGET OSMScout::MapOpenGL AND TARGET glfw)
+  osmscout_test_project(NAME OpenGLAreaVisibilityTest SOURCES src/OpenGLAreaVisibilityTest.cpp TARGET OSMScout::MapOpenGL glfw)
+  # The one case that needs a painter takes the bundled font file and the shader directory of the
+  # OpenGL backend, the same resources the OpenGL driver of PerformanceTest is started with.
+  target_compile_definitions(OpenGLAreaVisibilityTest PRIVATE
+    OPENGL_TEST_FONT_FILE="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"
+    OPENGL_TEST_SHADER_DIR="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/shaders")
+else()
+  message("Skip OpenGLAreaVisibilityTest test, libosmscout-map-opengl is missing.")
+endif()
+
+#---- PolygonTriangulationTest
+#
+# The triangulation the OpenGL backend uses makes no GL call itself, but the test links the OpenGL
+# library to reach it, so it is registered under the same condition as that backend's other tests.
+if(${OSMSCOUT_BUILD_MAP_OPENGL} AND TARGET OSMScout::MapOpenGL)
+  osmscout_test_project(NAME PolygonTriangulationTest SOURCES src/PolygonTriangulationTest.cpp TARGET OSMScout::MapOpenGL)
+else()
+  message("Skip PolygonTriangulationTest, libosmscout-map-opengl is missing.")
+endif()
+
 #---- StyleConfigVisibilityBoundsTest
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME StyleConfigVisibilityBoundsTest SOURCES src/StyleConfigVisibilityBoundsTest.cpp TARGET OSMScout::Map)
@@ -563,6 +621,13 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME MapPainterPointObjectCullingTest SOURCES src/MapPainterPointObjectCullingTest.cpp TARGET OSMScout::Map)
 else()
   message("Skip MapPainterPointObjectCulling test, libosmscout-map is missing.")
+endif()
+
+#---- MapPainterIconSymbolPreferenceTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME MapPainterIconSymbolPreferenceTest SOURCES src/MapPainterIconSymbolPreferenceTest.cpp TARGET OSMScout::Map)
+else()
+  message("Skip MapPainterIconSymbolPreference test, libosmscout-map is missing.")
 endif()
 
 #---- MapPainterLabelCullingTest

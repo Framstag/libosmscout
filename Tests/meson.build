@@ -112,8 +112,12 @@ TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
              install: true,
              install_dir: testInstallDir)
 
+# A performance test that runs on a loaded machine: on the coverage build of a slow CI runner the
+# default timeout of 30 seconds is not enough (measured: 7 s on an idle runner, more than 30 s on a
+# loaded one).
 test('Check type resolution performance', TypeResolutionPerformanceTest,
-     args: [meson.current_source_dir() + '/../stylesheets/map.ost'])
+     args: [meson.current_source_dir() + '/../stylesheets/map.ost'],
+     timeout: 120)
 
 AsyncProcessingTest =  executable('AsyncProcessingTest',
              'src/AsyncProcessingTest.cpp',
@@ -576,6 +580,37 @@ foreach stylesheet : stylesheets
                meson.current_source_dir() + '/../stylesheets/' + stylesheet])
 endforeach
 
+TileDataConversionTest = executable('TileDataConversionTest',
+             ['src/TileDataConversionTest.cpp', 'src/TestAllocationCounter.cpp'],
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check tile data conversion', TileDataConversionTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+# Compares the conversion with the conversion it replaces, so it measures durations and is a
+# performance test: the sanitizer job excludes the tests whose name contains 'PerformanceTest'.
+TileDataConversionPerformanceTest = executable('TileDataConversionPerformanceTest',
+             'src/TileDataConversionPerformanceTest.cpp',
+             include_directories: [testIncDir, osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+# The comparison is not registered in a build instrumented for coverage. The instrumentation slows
+# the conversion under test - it lives in libosmscout-map - far more than the hash map baseline it is
+# compared with - that one lives in the standard library and is not instrumented - so the comparison
+# reports the instrumentation instead of the conversion (measured in the coverage build of the sonar
+# job: a share of 4.0 to 5.8 instead of the expected well below one).
+if not get_option('b_coverage')
+  test('Check tile data conversion performance', TileDataConversionPerformanceTest,
+       env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+endif
+
 if buildMapCairo or buildMapQt or buildMapAgg or buildMapOpenGL
   includes = [osmscoutIncDir, osmscoutmapIncDir]
   deps = [mathDep, openmpDep]
@@ -804,6 +839,42 @@ SearchScopeTest = executable('SearchScopeTest',
 
 test('Check search scope', SearchScopeTest)
 
+RoutingProgressThrottleTest = executable('RoutingProgressThrottleTest',
+             'src/RoutingProgressThrottleTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check routing progress throttle', RoutingProgressThrottleTest)
+
+FramePixelLayoutTest = executable('FramePixelLayoutTest',
+             'src/FramePixelLayoutTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check frame pixel layout', FramePixelLayoutTest)
+
+RouteStepTimeTest = executable('RouteStepTimeTest',
+             'src/RouteStepTimeTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route step time', RouteStepTimeTest)
+
+RouteLengthTest = executable('RouteLengthTest',
+             'src/RouteLengthTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route length', RouteLengthTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
@@ -982,6 +1053,16 @@ MapPainterLabelCullingTest = executable('MapPainterLabelCullingTest',
 
 test('Check MapPainterLabelCulling compilation', MapPainterLabelCullingTest)
 
+MapPainterIconSymbolPreferenceTest = executable('MapPainterIconSymbolPreferenceTest',
+                               'src/MapPainterIconSymbolPreferenceTest.cpp',
+                               include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
+                               dependencies: [mathDep, openmpDep, catch2MainDep],
+                               link_with: [osmscout, osmscoutmap],
+                               install: true,
+                               install_dir: testInstallDir)
+
+test('Check MapPainterIconSymbolPreference compilation', MapPainterIconSymbolPreferenceTest)
+
 MapPainterLabelReuseTest = executable('MapPainterLabelReuseTest',
                                'src/MapPainterLabelReuseTest.cpp',
                                include_directories: [testIncDir, osmscoutIncDir, osmscoutmapIncDir],
@@ -1035,11 +1116,15 @@ ThreadedDatabaseTest = executable('ThreadedDatabaseTest',
              install: true,
              install_dir: testInstallDir)
 
+# Drives the database from 100 threads, so it is slow on a loaded machine: on the coverage build of
+# a CI runner the default timeout of 30 seconds is not enough (measured: 17.5 s on an idle runner,
+# more than 30 s on a loaded one).
 test('Check threaded database', ThreadedDatabaseTest, args : [
         '--threads', '100',
         '--iterations', '1000',
         meson.current_source_dir() + '/data/testregion',
-        meson.current_source_dir() + '/../stylesheets/standard.oss'])
+        meson.current_source_dir() + '/../stylesheets/standard.oss'],
+        timeout: 120)
 
 ThreadTest = executable('ThreadTest',
                     'src/ThreadTest.cpp',
@@ -1095,6 +1180,16 @@ if buildImport
                install_dir: testInstallDir)
 
   test('Check water index import code', WaterIndexTest)
+
+  OptimizeAreaWayIdsTest = executable('OptimizeAreaWayIdsTest',
+               'src/OptimizeAreaWayIdsTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout, osmscoutimport],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check the area and way id optimization', OptimizeAreaWayIdsTest)
 
   JsonWriterTest = executable('JsonWriterTest',
                ['src/JsonWriterTest.cpp'],
@@ -1203,6 +1298,40 @@ if buildMapCairo
                install_dir: testInstallDir)
 
   test('Check MapPainterShield compilation', MapPainterShieldTest)
+endif
+
+if buildMapOpenGL and glfwDep.found()
+  # The decision is a free function, but the test needs the GLFW link of the OpenGL backend to reach
+  # it, so it is registered under the same condition as the OpenGL driver of PerformanceTest. GLFW is
+  # the one dependency the OpenGL backend itself does not require, so a configuration without it must
+  # skip the test instead of compiling it against a header that is only on the default include path.
+  OpenGLAreaVisibilityTest = executable('OpenGLAreaVisibilityTest',
+               'src/OpenGLAreaVisibilityTest.cpp',
+               include_directories: [testIncDir, osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, openGLDep, glfwDep, glmDep, glewDep, pngDep, ftDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
+               # The one case that needs a painter takes the bundled font file and the shader
+               # directory of the OpenGL backend.
+               cpp_args: ['-DOPENGL_TEST_FONT_FILE="' + meson.project_source_root() + '/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf"',
+                          '-DOPENGL_TEST_SHADER_DIR="' + meson.project_source_root() + '/libosmscout-map-opengl/data/shaders"'],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check OpenGL area visibility', OpenGLAreaVisibilityTest)
+endif
+
+if buildMapOpenGL
+  # The triangulation the OpenGL backend uses makes no GL call itself, but the test links the OpenGL
+  # library to reach it. Unlike the visibility test this one needs no GLFW and no GL context.
+  PolygonTriangulationTest = executable('PolygonTriangulationTest',
+               'src/PolygonTriangulationTest.cpp',
+               include_directories: [testIncDir, osmscoutmapopenglIncDir, osmscoutmapIncDir, osmscoutIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep, openGLDep, glmDep, glewDep],
+               link_with: [osmscout, osmscoutmap, osmscoutmapopengl],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check polygon triangulation', PolygonTriangulationTest)
 endif
 
 if buildMapQt

@@ -20,8 +20,18 @@
 #include <osmscoutclient/DatabasePathRegistry.h>
 
 #include <algorithm>
+#include <system_error>
 
 namespace osmscout {
+
+bool IsOpenableDatabaseDirectory(const std::filesystem::path &path) noexcept
+{
+  // The error-code overload never throws: a permission failure, an unmounted
+  // path or any other filesystem error is a "no" for this question.
+  std::error_code error;
+
+  return std::filesystem::is_directory(path, error);
+}
 
 bool DatabasePathRegistry::Register(const std::filesystem::path &path)
 {
@@ -37,6 +47,17 @@ bool DatabasePathRegistry::Register(const std::filesystem::path &path)
 
   // Registered either way: a path already in the set stays in it.
   return true;
+}
+
+bool DatabasePathRegistry::RegisterOpenable(const std::filesystem::path &path)
+{
+  // Decided before the lock is taken, so a slow filesystem cannot block another
+  // opener or the database thread.
+  if (!IsOpenableDatabaseDirectory(path)) {
+    return false;
+  }
+
+  return Register(path);
 }
 
 DatabasePathRegistration DatabasePathRegistry::RegisterAll(const std::vector<std::filesystem::path> &paths)

@@ -122,6 +122,17 @@ Notes:
 - PerformanceTest is excluded because UI libraries leak on exit; run separately with `ASAN_OPTIONS=detect_leaks=0`
 - Works with both GCC and Clang
 - CI runs this on every PR (see `.github/workflows/sanitize_on_ubuntu_24_04.yml`)
+- **A sanitizer runtime has to be the only allocator interposer in the binaries of this build.** The
+  configuration therefore turns the heap profiler (gperftools' tcmalloc) off when it sees a sanitizer
+  in the flags; the configure output names the profiler and the reason. Two interposers in one binary
+  make each of them free the other's pointers, which a hand run of the performance tool reports as
+  `Attempt to free invalid pointer` of tcmalloc with the offending free in the first library that frees
+  such a pointer - a false diagnosis, not a defect of the program. Check a configuration with
+  `ldd build-asan/Tests/PerformanceTest* | grep tcmalloc` (no output is the wanted result); a sanitizer
+  enabled through a toolchain file or a compiler wrapper is not detected, so check it by hand there.
+  Pass `-DPERF_TEST_GPERFTOOLS_USAGE=ON` only deliberately. See
+  `openspec/changes/fix-sanitizer-allocator-conflict`, and note that an existing build directory keeps
+  its cached option until `cmake -U PERF_TEST_GPERFTOOLS_USAGE <dir>` is run.
 
 ### Dependencies
 - **Conan**: `conanfile.txt` (loaded automatically when `conanbuildinfo.cmake` exists)

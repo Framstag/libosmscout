@@ -62,6 +62,31 @@ namespace osmscout {
 
     GLuint projectionShader=0;
 
+  private:
+    /**
+     * Areas of the last ProcessAreas call, merged from the areas and the POI areas of the data and
+     * sorted by the size of their bounding box, which is the order they are drawn in. The list is a
+     * member so the step reuses its capacity across calls instead of allocating for every loaded
+     * area; it is cleared at the start of every ProcessAreas call.
+     *
+     * Like the render buffers of this painter, the list assumes that one painter is driven by one
+     * thread per frame.
+     */
+    std::vector<AreaRef> sortedAreas;
+
+    /**
+     * Number of rings the visibility decision of ProcessAreas was applied to, since the start of
+     * that call. Diagnostic for tests.
+     */
+    size_t examinedRingCount=0;
+
+    /**
+     * Number of rings the last ProcessAreas call kept and whose geometry it went on to prepare. The
+     * counter exists so a test can observe that the per-ring work follows the rings the view keeps;
+     * it is reset at the start of every ProcessAreas call.
+     */
+    size_t keptRingCount=0;
+
     OpenGLMapData<GL_RGBA, 4> areaRenderer;
     OpenGLMapData<GL_RGBA, 4> groundTileRenderer;
     OpenGLMapData<GL_RGBA, 4> groundRenderer;
@@ -139,8 +164,6 @@ namespace osmscout {
                        double z = 0, float dashsize = 0.0, float length = 1,
                        osmscout::Color gapcolor = osmscout::Color(1.0, 1.0, 1.0, 1.0));
 
-    bool IsVisibleArea(const Projection &projection, const GeoBox &boundingBox, double pixelOffset);
-
   public:
 
     MapPainterOpenGL(int width, int height, double dpi,
@@ -152,6 +175,26 @@ namespace osmscout {
     bool IsInitialized() const
     {
       return initialized;
+    }
+
+    /**
+     * Number of rings the visibility decision of the last ProcessAreas call was applied to. The
+     * counter exists so a test can observe that a ring the decision discards costs no per-ring
+     * geometry work; it is reset at the start of every ProcessAreas call.
+     */
+    size_t GetExaminedRingCount() const
+    {
+      return examinedRingCount;
+    }
+
+    /**
+     * Number of rings the last ProcessAreas call kept and prepared geometry for. The counter exists
+     * so a test can observe that the per-ring work follows the rings the view keeps; it is reset at
+     * the start of every ProcessAreas call.
+     */
+    size_t GetKeptRingCount() const
+    {
+      return keptRingCount;
     }
 
     /**
