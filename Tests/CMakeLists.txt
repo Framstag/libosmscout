@@ -175,6 +175,8 @@ if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	osmscout_test_project(NAME DbJsonWriterTest SOURCES src/DbJsonWriterTest.cpp TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
+	osmscout_test_project(NAME OptimizeAreaWayIdsTest SOURCES src/OptimizeAreaWayIdsTest.cpp TARGET OSMScout::Import)
+
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
 
 	# The basemap step needs a GNU userland (md5sum, GNU coreutils); it reports
@@ -324,24 +326,24 @@ else()
     message("Skip OSTAndOSS test, libosmscout-map is missing.")
 endif()
 
+#---- TileDataConversionTest
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+	osmscout_test_project(NAME TileDataConversionTest SOURCES src/TileDataConversionTest.cpp src/TestAllocationCounter.cpp TARGET OSMScout::OSMScout OSMScout::Map Catch2::Catch2WithMain)
+	set_tests_properties(TileDataConversionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
+	# The comparison holds the previous conversion as its baseline and measures durations, so it is a
+	# performance test: it is excluded from the sanitizer configuration the same way PerformanceTest is
+	# (ctest --exclude-regex "PerformanceTest" matches this name as well).
+	osmscout_test_project(NAME TileDataConversionPerformanceTest SOURCES src/TileDataConversionPerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map Catch2::Catch2WithMain)
+	set_tests_properties(TileDataConversionPerformanceTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+else()
+    message("Skip TileDataConversionTest, libosmscout-map is missing.")
+endif()
+
 #---- PerformanceTest
 if(${OSMSCOUT_BUILD_MAP})
 	osmscout_demo_project(NAME PerformanceTest SOURCES src/PerformanceTest.cpp TARGET OSMScout::OSMScout OSMScout::Map)
 	target_include_directories(PerformanceTest PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/PerformanceTest)
-
-	# The Cairo and Qt drivers resolve a font by family name, so the test takes the
-	# family of the font file it is started with (see Tests/include/TestFontSupport.h)
-	if(HAVE_LIB_FREETYPE)
-		target_link_libraries(PerformanceTest Freetype::Freetype)
-		target_include_directories(PerformanceTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
-		target_compile_definitions(PerformanceTest PRIVATE HAVE_LIB_FREETYPE)
-
-		find_package(Fontconfig QUIET)
-		if(TARGET Fontconfig::Fontconfig)
-			target_link_libraries(PerformanceTest Fontconfig::Fontconfig)
-			target_compile_definitions(PerformanceTest PRIVATE HAVE_LIB_FONTCONFIG)
-		endif()
-	endif()
 
 	set(PERFORMANCE_TEST_DRIVERS noop none)
 
@@ -470,12 +472,27 @@ else()
   message("Skip SymbolRendererSVG test, libosmscout-map-svg is missing.")
 endif()
 
+#---- MapPainterAreaBorderRender
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map AND TARGET OSMScout::MapSVG)
+  osmscout_test_project(NAME MapPainterAreaBorderRenderTest SOURCES src/MapPainterAreaBorderRenderTest.cpp TARGET OSMScout::Map OSMScout::MapSVG)
+else()
+  message("Skip MapPainterAreaBorderRender test, libosmscout-map-svg is missing.")
+endif()
+
 #---- StyleConfigSymbols
 if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   osmscout_test_project(NAME StyleConfigSymbolsTest SOURCES src/StyleConfigSymbolsTest.cpp TARGET OSMScout::Map)
   set_tests_properties(StyleConfigSymbolsTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 else()
   message("Skip StyleConfigSymbols test, libosmscout-map is missing.")
+endif()
+
+#---- StyleConfigLookupCost
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME StyleConfigLookupCostTest SOURCES src/StyleConfigLookupCostTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(StyleConfigLookupCostTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip StyleConfigLookupCost test, libosmscout-map is missing.")
 endif()
 
 #---- RoadStyleColors
@@ -492,6 +509,14 @@ if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
   set_tests_properties(PatternLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 else()
   message("Skip PatternLookup test, libosmscout-map is missing.")
+endif()
+
+#---- FontNameResolution
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME FontNameResolutionTest SOURCES src/FontNameResolutionTest.cpp TARGET OSMScout::Map)
+  set_tests_properties(FontNameResolutionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+else()
+  message("Skip FontNameResolution test, libosmscout-map is missing.")
 endif()
 
 #---- RouteStyleColors
@@ -535,21 +560,10 @@ endif()
 if(${OSMSCOUT_BUILD_MAP_CAIRO})
   osmscout_test_project(NAME MapPainterShieldTest SOURCES src/MapPainterShieldTest.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapCairo Catch2::Catch2WithMain)
 
-  # The test takes the family of the bundled font file and registers that file
-  # (see Tests/include/TestFontSupport.h), so that it measures the font the
-  # repository ships instead of whatever font the host provides
-  if(HAVE_LIB_FREETYPE)
-    target_link_libraries(MapPainterShieldTest Freetype::Freetype)
-    target_include_directories(MapPainterShieldTest PRIVATE ${PROJECT_SOURCE_DIR}/Demos/include)
-    target_compile_definitions(MapPainterShieldTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf" HAVE_LIB_FREETYPE)
-
-    find_package(Fontconfig QUIET)
-    if(TARGET Fontconfig::Fontconfig)
-      # must stay plain: osmscout_test_project links via the plain signature
-      target_link_libraries(MapPainterShieldTest Fontconfig::Fontconfig)
-      target_compile_definitions(MapPainterShieldTest PRIVATE HAVE_LIB_FONTCONFIG)
-    endif()
-  endif()
+  # The test configures the painter with the font file the repository ships and
+  # prepares nothing itself: resolving that file to the face it holds is the job
+  # of the backend
+  target_compile_definitions(MapPainterShieldTest PRIVATE TEXT_METRICS_FONT_PATH="${PROJECT_SOURCE_DIR}/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf")
 endif()
 
 #---- MapPainterShieldQtTest (Qt DLL loader issue under Windows CMake CI: SKIPTEST, like TextMetricsQtTest)

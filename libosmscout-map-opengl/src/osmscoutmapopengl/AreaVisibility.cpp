@@ -27,8 +27,8 @@ namespace osmscout {
 
   bool IsAreaRingVisible(const Projection& projection,
                          const GeoBox& boundingBox,
-                         // NOLINTNEXTLINE(bugprone-easily-swappable-parameters) the units are part of the names
-                         double borderWidthMM,
+                         // NOLINTNEXTLINE(bugprone-easily-swappable-parameters) the tolerance is in pixels, the smallest dimension in millimetres
+                         double tolerancePixel,
                          double minDimensionMM)
   {
     ScreenBox areaScreenBox;
@@ -38,12 +38,9 @@ namespace osmscout {
       return false;
     }
 
-    // The style sheet declares the border width in millimetres, the decision enlarges the screen box
-    // by pixels, so the tolerance has to be converted with the frame's projection. Half of the
-    // declared width is how far the border a style sheet declares reaches beyond the ring.
-    constexpr double borderReachFactor=0.5;
-
-    areaScreenBox=areaScreenBox.Resize(projection.ConvertWidthToPixel(borderWidthMM*borderReachFactor));
+    // The tolerance is the reach of the border the ring draws, already converted by the caller, so it
+    // enlarges the screen box of the ring directly.
+    areaScreenBox=areaScreenBox.Resize(tolerancePixel);
 
     double areaMinDimension=projection.ConvertWidthToPixel(minDimensionMM);
 

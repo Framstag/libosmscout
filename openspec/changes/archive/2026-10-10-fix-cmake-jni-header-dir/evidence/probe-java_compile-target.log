@@ -1,0 +1,30 @@
+timestamp: 2026-10-10T14:48:20+02:00
+probe: the added 'rm -rf ${JNI_HEADERS_DIR}' command is commented out with a TEMP-REVERT-PROBE marker; the same sentinel construction is repeated
+--- cmake --build build --target java_compile
+--  - StyleEditor:                  OFF
+--  - JavaScout:                    ON
+-- 
+-- demos:                           ON
+--  - heap profiler (Gperftools)    ON
+-- 
+-- bindings:
+--  - Java binding:                 OFF
+--  - C# binding:                   
+-- 
+-- external interfaces:
+--  - MATLAB mex function:          OFF
+-- 
+-- doxygen:                         YES
+-- documentation:                   ON
+-- webpage:                         ON
+-- Configuring done (7.7s)
+-- Generating done (1.1s)
+-- Build files have been written to: /home/tim/projects/libosmscout/build
+[1/2] Compiling Java sources and generating JNI headers
+--- headers after the build
+com_framstag_libosmscout_client_MapDownloadManager.h
+com_framstag_libosmscout_client_NavigationController.h
+com_framstag_libosmscout_client_OSMScoutClientBuilder.h
+com_framstag_libosmscout_client_OSMScoutClient.h
+com_framstag_libosmscout_client_OSMScoutClient_removedMethod.h
+PROBE RED (expected for the right reason): stale sentinel survives while the rm -rf is disabled

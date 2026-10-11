@@ -33,7 +33,9 @@
 
 namespace osmscout {
 
-  class OptimizeAreaWayIdsGenerator CLASS_FINAL : public ImportModule
+  class AreaWayIdReferenceRule;
+
+  class OSMSCOUT_IMPORT_API OptimizeAreaWayIdsGenerator CLASS_FINAL : public ImportModule
   {
   public:
     static const char* const AREAS3_TMP;
@@ -43,14 +45,13 @@ namespace osmscout {
     bool ScanAreaIds(const ImportParameter& parameter,
                      Progress& progress,
                      const TypeConfig& typeConfig,
-                     std::unordered_set<Id>& usedIdSet,
-                     std::unordered_set<Id>& usedIdAtLeastTwiceSet);
+                     AreaWayIdReferenceRule& rule);
 
     bool ScanWayIds(const ImportParameter& parameter,
                     Progress& progress,
                     const TypeConfig& typeConfig,
-                    std::unordered_set<Id>& usedIdSet,
-                    std::unordered_set<Id>& usedIdAtLeastTwiceSet);
+                    AreaWayIdReferenceRule& rule);
+
   public:
     void GetDescription(const ImportParameter& parameter,
                         ImportModuleDescription& description) const override;

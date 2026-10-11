@@ -21,6 +21,7 @@
 #include <utility>
 #include <iostream>
 
+#include <osmscoutmap/AreaBorderReach.h>
 #include <osmscoutmap/MapPainter.h>
 
 #include <osmscoutmapopengl/AreaVisibility.h>
@@ -258,8 +259,11 @@ namespace osmscout {
 
           // The visibility decision comes before any per-ring geometry work: a ring the view cannot
           // show costs neither the copy of its nodes nor the removal of the duplicates among them.
-          // The tolerance is half of the width of the ring's own border style, so the style has to be
-          // resolved first.
+          // The tolerance is the reach of every border style the ring resolves, which the shared
+          // helper computes from the same styles the drawing below reads; the front style alone
+          // would leave the tolerance of a ring whose border is drawn at an offset at zero.
+          const double   tolerancePixel=osmscout::GetAreaRingTolerancePixel(loadProjection,borderStyles);
+
           BorderStyleRef borderStyle;
           size_t borderStyleIndex = 0;
 
@@ -276,7 +280,7 @@ namespace osmscout {
 
           if (!IsAreaRingVisible(loadProjection,
                                  ring.GetBoundingBox(),
-                                 borderWidth,
+                                 tolerancePixel,
                                  parameter.GetAreaMinDimensionMM())) {
             continue;
           }
@@ -310,60 +314,60 @@ namespace osmscout {
             hasClippings = 1;
           }
 
-          if (!fillStyle) {
-            continue;
-          }
+          // A ring the loaded style sheet draws by a border only contributes its border: the fill
+          // path below needs the resolved fill style, the border loop below that does not.
+          keptRingCount++;
 
-          Color c = fillStyle->GetFillColor();
+          if (fillStyle) {
+            Color c = fillStyle->GetFillColor();
 
-          // The triangulated geometry of this ring, filled by the triangulation below
-          std::vector<GLfloat> points;
+            // The triangulated geometry of this ring, filled by the triangulation below
+            std::vector<GLfloat> points;
 
-          try {
-            keptRingCount++;
-
-            if (hasClippings == 1) {
-              for (auto &ring: r) {
-                for (int i = ring.nodes.size() - 1; i >= 0; i--) {
-                  for (int j = 0; j < i; j++) {
-                    if (fabs(ring.nodes[i].GetLat() - ring.nodes[j].GetLat()) < 0.000000001 &&
-                        fabs(ring.nodes[i].GetLon() - ring.nodes[j].GetLon()) < 0.0000000001) {
-                      ring.nodes.erase(ring.nodes.begin() + i);
+            try {
+              if (hasClippings == 1) {
+                for (auto &ring: r) {
+                  for (int i = ring.nodes.size() - 1; i >= 0; i--) {
+                    for (int j = 0; j < i; j++) {
+                      if (fabs(ring.nodes[i].GetLat() - ring.nodes[j].GetLat()) < 0.000000001 &&
+                          fabs(ring.nodes[i].GetLon() - ring.nodes[j].GetLon()) < 0.0000000001) {
+                        ring.nodes.erase(ring.nodes.begin() + i);
+                      }
                     }
                   }
                 }
-              }
 
-              std::vector<std::vector<osmscout::Point>> polygons;
-              polygons.push_back(p);
-              for (const auto &ring: r) {
-                if (ring.nodes.size() >= 3) {
-                  polygons.push_back(ring.nodes);
+                std::vector<std::vector<osmscout::Point>> polygons;
+                polygons.push_back(p);
+                for (const auto &ring: r) {
+                  if (ring.nodes.size() >= 3) {
+                    polygons.push_back(ring.nodes);
+                  }
                 }
-              }
-              points = osmscout::Triangulate::TriangulateWithHoles(polygons);
-            } else {
-              points = osmscout::Triangulate::TriangulatePolygon(p);
-            }
-          } catch (const std::runtime_error &e) {
-            log.Warn() << "Skip area " << area->GetFileOffset() << ", triangulation failed: " << e.what();
-            continue;
-          }
-
-          for (size_t t = 0; t < points.size(); t++) {
-            if (t % 2 == 0) {
-              areaRenderer.AddNewVertex(points[t]);
-            } else {
-              areaRenderer.AddNewVertex(points[t]);
-              areaRenderer.AddNewVertex(c.GetR());
-              areaRenderer.AddNewVertex(c.GetG());
-              areaRenderer.AddNewVertex(c.GetB());
-              areaRenderer.AddNewVertex(c.GetA());
-
-              if (areaRenderer.GetNumOfVertices() <= 6) {
-                areaRenderer.AddNewElement(0);
+                points = osmscout::Triangulate::TriangulateWithHoles(polygons);
               } else {
-                areaRenderer.AddNewElement(areaRenderer.GetVerticesNumber() - 1);
+                points = osmscout::Triangulate::TriangulatePolygon(p);
+              }
+            } catch (const std::runtime_error &e) {
+              log.Warn() << "Skip area " << area->GetFileOffset() << ", triangulation failed: " << e.what();
+              continue;
+            }
+
+            for (size_t t = 0; t < points.size(); t++) {
+              if (t % 2 == 0) {
+                areaRenderer.AddNewVertex(points[t]);
+              } else {
+                areaRenderer.AddNewVertex(points[t]);
+                areaRenderer.AddNewVertex(c.GetR());
+                areaRenderer.AddNewVertex(c.GetG());
+                areaRenderer.AddNewVertex(c.GetB());
+                areaRenderer.AddNewVertex(c.GetA());
+
+                if (areaRenderer.GetNumOfVertices() <= 6) {
+                  areaRenderer.AddNewElement(0);
+                } else {
+                  areaRenderer.AddNewElement(areaRenderer.GetVerticesNumber() - 1);
+                }
               }
             }
           }
@@ -422,7 +426,6 @@ namespace osmscout {
               wayRenderer.AddNewElement(num + 5);
             }
           }
-
         }
         ringId++;
       }
@@ -1252,5 +1255,4 @@ namespace osmscout {
     textRenderer.SetView(lookX, lookY);
     textRenderer.Draw();
   }
-
 }

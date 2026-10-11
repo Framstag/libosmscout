@@ -195,6 +195,11 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutimport => osmscoutimport.private",
     "osmscoutimport => osmscoutimport.pbf",
 
+    // The private part of the import package. Its headers describe the import library's own
+    // helpers, so they depend on the same core packages the public import headers depend on.
+    "osmscoutimport.private => osmscout", // Id, Point
+    "osmscoutimport.private => osmscoutimport", // ImportImportExport.h
+
     "osmscoutmap.oss => osmscout.system",
     "osmscoutmap.oss => osmscout.log",
     "osmscoutmap.oss => osmscout.util",

@@ -19,8 +19,11 @@
 
 #include <osmscoutmap/MapService.h>
 
-#include <algorithm>
+#include <cstddef>
+#include <functional>
 #include <future>
+#include <list>
+#include <vector>
 
 #include <osmscout/system/Assert.h>
 #include <osmscout/system/Math.h>
@@ -30,6 +33,228 @@
 #include <osmscout/log/Logger.h>
 
 namespace osmscout {
+
+  namespace {
+
+    /**
+     * Hash set of file offsets with linear probing.
+     *
+     * The objects of a tile are looked up in the set once per object reference, and a view repeats an
+     * object as often as the tiles of the tile list carry it, so the set is a flat table rather than a
+     * node-based set: it allocates its table once and doubles it when it fills up, instead of
+     * allocating a node per object and rehashing from an empty table. A slot holds the stored offset
+     * plus one, so that zero marks a free slot; an object is never stored at offset zero, because the
+     * data files start with a header.
+     */
+    class FileOffsetSet
+    {
+    private:
+      static constexpr size_t kInitialSlots=1024;
+
+      std::vector<FileOffset> table;
+      size_t                  count{0};
+
+      static size_t Hash(FileOffset offset)
+      {
+        // Knuth's multiplicative hash: the offsets of a data file are sorted and close to each other,
+        // so the low bits alone would collide.
+        return size_t((offset*11400714819323198485ull)>>40);
+      }
+
+      void Grow()
+      {
+        std::vector<FileOffset> grown(table.size()*2,0);
+
+        for (const auto& entry : table) {
+          if (entry==0) {
+            continue;
+          }
+
+          size_t slot=Hash(entry-1)&(grown.size()-1);
+
+          while (grown[slot]!=0) {
+            slot=(slot+1)&(grown.size()-1);
+          }
+
+          grown[slot]=entry;
+        }
+
+        table.swap(grown);
+      }
+
+    public:
+      FileOffsetSet()
+      : table(kInitialSlots,0)
+      {
+        // no code
+      }
+
+      /**
+       * Insert an offset. Return true if it was not in the set yet.
+       */
+      bool Insert(FileOffset offset)
+      {
+        if (count*4>=table.size()*3) {
+          Grow();
+        }
+
+        size_t slot=Hash(offset)&(table.size()-1);
+
+        for (;;) {
+          FileOffset entry=table[slot];
+
+          if (entry==0) {
+            table[slot]=offset+1;
+            count++;
+
+            return true;
+          }
+
+          if (entry==offset+1) {
+            return false;
+          }
+
+          slot=(slot+1)&(table.size()-1);
+        }
+      }
+    };
+
+    /**
+     * Duration of one phase of a conversion.
+     */
+    struct ConversionPhase
+    {
+      const char* name;
+      double      milliseconds;
+    };
+
+    /**
+     * Durations of the phases of one conversion, one phase per source data file.
+     */
+    struct ConversionTiming
+    {
+      std::vector<ConversionPhase> phases;
+    };
+
+    /**
+     * Report every phase of a conversion that took longer than the threshold, naming the phase.
+     */
+    void ReportSlowConversionPhases(const ConversionTiming& timing,
+                                    double threshold)
+    {
+      for (const auto& phase : timing.phases) {
+        if (phase.milliseconds>threshold) {
+          log.Warn() << "Tile data conversion: phase " << phase.name
+                     << " took " << phase.milliseconds << " ms";
+        }
+      }
+    }
+
+    /**
+     * Convert one source data file of one kind.
+     *
+     * Every object of the tiles is appended to the result on its first sight, so an object that
+     * several tiles carry appears exactly once. The objects seen so far are kept as a set of file
+     * offsets, which identifies an object only within one data file: the plain and the optimized data
+     * of a kind are read from different files and their offsets are independent of each other, so
+     * every source data file gets its own set.
+     *
+     * The order of the result is the order in which the tiles of the given list present their stored
+     * objects, which is reproducible for the same tile list and the same database, and which no
+     * longer depends on the iteration order of an internal container.
+     */
+    template<typename O>
+    void ConvertSource(const std::list<TileRef>& tiles,
+                       const std::function<const TileData<O>&(const TileRef&)>& getData,
+                       const TypeInfoSet* filter,
+                       const char* sourceName,
+                       std::vector<O>& out,
+                       ConversionTiming& timing)
+    {
+      FileOffsetSet seen;
+
+      /**
+       * The state the tile hands its stored objects to. It is captured as one pointer, so that the
+       * function a tile builds for its objects holds a pointer rather than three references and does
+       * not allocate.
+       */
+      struct Sink
+      {
+        std::vector<O>* out;
+        FileOffsetSet*  seen;
+        const TypeInfoSet* filter;
+      };
+
+      Sink sink{&out,&seen,filter};
+
+      StopClock phaseTimer;
+
+      for (const auto& tile : tiles) {
+        getData(tile).CopyData([&sink](const O& object) {
+          if (sink.filter!=nullptr && !sink.filter->IsSet(object->GetType())) {
+            return;
+          }
+
+          if (sink.seen->Insert(object->GetFileOffset())) {
+            sink.out->push_back(object);
+          }
+        });
+      }
+
+      phaseTimer.Stop();
+
+      timing.phases.push_back(ConversionPhase{sourceName,phaseTimer.GetMilliseconds()});
+    }
+
+    /**
+     * Sum of the objects the given kind of the tiles holds. An upper bound for the result of a
+     * conversion of that kind, used to reserve the result once. The bound over-estimates when a tile
+     * list names a tile more than once.
+     */
+    template<typename O>
+    size_t SumDataSize(const std::list<TileRef>& tiles,
+                       const std::function<const TileData<O>&(const TileRef&)>& getData)
+    {
+      size_t sum=0;
+
+      for (const auto& tile : tiles) {
+        sum+=getData(tile).GetDataSize();
+      }
+
+      return sum;
+    }
+
+    const TileNodeData& GetNodeData(const TileRef& tile)
+    {
+      return tile->GetNodeData();
+    }
+
+    const TileWayData& GetWayData(const TileRef& tile)
+    {
+      return tile->GetWayData();
+    }
+
+    const TileWayData& GetOptimizedWayData(const TileRef& tile)
+    {
+      return tile->GetOptimizedWayData();
+    }
+
+    const TileAreaData& GetAreaData(const TileRef& tile)
+    {
+      return tile->GetAreaData();
+    }
+
+    const TileAreaData& GetOptimizedAreaData(const TileRef& tile)
+    {
+      return tile->GetOptimizedAreaData();
+    }
+
+    const TileRouteData& GetRouteData(const TileRef& tile)
+    {
+      return tile->GetRouteData();
+    }
+  }
+
 
   void AreaSearchParameter::SetMaximumAreaLevel(unsigned long maxAreaLevel)
   {
@@ -120,6 +345,16 @@ namespace osmscout {
   /**
    * Set the size of the tile data cache
    */
+  void MapService::SetConversionPhaseWarningThreshold(double milliseconds)
+  {
+    conversionPhaseWarningThreshold.store(milliseconds);
+  }
+
+  double MapService::GetConversionPhaseWarningThreshold() const
+  {
+    return conversionPhaseWarningThreshold.load();
+  }
+
   void MapService::SetCacheSize(size_t cacheSize)
   {
     std::lock_guard<std::mutex> lock(stateMutex);
@@ -1190,180 +1425,77 @@ namespace osmscout {
 
   /**
    * Convert the data hold by the given tiles to the given MapData class instance.
+   *
+   * Every object of the tiles is placed in the result exactly once. The objects are grouped by the
+   * data file they were read from in a fixed order - the objects of `nodes.dat`, `ways.dat`,
+   * `areas.dat` and `routes.dat` first, then the objects of the optimized data files of a kind - and
+   * within a source data file they follow the order in which the tiles present them. An offset only
+   * identifies an object within one data file, so two data files that carry the same offset value
+   * both contribute their object.
+   *
+   * The cost of the conversion follows the objects of the tiles: every stored object is examined
+   * once, on a first sight it is appended, and a repeated sight costs one lookup in the set of the
+   * offsets already seen, so a tile that repeats an object the view already holds does not make the
+   * result grow.
    */
   void MapService::AddTileDataToMapData(std::list<TileRef>& tiles,
                                         MapData& data) const
   {
-    // TODO: Use a set and higher level fill functions
-    std::unordered_map<FileOffset,NodeRef>  nodeMap(10000);
-    std::unordered_map<FileOffset,WayRef>   wayMap(10000);
-    std::unordered_map<FileOffset,AreaRef>  areaMap(10000);
-    std::unordered_map<FileOffset,RouteRef> routeMap(1000);
-    std::unordered_map<FileOffset,WayRef>   optimizedWayMap(10000);
-    std::unordered_map<FileOffset,AreaRef>  optimizedAreaMap(10000);
+    ConversionTiming timing;
 
-    StopClock uniqueTime;
+    size_t nodeCapacity=SumDataSize<NodeRef>(tiles,GetNodeData);
+    size_t wayCapacity=SumDataSize<WayRef>(tiles,GetWayData);
+    size_t optimizedWayCapacity=SumDataSize<WayRef>(tiles,GetOptimizedWayData);
+    size_t areaCapacity=SumDataSize<AreaRef>(tiles,GetAreaData);
+    size_t optimizedAreaCapacity=SumDataSize<AreaRef>(tiles,GetOptimizedAreaData);
+    size_t routeCapacity=SumDataSize<RouteRef>(tiles,GetRouteData);
 
-    for (const auto& tile : tiles) {
-      tile->GetNodeData().CopyData([&nodeMap](const NodeRef& node) {
-        nodeMap[node->GetFileOffset()]=node;
-      });
+    data.nodes.reserve(data.nodes.size()+nodeCapacity);
+    data.ways.reserve(data.ways.size()+wayCapacity+optimizedWayCapacity);
+    data.areas.reserve(data.areas.size()+areaCapacity+optimizedAreaCapacity);
+    data.routes.reserve(data.routes.size()+routeCapacity);
 
-      //---
+    ConvertSource<NodeRef>(tiles,GetNodeData,nullptr,"nodes",data.nodes,timing);
+    ConvertSource<WayRef>(tiles,GetWayData,nullptr,"ways",data.ways,timing);
+    ConvertSource<WayRef>(tiles,GetOptimizedWayData,nullptr,"optimized ways",data.ways,timing);
+    ConvertSource<AreaRef>(tiles,GetAreaData,nullptr,"areas",data.areas,timing);
+    ConvertSource<AreaRef>(tiles,GetOptimizedAreaData,nullptr,"optimized areas",data.areas,timing);
+    ConvertSource<RouteRef>(tiles,GetRouteData,nullptr,"routes",data.routes,timing);
 
-      tile->GetOptimizedWayData().CopyData([&optimizedWayMap](const WayRef& way) {
-        optimizedWayMap[way->GetFileOffset()]=way;
-      });
-
-      tile->GetWayData().CopyData([&wayMap](const WayRef& way) {
-        wayMap[way->GetFileOffset()]=way;
-      });
-
-      //---
-
-      tile->GetOptimizedAreaData().CopyData([&optimizedAreaMap](const AreaRef& area) {
-        optimizedAreaMap[area->GetFileOffset()]=area;
-      });
-
-      tile->GetAreaData().CopyData([&areaMap](const AreaRef& area) {
-        areaMap[area->GetFileOffset()]=area;
-      });
-
-      //---
-      tile->GetRouteData().CopyData([&routeMap](const RouteRef& route) {
-        routeMap[route->GetFileOffset()]=route;
-      });
-    }
-
-    uniqueTime.Stop();
-
-    //std::cout << "Make data unique time: " << uniqueTime.ResultString() << std::endl;
-
-    StopClock copyTime;
-
-    data.nodes.reserve(nodeMap.size());
-    data.ways.reserve(wayMap.size()+optimizedWayMap.size());
-    data.areas.reserve(areaMap.size()+optimizedAreaMap.size());
-    data.routes.reserve(routeMap.size());
-
-    for (const auto& nodeEntry : nodeMap) {
-      data.nodes.push_back(nodeEntry.second);
-    }
-
-    for (const auto& wayEntry : wayMap) {
-      data.ways.push_back(wayEntry.second);
-    }
-
-    for (const auto& wayEntry : optimizedWayMap) {
-      data.ways.push_back(wayEntry.second);
-    }
-
-    for (const auto& areaEntry : areaMap) {
-      data.areas.push_back(areaEntry.second);
-    }
-
-    for (const auto& areaEntry : optimizedAreaMap) {
-      data.areas.push_back(areaEntry.second);
-    }
-
-    for (const auto& routeEntry : routeMap) {
-      data.routes.push_back(routeEntry.second);
-    }
-
-    copyTime.Stop();
-
-    if (copyTime.GetMilliseconds()>20) {
-      log.Warn() << "Copying data from tile to MapData took " << copyTime.ResultString();
-    }
+    ReportSlowConversionPhases(timing,conversionPhaseWarningThreshold.load());
   }
 
   /**
-   * Convert the data hold by the given tiles to the given MapData class instance.
+   * Convert the data hold by the given tiles to the given MapData class instance, restricted to the
+   * object types of the given type definition.
+   *
+   * The restricted conversion holds the same uniqueness and order guarantees as the unrestricted one.
+   * It reserves its result from the objects the tiles hold rather than from the objects that match the
+   * type filter, because the matching count is only known once the objects have been visited.
    */
   void MapService::AddTileDataToMapData(std::list<TileRef>& tiles,
                                         const TypeDefinition& typeDefinition,
                                         MapData& data) const
   {
-    // TODO: Use a set and higher level fill functions
-    std::unordered_map<FileOffset,NodeRef> nodeMap(10000);
-    std::unordered_map<FileOffset,WayRef>  wayMap(10000);
-    std::unordered_map<FileOffset,AreaRef> areaMap(10000);
-    std::unordered_map<FileOffset,WayRef>  optimizedWayMap(10000);
-    std::unordered_map<FileOffset,AreaRef> optimizedAreaMap(10000);
+    ConversionTiming timing;
 
-    StopClock uniqueTime;
+    size_t nodeCapacity=SumDataSize<NodeRef>(tiles,GetNodeData);
+    size_t wayCapacity=SumDataSize<WayRef>(tiles,GetWayData);
+    size_t optimizedWayCapacity=SumDataSize<WayRef>(tiles,GetOptimizedWayData);
+    size_t areaCapacity=SumDataSize<AreaRef>(tiles,GetAreaData);
+    size_t optimizedAreaCapacity=SumDataSize<AreaRef>(tiles,GetOptimizedAreaData);
 
-    for (const auto& tile : tiles) {
-      tile->GetNodeData().CopyData([&typeDefinition,&nodeMap](const NodeRef& node) {
-        if (typeDefinition.nodeTypes.IsSet(node->GetType())) {
-          nodeMap[node->GetFileOffset()]=node;
-        }
-      });
+    data.nodes.reserve(data.nodes.size()+nodeCapacity);
+    data.ways.reserve(data.ways.size()+wayCapacity+optimizedWayCapacity);
+    data.areas.reserve(data.areas.size()+areaCapacity+optimizedAreaCapacity);
 
-      //---
+    ConvertSource<NodeRef>(tiles,GetNodeData,&typeDefinition.nodeTypes,"nodes",data.nodes,timing);
+    ConvertSource<WayRef>(tiles,GetWayData,&typeDefinition.wayTypes,"ways",data.ways,timing);
+    ConvertSource<WayRef>(tiles,GetOptimizedWayData,&typeDefinition.optimizedWayTypes,"optimized ways",data.ways,timing);
+    ConvertSource<AreaRef>(tiles,GetAreaData,&typeDefinition.areaTypes,"areas",data.areas,timing);
+    ConvertSource<AreaRef>(tiles,GetOptimizedAreaData,&typeDefinition.optimizedAreaTypes,"optimized areas",data.areas,timing);
 
-      tile->GetOptimizedWayData().CopyData([&typeDefinition,&optimizedWayMap](const WayRef& way) {
-        if (typeDefinition.optimizedWayTypes.IsSet(way->GetType())) {
-          optimizedWayMap[way->GetFileOffset()]=way;
-        }
-      });
-
-      tile->GetWayData().CopyData([&typeDefinition,&wayMap](const WayRef& way) {
-        if (typeDefinition.wayTypes.IsSet(way->GetType())) {
-          wayMap[way->GetFileOffset()]=way;
-        }
-      });
-
-      //---
-
-      tile->GetOptimizedAreaData().CopyData([&typeDefinition,&optimizedAreaMap](const AreaRef& area) {
-        if (typeDefinition.optimizedAreaTypes.IsSet(area->GetType())) {
-          optimizedAreaMap[area->GetFileOffset()]=area;
-        }
-      });
-
-      tile->GetAreaData().CopyData([&typeDefinition,&areaMap](const AreaRef& area) {
-        if (typeDefinition.areaTypes.IsSet(area->GetType())) {
-          areaMap[area->GetFileOffset()]=area;
-        }
-      });
-    }
-
-    uniqueTime.Stop();
-
-    //std::cout << "Make data unique time: " << uniqueTime.ResultString() << std::endl;
-
-    StopClock copyTime;
-
-    data.nodes.reserve(nodeMap.size());
-    data.ways.reserve(wayMap.size()+optimizedWayMap.size());
-    data.areas.reserve(areaMap.size()+optimizedAreaMap.size());
-
-    for (const auto& nodeEntry : nodeMap) {
-      data.nodes.push_back(nodeEntry.second);
-    }
-
-    for (const auto& wayEntry : wayMap) {
-      data.ways.push_back(wayEntry.second);
-    }
-
-    for (const auto& wayEntry : optimizedWayMap) {
-      data.ways.push_back(wayEntry.second);
-    }
-
-    for (const auto& areaEntry : areaMap) {
-      data.areas.push_back(areaEntry.second);
-    }
-
-    for (const auto& areaEntry : optimizedAreaMap) {
-      data.areas.push_back(areaEntry.second);
-    }
-
-    copyTime.Stop();
-
-    if (copyTime.GetMilliseconds()>20) {
-      log.Warn() << "Copying data from tile to MapData took " << copyTime.ResultString();
-    }
+    ReportSlowConversionPhases(timing,conversionPhaseWarningThreshold.load());
   }
 
   /**
