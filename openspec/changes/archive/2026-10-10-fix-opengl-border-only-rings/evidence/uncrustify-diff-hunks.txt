@@ -1,0 +1,22 @@
+Uncrustify hunk counts behind section 5 of verification.md.
+
+The verdict that `scripts/format-check.sh check` computes is `uncrustify --check`, which prints only
+"FAIL: <file> (File size changed from X to Y)" and no hunks, so the counts below come from the diff
+that `scripts/format-check.sh diff` prints:
+
+    uncrustify -c .uncrustify -l CPP -f <file> 2>/dev/null | diff -u <file> - | grep -c '^@@'
+
+Uncrustify-0.83.0_f, run in /home/tim/projects/libosmscout on branch fix-loop-2026-10-10.
+The HEAD copies were written out of the index, without touching the working tree:
+
+    mkdir -p /tmp/uc-head/libosmscout-map-opengl/src/osmscoutmapopengl /tmp/uc-head/Tests/src
+    git show HEAD:<file> > /tmp/uc-head/<file>
+
+file                                                               with change   HEAD
+libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp           47     47
+Tests/src/OpenGLAreaVisibilityTest.cpp                                      17     12
+
+uncrustify --check on the two files of the change (no hunk output, the FAIL line only):
+
+    FAIL: libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp (File size changed from 47855 to 51023)
+    FAIL: Tests/src/OpenGLAreaVisibilityTest.cpp (File size changed from 21276 to 21702)

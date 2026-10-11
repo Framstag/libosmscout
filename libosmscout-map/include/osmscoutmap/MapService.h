@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <thread>
@@ -120,6 +121,12 @@ namespace osmscout {
 
     DatabaseRef                  database;             //!< The reference to the db
     mutable DataTileCache        cache;                //!< Data cache
+
+    /**
+     * Duration a phase of the tile data conversion may take before it is reported. Atomic, because a
+     * conversion runs on a worker thread while a caller may set the threshold.
+     */
+    std::atomic<double>          conversionPhaseWarningThreshold{20.0};
 
     mutable WorkQueue<bool>      nodeWorkerQueue;
     std::thread                  nodeWorkerThread;
@@ -377,12 +384,53 @@ namespace osmscout {
                                   const TypeDefinition& typeDefinition,
                                   std::list<TileRef>& tiles) const;
 
-    void AddTileDataToMapData(std::list<TileRef>& route,
+    /**
+     * Convert the data hold by the given tiles into the given map data.
+     *
+     * Every object of the tiles is placed in the result exactly once. The result is grouped by the
+     * source data file of the objects in a fixed order - the objects of `nodes.dat`, `ways.dat`,
+     * `areas.dat` and `routes.dat` first, then the objects of the optimized data files of a kind -
+     * and within a source data file the objects follow the order in which the tiles of the given list
+     * and their stored objects present them, which is reproducible for the same tile list.
+     *
+     * An offset only identifies an object within one data file, so the objects of two data files that
+     * carry the same offset value are both part of the result. The heap allocation of the conversion
+     * is bounded by the number of distinct objects of the result plus a constant: seen objects are
+     * held as a set of file offsets, which allocates once per distinct object of a source data file,
+     * and each result vector is reserved once.
+     */
+    void AddTileDataToMapData(std::list<TileRef>& tiles,
                               MapData& data) const;
 
+    /**
+     * Convert the data hold by the given tiles into the given map data, restricted to the object
+     * types of the given type definition.
+     *
+     * The restricted conversion holds the same uniqueness and order guarantees as the unrestricted
+     * one. It reserves its result from the objects the tiles hold rather than from the objects that
+     * match the type filter, because the matching count is only known once the objects have been
+     * visited; the reservation is therefore an upper bound.
+     */
     void AddTileDataToMapData(std::list<TileRef>& tiles,
                               const TypeDefinition& typeDefinition,
                               MapData& data) const;
+
+    /**
+     * Set the duration a phase of the tile data conversion may take before it is reported.
+     *
+     * A conversion measures one phase per source data file - `nodes`, `ways`, `optimized ways`,
+     * `areas`, `optimized areas` and `routes` - and logs one warning naming a phase that took longer
+     * than this threshold, so that a slow pan step is attributable from the log of a user device. The
+     * default is 20 milliseconds, the value the copy phase of the previous implementation warned at.
+     * A threshold of zero reports every phase.
+     */
+    void SetConversionPhaseWarningThreshold(double milliseconds);
+
+    /**
+     * Duration a phase of the tile data conversion may take before it is reported, see
+     * SetConversionPhaseWarningThreshold().
+     */
+    double GetConversionPhaseWarningThreshold() const;
 
     bool GetGroundTiles(const Projection& projection,
                         std::list<GroundTile>& tiles) const;

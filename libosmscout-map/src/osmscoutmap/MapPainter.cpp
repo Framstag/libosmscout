@@ -478,11 +478,29 @@ constexpr bool debugGroundTiles = false;
     labelLayoutData.clear();
 
     if (iconStyle) {
-      if (!iconStyle->GetIconName().empty() &&
-          HasIcon(styleConfig,
-                  projection,
-                  parameter,
-                  *iconStyle)) {
+      const auto &symbol=iconStyle->GetSymbol();
+
+      // A style may carry both a raster icon and a vector symbol. The
+      // preference decides which one is drawn; without it the raster icon
+      // keeps its precedence and the symbol stays the fallback.
+      if (parameter.GetPreferSymbolIcons() && symbol) {
+        LabelData data;
+
+        data.type=LabelData::Type::Symbol;
+        data.position=iconStyle->GetPosition();
+        data.iconStyle=iconStyle;
+        data.priority=iconStyle->GetPriority();
+
+        data.iconWidth=symbol->GetWidth(projection);
+        data.iconHeight=symbol->GetHeight(projection);
+
+        labelLayoutData.push_back(data);
+      }
+      else if (!iconStyle->GetIconName().empty() &&
+               HasIcon(styleConfig,
+                       projection,
+                       parameter,
+                       *iconStyle)) {
         LabelData data;
 
         data.type=LabelData::Type::Icon;
@@ -494,7 +512,7 @@ constexpr bool debugGroundTiles = false;
 
         labelLayoutData.push_back(data);
       }
-      else if (iconStyle->GetSymbol()) {
+      else if (symbol) {
         LabelData data;
 
         data.type=LabelData::Type::Symbol;
@@ -502,8 +520,8 @@ constexpr bool debugGroundTiles = false;
         data.iconStyle=iconStyle;
         data.priority=iconStyle->GetPriority();
 
-        data.iconWidth=iconStyle->GetSymbol()->GetWidth(projection);
-        data.iconHeight=iconStyle->GetSymbol()->GetHeight(projection);
+        data.iconWidth=symbol->GetWidth(projection);
+        data.iconHeight=symbol->GetHeight(projection);
 
         labelLayoutData.push_back(data);
       }

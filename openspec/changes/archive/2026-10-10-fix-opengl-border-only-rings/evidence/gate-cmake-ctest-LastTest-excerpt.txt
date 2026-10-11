@@ -1,0 +1,13 @@
+Start testing: Oct 10 14:07 CEST
+----------------------------------------------------------
+  [... per-test section, full log not retained - see gate-cmake-ctest.txt for the run and its tally; the file is overwritten by any later ctest run]
+3:134/149 Testing: OpenGLAreaVisibilityTest
+4-134/149 Test: OpenGLAreaVisibilityTest
+5-Command: "/home/tim/projects/libosmscout/build/Tests/OpenGLAreaVisibilityTest"
+6-Directory: /home/tim/projects/libosmscout/Tests
+  [...]
+"CachePerformanceTest" end time: Oct 10 14:08 CEST
+"CachePerformanceTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 10 14:08 CEST

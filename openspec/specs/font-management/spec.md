@@ -2,7 +2,8 @@
 
 ## Purpose
 
-The Skia backend loads and caches `SkTypeface` instances keyed by font name. `GetFontHeight()` returns the actual font height from font metrics instead of a hardcoded value.
+How the map backends turn a configured font into the face they draw with: which face they load, whether
+they cache it, and how a configured font name - a font family or a font file - is resolved to that face.
 
 ## Requirements
 
