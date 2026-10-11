@@ -525,6 +525,93 @@ namespace {
    * when it derives the tolerance of its early decision and the per-ring decision uses for a ring.
    */
   constexpr double borderWidthToTolerance=0.5;
+
+  /**
+   * One border style of a test style sheet. The slot separates the styles of one ring, so a ring
+   * with two specifications resolves two border styles; the same slot would merge them into one.
+   */
+  struct BorderSpec
+  {
+    std::string slot;
+    double      widthMM=0.0;
+    double      offsetMapUnits=0.0;
+    double      displayOffsetMM=0.0;
+  };
+
+  /**
+   * Style sheet with a fill style for the area type and one border style per given specification,
+   * all of them applying at every level.
+   */
+  osmscout::StyleConfigRef MakeStylesWithBorders(const TestTypes& types,
+                                                 const std::vector<BorderSpec>& borders)
+  {
+    auto                  styleConfig=std::make_shared<osmscout::StyleConfig>(types.typeConfig);
+
+    osmscout::TypeInfoSet areaTypes(*types.typeConfig);
+
+    areaTypes.Set(types.styledAreaType);
+
+    osmscout::StyleFilter areaFilter;
+
+    areaFilter.SetTypes(areaTypes);
+
+    osmscout::FillPartialStyle fillStyle;
+
+    fillStyle.SetColorValue(osmscout::FillStyle::attrFillColor,osmscout::Color(0.0,1.0,0.0));
+    styleConfig->AddAreaFillStyle(areaFilter,fillStyle);
+
+    for (const auto& border : borders) {
+      osmscout::BorderPartialStyle borderStyle;
+
+      borderStyle.style->SetSlot(border.slot);
+      borderStyle.SetDoubleValue(osmscout::BorderStyle::attrWidth,border.widthMM);
+      borderStyle.SetDoubleValue(osmscout::BorderStyle::attrOffset,border.offsetMapUnits);
+      borderStyle.SetDoubleValue(osmscout::BorderStyle::attrDisplayOffset,border.displayOffsetMM);
+      borderStyle.SetColorValue(osmscout::BorderStyle::attrColor,osmscout::Color(1.0,0.0,0.0));
+      styleConfig->AddAreaBorderStyle(areaFilter,borderStyle);
+    }
+
+    styleConfig->Postprocess();
+
+    return styleConfig;
+  }
+
+  /**
+   * Prepared area entries of a frame that loads one area of the given half size whose left screen
+   * edge lies at the given x position. One or more entries means the ring passed the visibility
+   * decision of the painter.
+   */
+  size_t PreparedEntriesForEdge(const osmscout::StyleConfigRef& styleConfig,
+                                const TestTypes& types,
+                                const osmscout::MercatorProjection& projection,
+                                const osmscout::MapParameter& parameter,
+                                double leftEdgePx,
+                                double halfSizePx)
+  {
+    // The area has to be larger than the minimum dimension, else it is rejected for being tiny
+    REQUIRE(halfSizePx>projection.ConvertWidthToPixel(parameter.GetAreaMinDimensionMM()));
+
+    auto         data=MakeData(styleConfig);
+
+    const Extent extent=ExtentForPixels(projection,halfSizePx);
+
+    const double screenMiddleX=projection.GetWidth()/2.0;
+
+    // The area center is half its width to the right of its left edge
+    const double centerLonOffset=DegreesLonForPixels(projection,
+                                                     leftEdgePx+halfSizePx-screenMiddleX);
+
+    data.areas.push_back(MakeArea(types.styledAreaType,
+                                  {projection.GetCenter().GetLat(),
+                                   projection.GetCenter().GetLon()+centerLonOffset},
+                                  extent));
+
+    RecordingPainter painter;
+
+    Render(painter,projection,parameter,data);
+
+    return painter.Areas().size();
+  }
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -924,4 +1011,321 @@ TEST_CASE("Prepared entries and clipping geometry do not depend on the loaded ar
     REQUIRE(painter.Areas().empty());
     REQUIRE(painter.Ways().size()==1);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Requirement: A ring's visibility tolerance covers every border style the ring
+// resolves
+// ---------------------------------------------------------------------------
+
+/**
+ * A ring's border can be drawn at an offset from the ring, so the decision has to extend the ring by
+ * that offset as well (spec map-painter-area-culling, requirement "A ring's visibility tolerance
+ * covers every border style the ring resolves"). The offset is measured in map units and the width
+ * in millimetres, so both terms are converted with the projection of the frame.
+ */
+TEST_CASE("A border drawn at an offset keeps its ring","[MapPainterAreaVisibilityCull]")
+{
+  auto types=MakeTypes();
+  auto projection=MakeProjection();
+  auto parameter=MakeParameter();
+
+  // The width keeps the early decision of the unmodified pipeline wide enough to let the area reach
+  // the per-ring decision, so what this case observes is that decision
+  constexpr double borderWidthMM=40.0;
+
+  const double     widthReachPx=projection.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
+
+  // An offset that reaches half as far as half of the border width, expressed in the map units the
+  // style sheet declares it in
+  const double offsetMapUnits=0.5*widthReachPx*projection.GetPixelSize();
+
+  auto         styleConfig=MakeStylesWithBorders(types,{{"line",borderWidthMM,offsetMapUnits,0.0}});
+
+  const double offsetReachPx=offsetMapUnits/projection.GetPixelSize();
+
+  INFO("reach of half of the border width: " << widthReachPx);
+  INFO("reach of the offset: " << offsetReachPx);
+
+  REQUIRE(offsetReachPx>10.0);
+
+  const double     screenRight=projection.GetWidth();
+  constexpr double halfSizePx=60.0;
+
+  // The area lies outside the view by three quarters of the reach of half the border width. Its
+  // border still reaches the view through the offset, so the ring has to be kept; the decision that
+  // read the front style alone used a tolerance of zero for a style that carries an offset, so this
+  // area was rejected before
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+0.75*widthReachPx,
+                                 halfSizePx)>0);
+
+  // Beyond the reach of the drawn border nothing is prepared
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+widthReachPx+offsetReachPx+10.0,
+                                 halfSizePx)==0);
+}
+
+/**
+ * The tolerance is the widest reach of the border styles the ring resolves, not the reach of the
+ * style the decision reads first (spec map-painter-area-culling, requirement "A ring's visibility
+ * tolerance covers every border style the ring resolves").
+ */
+TEST_CASE("The widest drawn border decides the tolerance","[MapPainterAreaVisibilityCull]")
+{
+  auto             types=MakeTypes();
+  auto             projection=MakeProjection();
+  auto             parameter=MakeParameter();
+
+  constexpr double wideWidthMM=40.0;
+  constexpr double narrowWidthMM=0.4;
+
+  // The wide style carries a display offset, which the decision that reads the front style alone
+  // treats as "not the border of the ring" and therefore reduces its tolerance to zero; the narrow
+  // style has no offsets and gives it a tolerance of a fraction of a pixel. Whichever of the two the
+  // decision reads first, it used a tolerance far smaller than the reach of the wide border
+  auto styleConfig=MakeStylesWithBorders(types,
+                                         {{"casing",wideWidthMM,0.0,0.6},
+                                           {"line",narrowWidthMM,0.0,0.0}});
+
+  const double wideReachPx=projection.ConvertWidthToPixel(wideWidthMM*borderWidthToTolerance);
+
+  INFO("reach of half of the wide border width: " << wideReachPx);
+
+  const double     screenRight=projection.GetWidth();
+  constexpr double halfSizePx=60.0;
+
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+0.5*wideReachPx,
+                                 halfSizePx)>0);
+
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+2.0*wideReachPx,
+                                 halfSizePx)==0);
+}
+
+/**
+ * A ring whose drawn borders are farther away than their own reach contributes nothing, so the wider
+ * tolerance does not prepare every loaded area (spec map-painter-area-culling, requirement "A ring's
+ * visibility tolerance covers every border style the ring resolves").
+ */
+TEST_CASE("A ring beyond the reach of its drawn borders contributes nothing",
+          "[MapPainterAreaVisibilityCull]")
+{
+  auto             types=MakeTypes();
+  auto             projection=MakeProjection();
+  auto             parameter=MakeParameter();
+
+  constexpr double borderWidthMM=10.0;
+
+  const double     widthReachPx=projection.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
+  const double     offsetMapUnits=1000.0;
+  const double     offsetReachPx=offsetMapUnits/projection.GetPixelSize();
+
+  auto             styleConfig=MakeStylesWithBorders(types,{{"line",borderWidthMM,offsetMapUnits,0.0}});
+
+  const double     screenRight=projection.GetWidth();
+  constexpr double halfSizePx=60.0;
+
+  INFO("reach of the drawn border: " << widthReachPx+offsetReachPx);
+
+  REQUIRE(offsetReachPx>widthReachPx);
+
+  // The area lies outside the view by more than the offset and half of the width, so no border of it
+  // can reach the view
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+offsetReachPx+2.0*widthReachPx,
+                                 halfSizePx)==0);
+}
+
+/**
+ * A ring whose border styles declare one width and no offset keeps the tolerance it had: half of
+ * that width, converted with the projection (spec map-painter-area-culling, requirement "A ring's
+ * visibility tolerance covers every border style the ring resolves").
+ */
+TEST_CASE("A ring without an offset border keeps its tolerance","[MapPainterAreaVisibilityCull]")
+{
+  auto             types=MakeTypes();
+  auto             projection=MakeProjection();
+  auto             parameter=MakeParameter();
+
+  constexpr double borderWidthMM=2.0;
+
+  // The tolerance of the decision is half of the declared width, converted to the pixels of the frame
+  const double tolerancePx=projection.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
+
+  auto         styleConfig=MakeStylesWithBorders(types,{{"line",borderWidthMM,0.0,0.0}});
+
+  REQUIRE(styleConfig->GetMaxAreaBorderWidthMM(projection.GetMagnification())==borderWidthMM);
+
+  const double     screenRight=projection.GetWidth();
+  constexpr double halfSizePx=60.0;
+
+  INFO("tolerance of the ring: " << tolerancePx);
+
+  REQUIRE(tolerancePx>1.0);
+
+  // Within the tolerance the ring is kept, beyond it nothing is prepared
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+0.9*tolerancePx,
+                                 halfSizePx)>0);
+
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+1.5*tolerancePx,
+                                 halfSizePx)==0);
+}
+
+// ---------------------------------------------------------------------------
+// Requirement: The early rejection is conservative (the offset reach)
+// ---------------------------------------------------------------------------
+
+/**
+ * An area whose border reaches the view only through the offset it is drawn at has to arrive at
+ * per-ring preparation: the frame-wide bound the early rejection uses has to cover the offset term
+ * as well (spec map-painter-area-culling, requirement "The early rejection is conservative",
+ * scenario "An area whose only reachable border is offset is not rejected early").
+ */
+TEST_CASE("An area whose only reachable border is offset is not rejected early",
+          "[MapPainterAreaVisibilityCull]")
+{
+  auto             types=MakeTypes();
+  auto             projection=MakeProjection();
+  auto             parameter=MakeParameter();
+
+  constexpr double borderWidthMM=40.0;
+
+  const double     widthReachPx=projection.ConvertWidthToPixel(borderWidthMM*borderWidthToTolerance);
+  const double     offsetMapUnits=0.5*widthReachPx*projection.GetPixelSize();
+  const double     offsetReachPx=offsetMapUnits/projection.GetPixelSize();
+
+  auto             styleConfig=MakeStylesWithBorders(types,{{"line",borderWidthMM,offsetMapUnits,0.0}});
+
+  const double     screenRight=projection.GetWidth();
+  constexpr double halfSizePx=60.0;
+
+  INFO("reach of half of the border width: " << widthReachPx);
+  INFO("reach of the offset: " << offsetReachPx);
+
+  // The bound of this style sheet's width alone, i.e. the tolerance of the early rejection that read
+  // no offset, is not enough to reach this area
+  const double distancePx=1.25*widthReachPx;
+
+  REQUIRE(distancePx>widthReachPx);
+  REQUIRE(distancePx<widthReachPx+offsetReachPx);
+
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+distancePx,
+                                 halfSizePx)>0);
+
+  // Beyond the width and the offset of the drawn border nothing is prepared
+  REQUIRE(PreparedEntriesForEdge(styleConfig,
+                                 types,
+                                 projection,
+                                 parameter,
+                                 screenRight+widthReachPx+offsetReachPx+10.0,
+                                 halfSizePx)==0);
+}
+
+/**
+ * The frame-wide area reach is converted with the projection of the frame, so a style sheet whose
+ * borders reach through a display offset gets the larger tolerance at the higher DPI; a style sheet
+ * without any area border style has no area reach at all (spec map-painter-area-culling, requirement
+ * "The early rejection is conservative").
+ */
+TEST_CASE("The area reach of the frame follows the DPI and the offsets of the stylesheet",
+          "[MapPainterAreaVisibilityCull]")
+{
+  auto             types=MakeTypes();
+
+  constexpr double borderWidthMM=0.1;
+  constexpr double displayOffsetMM=4.0;
+
+  auto             styleConfig=MakeStylesWithBorders(types,{{"line",borderWidthMM,0.0,displayOffsetMM}});
+
+  auto             projection96=MakeProjectionWithDpi(lowerDpi);
+  auto             projection300=MakeProjectionWithDpi(referenceDpi);
+  auto             parameter=MakeParameter();
+
+  const double     tolerancePx96=projection96.ConvertWidthToPixel((borderWidthMM*borderWidthToTolerance)+
+                                                                  displayOffsetMM);
+  const double     tolerancePx300=projection300.ConvertWidthToPixel((borderWidthMM*borderWidthToTolerance)+
+                                                                    displayOffsetMM);
+
+  INFO("area reach at 96 DPI: " << tolerancePx96);
+  INFO("area reach at 300 DPI: " << tolerancePx300);
+
+  REQUIRE(tolerancePx300>tolerancePx96);
+
+  constexpr double halfSizePx=60.0;
+
+  // The area reaches into the view by just over the reach of the 96 DPI projection and well within
+  // the reach of the 300 DPI projection, so only the latter may keep it
+  const double reachPx=tolerancePx96+1.0;
+
+  REQUIRE(reachPx<tolerancePx300);
+
+  auto preparedAt=[&](const osmscout::MercatorProjection& projection) {
+                     return PreparedEntriesForEdge(styleConfig,
+                                                   types,
+                                                   projection,
+                                                   parameter,
+                                                   projection.GetWidth()+reachPx,
+                                                   halfSizePx);
+                   };
+
+  REQUIRE(preparedAt(projection300)>0);
+  REQUIRE(preparedAt(projection96)==0);
+
+  // A style sheet without any area border style has no area reach, so an area outside the view is
+  // not prepared at all
+  auto                  noBorderStyles=std::make_shared<osmscout::StyleConfig>(types.typeConfig);
+
+  osmscout::TypeInfoSet areaTypes(*types.typeConfig);
+
+  areaTypes.Set(types.styledAreaType);
+
+  osmscout::StyleFilter areaFilter;
+
+  areaFilter.SetTypes(areaTypes);
+
+  osmscout::FillPartialStyle fillStyle;
+
+  fillStyle.SetColorValue(osmscout::FillStyle::attrFillColor,osmscout::Color(0.0,1.0,0.0));
+  noBorderStyles->AddAreaFillStyle(areaFilter,fillStyle);
+  noBorderStyles->Postprocess();
+
+  REQUIRE(noBorderStyles->GetVisibilityBounds(projection300.GetMagnification()).maxAreaBorderWidth==0.0);
+  REQUIRE(noBorderStyles->GetVisibilityBounds(projection300.GetMagnification()).maxAreaBorderOffset==0.0);
+  REQUIRE(noBorderStyles->GetVisibilityBounds(projection300.GetMagnification()).maxAreaBorderDisplayOffset==0.0);
+
+  REQUIRE(PreparedEntriesForEdge(noBorderStyles,
+                                 types,
+                                 projection300,
+                                 parameter,
+                                 projection300.GetWidth()+1.0,
+                                 halfSizePx)==0);
 }

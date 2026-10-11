@@ -21,6 +21,7 @@
 #include <utility>
 #include <iostream>
 
+#include <osmscoutmap/AreaBorderReach.h>
 #include <osmscoutmap/MapPainter.h>
 
 #include <osmscoutmapopengl/AreaVisibility.h>
@@ -258,8 +259,11 @@ namespace osmscout {
 
           // The visibility decision comes before any per-ring geometry work: a ring the view cannot
           // show costs neither the copy of its nodes nor the removal of the duplicates among them.
-          // The tolerance is half of the width of the ring's own border style, so the style has to be
-          // resolved first.
+          // The tolerance is the reach of every border style the ring resolves, which the shared
+          // helper computes from the same styles the drawing below reads; the front style alone
+          // would leave the tolerance of a ring whose border is drawn at an offset at zero.
+          const double   tolerancePixel=osmscout::GetAreaRingTolerancePixel(loadProjection,borderStyles);
+
           BorderStyleRef borderStyle;
           size_t borderStyleIndex = 0;
 
@@ -276,7 +280,7 @@ namespace osmscout {
 
           if (!IsAreaRingVisible(loadProjection,
                                  ring.GetBoundingBox(),
-                                 borderWidth,
+                                 tolerancePixel,
                                  parameter.GetAreaMinDimensionMM())) {
             continue;
           }
@@ -422,7 +426,6 @@ namespace osmscout {
               wayRenderer.AddNewElement(num + 5);
             }
           }
-
         }
         ringId++;
       }
@@ -1252,5 +1255,4 @@ namespace osmscout {
     textRenderer.SetView(lookX, lookY);
     textRenderer.Draw();
   }
-
 }

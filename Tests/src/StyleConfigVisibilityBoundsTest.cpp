@@ -50,6 +50,7 @@ namespace {
     osmscout::TypeConfigRef typeConfig;
     osmscout::TypeInfoRef   wayType;
     osmscout::TypeInfoRef   nodeType;
+    osmscout::TypeInfoRef   areaType;
   };
 
   TestTypes MakeTypes()
@@ -65,6 +66,10 @@ namespace {
     types.nodeType=std::make_shared<osmscout::TypeInfo>("test_node");
     types.nodeType->CanBeNode(true);
     types.typeConfig->RegisterType(types.nodeType);
+
+    types.areaType=std::make_shared<osmscout::TypeInfo>("test_area");
+    types.areaType->CanBeArea(true);
+    types.typeConfig->RegisterType(types.areaType);
 
     return types;
   }
@@ -261,4 +266,81 @@ TEST_CASE("The label extent bound grows with the text and the font size","[Style
   REQUIRE(osmscout::CountLabelWords("a")==1);
   REQUIRE(osmscout::CountLabelWords("a b")==2);
   REQUIRE(osmscout::CountLabelWords("  a  b\tc\nd ")==4);
+}
+
+/**
+ * The reach of the area borders of a level is the widest border width and the largest offset and
+ * display offset the level can resolve (spec map-painter-area-culling, requirement "The early
+ * rejection is conservative"). The painter converts the three maxima with the projection of its
+ * frame, so they are collected separately and in the unit each of them is declared in.
+ */
+TEST_CASE("The area border reach bound is the widest border and the largest offsets of a level",
+          "[StyleConfigVisibilityBounds]")
+{
+  const auto            types=MakeTypes();
+
+  auto                  styleConfig=std::make_shared<osmscout::StyleConfig>(types.typeConfig);
+
+  osmscout::TypeInfoSet areaTypes(*types.typeConfig);
+
+  areaTypes.Set(types.areaType);
+
+  osmscout::StyleFilter areaFilter;
+
+  areaFilter.SetTypes(areaTypes);
+
+  osmscout::FillPartialStyle fillStyle;
+
+  fillStyle.SetColorValue(osmscout::FillStyle::attrFillColor,osmscout::Color(0.0,1.0,0.0));
+  styleConfig->AddAreaFillStyle(areaFilter,fillStyle);
+
+  auto addBorder=[&](double width,double offset,double displayOffset,size_t minLevel,size_t maxLevel) {
+                    osmscout::StyleFilter filter;
+
+                    filter.SetTypes(areaTypes);
+                    filter.SetMinLevel(minLevel);
+                    filter.SetMaxLevel(maxLevel);
+
+                    osmscout::BorderPartialStyle borderStyle;
+
+                    borderStyle.SetDoubleValue(osmscout::BorderStyle::attrWidth,width);
+                    borderStyle.SetDoubleValue(osmscout::BorderStyle::attrOffset,offset);
+                    borderStyle.SetDoubleValue(osmscout::BorderStyle::attrDisplayOffset,displayOffset);
+                    borderStyle.SetColorValue(osmscout::BorderStyle::attrColor,osmscout::Color(1.0,0.0,0.0));
+                    styleConfig->AddAreaBorderStyle(filter,borderStyle);
+                  };
+
+  addBorder(1.0,0.0,0.0,0,9);
+  addBorder(2.5,0.0,0.0,10,14);
+  addBorder(0.5,-100.0,-1.5,15,19);
+  // The area border styles of this style sheet reach levels the way and icon styles do not, and
+  // levels 20 and 21 declare no border at all
+  addBorder(0.25,0.0,0.0,22,24);
+
+  styleConfig->Postprocess();
+
+  auto boundsAt=[&](size_t level) {
+                   return styleConfig->GetVisibilityBounds(Level(level));
+                 };
+
+  REQUIRE(boundsAt(5).maxAreaBorderWidth==1.0);
+  REQUIRE(boundsAt(5).maxAreaBorderOffset==0.0);
+  REQUIRE(boundsAt(5).maxAreaBorderDisplayOffset==0.0);
+
+  REQUIRE(boundsAt(12).maxAreaBorderWidth==2.5);
+
+  // The offset of a border style is collected as its magnitude, whatever its sign
+  REQUIRE(boundsAt(17).maxAreaBorderWidth==0.5);
+  REQUIRE(boundsAt(17).maxAreaBorderOffset==100.0);
+  REQUIRE(boundsAt(17).maxAreaBorderDisplayOffset==1.5);
+
+  // A level of the style sheet without an area border has no area border reach, and the level that
+  // only the area border styles of this style sheet reach is covered as well
+  REQUIRE(boundsAt(20).maxAreaBorderWidth==0.0);
+  REQUIRE(boundsAt(20).maxAreaBorderOffset==0.0);
+  REQUIRE(boundsAt(23).maxAreaBorderWidth==0.25);
+
+  // The width accessor stays the width bound of the level
+  REQUIRE(styleConfig->GetMaxAreaBorderWidthMM(Level(12))==2.5);
+  REQUIRE(styleConfig->GetMaxAreaBorderWidthMM(Level(20))==0.0);
 }
