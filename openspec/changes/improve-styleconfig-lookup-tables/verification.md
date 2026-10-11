@@ -177,3 +177,26 @@ load-time slope comparison is in section 3.
 - `MapDataBudgetTest` is not registered in this configuration at all (`ctest -R MapDataBudgetTest` finds no
   test): it belongs to the open `map-data-memory-budget` change, not to `origin/master`, so there is no figure
   of it to compare here.
+
+## 8. Windows build of the test (PR CI)
+
+The Visual Studio 2025 job of PR #1872 rejected `Tests/src/StyleConfigLookupCostTest.cpp` with C3530
+(`'auto' cannot be combined with any other type-specifier`) and C2513 (`'char': no variable declared
+before '='`), both at the `auto small=LoadStyleSheet(...)` line: the Windows headers define `small` as
+`char` (reached through the `windows.h` that `libosmscout/io/FileScanner.h` includes for `_WIN32`, which
+`#undef`s `min` and `max` but not this one), so MSVC read the declaration as `auto char=...`. GCC and
+clang accept the identifier, which is why the Linux and macOS jobs stayed green. The two loaded sheets
+are named `smallSheet` and `largeSheet` now.
+
+Verified after `origin/master` was merged into this branch (commit `7cd786d22`):
+
+```text
+CMake   ctest -j 4 --exclude-regex PerformanceTest   115/115 passed
+        StyleConfigLookupCostTest                     72 assertions in 11 test cases
+Meson   meson setup build-meson-check                 the test is registered
+uncrustify                                            no finding for the file
+```
+
+The two conflicts of that merge (`TODO.md` §22, `Tests/meson.build`) were additive on both sides and were
+resolved by keeping both: the entry text of this change beside the metadata line of the cleanup pass, and
+the new test beside `FontNameResolutionTest`.
