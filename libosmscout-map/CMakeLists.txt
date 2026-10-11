@@ -9,6 +9,7 @@ set(HEADER_FILES
 	include/osmscoutmap/MapPainterStatistics.h
 	include/osmscoutmap/MapParameter.h
 	include/osmscoutmap/MapData.h
+	include/osmscoutmap/FontNameResolution.h
 	include/osmscoutmap/MapService.h
 	include/osmscoutmap/PatternLookup.h
 	include/osmscoutmap/LabelProvider.h
@@ -36,6 +37,7 @@ set(SOURCE_FILES
 	src/osmscoutmap/MapParameter.cpp
 	src/osmscoutmap/PatternLookup.cpp
 	src/osmscoutmap/MapData.cpp
+	src/osmscoutmap/FontNameResolution.cpp
 	src/osmscoutmap/MapService.cpp
 	src/osmscoutmap/LabelProvider.cpp
 	src/osmscoutmap/LabelPath.cpp
@@ -49,6 +51,14 @@ set(SOURCE_FILES
 	src/osmscoutmap/SymbolRenderer.cpp
 )
 
+# The family name of a configured font file is read with FreeType where it is
+# available; without it a font name is passed on unchanged (see MapFeatures.h)
+set(OSMSCOUT_MAP_TARGETS OSMScout::OSMScout)
+
+if(TARGET Freetype::Freetype)
+	list(APPEND OSMSCOUT_MAP_TARGETS Freetype::Freetype)
+endif()
+
 osmscout_library_project(
 	NAME OSMScoutMap
 	ALIAS Map
@@ -58,7 +68,7 @@ osmscout_library_project(
 	INCLUDEDIR "osmscoutmap"
 	TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscoutmap/MapFeatures.h.cmake
 	FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutmap/MapFeatures.h
-	TARGET OSMScout::OSMScout
+	TARGET ${OSMSCOUT_MAP_TARGETS}
 )
 
 if(APPLE AND OSMSCOUT_BUILD_FRAMEWORKS)

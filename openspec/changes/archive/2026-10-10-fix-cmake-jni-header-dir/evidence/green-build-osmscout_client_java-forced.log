@@ -1,0 +1,7 @@
+timestamp: 2026-10-10T14:46:18+02:00
+forced the C++ compile with: touch libosmscout-client-java/src/OSMScoutClient.cpp (mtime only, no content change; git diff clean)
+--- cmake --build build --target osmscout_client_java -j 16
+[1/2] Building CXX object libosmscout-client-java/CMakeFiles/osmscout_client_java.dir/src/OSMScoutClient.cpp.o
+[2/2] Linking CXX shared library libosmscout-client-java/libosmscout_client_java.so
+rc=0
+-rwxr-xr-x 1 tim tim 1176856 10. Okt 14:48 build/libosmscout-client-java/libosmscout_client_java.so
