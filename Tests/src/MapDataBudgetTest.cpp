@@ -217,6 +217,10 @@ namespace {
   {
     std::string directory=GetTempDirectory()+"/"+name;
 
+    // The test cases run in an arbitrary order, so the directory the copy is put in may not be
+    // there yet
+    std::filesystem::create_directories(GetTempDirectory());
+
     std::filesystem::remove_all(directory);
     std::filesystem::copy(sourceDirectory,
                           directory,
