@@ -312,11 +312,7 @@ namespace osmscout {
        */
       bool IsEmpty() const
       {
-        return nodeCount==0 &&
-               wayCount==0 &&
-               areaCount==0 &&
-               routeCount==0 &&
-               areaAreaIndexEntryCount==0;
+        return nodeCount+wayCount+areaCount+routeCount+areaAreaIndexEntryCount==0;
       }
     };
 

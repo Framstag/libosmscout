@@ -46,7 +46,7 @@ namespace osmscout {
     /**
      * The content of one or more caches, as counts per kind of cached entry.
      */
-    struct Cost CLASS_FINAL
+    struct OSMSCOUT_MAP_API Cost CLASS_FINAL
     {
       size_t nodeCount=0;       //!< Number of cached nodes
       size_t wayCount=0;        //!< Number of cached ways, including optimized ways
@@ -59,11 +59,7 @@ namespace osmscout {
        */
       bool IsEmpty() const
       {
-        return nodeCount==0 &&
-               wayCount==0 &&
-               areaCount==0 &&
-               routeCount==0 &&
-               indexEntryCount==0;
+        return nodeCount+wayCount+areaCount+routeCount+indexEntryCount==0;
       }
 
       /**
