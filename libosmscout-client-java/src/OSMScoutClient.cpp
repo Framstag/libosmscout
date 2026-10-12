@@ -4807,8 +4807,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAddressAt(JNIEnv *env, jo
 /** Fraction of the requested square an icon's artwork fills, leaving a margin. */
 #define NAVIVEYLIN_TYPE_ICON_FIT 0.9
 
-/** Magnification the icon style is resolved at: a detail level at which POI icons are defined. */
-#define NAVIVEYLIN_TYPE_ICON_MAGNIFICATION 16.0
+/**
+ * Magnification *level* the icon style is resolved at — a detail level at which stylesheets define
+ * POI icons. The level constructor, not the factor one: `Magnification(double)` reads its argument as
+ * a magnification factor (level 4 for 16.0), and at that level a stylesheet defines no POI icon at all.
+ */
+#define NAVIVEYLIN_TYPE_ICON_MAGNIFICATION_LEVEL osmscout::Magnification::magVeryClose
 
 /** Reference resolution of that projection; the artwork is scaled to fit regardless. */
 #define NAVIVEYLIN_TYPE_ICON_DPI 96.0
@@ -4937,23 +4941,27 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
 
       for (const auto &db : candidates) {
         if (!db || !db->GetStyleConfig()) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-style-config type=" << typeName;
           continue;
         }
 
         osmscout::TypeConfigRef typeConfig = db->GetDatabase()->GetTypeConfig();
         if (!typeConfig) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-type-config type=" << typeName;
           continue;
         }
 
         osmscout::TypeInfoRef typeInfo = typeConfig->GetTypeInfo(typeName);
         if (!typeInfo) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=unknown-type type=" << typeName
+                               << " db=" << db->path;
           continue;
         }
 
         osmscout::FeatureValueBuffer buffer;
         buffer.SetType(typeInfo);
 
-        osmscout::Magnification iconMagnification(NAVIVEYLIN_TYPE_ICON_MAGNIFICATION);
+        osmscout::Magnification iconMagnification(osmscout::Magnification::magVeryClose);
         osmscout::MercatorProjection projection;
         if (!projection.Set(osmscout::GeoCoord(0.0, 0.0),
                             0.0,
@@ -4961,6 +4969,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
                             NAVIVEYLIN_TYPE_ICON_DPI,
                             static_cast<size_t>(side),
                             static_cast<size_t>(side))) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=bad-projection type=" << typeName
+                               << " px=" << side;
           continue;
         }
 
@@ -4970,6 +4980,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
           iconStyle = styleConfig->GetAreaIconStyle(typeInfo, buffer, projection);
         }
         if (!iconStyle || !iconStyle->IsVisible()) {
+          // The normal case for an entry whose type the stylesheet gives no icon at all (a street, an
+          // address): silent, because the caller reports the absence (Diag/ROWICON).
           continue;
         }
 
@@ -4987,17 +4999,29 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
         }
 
         bool painted = false;
-        if (data->preferSymbolIcons && iconStyle->GetSymbol()) {
+        const bool hasSymbol = iconStyle->GetSymbol() != nullptr;
+        const bool symbolFirst = data->preferSymbolIcons && hasSymbol;
+        if (symbolFirst) {
           painted = DrawTypeIconSymbol(cr, projection, *iconStyle->GetSymbol(), side);
-        }
-        if (!painted) {
+        } else {
+          // The map's own order (MapPainter::LayoutPointLabels): the image, else the symbol. The
+          // preference *prefers* the symbol, it does not disable it for a symbol-only entry — a
+          // symbol-backed type without a PNG is the normal case for most stylesheet icons, and
+          // gating the symbol on the preference is what makes such a row draw nothing.
           painted = DrawTypeIconImage(cr,
                                       data->dbThread->GetIconDirectory(),
                                       iconStyle->GetIconName(),
                                       side);
+          if (!painted && hasSymbol) {
+            painted = DrawTypeIconSymbol(cr, projection, *iconStyle->GetSymbol(), side);
+          }
         }
 
         if (!painted) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=not-drawn type=" << typeName
+                               << " px=" << side
+                               << " symbol=" << (hasSymbol ? "yes" : "no")
+                               << " image=" << (iconStyle->GetIconName().empty() ? "-" : iconStyle->GetIconName());
           cairo_destroy(cr);
           cairo_surface_destroy(surface);
           continue;
