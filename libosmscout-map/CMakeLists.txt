@@ -20,7 +20,8 @@ set(HEADER_FILES
 	include/osmscoutmap/StyleConfig.h
 	include/osmscoutmap/StyleProcessor.h
 	include/osmscoutmap/DataTileCache.h
-	include/osmscoutmap/MapTileCache.h
+	include/osmscoutmap/MapDataAccounting.h
+	include/osmscoutmap/MapDataBudget.h
 	include/osmscoutmap/MapPainterNoOp.h
 	include/osmscoutmap/SymbolRenderer.h
 	${CMAKE_CURRENT_BINARY_DIR}/include/osmscoutmap/MapFeatures.h
@@ -46,7 +47,8 @@ set(SOURCE_FILES
 	src/osmscoutmap/StyleConfig.cpp
 	src/osmscoutmap/StyleProcessor.cpp
 	src/osmscoutmap/DataTileCache.cpp
-	src/osmscoutmap/MapTileCache.cpp
+	src/osmscoutmap/MapDataAccounting.cpp
+	src/osmscoutmap/MapDataBudget.cpp
 	src/osmscoutmap/MapPainterNoOp.cpp
 	src/osmscoutmap/SymbolRenderer.cpp
 )

@@ -2,7 +2,7 @@ package com.framstag.libosmscout.client;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -30,20 +30,16 @@ public class OSMScoutClientStyleTest {
 
     private static OSMScoutClient client;
 
-    @BeforeAll
-    public static void setUp() {
-        try {
-            client = new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
-        }
+    @BeforeEach
+    public void setUp() {
+        TestClients.assumeNativeLibrary();
     }
 
     @AfterAll
     public static void tearDown() {
         if (client != null) {
             client.close();
+            client = null;
         }
     }
 
@@ -54,6 +50,7 @@ public class OSMScoutClientStyleTest {
     private static void rebuild(String stylesheetDir) {
         if (client != null) {
             client.close();
+            client = null;
         }
         client = new OSMScoutClientBuilder()
             .withStyleSheetDirectory(stylesheetDir)

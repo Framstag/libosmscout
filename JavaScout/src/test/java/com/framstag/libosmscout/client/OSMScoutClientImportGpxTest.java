@@ -1,7 +1,7 @@
 package com.framstag.libosmscout.client;
 
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,18 +16,30 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>
  * These tests are skipped automatically when the native library is not available
  * (e.g. when running {@code mvn test} without {@code -Dnative.lib.dir}).
+ * <p>
+ * The {@code client} below is a receiver, not a subject: the native implementation of
+ * the import does not read its receiver - it takes an ignored self argument and parses
+ * the file itself - and it does not use the process-wide client either. A client
+ * without a native handle is therefore sufficient here, and the availability probe is
+ * released immediately rather than being reused as a client. Whatever this class
+ * builds, it releases when the class ends.
  */
 public class OSMScoutClientImportGpxTest {
 
     private static OSMScoutClient client;
 
-    @BeforeAll
-    public static void setUp() {
-        try {
-            client = new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
+    @BeforeEach
+    public void setUp() {
+        TestClients.assumeNativeLibrary();
+
+        client = TestClients.receiverWithoutNativeHandle();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (client != null) {
+            client.close();
+            client = null;
         }
     }
 

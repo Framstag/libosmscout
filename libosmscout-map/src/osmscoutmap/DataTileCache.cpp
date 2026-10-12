@@ -59,29 +59,120 @@ namespace osmscout {
   }
 
   /**
-   * Cleanup the cache. Free least recently used tiles until the given maximum cache
-   * size is reached again.
+   * Bound the cache by the accounted weight of its content instead of by its tile count.
+   */
+  void DataTileCache::SetWeightSize(size_t weightSize)
+  {
+    // Switching the bound on or off, or shrinking it, has to cleanup: the tile count bound the cache
+    // was cleaned up to before is not the bound that applies afterwards.
+    bool boundSwitched=((this->weightSize==0)!=(weightSize==0));
+    bool boundShrunk=weightSize>0 && weightSize<this->weightSize;
+    bool cleanupCache=boundSwitched || boundShrunk;
+
+    this->weightSize=weightSize;
+
+    if (cleanupCache) {
+      CleanupCache();
+    }
+  }
+
+  /**
+   * Return the accounted weight of the content of the given tile. The content of a tile is accounted
+   * as if every cached object was held by this tile alone; an object that several tiles reference is
+   * therefore accounted by every one of them, which overestimates the memory of the cache and lets it
+   * drop tiles earlier rather than later.
+   */
+  size_t DataTileCache::GetTileWeight(const Tile& tile)
+  {
+    MapDataAccounting::Cost cost;
+
+    cost.nodeCount=tile.GetNodeData().GetDataSize();
+    cost.wayCount=tile.GetWayData().GetDataSize()+
+                  tile.GetOptimizedWayData().GetDataSize();
+    cost.areaCount=tile.GetAreaData().GetDataSize()+
+                   tile.GetOptimizedAreaData().GetDataSize();
+    cost.routeCount=tile.GetRouteData().GetDataSize();
+
+    return MapDataAccounting::GetWeight(cost);
+  }
+
+  /**
+   * Return the accounted weight of the content of all cached tiles
+   */
+  size_t DataTileCache::GetAccountedWeight() const
+  {
+    size_t weight=0;
+
+    for (const auto& entry : tileCache) {
+      weight+=GetTileWeight(*entry.tile);
+    }
+
+    return weight;
+  }
+
+  /**
+   * Cleanup the cache. Free least recently used tiles until the configured bound is reached again:
+   * either the maximum tile count or, if a weight size is configured, the maximum accounted weight
+   * of the cached content.
    */
   void DataTileCache::CleanupCache()
   {
-    if (tileCache.size()>cacheSize) {
-      auto currentEntry=tileCache.rbegin();
+    if (weightSize==0) {
+      if (tileCache.size()>cacheSize) {
+        auto currentEntry=tileCache.rbegin();
 
-      while (currentEntry!=tileCache.rend() &&
-              tileCache.size()>cacheSize) {
-        //if (currentEntry->tile.expired()) {
-        if (currentEntry->tile.use_count()==1) {
-          //std::cout << "Dropping tile " << (std::string)currentEntry->id << " from cache " << cache.size() << "/" << cacheSize << std::endl;
-          tileIndex.erase(currentEntry->key);
+        while (currentEntry!=tileCache.rend() &&
+                tileCache.size()>cacheSize) {
+          //if (currentEntry->tile.expired()) {
+          if (currentEntry->tile.use_count()==1) {
+            //std::cout << "Dropping tile " << (std::string)currentEntry->id << " from cache " << cache.size() << "/" << cacheSize << std::endl;
+            tileIndex.erase(currentEntry->key);
 
-          ++currentEntry;
-          currentEntry=std::reverse_iterator<Cache::iterator>(tileCache.erase(currentEntry.base()));
-        }
-        else {
-          ++currentEntry;
+            ++currentEntry;
+            currentEntry=std::reverse_iterator<Cache::iterator>(tileCache.erase(currentEntry.base()));
+          }
+          else {
+            ++currentEntry;
+          }
         }
       }
+
+      return;
     }
+
+    size_t weight=GetAccountedWeight();
+
+    if (weight<=weightSize) {
+      return;
+    }
+
+    auto currentEntry=tileCache.rbegin();
+
+    while (currentEntry!=tileCache.rend() &&
+            weight>weightSize) {
+      if (currentEntry->tile.use_count()==1) {
+        size_t entryWeight=GetTileWeight(*currentEntry->tile);
+
+        tileIndex.erase(currentEntry->key);
+
+        ++currentEntry;
+        currentEntry=std::reverse_iterator<Cache::iterator>(tileCache.erase(currentEntry.base()));
+
+        weight=entryWeight<=weight ? weight-entryWeight : 0;
+      }
+      else {
+        ++currentEntry;
+      }
+    }
+  }
+
+  /**
+   * Drop every cached tile, whatever bound is configured
+   */
+  void DataTileCache::Flush()
+  {
+    tileIndex.clear();
+    tileCache.clear();
   }
 
   /**

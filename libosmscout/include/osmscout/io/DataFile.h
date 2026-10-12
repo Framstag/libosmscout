@@ -118,6 +118,24 @@ namespace osmscout {
 
     void FlushCache();
 
+    /**
+     * Change the maximum number of objects the cache of this data file holds. The oldest entries are
+     * stripped if the new size is smaller than the current one. The method is thread-safe.
+     */
+    void SetCacheSize(size_t cacheSize);
+
+    /**
+     * Return the maximum number of objects the cache of this data file holds. The method is
+     * thread-safe.
+     */
+    size_t GetCacheSize() const;
+
+    /**
+     * Return the number of objects the cache of this data file currently holds. The method is
+     * thread-safe.
+     */
+    size_t GetCachedEntryCount() const;
+
     std::string GetFilename() const
     {
       return datafilename;
@@ -274,6 +292,30 @@ namespace osmscout {
   {
     std::scoped_lock<std::mutex> lock(accessMutex);
     cache.Flush();
+  }
+
+  template <class N>
+  void DataFile<N>::SetCacheSize(size_t cacheSize)
+  {
+    std::scoped_lock<std::mutex> lock(accessMutex);
+
+    cache.SetMaxSize(cacheSize);
+  }
+
+  template <class N>
+  size_t DataFile<N>::GetCacheSize() const
+  {
+    std::scoped_lock<std::mutex> lock(accessMutex);
+
+    return cache.GetMaxSize();
+  }
+
+  template <class N>
+  size_t DataFile<N>::GetCachedEntryCount() const
+  {
+    std::scoped_lock<std::mutex> lock(accessMutex);
+
+    return cache.GetSize();
   }
 
   /**

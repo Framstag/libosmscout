@@ -1,7 +1,8 @@
 package com.framstag.libosmscout.client;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -25,15 +26,19 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class OSMScoutClientNavigationLiveTest {
 
-    private static OSMScoutClient client;
+    private OSMScoutClient localClient;
 
-    @BeforeAll
-    public static void setUp() {
-        try {
-            client = new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
+    @BeforeEach
+    public void setUp() {
+        TestClients.assumeNativeLibrary();
+    }
+
+    /** Releases the client of this test however the test ends. */
+    @AfterEach
+    public void closeLocalClient() {
+        if (localClient != null) {
+            localClient.close();
+            localClient = null;
         }
     }
 
@@ -68,7 +73,7 @@ public class OSMScoutClientNavigationLiveTest {
             .withCustomPoiType("_route_start")
             .withCustomPoiType("_route_end");
 
-        OSMScoutClient localClient = builder.build();
+        localClient = builder.build();
         Assumptions.assumeTrue(localClient != null, "client already initialised");
 
         assertTrue(localClient.openDatabase(mapDir.toString()),
@@ -196,7 +201,6 @@ public class OSMScoutClientNavigationLiveTest {
             "route instructions callback should have been called");
 
         controller.stop();
-        localClient.close();
     }
 
     @Test
@@ -215,7 +219,7 @@ public class OSMScoutClientNavigationLiveTest {
             .withCustomPoiType("_route_start")
             .withCustomPoiType("_route_end");
 
-        OSMScoutClient localClient = builder.build();
+        localClient = builder.build();
         Assumptions.assumeTrue(localClient != null, "client already initialised");
         assertTrue(localClient.openDatabase(mapDir.toString()), "database should open");
 
@@ -252,8 +256,6 @@ public class OSMScoutClientNavigationLiveTest {
         assertTrue(route.routeHandle != 0, "route handle should be set");
         assertTrue(route.distance > 0, "bicycle route distance should be positive");
         System.out.println("[Test] bicycle route distance=" + route.distance + "m duration=" + route.duration + "s");
-
-        localClient.close();
     }
 
     @Test
@@ -272,7 +274,7 @@ public class OSMScoutClientNavigationLiveTest {
             .withCustomPoiType("_route_start")
             .withCustomPoiType("_route_end");
 
-        OSMScoutClient localClient = builder.build();
+        localClient = builder.build();
         Assumptions.assumeTrue(localClient != null, "client already initialised");
         assertTrue(localClient.openDatabase(mapDir.toString()), "database should open");
 
@@ -307,8 +309,6 @@ public class OSMScoutClientNavigationLiveTest {
         assertTrue(route.routeHandle != 0, "route handle should be set");
         assertTrue(route.distance > 0, "pedestrian route distance should be positive");
         System.out.println("[Test] pedestrian route distance=" + route.distance + "m duration=" + route.duration + "s");
-
-        localClient.close();
     }
 
     @Test
@@ -327,7 +327,7 @@ public class OSMScoutClientNavigationLiveTest {
             .withCustomPoiType("_route_start")
             .withCustomPoiType("_route_end");
 
-        OSMScoutClient localClient = builder.build();
+        localClient = builder.build();
         Assumptions.assumeTrue(localClient != null, "client already initialised");
         assertTrue(localClient.openDatabase(mapDir.toString()), "database should open");
 
@@ -393,6 +393,5 @@ public class OSMScoutClientNavigationLiveTest {
         assertFalse(positions.isEmpty(), "should have at least one position");
 
         controller.stop();
-        localClient.close();
     }
 }

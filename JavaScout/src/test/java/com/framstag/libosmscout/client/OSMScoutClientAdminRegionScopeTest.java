@@ -33,12 +33,7 @@ public class OSMScoutClientAdminRegionScopeTest {
 
     /** Skip the test when the native library cannot be loaded. */
     private static void assumeNativeLibrary() {
-        try {
-            new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
-        }
+        TestClients.assumeNativeLibrary();
     }
 
     /** Operator-provided map database directory, or null when unset. */
@@ -88,12 +83,14 @@ public class OSMScoutClientAdminRegionScopeTest {
     public void testScopeNameWithoutRegion(@TempDir Path emptyDir) {
         OSMScoutClient noMapClient = buildClient(emptyDir);
 
-        assertNull(noMapClient.getAdminRegionScopeName(0),
-            "handle 0 resolves no region, so it has no scope name");
-        assertNull(noMapClient.getAdminRegionScopeName(UNKNOWN_HANDLE),
-            "an unknown handle has no scope name");
-
-        noMapClient.close();
+        try {
+            assertNull(noMapClient.getAdminRegionScopeName(0),
+                "handle 0 resolves no region, so it has no scope name");
+            assertNull(noMapClient.getAdminRegionScopeName(UNKNOWN_HANDLE),
+                "an unknown handle has no scope name");
+        } finally {
+            noMapClient.close();
+        }
     }
 
     /**

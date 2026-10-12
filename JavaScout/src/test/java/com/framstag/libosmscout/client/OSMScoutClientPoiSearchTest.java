@@ -1,8 +1,11 @@
 package com.framstag.libosmscout.client;
 
 import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,49 +15,83 @@ import static org.junit.jupiter.api.Assertions.*;
  * Skipped automatically when the native library is not available. The
  * database-driven scenario additionally requires {@code -Dpoi.test.db.dir}
  * pointing at an openable .osmscout database directory.
+ * <p>
+ * The native layer holds at most one client at a time, so every test builds the client
+ * it uses - or the clients it uses, releasing each before the next is built - and
+ * releases it however the test ends, including a skipped assumption.
  */
 public class OSMScoutClientPoiSearchTest {
 
-    private static OSMScoutClient client;
+    @BeforeEach
+    public void setUp() {
+        TestClients.assumeNativeLibrary();
+    }
 
-    @BeforeAll
-    public static void setUp() {
+    // The four tests below claim that a search without a database yields no results.
+    // The claim is about the database, so the client must be initialised: a client
+    // without a native handle would answer from the "client not initialised" guard and
+    // make the assertions pass for a reason they do not name.
+
+    @Test
+    public void testUnknownCategoryReturnsEmpty(@TempDir Path emptyDir) {
+        OSMScoutClient noMapClient = buildClient(emptyDir.toString());
+
         try {
-            client = new OSMScoutClient();
-        } catch (UnsatisfiedLinkError | NoClassDefFoundError e) {
-            Assumptions.assumeTrue(false,
-                "Native library not available: " + e.getMessage());
+            assertTrue(noMapClient.isInitialized(), "the test needs an initialised client");
+
+            PoiEntry[] results = noMapClient.searchPOIs("unknown-category", 52.0, 8.0, 5000, 50);
+            assertNotNull(results);
+            assertEquals(0, results.length);
+        } finally {
+            noMapClient.close();
         }
     }
 
     @Test
-    public void testUnknownCategoryReturnsEmpty() {
-        PoiEntry[] results = client.searchPOIs("unknown-category", 52.0, 8.0, 5000, 50);
-        assertNotNull(results);
-        assertEquals(0, results.length);
+    public void testZeroRadiusReturnsEmpty(@TempDir Path emptyDir) {
+        OSMScoutClient noMapClient = buildClient(emptyDir.toString());
+
+        try {
+            assertTrue(noMapClient.isInitialized(), "the test needs an initialised client");
+
+            PoiEntry[] results = noMapClient.searchPOIs(PoiCategories.HOTELS, 52.0, 8.0, 0, 50);
+            assertNotNull(results);
+            assertEquals(0, results.length);
+        } finally {
+            noMapClient.close();
+        }
     }
 
     @Test
-    public void testZeroRadiusReturnsEmpty() {
-        PoiEntry[] results = client.searchPOIs(PoiCategories.HOTELS, 52.0, 8.0, 0, 50);
-        assertNotNull(results);
-        assertEquals(0, results.length);
+    public void testNegativeRadiusReturnsEmpty(@TempDir Path emptyDir) {
+        OSMScoutClient noMapClient = buildClient(emptyDir.toString());
+
+        try {
+            assertTrue(noMapClient.isInitialized(), "the test needs an initialised client");
+
+            PoiEntry[] results = noMapClient.searchPOIs(PoiCategories.RESTAURANTS, 52.0, 8.0, -1, 50);
+            assertNotNull(results);
+            assertEquals(0, results.length);
+        } finally {
+            noMapClient.close();
+        }
     }
 
     @Test
-    public void testNegativeRadiusReturnsEmpty() {
-        PoiEntry[] results = client.searchPOIs(PoiCategories.RESTAURANTS, 52.0, 8.0, -1, 50);
-        assertNotNull(results);
-        assertEquals(0, results.length);
-    }
+    public void testSearchBeforeDatabaseOpenReturnsEmpty(@TempDir Path emptyDir) {
+        OSMScoutClient noMapClient = buildClient(emptyDir.toString());
 
-    @Test
-    public void testSearchBeforeDatabaseOpenReturnsEmpty() {
-        // The client has no databases registered, so the search must yield no
-        // results without error (spec: Search on uninitialized client).
-        PoiEntry[] results = client.searchPOIs(PoiCategories.GROCERY, 52.0, 8.0, 5000, 50);
-        assertNotNull(results);
-        assertEquals(0, results.length);
+        try {
+            assertTrue(noMapClient.isInitialized(), "the test needs an initialised client");
+
+            // The client has no databases registered, so the search must yield no
+            // results without error (spec: Search on uninitialized client).
+            PoiEntry[] results = noMapClient.searchPOIs(PoiCategories.GROCERY, 52.0, 8.0, 5000, 50);
+            assertNotNull(results);
+            assertEquals(0, results.length);
+        } finally {
+            noMapClient.close();
+        }
     }
 
     @Test
@@ -63,24 +100,19 @@ public class OSMScoutClientPoiSearchTest {
         Assumptions.assumeTrue(dbDir != null && !dbDir.isEmpty(),
             "poi.test.db.dir not set - skipping database-driven scenario");
 
-        OSMScoutClient dbClient = new OSMScoutClientBuilder()
-            .withMapLookupDirectories(dbDir)
-            .withStyleSheetDirectory("../stylesheets")
-            .withPhysicalDpi(96.0)
-            .withUnits("metrics")
-            .build();
-        Assumptions.assumeTrue(dbClient != null, "could not build client");
-        Assumptions.assumeTrue(dbClient.openDatabase(dbDir), "could not open database");
+        OSMScoutClient dbClient = openFixtureClient(dbDir);
 
-        PoiEntry[] results = dbClient.searchPOIs(PoiCategories.HOTELS, 52.0, 8.0, 20000, 50);
-        assertNotNull(results);
-        assertTrue(results.length <= 50);
-        for (PoiEntry entry : results) {
-            assertNotNull(entry.objectType);
-            assertTrue(entry.distance >= 0.0);
+        try {
+            PoiEntry[] results = dbClient.searchPOIs(PoiCategories.HOTELS, 52.0, 8.0, 20000, 50);
+            assertNotNull(results);
+            assertTrue(results.length <= 50);
+            for (PoiEntry entry : results) {
+                assertNotNull(entry.objectType);
+                assertTrue(entry.distance >= 0.0);
+            }
+        } finally {
+            dbClient.close();
         }
-
-        dbClient.close();
     }
 
     // -------------------------------------------------------------------
@@ -110,16 +142,11 @@ public class OSMScoutClientPoiSearchTest {
     public void testMultiDatabaseSearchCoversEveryLoadedDatabase() throws InterruptedException {
         String dbDir = multiDatabaseDir();
 
-        OSMScoutClient mergedClient = openLookupClient(dbDir);
-        PoiEntry[] merged = searchStable(mergedClient, PoiCategories.RESTAURANTS);
-        mergedClient.close();
-
+        PoiEntry[] merged = searchInLookupClient(dbDir);
         Assumptions.assumeTrue(merged != null && merged.length > 0,
             "the overlapping databases hold no restaurant around the search center");
 
-        OSMScoutClient singleClient = openLookupClient(singleDatabaseDir(dbDir));
-        PoiEntry[] single = searchStable(singleClient, PoiCategories.RESTAURANTS);
-        singleClient.close();
+        PoiEntry[] single = searchInLookupClient(singleDatabaseDir(dbDir));
 
         java.util.Set<String> singleKeys = new java.util.HashSet<>();
         if (single != null) {
@@ -147,10 +174,7 @@ public class OSMScoutClientPoiSearchTest {
     public void testMultiDatabaseSearchCollapsesDuplicatePois() throws InterruptedException {
         String dbDir = multiDatabaseDir();
 
-        OSMScoutClient mergedClient = openLookupClient(dbDir);
-        PoiEntry[] merged = searchStable(mergedClient, PoiCategories.RESTAURANTS);
-        mergedClient.close();
-
+        PoiEntry[] merged = searchInLookupClient(dbDir);
         Assumptions.assumeTrue(merged != null && merged.length > 0,
             "the overlapping databases hold no restaurant around the search center");
 
@@ -168,17 +192,11 @@ public class OSMScoutClientPoiSearchTest {
         throws InterruptedException {
         String dbDir = multiDatabaseDir();
 
-        OSMScoutClient mergedClient = openLookupClient(dbDir);
-        PoiEntry[] merged = searchStable(mergedClient, PoiCategories.RESTAURANTS);
-        mergedClient.close();
-
+        PoiEntry[] merged = searchInLookupClient(dbDir);
         Assumptions.assumeTrue(merged != null && merged.length > 0,
             "the overlapping databases hold no restaurant around the search center");
 
-        OSMScoutClient singleClient = openLookupClient(singleDatabaseDir(dbDir));
-        PoiEntry[] single = searchStable(singleClient, PoiCategories.RESTAURANTS);
-        singleClient.close();
-
+        PoiEntry[] single = searchInLookupClient(singleDatabaseDir(dbDir));
         Assumptions.assumeTrue(single != null && single.length > 0,
             "the center's database returned no restaurant");
 
@@ -210,11 +228,17 @@ public class OSMScoutClientPoiSearchTest {
     public void testMultiDatabaseSearchOrderIsDeterministic() throws InterruptedException {
         String dbDir = multiDatabaseDir();
 
-        OSMScoutClient mergedClient = openLookupClient(dbDir);
-        PoiEntry[] first = searchStable(mergedClient, PoiCategories.RESTAURANTS);
-        PoiEntry[] second = mergedClient.searchPOIs(PoiCategories.RESTAURANTS,
-            MULTIDB_LAT, MULTIDB_LON, MULTIDB_RADIUS, MULTIDB_LIMIT);
-        mergedClient.close();
+        OSMScoutClient mergedClient = buildClient(dbDir);
+
+        PoiEntry[] first;
+        PoiEntry[] second;
+        try {
+            first = searchStable(mergedClient, PoiCategories.RESTAURANTS);
+            second = mergedClient.searchPOIs(PoiCategories.RESTAURANTS,
+                MULTIDB_LAT, MULTIDB_LON, MULTIDB_RADIUS, MULTIDB_LIMIT);
+        } finally {
+            mergedClient.close();
+        }
 
         Assumptions.assumeTrue(first != null && first.length > 0,
             "the overlapping databases hold no restaurant around the search center");
@@ -241,27 +265,30 @@ public class OSMScoutClientPoiSearchTest {
             "poi.test.db.dir not set - skipping attribute scenario");
 
         OSMScoutClient dbClient = openFixtureClient(dbDir);
-        PoiEntry[] results = searchUntilLoaded(dbClient, PoiCategories.CHARGING_STATION);
-        Assumptions.assumeTrue(results != null && results.length > 0,
-            "fixture has no charging stations to check the attributes against");
 
-        int withOperator = 0;
-        for (PoiEntry entry : results) {
-            assertNotNull(entry.operator, "operator must never be null");
-            assertNotNull(entry.brand, "brand must never be null");
-            if (!entry.operator.isEmpty()) {
-                withOperator++;
+        try {
+            PoiEntry[] results = searchUntilLoaded(dbClient, PoiCategories.CHARGING_STATION);
+            Assumptions.assumeTrue(results != null && results.length > 0,
+                "fixture has no charging stations to check the attributes against");
+
+            int withOperator = 0;
+            for (PoiEntry entry : results) {
+                assertNotNull(entry.operator, "operator must never be null");
+                assertNotNull(entry.brand, "brand must never be null");
+                if (!entry.operator.isEmpty()) {
+                    withOperator++;
+                }
+                // An object without the attribute is still a usable result: the
+                // attribute is empty and the entry keeps its label and type.
+                assertNotNull(entry.label);
+                assertNotNull(entry.objectType);
             }
-            // An object without the attribute is still a usable result: the
-            // attribute is empty and the entry keeps its label and type.
-            assertNotNull(entry.label);
-            assertNotNull(entry.objectType);
+
+            assertTrue(withOperator > 0,
+                "expected at least one result carrying an operator, results=" + results.length);
+        } finally {
+            dbClient.close();
         }
-
-        assertTrue(withOperator > 0,
-            "expected at least one result carrying an operator, results=" + results.length);
-
-        dbClient.close();
     }
 
     // Spec: the label fallback must not consume the operator. A charging
@@ -274,46 +301,72 @@ public class OSMScoutClientPoiSearchTest {
             "poi.test.db.dir not set - skipping attribute scenario");
 
         OSMScoutClient dbClient = openFixtureClient(dbDir);
-        PoiEntry[] results = searchUntilLoaded(dbClient, PoiCategories.CHARGING_STATION);
-        Assumptions.assumeTrue(results != null && results.length > 0,
-            "fixture has no charging stations to check the label fallback against");
 
-        int operatorDerivedLabels = 0;
-        for (PoiEntry entry : results) {
-            if (!entry.operator.isEmpty() && entry.label.equals(entry.operator)) {
-                // The label came from the operator; the operator is still there.
-                assertFalse(entry.label.isEmpty(),
-                    "an operator-derived label is never empty");
-                operatorDerivedLabels++;
+        try {
+            PoiEntry[] results = searchUntilLoaded(dbClient, PoiCategories.CHARGING_STATION);
+            Assumptions.assumeTrue(results != null && results.length > 0,
+                "fixture has no charging stations to check the label fallback against");
+
+            int operatorDerivedLabels = 0;
+            for (PoiEntry entry : results) {
+                if (!entry.operator.isEmpty() && entry.label.equals(entry.operator)) {
+                    // The label came from the operator; the operator is still there.
+                    assertFalse(entry.label.isEmpty(),
+                        "an operator-derived label is never empty");
+                    operatorDerivedLabels++;
+                }
             }
+
+            assertTrue(operatorDerivedLabels > 0,
+                "expected at least one result whose label is derived from its operator, results="
+                    + results.length);
+        } finally {
+            dbClient.close();
         }
-
-        assertTrue(operatorDerivedLabels > 0,
-            "expected at least one result whose label is derived from its operator, results="
-                + results.length);
-
-        dbClient.close();
     }
 
-    // The JNI allows one open database client at a time and the database load
-    // is asynchronous, so building the fixture client is retried until the
-    // previous one is gone.
-    private static OSMScoutClient openFixtureClient(String dbDir) throws InterruptedException {
-        OSMScoutClient dbClient = null;
-        for (int i = 0; i < 20 && dbClient == null; i++) {
-            dbClient = new OSMScoutClientBuilder()
-                .withMapLookupDirectories(dbDir)
-                .withStyleSheetDirectory("../stylesheets")
-                .withPhysicalDpi(96.0)
-                .withUnits("metrics")
-                .build();
-            if (dbClient == null) {
-                Thread.sleep(250);
-            }
+    /**
+     * A client of this test's own on the given lookup directory, or a skip when one
+     * cannot be built. The caller releases it however the test ends.
+     */
+    private static OSMScoutClient buildClient(String lookupDir) {
+        OSMScoutClient builtClient = new OSMScoutClientBuilder()
+            .withMapLookupDirectories(lookupDir)
+            .withStyleSheetDirectory("../stylesheets")
+            .withPhysicalDpi(96.0)
+            .withUnits("metrics")
+            .build();
+
+        Assumptions.assumeTrue(builtClient != null, "could not build client");
+
+        return builtClient;
+    }
+
+    /**
+     * The same, with the fixture database opened. A client that cannot open the
+     * database is released before the test skips, so a skip cannot leave it behind.
+     */
+    private static OSMScoutClient openFixtureClient(String dbDir) {
+        OSMScoutClient dbClient = buildClient(dbDir);
+
+        if (!dbClient.openDatabase(dbDir)) {
+            dbClient.close();
+
+            Assumptions.assumeTrue(false, "could not open database");
         }
-        Assumptions.assumeTrue(dbClient != null, "could not build client");
-        Assumptions.assumeTrue(dbClient.openDatabase(dbDir), "could not open database");
+
         return dbClient;
+    }
+
+    /** Search in a client of this test's own, released before this method returns. */
+    private static PoiEntry[] searchInLookupClient(String lookupDir) throws InterruptedException {
+        OSMScoutClient lookupClient = buildClient(lookupDir);
+
+        try {
+            return searchStable(lookupClient, PoiCategories.RESTAURANTS);
+        } finally {
+            lookupClient.close();
+        }
     }
 
     // A search issued while the database is still loading returns no results;
@@ -366,25 +419,6 @@ public class OSMScoutClientPoiSearchTest {
             Thread.sleep(500);
         }
         return results;
-    }
-
-    // The JNI allows only one open database client at a time, so building a
-    // client is retried until the previous one is gone.
-    private static OSMScoutClient openLookupClient(String lookupDir) throws InterruptedException {
-        OSMScoutClient dbClient = null;
-        for (int i = 0; i < 20 && dbClient == null; i++) {
-            dbClient = new OSMScoutClientBuilder()
-                .withMapLookupDirectories(lookupDir)
-                .withStyleSheetDirectory("../stylesheets")
-                .withPhysicalDpi(96.0)
-                .withUnits("metrics")
-                .build();
-            if (dbClient == null) {
-                Thread.sleep(250);
-            }
-        }
-        Assumptions.assumeTrue(dbClient != null, "could not build client");
-        return dbClient;
     }
 
     private static String signatures(PoiEntry[] entries) {

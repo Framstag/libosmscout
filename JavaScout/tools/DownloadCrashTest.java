@@ -13,6 +13,26 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Manual reproduction tool for the map-download crash. This is not a test: it lives
+ * outside the Maven test source root on purpose, so the suite neither compiles nor runs
+ * it (as a class without test cases it would sit in the test classpath and could be
+ * mistaken for one).
+ * <p>
+ * Run it by hand from the repository root, with the client jar and the native library built
+ * (Meson: {@code meson compile -C build-meson libosmscoutclientjava osmscout_client_java}):
+ * <pre>
+ * JAR=build-meson/libosmscout-client-java/java/libosmscoutclientjava.jar
+ * javac -cp "$JAR" -d JavaScout/target/manual-tools JavaScout/tools/DownloadCrashTest.java
+ * java -Djava.library.path=build-meson/libosmscout-client-java/src \
+ *      -cp "JavaScout/target/manual-tools:$JAR" com.framstag.libosmscout.DownloadCrashTest
+ * </pre>
+ * The same jar is installed into the local Maven repository by {@code JavaScout/build.sh}, which
+ * is the other way to obtain it. Prerequisites: the native library on
+ * {@code java.library.path}, network access to the map provider, and a stylesheet directory -
+ * the path in {@code main} points at this repository's {@code stylesheets} and has to be
+ * adjusted for another checkout.
+ */
 public class DownloadCrashTest {
     public static void main(String[] args) throws Exception {
         Path tmp = Files.createTempDirectory("javascout-download-test");
