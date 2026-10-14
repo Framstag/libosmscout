@@ -2240,9 +2240,13 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
   jclass instructionCls = env->FindClass("com/framstag/libosmscout/client/RouteInstruction");
   if (instructionCls) {
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
+    // The descriptor must match the full Java constructor exactly - it is the one
+    // with the roundabout fields. A mismatch leaves instructionCtor null, which
+    // CreateJavaRouteInstruction reports by returning null (see DispatchRouteInstructions,
+    // which then sends no instructions rather than an array with null entries).
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZ)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -2279,6 +2283,19 @@ struct JavaRouteInstruction
   std::string streetName;       // street to turn into
   std::string description;      // "Turn left into Hauptstrasse"
   std::string shortDescription; // "Turn left"
+
+  // Roundabout manoeuvres: the 1-based ordinal, counted in circulation order, of the
+  // exit the route takes, and the ring's circulation direction. 0 / true when the
+  // instruction is not a roundabout manoeuvre.
+  //
+  // libosmscout's RoundaboutLeaveDescription::GetExitCount() counts the exits passed
+  // (RoutePostprocessor: roundaboutCrossingCounter), so the value it returns IS that
+  // ordinal - it is not the number of exits the ring has, which no part of the
+  // description carries. The English "Exit N" text is not a substitute for either
+  // field: it carries no direction, and an unparseable text is indistinguishable
+  // from an unknown exit at the call site.
+  int roundaboutExitNumber{0};
+  bool roundaboutClockwise{true};
 
   // Optional "next next" hint — populated when the following instruction
   // is within CloseHintDistance of the current one (e.g. roundabout exit).
@@ -2585,7 +2602,7 @@ private:
       result.push_back(instr);
     }
 
-    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef & /*roundaboutEnterDesc*/,
+    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDesc,
                            const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
     {
       JavaRouteInstruction instr;
@@ -2594,6 +2611,12 @@ private:
       instr.turnType = "roundaboutEnter";
       instr.description = "Enter roundabout";
       instr.shortDescription = "Roundabout";
+      // The ring's circulation direction: without it a consumer cannot tell a
+      // clockwise roundabout from a counter-clockwise one, and the direction
+      // cannot be recovered from the instruction text.
+      if (roundaboutEnterDesc) {
+        instr.roundaboutClockwise = roundaboutEnterDesc->IsClockwise();
+      }
       result.push_back(instr);
     }
 
@@ -2611,6 +2634,13 @@ private:
       instr.streetName = street;
       instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
       instr.shortDescription = "Exit " + exitStr;
+      // The ordinal of the exit taken (see the field's comment) and the direction,
+      // as structure - the text above stays byte-identical so a consumer that reads
+      // only strings observes no change.
+      if (roundaboutLeaveDesc) {
+        instr.roundaboutExitNumber = static_cast<int>(roundaboutLeaveDesc->GetExitCount());
+        instr.roundaboutClockwise = roundaboutLeaveDesc->IsClockwise();
+      }
       result.push_back(instr);
     }
 
@@ -3123,7 +3153,9 @@ private:
         instr.nextNextDistanceTo,
         nnTurnTypeObj,
         nnDescJ,
-        nnShortDescJ);
+        nnShortDescJ,
+        instr.roundaboutExitNumber,
+        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE);
 
     env->DeleteLocalRef(turnTypeObj);
     env->DeleteLocalRef(streetNameJ);
@@ -3141,19 +3173,29 @@ private:
   {
     if (!methods.onRouteInstructions) return;
 
-    jsize count = static_cast<jsize>(instructions.size());
-    jobjectArray arr = env->NewObjectArray(
-        count,
-        static_cast<jclass>(methods.instructionClsGlobal),
-        nullptr);
-
-    jsize idx = 0;
+    // Build every instruction before the array exists. An instruction the bridge cannot
+    // build yields null - a missing constructor method id (a descriptor that does not
+    // match the Java constructor) or a missing TurnType enum method makes every
+    // instruction unbuildable - and an array sized for the input would then carry null
+    // entries that the listener dereferences far from here. No buildable instruction
+    // means no dispatch at all, which is observable as an absent instruction list.
+    std::vector<jobject> built;
+    built.reserve(instructions.size());
     for (const auto &instr : instructions) {
       jobject instrObj = CreateJavaRouteInstruction(env, instr);
       if (instrObj) {
-        env->SetObjectArrayElement(arr, idx++, instrObj);
-        env->DeleteLocalRef(instrObj);
+        built.push_back(instrObj);
       }
+    }
+    if (built.empty()) return;
+
+    jobjectArray arr = env->NewObjectArray(
+        static_cast<jsize>(built.size()),
+        static_cast<jclass>(methods.instructionClsGlobal),
+        nullptr);
+    for (size_t i = 0; i < built.size(); ++i) {
+      env->SetObjectArrayElement(arr, static_cast<jsize>(i), built[i]);
+      env->DeleteLocalRef(built[i]);
     }
 
     env->CallVoidMethod(listenerGlobal, methods.onRouteInstructions, arr);
