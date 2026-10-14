@@ -67,6 +67,14 @@ public class RouteInstruction {
      */
     public final boolean roundaboutClockwise;
 
+    /**
+     * {@link #roundaboutExitNumber} for the "next next" hint's manoeuvre: the ordinal of the
+     * exit that following manoeuvre takes, or 0 when the hint is absent or is not a roundabout
+     * exit. A separate field because the hint's roundabout can be a different one from the
+     * roundabout this instruction leaves.
+     */
+    public final int nextNextRoundaboutExitNumber;
+
     // -- Optional "next next" hint fields --
 
     /** Distance to the following manoeuvre (0 if none or too far). */
@@ -96,7 +104,7 @@ public class RouteInstruction {
                             String description,
                             String shortDescription) {
         this(distanceTo, 0.0, 0.0, turnType, streetName, description, shortDescription,
-             0.0, TurnType.STRAIGHT_ON, "", "", 0, true);
+             0.0, TurnType.STRAIGHT_ON, "", "", 0, true, 0);
     }
 
     /**
@@ -105,6 +113,55 @@ public class RouteInstruction {
      * @param distanceTo              distance to next manoeuvre in meters
      * @param timeTo                  travel time of the leg ending at this manoeuvre in seconds (0 if unknown)
      * @param legDistance             length of that leg in meters (0 if unknown)
+     * @param turnType                type of turn
+     * @param streetName              street to turn into (may be empty)
+     * @param description             human-readable description
+     * @param shortDescription        short description
+     * @param nextNextDistanceTo      distance to following manoeuvre (0 if none)
+     * @param nextNextTurnType        turn type of following manoeuvre
+     * @param nextNextDescription     description of following manoeuvre
+     * @param nextNextShortDescription short description of following manoeuvre
+     * @param roundaboutExitNumber    ordinal of the roundabout exit taken, 0 if none
+     * @param roundaboutClockwise     circulation direction of the roundabout
+     * @param nextNextRoundaboutExitNumber ordinal of the next-next hint's roundabout exit, 0 if none
+     */
+    public RouteInstruction(double distanceTo,
+                            double timeTo,
+                            double legDistance,
+                            TurnType turnType,
+                            String streetName,
+                            String description,
+                            String shortDescription,
+                            double nextNextDistanceTo,
+                            TurnType nextNextTurnType,
+                            String nextNextDescription,
+                            String nextNextShortDescription,
+                            int roundaboutExitNumber,
+                            boolean roundaboutClockwise,
+                            int nextNextRoundaboutExitNumber) {
+        this.distanceTo = distanceTo;
+        this.timeTo = timeTo;
+        this.legDistance = legDistance;
+        this.turnType = turnType;
+        this.streetName = streetName != null ? streetName : "";
+        this.description = description != null ? description : "";
+        this.shortDescription = shortDescription != null ? shortDescription : "";
+        this.nextNextDistanceTo = nextNextDistanceTo;
+        this.nextNextTurnType = nextNextTurnType != null ? nextNextTurnType : TurnType.STRAIGHT_ON;
+        this.nextNextDescription = nextNextDescription != null ? nextNextDescription : "";
+        this.nextNextShortDescription = nextNextShortDescription != null ? nextNextShortDescription : "";
+        this.roundaboutExitNumber = roundaboutExitNumber;
+        this.roundaboutClockwise = roundaboutClockwise;
+        this.nextNextRoundaboutExitNumber = nextNextRoundaboutExitNumber;
+    }
+
+    /**
+     * Constructor without the next-next roundabout ordinal, kept so an existing caller compiles
+     * unchanged; that ordinal defaults to "no roundabout", the behaviour before it existed.
+     *
+     * @param distanceTo              distance to next manoeuvre in meters
+     * @param timeTo                  travel time of the leg ending at this manoeuvre in seconds
+     * @param legDistance             length of that leg in meters
      * @param turnType                type of turn
      * @param streetName              street to turn into (may be empty)
      * @param description             human-readable description
@@ -129,19 +186,9 @@ public class RouteInstruction {
                             String nextNextShortDescription,
                             int roundaboutExitNumber,
                             boolean roundaboutClockwise) {
-        this.distanceTo = distanceTo;
-        this.timeTo = timeTo;
-        this.legDistance = legDistance;
-        this.turnType = turnType;
-        this.streetName = streetName != null ? streetName : "";
-        this.description = description != null ? description : "";
-        this.shortDescription = shortDescription != null ? shortDescription : "";
-        this.nextNextDistanceTo = nextNextDistanceTo;
-        this.nextNextTurnType = nextNextTurnType != null ? nextNextTurnType : TurnType.STRAIGHT_ON;
-        this.nextNextDescription = nextNextDescription != null ? nextNextDescription : "";
-        this.nextNextShortDescription = nextNextShortDescription != null ? nextNextShortDescription : "";
-        this.roundaboutExitNumber = roundaboutExitNumber;
-        this.roundaboutClockwise = roundaboutClockwise;
+        this(distanceTo, timeTo, legDistance, turnType, streetName, description, shortDescription,
+             nextNextDistanceTo, nextNextTurnType, nextNextDescription, nextNextShortDescription,
+             roundaboutExitNumber, roundaboutClockwise, 0);
     }
 
     /**
@@ -174,7 +221,7 @@ public class RouteInstruction {
                             String nextNextShortDescription) {
         this(distanceTo, timeTo, legDistance, turnType, streetName, description, shortDescription,
              nextNextDistanceTo, nextNextTurnType, nextNextDescription, nextNextShortDescription,
-             0, true);
+             0, true, 0);
     }
 
     /**

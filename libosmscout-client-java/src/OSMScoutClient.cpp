@@ -2246,7 +2246,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     // which then sends no instructions rather than an array with null entries).
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZ)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZI)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -2303,6 +2303,12 @@ struct JavaRouteInstruction
   std::string nextNextTurnType;
   std::string nextNextDescription;
   std::string nextNextShortDescription;
+
+  // The following manoeuvre's roundabout exit ordinal, on the same terms as
+  // roundaboutExitNumber: 0 when the hint's manoeuvre is not a roundabout exit or the hint
+  // is absent. It is its own field because the hint can be a different roundabout from the
+  // one roundaboutExitNumber describes.
+  int nextNextRoundaboutExitNumber{0};
 
   static constexpr double CloseHintDistance = 200.0; // meters
 
@@ -2414,6 +2420,7 @@ public:
         next.nextNextTurnType = it->turnType;
         next.nextNextDescription = it->description;
         next.nextNextShortDescription = it->shortDescription;
+        next.nextNextRoundaboutExitNumber = it->roundaboutExitNumber;
       }
     }
 
@@ -3155,7 +3162,8 @@ private:
         nnDescJ,
         nnShortDescJ,
         instr.roundaboutExitNumber,
-        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE);
+        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE,
+        instr.nextNextRoundaboutExitNumber);
 
     env->DeleteLocalRef(turnTypeObj);
     env->DeleteLocalRef(streetNameJ);
