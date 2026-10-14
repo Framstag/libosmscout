@@ -2177,6 +2177,45 @@ struct NavigationListenerMethods
   jmethodID laneTurnFromId{nullptr};
 };
 
+// A failed FindClass / GetMethodID / GetStaticMethodID leaves a *pending* exception
+// (ClassNotFoundException, NoSuchMethodError, ...). While one is pending, the next JNI call
+// aborts the process - "JNI DETECTED ERROR IN APPLICATION: JNI FindClass called with pending
+// exception java.lang.NoSuchMethodError: no non-static method \"...RouteInstruction;.<init>(...)\""
+// - so every null-returning guard downstream becomes unreachable and a mismatching
+// descriptor crashes at bridge init instead of degrading. Clearing it here is what makes a
+// missing class or method a null method id, and from there a refused dispatch.
+//
+// Measured (2026-10-14, emulator-5554): with the instruction-constructor descriptor mutated to
+// a signature that matches no constructor, the abort landed on the FindClass for TurnType - the
+// next lookup after the failing one - and the instrumentation reported "Process crashed", not a
+// failed case. With this clear in place the same mutation delivers no instruction list at all.
+static jclass FindClassOrClear(JNIEnv *env, const char *name)
+{
+  jclass cls = env->FindClass(name);
+  if (!cls) {
+    env->ExceptionClear();
+  }
+  return cls;
+}
+
+static jmethodID GetMethodOrClear(JNIEnv *env, jclass cls, const char *name, const char *sig)
+{
+  jmethodID id = env->GetMethodID(cls, name, sig);
+  if (!id) {
+    env->ExceptionClear();
+  }
+  return id;
+}
+
+static jmethodID GetStaticMethodOrClear(JNIEnv *env, jclass cls, const char *name, const char *sig)
+{
+  jmethodID id = env->GetStaticMethodID(cls, name, sig);
+  if (!id) {
+    env->ExceptionClear();
+  }
+  return id;
+}
+
 static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
                                          NavigationListenerMethods &methods)
 {
@@ -2185,83 +2224,85 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     return false;
   }
 
-  methods.onPositionEstimate = env->GetMethodID(
-      listenerCls, "onPositionEstimate",
+  methods.onPositionEstimate = GetMethodOrClear(
+      env, listenerCls, "onPositionEstimate",
       "(Lcom/framstag/libosmscout/client/NavigationPosition;)V");
-  methods.onRerouteRequest = env->GetMethodID(
-      listenerCls, "onRerouteRequest",
+  methods.onRerouteRequest = GetMethodOrClear(
+      env, listenerCls, "onRerouteRequest",
       "(DDDDD)V");
-  methods.onTargetReached = env->GetMethodID(
-      listenerCls, "onTargetReached",
+  methods.onTargetReached = GetMethodOrClear(
+      env, listenerCls, "onTargetReached",
       "(DD)V");
-  methods.onArrivalEstimate = env->GetMethodID(
-      listenerCls, "onArrivalEstimate",
+  methods.onArrivalEstimate = GetMethodOrClear(
+      env, listenerCls, "onArrivalEstimate",
       "(JD)V");
-  methods.onCurrentSpeed = env->GetMethodID(
-      listenerCls, "onCurrentSpeed",
+  methods.onCurrentSpeed = GetMethodOrClear(
+      env, listenerCls, "onCurrentSpeed",
       "(D)V");
-  methods.onMaxAllowedSpeed = env->GetMethodID(
-      listenerCls, "onMaxAllowedSpeed",
+  methods.onMaxAllowedSpeed = GetMethodOrClear(
+      env, listenerCls, "onMaxAllowedSpeed",
       "(D)V");
-  methods.onLaneUpdate = env->GetMethodID(
-      listenerCls, "onLaneUpdate",
+  methods.onLaneUpdate = GetMethodOrClear(
+      env, listenerCls, "onLaneUpdate",
       "(ZIZIILjava/lang/String;[Lcom/framstag/libosmscout/client/LaneTurn;)V");
-  methods.onVoiceInstruction = env->GetMethodID(
-      listenerCls, "onVoiceInstruction",
+  methods.onVoiceInstruction = GetMethodOrClear(
+      env, listenerCls, "onVoiceInstruction",
       "([I)V");
-  methods.onError = env->GetMethodID(
-      listenerCls, "onError",
+  methods.onError = GetMethodOrClear(
+      env, listenerCls, "onError",
       "(Ljava/lang/String;)V");
 
-  jclass positionCls = env->FindClass("com/framstag/libosmscout/client/NavigationPosition");
+  jclass positionCls = FindClassOrClear(env, "com/framstag/libosmscout/client/NavigationPosition");
   if (positionCls) {
     methods.positionClsGlobal = env->NewGlobalRef(positionCls);
-    methods.positionCtor = env->GetMethodID(
-        positionCls, "<init>",
+    methods.positionCtor = GetMethodOrClear(
+        env, positionCls, "<init>",
         "(Lcom/framstag/libosmscout/client/NavigationState;DDDDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
   }
 
-  jclass stateCls = env->FindClass("com/framstag/libosmscout/client/NavigationState");
+  jclass stateCls = FindClassOrClear(env, "com/framstag/libosmscout/client/NavigationState");
   if (stateCls) {
     methods.stateClsGlobal = env->NewGlobalRef(stateCls);
-    methods.stateValueOf = env->GetStaticMethodID(
-        stateCls, "valueOf",
+    methods.stateValueOf = GetStaticMethodOrClear(
+        env, stateCls, "valueOf",
         "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/NavigationState;");
   }
 
   // Route instruction callbacks
-  methods.onRouteInstructions = env->GetMethodID(
-      listenerCls, "onRouteInstructions",
+  methods.onRouteInstructions = GetMethodOrClear(
+      env, listenerCls, "onRouteInstructions",
       "([Lcom/framstag/libosmscout/client/RouteInstruction;)V");
-  methods.onNextRouteInstruction = env->GetMethodID(
-      listenerCls, "onNextRouteInstruction",
+  methods.onNextRouteInstruction = GetMethodOrClear(
+      env, listenerCls, "onNextRouteInstruction",
       "(Lcom/framstag/libosmscout/client/RouteInstruction;)V");
 
-  jclass instructionCls = env->FindClass("com/framstag/libosmscout/client/RouteInstruction");
+  jclass instructionCls = FindClassOrClear(env, "com/framstag/libosmscout/client/RouteInstruction");
   if (instructionCls) {
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
     // The descriptor must match the full Java constructor exactly - it is the one
     // with the roundabout fields. A mismatch leaves instructionCtor null, which
     // CreateJavaRouteInstruction reports by returning null (see DispatchRouteInstructions,
-    // which then sends no instructions rather than an array with null entries).
-    methods.instructionCtor = env->GetMethodID(
-        instructionCls, "<init>",
+    // which then sends no instructions rather than an array with null entries). That path
+    // is only reachable because the lookup clears its own pending exception above: left
+    // pending, the exception aborts the process on the next JNI call, before any of this.
+    methods.instructionCtor = GetMethodOrClear(
+        env, instructionCls, "<init>",
         "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZI)V");
   }
 
-  jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
+  jclass turnTypeCls = FindClassOrClear(env, "com/framstag/libosmscout/client/TurnType");
   if (turnTypeCls) {
     methods.turnTypeClsGlobal = env->NewGlobalRef(turnTypeCls);
-    methods.turnTypeValueOf = env->GetStaticMethodID(
-        turnTypeCls, "fromString",
+    methods.turnTypeValueOf = GetStaticMethodOrClear(
+        env, turnTypeCls, "fromString",
         "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/TurnType;");
   }
 
-  jclass laneTurnCls = env->FindClass("com/framstag/libosmscout/client/LaneTurn");
+  jclass laneTurnCls = FindClassOrClear(env, "com/framstag/libosmscout/client/LaneTurn");
   if (laneTurnCls) {
     methods.laneTurnClsGlobal = env->NewGlobalRef(laneTurnCls);
-    methods.laneTurnFromId = env->GetStaticMethodID(
-        laneTurnCls, "fromId",
+    methods.laneTurnFromId = GetStaticMethodOrClear(
+        env, laneTurnCls, "fromId",
         "(I)Lcom/framstag/libosmscout/client/LaneTurn;");
   }
 
