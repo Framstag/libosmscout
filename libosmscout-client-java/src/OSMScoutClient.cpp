@@ -52,6 +52,7 @@
 #include <osmscoutmap/MapPainter.h>
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapService.h>
+#include <osmscoutmap/Styles.h>
 
 #ifdef HAVE_MAP_CAIRO
 #include <osmscoutmapcairo/MapPainterCairo.h>
@@ -75,6 +76,7 @@
 #include "route_step_time.h"
 #include "routing_progress_throttle.h"
 #include "search_scope.h"
+#include "type_icon_pixels.h"
 
 #include <osmscout/util/StringMatcher.h>
 
@@ -256,6 +258,8 @@ namespace {
 
 #ifdef HAVE_MAP_CAIRO
 #include <cairo.h>
+#include <osmscoutmapcairo/LoaderPNG.h>
+#include <osmscoutmapcairo/SymbolRendererCairo.h>
 #endif
 
 #include <jni.h>
@@ -4780,6 +4784,294 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAddressAt(JNIEnv *env, jo
     env->DeleteLocalRef(jStr);
   }
   return result;
+}
+
+// --------------------------------------------------------------------------
+// OSMScoutClient::renderTypeIcon(String objectType, int sizePx)
+// --------------------------------------------------------------------------
+// The artwork the active stylesheet gives an object type, rendered into a
+// sizePx x sizePx square - the leading icon of a search result row (spec:
+// map-rendering - JNI entry point returns a type's stylesheet artwork).
+//
+// The type is looked up in the loaded type configuration and its icon style is
+// resolved through the stylesheet's own selectors, with a feature buffer that
+// carries the type and no tag values: a rule that selects on the object's tags
+// (a religion, a brand) cannot match without loading an object, and such a type
+// falls back to no artwork instead of to an invented icon. The projection is this
+// entry point's own, at a fixed detail magnification, so the call needs no map
+// frame, viewport or projection of the caller's; the artwork is scaled to fit the
+// requested square. Returns sizePx * sizePx ARGB pixels in the layout the
+// allocating render entry point returns, or null when the type has no artwork and
+// when the artwork cannot be produced (logged, never fatal).
+
+/**
+ * Magnification *level* the icon style is resolved at — a detail level at which stylesheets define
+ * POI icons. The level constructor, not the factor one: `Magnification(double)` reads its argument as
+ * a magnification factor (level 4 for 16.0), and at that level a stylesheet defines no POI icon at all.
+ */
+#define NAVIVEYLIN_TYPE_ICON_MAGNIFICATION_LEVEL osmscout::Magnification::magVeryClose
+
+/** Reference resolution of that projection; the artwork is scaled to fit regardless. */
+#define NAVIVEYLIN_TYPE_ICON_DPI 96.0
+
+/** Largest square this entry point renders; a larger request is an invalid one. */
+#define NAVIVEYLIN_TYPE_ICON_MAX_SIZE 512
+
+#if defined(HAVE_MAP_CAIRO)
+
+/**
+ * Draw `symbol` centred in a `side` x `side` canvas and scaled so that its longer
+ * side fills the configured fraction of it. False when the symbol has no extent to
+ * scale by.
+ */
+static bool DrawTypeIconSymbol(cairo_t *cr,
+                               const osmscout::Projection &projection,
+                               const osmscout::Symbol &symbol,
+                               int side)
+{
+  osmscout::ScreenBox box = symbol.GetBoundingBox(projection);
+  double extent = std::max(box.GetWidth(), box.GetHeight());
+  double scale = naviveylin::TypeIconFitScale(side, extent);
+  if (scale <= 0.0) {
+    return false;
+  }
+
+  osmscout::SymbolRendererCairo renderer(cr);
+  renderer.Render(projection,
+                  symbol,
+                  osmscout::Vertex2D(static_cast<double>(side) / 2.0, static_cast<double>(side) / 2.0),
+                  scale);
+  return true;
+}
+
+/**
+ * Draw the raster icon `iconName` from `iconDirectory` centred in a `side` x `side`
+ * canvas, scaled to fit. False when the directory or the image is unusable - a
+ * stylesheet may name an icon upstream ships as SVG only (MapPainterCairo reads
+ * PNG), which is a normal outcome and not an error.
+ */
+static bool DrawTypeIconImage(cairo_t *cr,
+                              const std::string &iconDirectory,
+                              const std::string &iconName,
+                              int side)
+{
+  if (iconDirectory.empty() || iconName.empty()) {
+    return false;
+  }
+
+  // The loader concatenates path and name: the directory must end with a separator.
+  std::string directory = iconDirectory;
+  if (directory.back() != '/' && directory.back() != '\\') {
+    directory += "/";
+  }
+
+  cairo_surface_t *image = osmscout::LoadPNG(directory + iconName + ".png");
+  if (image == nullptr) {
+    return false;
+  }
+
+  int width = cairo_image_surface_get_width(image);
+  int height = cairo_image_surface_get_height(image);
+  if (width <= 0 || height <= 0) {
+    cairo_surface_destroy(image);
+    return false;
+  }
+
+  double scale = naviveylin::TypeIconFitScale(side, static_cast<double>(std::max(width, height)));
+  if (scale <= 0.0) {
+    cairo_surface_destroy(image);
+    return false;
+  }
+
+  cairo_save(cr);
+  cairo_translate(cr, static_cast<double>(side) / 2.0, static_cast<double>(side) / 2.0);
+  cairo_scale(cr, scale, scale);
+  cairo_set_source_surface(cr, image, -static_cast<double>(width) / 2.0, -static_cast<double>(height) / 2.0);
+  cairo_paint(cr);
+  cairo_restore(cr);
+  cairo_surface_destroy(image);
+  return true;
+}
+
+#endif // HAVE_MAP_CAIRO
+
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, jobject self,
+                                                                   jstring objectType,
+                                                                   jint sizePx)
+{
+#if !defined(HAVE_MAP_CAIRO)
+  (void)self;
+  (void)objectType;
+  (void)sizePx;
+  osmscout::log.Warn() << "Cairo backend not available, cannot render a type icon";
+  return nullptr;
+#else
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || data->dbThread == nullptr) {
+    return nullptr;
+  }
+  if (objectType == nullptr || sizePx <= 0 || sizePx > NAVIVEYLIN_TYPE_ICON_MAX_SIZE) {
+    return nullptr;
+  }
+
+  const char *typeChars = env->GetStringUTFChars(objectType, nullptr);
+  if (typeChars == nullptr) {
+    return nullptr;
+  }
+  const std::string typeName(typeChars);
+  env->ReleaseStringUTFChars(objectType, typeChars);
+
+  const int side = static_cast<int>(sizePx);
+  const size_t pixelCount = static_cast<size_t>(side) * static_cast<size_t>(side);
+
+  // Fully transparent: a type without artwork paints nothing, and the caller shows
+  // no icon for it.
+  std::vector<jint> pixels(pixelCount, 0);
+  bool rendered = false;
+
+  data->dbThread->RunSynchronousJob(
+    [&](const std::list<osmscout::DBInstanceRef> &databases,
+        const osmscout::DBInstanceRef &basemapDatabase) {
+      // The regional databases carry the stylesheet the user selected; the basemap
+      // is a fallback for a client that has only that.
+      std::vector<osmscout::DBInstanceRef> candidates(databases.begin(), databases.end());
+      if (basemapDatabase) {
+        candidates.push_back(basemapDatabase);
+      }
+
+      for (const auto &db : candidates) {
+        if (!db || !db->GetStyleConfig()) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-style-config type=" << typeName
+                               << " px=" << side;
+          continue;
+        }
+
+        osmscout::TypeConfigRef typeConfig = db->GetDatabase()->GetTypeConfig();
+        if (!typeConfig) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-type-config type=" << typeName
+                               << " px=" << side;
+          continue;
+        }
+
+        osmscout::TypeInfoRef typeInfo = typeConfig->GetTypeInfo(typeName);
+        if (!typeInfo) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=unknown-type type=" << typeName
+                               << " px=" << side
+                               << " db=" << db->path;
+          continue;
+        }
+
+        osmscout::FeatureValueBuffer buffer;
+        buffer.SetType(typeInfo);
+
+        osmscout::Magnification iconMagnification(NAVIVEYLIN_TYPE_ICON_MAGNIFICATION_LEVEL);
+        osmscout::MercatorProjection projection;
+        if (!projection.Set(osmscout::GeoCoord(0.0, 0.0),
+                            0.0,
+                            iconMagnification,
+                            NAVIVEYLIN_TYPE_ICON_DPI,
+                            static_cast<size_t>(side),
+                            static_cast<size_t>(side))) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=bad-projection type=" << typeName
+                               << " px=" << side;
+          continue;
+        }
+
+        const osmscout::StyleConfigRef &styleConfig = db->GetStyleConfig();
+        osmscout::IconStyleRef iconStyle = styleConfig->GetNodeIconStyle(buffer, projection);
+        if (!iconStyle) {
+          iconStyle = styleConfig->GetAreaIconStyle(typeInfo, buffer, projection);
+        }
+        if (!iconStyle || !iconStyle->IsVisible()) {
+          // The normal case for an entry whose type the stylesheet gives no icon at all (a street, an
+          // address): silent, because the caller reports the absence.
+          continue;
+        }
+
+        cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                                                              side,
+                                                              side);
+        if (surface == nullptr) {
+          continue;
+        }
+
+        cairo_t *cr = cairo_create(surface);
+        if (cr == nullptr) {
+          cairo_surface_destroy(surface);
+          continue;
+        }
+
+        bool painted = false;
+        const bool hasSymbol = iconStyle->GetSymbol() != nullptr;
+        const bool symbolFirst = data->preferSymbolIcons && hasSymbol;
+        if (symbolFirst) {
+          painted = DrawTypeIconSymbol(cr, projection, *iconStyle->GetSymbol(), side);
+        } else {
+          // The map's own order (MapPainter::LayoutPointLabels): the image, else the symbol. The
+          // preference *prefers* the symbol, it does not disable it for a symbol-only entry — a
+          // symbol-backed type without a PNG is the normal case for most stylesheet icons, and
+          // gating the symbol on the preference is what makes such a row draw nothing.
+          painted = DrawTypeIconImage(cr,
+                                      data->dbThread->GetIconDirectory(),
+                                      iconStyle->GetIconName(),
+                                      side);
+          if (!painted && hasSymbol) {
+            painted = DrawTypeIconSymbol(cr, projection, *iconStyle->GetSymbol(), side);
+          }
+        }
+
+        if (!painted) {
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=not-drawn type=" << typeName
+                               << " px=" << side
+                               << " symbol=" << (hasSymbol ? "yes" : "no")
+                               << " image=" << (iconStyle->GetIconName().empty() ? "-" : iconStyle->GetIconName());
+          cairo_destroy(cr);
+          cairo_surface_destroy(surface);
+          continue;
+        }
+
+        cairo_destroy(cr);
+        cairo_surface_mark_dirty(surface);
+        cairo_surface_flush(surface);
+
+        // CAIRO_FORMAT_ARGB32 is premultiplied and stored in native byte order, which
+        // is B,G,R,A on the platforms this bridge builds for. The destination is
+        // Android's non-premultiplied ARGB_8888, so alpha is divided back out once,
+        // here - an anti-aliased edge would otherwise darken against the surface.
+        const unsigned char *cairoData = cairo_image_surface_get_data(surface);
+        int stride = cairo_image_surface_get_stride(surface);
+        for (int y = 0; y < side; y++) {
+          for (int x = 0; x < side; x++) {
+            int offset = y * stride + x * 4;
+            size_t pixel = static_cast<size_t>(y) * static_cast<size_t>(side) + static_cast<size_t>(x);
+            pixels[pixel] = static_cast<jint>(naviveylin::TypeIconArgbWord(cairoData[offset + 0],
+                                                                           cairoData[offset + 1],
+                                                                           cairoData[offset + 2],
+                                                                           cairoData[offset + 3]));
+          }
+        }
+
+        cairo_surface_destroy(surface);
+        rendered = true;
+        return;
+      }
+    }
+  );
+
+  if (!rendered) {
+    return nullptr;
+  }
+
+  jintArray result = env->NewIntArray(static_cast<jsize>(pixelCount));
+  if (result == nullptr) {
+    return nullptr;
+  }
+
+  env->SetIntArrayRegion(result, 0, static_cast<jsize>(pixelCount), pixels.data());
+
+  return result;
+#endif
 }
 
 // --------------------------------------------------------------------------

@@ -875,6 +875,15 @@ RouteLengthTest = executable('RouteLengthTest',
 
 test('Check route length', RouteLengthTest)
 
+TypeIconPixelsTest = executable('TypeIconPixelsTest',
+             'src/TypeIconPixelsTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check type icon pixels', TypeIconPixelsTest)
+
 if buildMapSVG
   SymbolRendererSVGTest = executable('SymbolRendererSVGTest',
                                'src/SymbolRendererSVGTest.cpp',
