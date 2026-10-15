@@ -2236,9 +2236,11 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
   jclass instructionCls = env->FindClass("com/framstag/libosmscout/client/RouteInstruction");
   if (instructionCls) {
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
+    // The descriptor must match the full Java constructor exactly - it is the one
+    // with the roundabout fields.
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZI)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -2276,12 +2278,31 @@ struct JavaRouteInstruction
   std::string description;      // "Turn left into Hauptstrasse"
   std::string shortDescription; // "Turn left"
 
+  // Roundabout manoeuvres: the 1-based ordinal, counted in circulation order, of the
+  // exit the route takes, and the ring's circulation direction. 0 / true when the
+  // instruction is not a roundabout manoeuvre.
+  //
+  // libosmscout's RoundaboutLeaveDescription::GetExitCount() counts the exits passed
+  // (RoutePostprocessor: roundaboutCrossingCounter), so the value it returns IS that
+  // ordinal - it is not the number of exits the ring has, which no part of the
+  // description carries. The English "Exit N" text is not a substitute for either
+  // field: it carries no direction, and an unparseable text is indistinguishable
+  // from an unknown exit at the call site.
+  int roundaboutExitNumber{0};
+  bool roundaboutClockwise{true};
+
   // Optional "next next" hint — populated when the following instruction
   // is within CloseHintDistance of the current one (e.g. roundabout exit).
   double nextNextDistanceTo{0.0};
   std::string nextNextTurnType;
   std::string nextNextDescription;
   std::string nextNextShortDescription;
+
+  // The following manoeuvre's roundabout exit ordinal, on the same terms as
+  // roundaboutExitNumber: 0 when the hint's manoeuvre is not a roundabout exit or the hint
+  // is absent. It is its own field because the hint can be a different roundabout from the
+  // one roundaboutExitNumber describes.
+  int nextNextRoundaboutExitNumber{0};
 
   static constexpr double CloseHintDistance = 200.0; // meters
 
@@ -2393,6 +2414,7 @@ public:
         next.nextNextTurnType = it->turnType;
         next.nextNextDescription = it->description;
         next.nextNextShortDescription = it->shortDescription;
+        next.nextNextRoundaboutExitNumber = it->roundaboutExitNumber;
       }
     }
 
@@ -2581,7 +2603,7 @@ private:
       result.push_back(instr);
     }
 
-    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef & /*roundaboutEnterDesc*/,
+    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDesc,
                            const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
     {
       JavaRouteInstruction instr;
@@ -2590,6 +2612,12 @@ private:
       instr.turnType = "roundaboutEnter";
       instr.description = "Enter roundabout";
       instr.shortDescription = "Roundabout";
+      // The ring's circulation direction: without it a consumer cannot tell a
+      // clockwise roundabout from a counter-clockwise one, and the direction
+      // cannot be recovered from the instruction text.
+      if (roundaboutEnterDesc) {
+        instr.roundaboutClockwise = roundaboutEnterDesc->IsClockwise();
+      }
       result.push_back(instr);
     }
 
@@ -2607,6 +2635,13 @@ private:
       instr.streetName = street;
       instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
       instr.shortDescription = "Exit " + exitStr;
+      // The ordinal of the exit taken (see the field's comment) and the direction,
+      // as structure - the text above stays byte-identical so a consumer that reads
+      // only strings observes no change.
+      if (roundaboutLeaveDesc) {
+        instr.roundaboutExitNumber = static_cast<int>(roundaboutLeaveDesc->GetExitCount());
+        instr.roundaboutClockwise = roundaboutLeaveDesc->IsClockwise();
+      }
       result.push_back(instr);
     }
 
@@ -3119,7 +3154,10 @@ private:
         instr.nextNextDistanceTo,
         nnTurnTypeObj,
         nnDescJ,
-        nnShortDescJ);
+        nnShortDescJ,
+        instr.roundaboutExitNumber,
+        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE,
+        instr.nextNextRoundaboutExitNumber);
 
     env->DeleteLocalRef(turnTypeObj);
     env->DeleteLocalRef(streetNameJ);
