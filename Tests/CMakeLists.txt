@@ -281,6 +281,9 @@ osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp I
 #---- RouteLength
 osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RoutingProfileSpeed
+osmscout_test_project(NAME RoutingProfileSpeedTest SOURCES src/RoutingProfileSpeedTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 

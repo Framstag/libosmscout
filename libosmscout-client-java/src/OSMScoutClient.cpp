@@ -73,6 +73,7 @@
 #include "frame_pixel_layout.h"
 #include "route_length.h"
 #include "route_step_time.h"
+#include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
 #include "search_scope.h"
 
@@ -5870,13 +5871,18 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 /**
  * Create a routing profile for the given vehicle type.
  * Car uses a speed map; bicycle and foot use built-in parametrization.
+ *
+ * For a car [maxSpeedKmh] is a ceiling on top of the speed map, for bicycle and foot it is the speed
+ * of every routable type. A value of 0 (and any value outside 1-300 km/h) selects the built-in
+ * default speed of the vehicle through [naviveylin::ResolveProfileMaxSpeedKmh].
  */
 static osmscout::RoutingProfileRef CreateRoutingProfile(
     const osmscout::TypeConfigRef &tc,
     osmscout::Vehicle vehicle,
     bool avoidTolls = false,
     bool avoidFerries = false,
-    bool avoidUnpaved = false)
+    bool avoidUnpaved = false,
+    double maxSpeedKmh = 0.0)
 {
   if (!tc) {
     return nullptr;
@@ -5906,18 +5912,24 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
       speedMap["highway_roundabout"]=40.0;
       speedMap["highway_living_street"]=10.0;
       speedMap["highway_service"]=30.0;
-      profile->ParametrizeForCar(*tc, speedMap, 120.0);
-      osmscout::log.Warn() << "  created car routing profile";
+      double carMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
+      profile->ParametrizeForCar(*tc, speedMap, carMaxSpeed);
+      osmscout::log.Warn() << "  created car routing profile (max speed "
+                           << carMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleBicycle: {
-      profile->ParametrizeForBicycle(*tc, 30.0);
-      osmscout::log.Warn() << "  created bicycle routing profile";
+      double bicycleMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
+      profile->ParametrizeForBicycle(*tc, bicycleMaxSpeed);
+      osmscout::log.Warn() << "  created bicycle routing profile (max speed "
+                           << bicycleMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleFoot: {
-      profile->ParametrizeForFoot(*tc, 10.0);
-      osmscout::log.Warn() << "  created pedestrian routing profile";
+      double footMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
+      profile->ParametrizeForFoot(*tc, footMaxSpeed);
+      osmscout::log.Warn() << "  created pedestrian routing profile (max speed "
+                           << footMaxSpeed << " km/h)";
       break;
     }
   }
@@ -6000,6 +6012,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
   bool avoidTolls = false;
   bool avoidFerries = false;
   bool avoidUnpaved = false;
+  // 0 requests the vehicle's built-in profile; ResolveProfileMaxSpeedKmh maps every unusable value there.
+  double maxSpeedKmh = 0.0;
   if (profileObj != nullptr) {
     jclass profileCls = env->GetObjectClass(profileObj);
     jfieldID vehicleField = env->GetFieldID(profileCls, "vehicle", "Lcom/framstag/libosmscout/client/Vehicle;");
@@ -6014,6 +6028,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
     jfieldID unpavedField = env->GetFieldID(profileCls, "avoidUnpaved", "Z");
     avoidUnpaved = env->GetBooleanField(profileObj, unpavedField) == JNI_TRUE;
+
+    jfieldID speedField = env->GetFieldID(profileCls, "maxSpeedKmh", "D");
+    if (speedField != nullptr) {
+      maxSpeedKmh = env->GetDoubleField(profileObj, speedField);
+    } else {
+      // A profile class without the field - an older caller of an unchanged constructor. The
+      // failed lookup left a pending exception that the next JNI call would report.
+      env->ExceptionClear();
+    }
   }
 
   // Create a global ref for the callback (used from background thread)
@@ -6042,7 +6065,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
     thread = std::make_shared<std::thread>(
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr,
-     vehicle, avoidTolls, avoidFerries, avoidUnpaved]() {
+     vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh]() {
       JNIEnv *threadEnv;
       if (AttachCurrentThread(&threadEnv, jvm) != JNI_OK) {
         jvm->DetachCurrentThread();
@@ -6091,9 +6114,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               std::make_shared<osmscout::MultiDBRoutingService>(routerParam, dbs);
 
           osmscout::MultiDBRoutingService::RoutingProfileBuilder profileBuilder =
-              [vehicle, avoidTolls, avoidFerries, avoidUnpaved](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
+              [vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
             auto tc = database->GetTypeConfig();
-            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved);
+            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh);
           };
 
           if (!routingService->Open(profileBuilder)) {
@@ -6191,7 +6214,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             for (const auto& db : dbsForPost) {
               auto tc = db->GetTypeConfig();
               if (tc) {
-                profiles.push_back(CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved));
+                profiles.push_back(CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved,
+                                                       maxSpeedKmh));
               } else {
                 // keep index alignment with dbsForPost; a database without type
                 // config would have failed routing service open already
@@ -6443,9 +6467,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               std::make_shared<osmscout::MultiDBRoutingService>(routerParam, dbs);
 
           osmscout::MultiDBRoutingService::RoutingProfileBuilder profileBuilder =
-              [vehicle, avoidTolls, avoidFerries, avoidUnpaved](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
+              [vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
             auto tc = database->GetTypeConfig();
-            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved);
+            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh);
           };
 
           if (!routingService->Open(profileBuilder)) return;
