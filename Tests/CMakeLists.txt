@@ -284,6 +284,13 @@ osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLU
 #---- RoutingProfileSpeed
 osmscout_test_project(NAME RoutingProfileSpeedTest SOURCES src/RoutingProfileSpeedTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- TypeIconPixels
+# The two decisions behind renderTypeIcon (the scale the artwork is fitted with and the word Java
+# receives for one surface pixel) are arithmetic that a rendering test could not show as wrong: a
+# wrong fit draws a small or clipped icon, a missing un-premultiplication draws a black fringe. They
+# live in a dependency-free helper and are pinned here, on a host that has no map database.
+osmscout_test_project(NAME TypeIconPixelsTest SOURCES src/TypeIconPixelsTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- StdByteTest
 osmscout_test_project(NAME StdByteTest SOURCES src/StdByteTest.cpp)
 
