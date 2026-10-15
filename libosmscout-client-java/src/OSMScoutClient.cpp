@@ -1544,6 +1544,19 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
       osmscout::MapParameter params;
       params.SetFontName("sans-serif");
       params.SetFontSize(data->fontSizeMm);
+
+      // Line wrapping of labels: the same bounds the Qt plane renderer configures.
+      // A label is only broken at a word boundary, so a one-word label stays on one
+      // line; the character bounds keep ordinary street and place names on one line
+      // and wrap a long multi-word name into two or three. Fit-to-width spans the
+      // shorter side of the render buffer (which carries the pan overrun), so a label
+      // can never run across the whole map.
+      params.SetLabelLineMinCharCount(5);
+      params.SetLabelLineMaxCharCount(15);
+      params.SetLabelLineFitToArea(true);
+      params.SetLabelLineFitToWidth(std::min(static_cast<double>(width),
+                                             static_cast<double>(height)));
+
       params.SetRenderSeaLand(true);
       params.SetRenderBackground(true);
       params.SetRenderUnknowns(true);
