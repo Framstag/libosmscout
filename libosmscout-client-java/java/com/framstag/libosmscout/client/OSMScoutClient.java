@@ -114,6 +114,23 @@ public class OSMScoutClient {
     public native boolean loadStyleSheet(String name);
 
     /**
+     * Set the language of the descriptions this client reports for the type of a found object.
+     *
+     * <p>Results of {@code searchLocations} and {@code searchPOIs} carry the description of
+     * their object type in this language when the database carries one. When the database does
+     * not carry that language, the English description answers; when the type carries no
+     * description at all, the description of the result is empty and the caller shows the
+     * technical type name (e.g. {@code amenity_bank}) instead.
+     *
+     * <p>The language can also be set when the client is built
+     * ({@link OSMScoutClientBuilder#withDescriptionLanguage(String)}); this method changes it on a
+     * running client. The next search reports descriptions in the new language.
+     *
+     * @param languageCode language code of the description, e.g. {@code "de"} or {@code "en"}
+     */
+    public native void setDescriptionLanguage(String languageCode);
+
+    /**
      * Enables or disables a stylesheet flag (e.g. {@code "daylight"}) and
      * reloads the active stylesheet with the flag applied.
      *

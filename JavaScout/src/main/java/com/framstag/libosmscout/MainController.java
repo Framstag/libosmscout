@@ -36,6 +36,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -253,6 +254,7 @@ public class MainController implements Initializable {
                         .withStyleSheetDirectory(stylesheetsDir)
                         .withPhysicalDpi(javafx.stage.Screen.getPrimary().getDpi())
                         .withUnits("metrics")
+                        .withDescriptionLanguage(DescriptionLanguage.forLocale(java.util.Locale.getDefault()))
                         .withCustomPoiType("_route_start")
                         .withCustomPoiType("_route_end")
                         .withCustomPoiType("_route")
@@ -486,6 +488,24 @@ public class MainController implements Initializable {
         } else {
             showDescriptionOverlay(desc);
         }
+    }
+
+    /**
+     * Switch the language the client reports type descriptions in.
+     *
+     * <p>Results built after the switch carry the description of their object type in the new
+     * language; a result list that is already on screen is not rebuilt, so the next search shows
+     * it. A client that is not built yet keeps the language derived from the platform locale.
+     */
+    private void onDescriptionLanguageSelected(String languageCode) {
+        if (client == null) {
+            Log.error("MainController: type description language changed before the client was built");
+            return;
+        }
+
+        client.setDescriptionLanguage(languageCode);
+
+        Log.info("MainController: type descriptions in " + DescriptionLanguage.label(languageCode));
     }
 
     private void openPoiSearch() {
@@ -933,7 +953,17 @@ public class MainController implements Initializable {
         MenuItem downloadMapsItem = new MenuItem("Download Maps…");
         downloadMapsItem.setOnAction(e -> onDownloadMaps());
 
-        mainMenu.getItems().addAll(favoritesItem, importTrackItem, switchStyleItem, poiSearchItem, liveGpsItem, downloadMapsItem);
+        // Type descriptions: the client reports the description of a result's object type in this
+        // language. It is derived from the platform locale when the client is built; the switch
+        // changes it for the searches that follow.
+        Menu languageMenu = new Menu("Type Descriptions");
+        MenuItem germanItem = new MenuItem("Deutsch");
+        germanItem.setOnAction(e -> onDescriptionLanguageSelected(DescriptionLanguage.GERMAN));
+        MenuItem englishItem = new MenuItem("English");
+        englishItem.setOnAction(e -> onDescriptionLanguageSelected(DescriptionLanguage.ENGLISH));
+        languageMenu.getItems().addAll(germanItem, englishItem);
+
+        mainMenu.getItems().addAll(favoritesItem, importTrackItem, switchStyleItem, poiSearchItem, liveGpsItem, downloadMapsItem, languageMenu);
 
         menuButton.setOnAction(e -> {
             if (mainMenu.isShowing()) {
