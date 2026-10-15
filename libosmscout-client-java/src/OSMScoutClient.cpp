@@ -74,6 +74,7 @@
 #include "frame_pixel_layout.h"
 #include "route_length.h"
 #include "route_step_time.h"
+#include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
 #include "search_scope.h"
 #include "type_icon_pixels.h"
@@ -2240,9 +2241,11 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
   jclass instructionCls = env->FindClass("com/framstag/libosmscout/client/RouteInstruction");
   if (instructionCls) {
     methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
+    // The descriptor must match the full Java constructor exactly - it is the one
+    // with the roundabout fields.
     methods.instructionCtor = env->GetMethodID(
         instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZI)V");
   }
 
   jclass turnTypeCls = env->FindClass("com/framstag/libosmscout/client/TurnType");
@@ -2280,12 +2283,31 @@ struct JavaRouteInstruction
   std::string description;      // "Turn left into Hauptstrasse"
   std::string shortDescription; // "Turn left"
 
+  // Roundabout manoeuvres: the 1-based ordinal, counted in circulation order, of the
+  // exit the route takes, and the ring's circulation direction. 0 / true when the
+  // instruction is not a roundabout manoeuvre.
+  //
+  // libosmscout's RoundaboutLeaveDescription::GetExitCount() counts the exits passed
+  // (RoutePostprocessor: roundaboutCrossingCounter), so the value it returns IS that
+  // ordinal - it is not the number of exits the ring has, which no part of the
+  // description carries. The English "Exit N" text is not a substitute for either
+  // field: it carries no direction, and an unparseable text is indistinguishable
+  // from an unknown exit at the call site.
+  int roundaboutExitNumber{0};
+  bool roundaboutClockwise{true};
+
   // Optional "next next" hint — populated when the following instruction
   // is within CloseHintDistance of the current one (e.g. roundabout exit).
   double nextNextDistanceTo{0.0};
   std::string nextNextTurnType;
   std::string nextNextDescription;
   std::string nextNextShortDescription;
+
+  // The following manoeuvre's roundabout exit ordinal, on the same terms as
+  // roundaboutExitNumber: 0 when the hint's manoeuvre is not a roundabout exit or the hint
+  // is absent. It is its own field because the hint can be a different roundabout from the
+  // one roundaboutExitNumber describes.
+  int nextNextRoundaboutExitNumber{0};
 
   static constexpr double CloseHintDistance = 200.0; // meters
 
@@ -2397,6 +2419,7 @@ public:
         next.nextNextTurnType = it->turnType;
         next.nextNextDescription = it->description;
         next.nextNextShortDescription = it->shortDescription;
+        next.nextNextRoundaboutExitNumber = it->roundaboutExitNumber;
       }
     }
 
@@ -2585,7 +2608,7 @@ private:
       result.push_back(instr);
     }
 
-    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef & /*roundaboutEnterDesc*/,
+    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDesc,
                            const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
     {
       JavaRouteInstruction instr;
@@ -2594,6 +2617,12 @@ private:
       instr.turnType = "roundaboutEnter";
       instr.description = "Enter roundabout";
       instr.shortDescription = "Roundabout";
+      // The ring's circulation direction: without it a consumer cannot tell a
+      // clockwise roundabout from a counter-clockwise one, and the direction
+      // cannot be recovered from the instruction text.
+      if (roundaboutEnterDesc) {
+        instr.roundaboutClockwise = roundaboutEnterDesc->IsClockwise();
+      }
       result.push_back(instr);
     }
 
@@ -2611,6 +2640,13 @@ private:
       instr.streetName = street;
       instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
       instr.shortDescription = "Exit " + exitStr;
+      // The ordinal of the exit taken (see the field's comment) and the direction,
+      // as structure - the text above stays byte-identical so a consumer that reads
+      // only strings observes no change.
+      if (roundaboutLeaveDesc) {
+        instr.roundaboutExitNumber = static_cast<int>(roundaboutLeaveDesc->GetExitCount());
+        instr.roundaboutClockwise = roundaboutLeaveDesc->IsClockwise();
+      }
       result.push_back(instr);
     }
 
@@ -3123,7 +3159,10 @@ private:
         instr.nextNextDistanceTo,
         nnTurnTypeObj,
         nnDescJ,
-        nnShortDescJ);
+        nnShortDescJ,
+        instr.roundaboutExitNumber,
+        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE,
+        instr.nextNextRoundaboutExitNumber);
 
     env->DeleteLocalRef(turnTypeObj);
     env->DeleteLocalRef(streetNameJ);
@@ -6162,13 +6201,18 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 /**
  * Create a routing profile for the given vehicle type.
  * Car uses a speed map; bicycle and foot use built-in parametrization.
+ *
+ * For a car [maxSpeedKmh] is a ceiling on top of the speed map, for bicycle and foot it is the speed
+ * of every routable type. A value of 0 (and any value outside 1-300 km/h) selects the built-in
+ * default speed of the vehicle through [naviveylin::ResolveProfileMaxSpeedKmh].
  */
 static osmscout::RoutingProfileRef CreateRoutingProfile(
     const osmscout::TypeConfigRef &tc,
     osmscout::Vehicle vehicle,
     bool avoidTolls = false,
     bool avoidFerries = false,
-    bool avoidUnpaved = false)
+    bool avoidUnpaved = false,
+    double maxSpeedKmh = 0.0)
 {
   if (!tc) {
     return nullptr;
@@ -6198,18 +6242,24 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
       speedMap["highway_roundabout"]=40.0;
       speedMap["highway_living_street"]=10.0;
       speedMap["highway_service"]=30.0;
-      profile->ParametrizeForCar(*tc, speedMap, 120.0);
-      osmscout::log.Warn() << "  created car routing profile";
+      double carMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
+      profile->ParametrizeForCar(*tc, speedMap, carMaxSpeed);
+      osmscout::log.Warn() << "  created car routing profile (max speed "
+                           << carMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleBicycle: {
-      profile->ParametrizeForBicycle(*tc, 30.0);
-      osmscout::log.Warn() << "  created bicycle routing profile";
+      double bicycleMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
+      profile->ParametrizeForBicycle(*tc, bicycleMaxSpeed);
+      osmscout::log.Warn() << "  created bicycle routing profile (max speed "
+                           << bicycleMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleFoot: {
-      profile->ParametrizeForFoot(*tc, 10.0);
-      osmscout::log.Warn() << "  created pedestrian routing profile";
+      double footMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
+      profile->ParametrizeForFoot(*tc, footMaxSpeed);
+      osmscout::log.Warn() << "  created pedestrian routing profile (max speed "
+                           << footMaxSpeed << " km/h)";
       break;
     }
   }
@@ -6292,6 +6342,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
   bool avoidTolls = false;
   bool avoidFerries = false;
   bool avoidUnpaved = false;
+  // 0 requests the vehicle's built-in profile; ResolveProfileMaxSpeedKmh maps every unusable value there.
+  double maxSpeedKmh = 0.0;
   if (profileObj != nullptr) {
     jclass profileCls = env->GetObjectClass(profileObj);
     jfieldID vehicleField = env->GetFieldID(profileCls, "vehicle", "Lcom/framstag/libosmscout/client/Vehicle;");
@@ -6306,6 +6358,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
     jfieldID unpavedField = env->GetFieldID(profileCls, "avoidUnpaved", "Z");
     avoidUnpaved = env->GetBooleanField(profileObj, unpavedField) == JNI_TRUE;
+
+    jfieldID speedField = env->GetFieldID(profileCls, "maxSpeedKmh", "D");
+    if (speedField != nullptr) {
+      maxSpeedKmh = env->GetDoubleField(profileObj, speedField);
+    } else {
+      // A profile class without the field - an older caller of an unchanged constructor. The
+      // failed lookup left a pending exception that the next JNI call would report.
+      env->ExceptionClear();
+    }
   }
 
   // Create a global ref for the callback (used from background thread)
@@ -6334,7 +6395,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
     thread = std::make_shared<std::thread>(
     [data, jvm, start, dest, breaker, callbackGlobal, cbMethods,
      startObjOffset, startObjTypeStr, destObjOffset, destObjTypeStr,
-     vehicle, avoidTolls, avoidFerries, avoidUnpaved]() {
+     vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh]() {
       JNIEnv *threadEnv;
       if (AttachCurrentThread(&threadEnv, jvm) != JNI_OK) {
         jvm->DetachCurrentThread();
@@ -6383,9 +6444,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               std::make_shared<osmscout::MultiDBRoutingService>(routerParam, dbs);
 
           osmscout::MultiDBRoutingService::RoutingProfileBuilder profileBuilder =
-              [vehicle, avoidTolls, avoidFerries, avoidUnpaved](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
+              [vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
             auto tc = database->GetTypeConfig();
-            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved);
+            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh);
           };
 
           if (!routingService->Open(profileBuilder)) {
@@ -6483,7 +6544,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             for (const auto& db : dbsForPost) {
               auto tc = db->GetTypeConfig();
               if (tc) {
-                profiles.push_back(CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved));
+                profiles.push_back(CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved,
+                                                       maxSpeedKmh));
               } else {
                 // keep index alignment with dbsForPost; a database without type
                 // config would have failed routing service open already
@@ -6735,9 +6797,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               std::make_shared<osmscout::MultiDBRoutingService>(routerParam, dbs);
 
           osmscout::MultiDBRoutingService::RoutingProfileBuilder profileBuilder =
-              [vehicle, avoidTolls, avoidFerries, avoidUnpaved](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
+              [vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh](const osmscout::DatabaseRef &database) -> osmscout::RoutingProfileRef {
             auto tc = database->GetTypeConfig();
-            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved);
+            return CreateRoutingProfile(tc, vehicle, avoidTolls, avoidFerries, avoidUnpaved, maxSpeedKmh);
           };
 
           if (!routingService->Open(profileBuilder)) return;

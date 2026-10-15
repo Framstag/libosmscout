@@ -281,6 +281,9 @@ osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp I
 #---- RouteLength
 osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RoutingProfileSpeed
+osmscout_test_project(NAME RoutingProfileSpeedTest SOURCES src/RoutingProfileSpeedTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- TypeIconPixels
 # The two decisions behind renderTypeIcon (the scale the artwork is fitted with and the word Java
 # receives for one surface pixel) are arithmetic that a rendering test could not show as wrong: a
