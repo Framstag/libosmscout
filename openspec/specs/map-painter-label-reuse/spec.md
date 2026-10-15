@@ -42,6 +42,13 @@ inputs, or a painter parameter the measurement depends on, changes.
 - **WHEN** that parameter changes between two frames
 - **THEN** the labels SHALL be measured for the new parameter and SHALL NOT be drawn with the measurements of the earlier parameter
 
+#### Scenario: A changed font name is measured and drawn with the new font
+
+- **GIVEN** a backend whose measurement and whose drawing both depend on the requested font name, on a painter that has drawn a frame with one font name
+- **WHEN** the requested font name changes and a label is measured and drawn
+- **THEN** the measurement SHALL be the measurement for the new font name
+- **THEN** the drawn glyphs SHALL be the glyphs of the new font name, so that the drawn font and the measurement agree
+
 #### Scenario: A changed line wrapping parameter is measured again
 
 - **GIVEN** a label that has been measured while the painting parameters put one wrapping width, one minimum and one maximum line length and one wrap-to-area setting in force
