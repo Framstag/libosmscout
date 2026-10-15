@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the RouteInstruction model class, in particular the per-step
- * time and leg length the native side reports for a segment.
+ * time and leg length the native side reports for a segment, and the roundabout
+ * manoeuvre data the constructor arities name or default.
  */
 class RouteInstructionTest {
 
@@ -75,5 +76,47 @@ class RouteInstructionTest {
         assertEquals("", instruction.shortDescription);
         assertEquals(TurnType.STRAIGHT_ON, instruction.nextNextTurnType);
         assertEquals("", instruction.nextNextDescription);
+    }
+
+    @Test
+    void testFullConstructorCarriesTheRoundaboutManoeuvre() {
+        RouteInstruction instruction = new RouteInstruction(
+            300.0, 25.0, 300.0, TurnType.ROUNDABOUT_LEAVE, "Hauptstrasse",
+            "Take exit 2 onto Hauptstrasse", "Exit 2",
+            150.0, TurnType.ROUNDABOUT_LEAVE, "Take exit 1 onto Ringstrasse", "Exit 1",
+            2, false, 1);
+
+        assertEquals(2, instruction.roundaboutExitNumber);
+        assertFalse(instruction.roundaboutClockwise);
+        // The hint's own roundabout: a different ordinal, of a ring the hint leaves itself.
+        assertEquals(1, instruction.nextNextRoundaboutExitNumber);
+        // The roundabout data is carried beside the text, which stays what it was.
+        assertEquals("Take exit 2 onto Hauptstrasse", instruction.description);
+        assertEquals("Exit 2", instruction.shortDescription);
+    }
+
+    @Test
+    void testConstructorWithoutTheNextNextRoundaboutOrdinalDefaultsItToZero() {
+        RouteInstruction instruction = new RouteInstruction(
+            300.0, 25.0, 300.0, TurnType.ROUNDABOUT_LEAVE, "Hauptstrasse",
+            "Take exit 2 onto Hauptstrasse", "Exit 2",
+            150.0, TurnType.LEFT, "Turn left into Markt", "Turn left",
+            2, false);
+
+        assertEquals(2, instruction.roundaboutExitNumber);
+        assertFalse(instruction.roundaboutClockwise);
+        assertEquals(0, instruction.nextNextRoundaboutExitNumber);
+        assertEquals(150.0, instruction.nextNextDistanceTo);
+    }
+
+    @Test
+    void testConstructorWithoutTheRoundaboutFieldsDefaultsToNoRoundabout() {
+        RouteInstruction instruction = new RouteInstruction(
+            500.0, 30.0, 1200.0, TurnType.RIGHT, "Ringstrasse", "Turn right into Ringstrasse", "Turn right",
+            400.0, TurnType.LEFT, "Turn left into Markt", "Turn left");
+
+        assertEquals(0, instruction.roundaboutExitNumber);
+        assertTrue(instruction.roundaboutClockwise);
+        assertEquals(0, instruction.nextNextRoundaboutExitNumber);
     }
 }
