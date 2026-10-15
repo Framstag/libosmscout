@@ -1,0 +1,147 @@
+# Types of the shipped type configuration that deliberately carry no description.
+#
+# One entry per line: <type-name><TAB><reason>
+# Lines starting with '#' are comments, empty lines are ignored.
+#
+# The rule this list implements is section 6 of guidelines/TypeDescriptions.md: a description is
+# left out when the user-facing name of the type cannot be established. An entry here is a
+# reviewed decision, not a defect. Tests/src/TypeDescriptionCoverageTest.cpp requires every type
+# of the shipped configuration to be either described in both shipped languages or listed here.
+#
+# The reason names what makes a user-facing name impossible for that type, so that a reader can
+# check the decision instead of trusting it.
+
+street_any	relation bookkeeping of the import (relation type=street), not an object a user encounters
+tunnel_any	relation bookkeeping of the import (relation type=tunnel), not an object a user encounters
+bridge_any	relation bookkeeping of the import (relation type=bridge), not an object a user encounters
+dual_carriageway_any	relation bookkeeping of the import (relation type=dual_carriageway), not an object a user encounters
+waterway_any	relation bookkeeping of the import (relation type=waterway), not an object a user encounters
+wayparts_any	relation bookkeeping of the import (relation type=wayparts), not an object a user encounters
+associated_street_any	relation bookkeeping of the import (relation type=associated_street), not an object a user encounters
+enforcement_any	relation bookkeeping of the import (relation type=enforcement), not an object a user encounters
+roadAccess_any	relation bookkeeping of the import (relation type=roadAccess), not an object a user encounters
+junction_any	relation bookkeeping of the import (relation type=junction), not an object a user encounters
+label_any	relation bookkeeping of the import (relation type=label), not an object a user encounters
+composite_Attribute_any	relation bookkeeping of the import (relation type=composite_Attribute), not an object a user encounters
+segmented_tag_any	relation bookkeeping of the import (relation type=segmented_tag), not an object a user encounters
+building_any	relation bookkeeping of the import (relation type=building), not an object a user encounters
+related_building_any	relation bookkeeping for building relations, not an object a user encounters
+site_any	relation bookkeeping for site relations, not an object a user encounters
+station_any	relation bookkeeping for station relations, not an object a user encounters
+railway_halt_any	relation bookkeeping for railway halt relations, not an object a user encounters
+line_any	relation bookkeeping of the import (relation type=line), not an object a user encounters
+public_transport_any	relation bookkeeping of the import (relation type=public_transport), not an object a user encounters
+collection_any	relation bookkeeping of the import (relation type=collection), not an object a user encounters
+network_any	relation bookkeeping of the import (relation type=network), not an object a user encounters
+routemaster_any	relation bookkeeping of the route import (relation type=route_master), not an object a user encounters
+route_any	relation bookkeeping of the route import (relation type=route), not an object a user encounters
+superroute_any	relation bookkeeping of the route import (relation type=superroute), not an object a user encounters
+netzwolf_route_any	relation bookkeeping of the route import (relation type=netzwolf:route), not an object a user encounters
+netzwolf_routemaster_any	relation bookkeeping of the route import (relation type=netzwolf:route_master), not an object a user encounters
+place_any	relation bookkeeping for the region index (relation type=place), not a place a user encounters
+amt_any	relation bookkeeping for the region index (relation type=amt), not an object a user encounters
+suburb_any	relation bookkeeping for the region index (relation type=suburb), not a region a user encounters as such
+city_any	relation bookkeeping for the region index (relation type=city), not a region a user encounters as such
+town_any	relation bookkeeping for the region index (relation type=town), not a region a user encounters as such
+municipality_any	relation bookkeeping for the region index (relation type=municipality), not a region a user encounters as such
+district_any	relation bookkeeping for the region index (relation type=district), not a region a user encounters as such
+county_any	relation bookkeeping for the region index (relation type=county), not a region a user encounters as such
+state_any	relation bookkeeping for the region index (relation type=state), not a region a user encounters as such
+tmc_any	bookkeeping for traffic message channel data, not an object a user encounters
+lez_any	relation bookkeeping of the import (relation type=LEZ), not an object a user encounters
+group_any	relation bookkeeping of the import (relation type=group), not an object a user encounters
+set_any	relation bookkeeping of the import (relation type=set), not an object a user encounters
+compound_any	relation bookkeeping of the import (relation type=compound), not an object a user encounters
+public_transport_stop_area_group	relation bookkeeping of the import (public_transport=stop_area_group), not an object a user encounters
+address	relation bookkeeping of the import (relation type=address), not an address point a user encounters
+border	relation bookkeeping of the import (relation type=border), not an object a user encounters
+postal_code	relation bookkeeping of the import (relation type=postal_code), not an object a user encounters
+organization	relation bookkeeping of the import (relation type=organization), not an object a user encounters
+srtm_tile	debugging type of the elevation import, never imported and never drawn
+boundary_civil	the tag value boundary=civil has no established user-facing meaning, so no correct name is known
+amenity_college_building	the tag value amenity=college has no established German name (college, Berufskolleg and Fachschule are different institutions)
+amenity_college	the tag value amenity=college has no established German name (college, Berufskolleg and Fachschule are different institutions)
+amenity_prep_school_building	the tag value amenity=prep_school has no established German name; Studienkolleg and Vorbereitungsschule name other institutions
+amenity_prep_school	the tag value amenity=prep_school has no established German name; Studienkolleg and Vorbereitungsschule name other institutions
+amenity_mobile_money_agent	the service has no German name, and the English wording is a provider term rather than a user-facing name
+amenity_gambling	amenity=gambling names a purpose, not a business a user can name; Spielhalle and Wettbüro are different places
+amenity_ranger_station_building	the institution has no established German name (Nationalparkwacht, Rangerstation and Forststation name different things)
+amenity_ranger_station	the institution has no established German name (Nationalparkwacht, Rangerstation and Forststation name different things)
+amenity_post_depot_building	the tag value amenity=post_depot has no established German name; Paketzentrum and Zustellbasis are different facilities
+amenity_post_depot	the tag value amenity=post_depot has no established German name; Paketzentrum and Zustellbasis are different facilities
+amenity_public_bath_building	amenity=public_bath covers a thermal bath, a spa and a historic bathhouse, and no single German name fits all of them
+amenity_public_bath	amenity=public_bath covers a thermal bath, a spa and a historic bathhouse, and no single German name fits all of them
+amenity_letter_box	not distinguishable from a post box for a user; the tag value names a private mailbox
+amenity_lavoir	a lavoir is a regional public washhouse, and the German name (Waschhaus, Waschplatz) is regional as well
+shop_coffee_building	shop=coffee sells beans and equipment; the English "coffee shop" and the German "Kaffeehaus" name a cafe, while Kaffeerösterei and Kaffeegeschäft name other businesses
+shop_coffee	shop=coffee sells beans and equipment; the English "coffee shop" and the German "Kaffeehaus" name a cafe, while Kaffeerösterei and Kaffeegeschäft name other businesses
+natural_fell	natural=fell names a hill type of northern England and Scotland with no German equivalent
+landuse_brownfield	brownfield is a planning term for land awaiting development; the German Brachfläche does not separate it from greenfield
+landuse_greenfield	greenfield is a planning term for undeveloped land awaiting development; the German Brachfläche does not separate it from brownfield
+landuse_cemetery_sea	landuse=cemetery with a burial at sea is not a parcel of land a map user encounters, and no user-facing name is established
+leisure_common	leisure=common is the British concept of common land; the German Allmende is understood by few and names a different legal institution
+sport_cricket_nets	a cricket practice net has no German name, and the difference from a cricket ground is invisible to a user
+sport_raquet	sport=raquet is a misspelling of racket and names no particular sport, so no correct name exists
+barrier_sally_port	barrier=sally_port names two different structures (a castle's sally port and a secured double gate) and no single German name covers both
+barrier_kent_carriage_gate	the tag value names a British estate gate with no German equivalent
+shop_tortilla_building	a tortilla shop is a Latin American business with no established German name
+shop_tortilla	a tortilla shop is a Latin American business with no established German name
+shop_variety_store_building	shop=variety_store names a shop of cheap household goods; the German Sonderpostenmarkt and 1-Euro-Laden name other kinds of shop
+shop_variety_store	shop=variety_store names a shop of cheap household goods; the German Sonderpostenmarkt and 1-Euro-Laden name other kinds of shop
+shop_chemist_building	shop=chemist names a pharmacist in some countries and a drugstore in others; no German name fits without colliding with the pharmacy
+shop_chemist	shop=chemist names a pharmacist in some countries and a drugstore in others; no German name fits without colliding with the pharmacy
+shop_energy_building	a shop selling energy tariffs has no established German name
+shop_energy	a shop selling energy tariffs has no established German name
+office_guide_building	office=guide names a tourist guide's office; Fremdenführerbüro is not an established German name and the type overlaps the tourist information
+office_guide	office=guide names a tourist guide's office; Fremdenführerbüro is not an established German name and the type overlaps the tourist information
+office_quango_building	a quango is a British administrative body with no German equivalent
+office_quango	a quango is a British administrative body with no German equivalent
+office_religion_building	the office of a religious body has no single German name; Kirchenverwaltung names one religion only
+office_religion	the office of a religious body has no single German name; Kirchenverwaltung names one religion only
+man_made_bioswale	a bioswale is a feature of landscape engineering; Mulden-Rigole is a technical term no map user knows
+historic_bullaun_stone	a bullaun stone is an Irish monument with no German name
+historic_cattle_crush_building	a cattle crush is a chute for treating cattle and has no established German name
+historic_cattle_crush	a cattle crush is a chute for treating cattle and has no established German name
+historic_folly_building	a folly is a decorative building of British garden design with no German equivalent
+historic_folly	a folly is a decorative building of British garden design with no German equivalent
+historic_high_cross	a high cross is an Irish monument; the German Hochkreuz names a different monument
+historic_lavoir_building	a lavoir is a regional public washhouse, and the German name (Waschhaus, Waschplatz) is regional as well
+historic_lavoir	a lavoir is a regional public washhouse, and the German name (Waschhaus, Waschplatz) is regional as well
+historic_ogham_stone	an ogham stone is an Irish monument with no German name
+historic_pound	a pound is a lockup for stray animals; Viehpferch and Tiergefängnis name other kinds of enclosure
+historic_shieling_building	a shieling is a Scottish summer pasture hut with no German equivalent
+historic_shieling	a shieling is a Scottish summer pasture hut with no German equivalent
+historic_stecak	a stecak is a Bosnian medieval tombstone with no German name
+historic_tank	historic=tank names a storage tank kept as a monument and cannot be told from a tank in use, so neither name is right
+historic_tree_shrine	a shrine in a tree has no established German name; Bildstock and Marterl name other shrines
+railway_defect_detector	a trackside defect detector has no user-facing name; Heißläuferortungsanlage is a technical term
+railway_owner_change	railway=owner_change marks the point where the operating company changes and names no object a user sees
+leisure_adult_gaming_centre	an adult gaming centre is a legal category; the German Spielhalle names the arcade that is described as its own type
+piste_nordic_hike	names a combination of uses on one winter trail, so a user-facing name would have to enumerate them and the type never stands alone
+piste_hike_fatbike	names a combination of uses on one winter trail, so a user-facing name would have to enumerate them and the type never stands alone
+piste_hike_snowshoe	names a combination of uses on one winter trail, so a user-facing name would have to enumerate them and the type never stands alone
+piste_nordic_hike_snowshoe	names a combination of uses on one winter trail, so a user-facing name would have to enumerate them and the type never stands alone
+piste_nordic_fatbike	names a combination of uses on one winter trail, so a user-facing name would have to enumerate them and the type never stands alone
+religion_pagan	a pagan place of worship has no established German name; Heidnischer Andachtsort is a phrase, not a name
+religion_vietnamese_folk	Vietnamese folk religion has no German name for its place of worship
+religion_ancestor	ancestor veneration has no house of worship a map user names
+religion_animist	an animist place of worship has no established German name
+religion_antoinist	Antoinism is a small movement whose place of worship has no German name
+religion_benzhu	Benzhu temples are local to Dali and have no German name
+religion_shamanic	a shamanic place of worship has no established German name
+religion_scientologist	the organisation's place of worship has no uncontested German name (Scientology-Kirche)
+religion_self_realization_fellowship	the Self-Realization Fellowship is known by its English name only
+religion_spiritualist	a spiritualist place of worship has no established German name
+religion_tenrikyo	Tenrikyo's place of worship has no German name
+religion_unitarian_universalist	the Unitarian Universalist church has no established German name
+religion_voodoo	a voodoo place of worship has no established German name; Voodoo-Tempel is colloquial
+waterway_flowline	waterway=flowline traces a line of water flow without being a watercourse; no user-facing name exists
+waterway_soakhole	a soakhole is a point where water soaks away; German (Sickerloch, Schluckbrunnen) is technical
+highway_cyclist_waiting_aid	a waiting aid for cyclists at a traffic light has no established German name
+highway_trailhead	a trailhead is the starting point of a trail; German has no name for the point itself (Wanderparkplatz names a car park)
+barrier_kissing_gate	a kissing gate is a British gate type with no German equivalent
+barrier_hampshire_gate	a Hampshire gate is a British field gate with no German equivalent
+place_plot	place=plot names a plot of land in Indonesia and has no German name
+place_subcounty	a subdivision below a county has no established German name (Amtsgemeinde, Kreisangehörige Gemeinde)
+aeroway_aircraft_crossing	a crossing of taxiways used by aircraft has no established German name
+aeroway_stopway	the tag names a runway overrun area; the German terms (Notfallfläche, Sicherheitsbereich) are not established
