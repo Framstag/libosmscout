@@ -285,6 +285,30 @@
     return "";
   }
 
+  /**
+   * Returns the description for the given language code. Returns the English description,
+   * if no description is available for the given language code. Returns an empty string,
+   * if the type has no description at all.
+   *
+   * @param languageCode
+   *    languageCode like for example 'de'
+   * @return
+   *    Description or empty string
+   */
+  std::string TypeInfo::GetLocalizedDescription(const std::string& languageCode) const
+  {
+    static const std::string fallbackLanguageCode="en";
+
+    std::string description=GetDescription(languageCode);
+
+    if (description.empty() &&
+        languageCode!=fallbackLanguageCode) {
+      description=GetDescription(fallbackLanguageCode);
+    }
+
+    return description;
+  }
+
   TypeInfoRef TypeInfo::Read(FileScanner& scanner)
   {
     std::string name=scanner.ReadString();
