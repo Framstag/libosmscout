@@ -3352,7 +3352,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                                jstring queryJStr, jint limit,
                                jlong adminRegionHandle,
                                jstring defaultRegionJStr,
-                               jboolean cancel);
+                               jlong generation);
 
 // Form-based address search (searchLocationByForm): structured lookup by
 // admin region (city), postal area, street (location) and house number.
@@ -4201,6 +4201,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
         param.SetPartialMatch(true);
         param.SetStringMatcherFactory(
             CreateNameMatcherFactory());
+        param.SetBreaker(breaker);
 
         osmscout::LocationSearchResult searchResult;
         if (locationService->SearchForLocationByForm(param, searchResult)) {
@@ -4439,6 +4440,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         }
 
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
+        // The text index takes no breaker, so this pass is bounded per database: check
+        // before and after it, and the walk stops at the next database (spec:
+        // `osmscout-jni` — the free-text pass is abortable).
+        if (breaker && breaker->IsAborted()) {
+          break;
+        }
+
         // Free-text search over the text index (optional; index may be missing)
         osmscout::TextSearchIndex textSearch;
         if (!textSearch.Load(db->path)) {
@@ -4455,6 +4463,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                             /*searchRegions*/ true, /*searchOther*/ true,
                             /*transliterate*/ true,
                             resultsTxt);
+
+          // An abort that arrived while the index was searched stops the remaining
+          // databases; the entries gathered so far are discarded by the caller's
+          // fail-closed return.
+          if (breaker && breaker->IsAborted()) {
+            break;
+          }
           for (const auto &e : resultsTxt) {
             if (freeTextLimitReached()) {
               break;
@@ -9298,7 +9313,8 @@ extern "C" JNIEXPORT jobjectArray JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *env, jobject self,
                                                                       jobjectArray typeNamesJArray,
                                                                       jdouble lat, jdouble lon,
-                                                                      jdouble radiusMeters, jint limit)
+                                                                      jdouble radiusMeters, jint limit,
+                                                                      jlong generation)
 {
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/PoiEntry");
   if (entryCls == nullptr) {
