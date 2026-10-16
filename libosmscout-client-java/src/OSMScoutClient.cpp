@@ -52,6 +52,7 @@
 #include <osmscoutmap/MapPainter.h>
 #include <osmscoutmap/MapParameter.h>
 #include <osmscoutmap/MapService.h>
+#include <osmscoutmap/Styles.h>
 
 #ifdef HAVE_MAP_CAIRO
 #include <osmscoutmapcairo/MapPainterCairo.h>
@@ -73,10 +74,12 @@
 #include "frame_pixel_layout.h"
 #include "route_length.h"
 #include "route_step_time.h"
+#include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
 #include "route_failure_kind.h"
 #include "search_breaker.h"
 #include "search_scope.h"
+#include "type_icon_pixels.h"
 
 #include <osmscout/util/StringMatcher.h>
 
@@ -5049,7 +5052,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAddressAt(JNIEnv *env, jo
 // --------------------------------------------------------------------------
 // The artwork the active stylesheet gives an object type, rendered into a
 // sizePx x sizePx square - the leading icon of a search result row (spec:
-// osmscout-jni - Icon entry point returns a type's stylesheet artwork).
+// map-rendering - JNI entry point returns a type's stylesheet artwork).
 //
 // The type is looked up in the loaded type configuration and its icon style is
 // resolved through the stylesheet's own selectors, with a feature buffer that
@@ -5061,9 +5064,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAddressAt(JNIEnv *env, jo
 // requested square. Returns sizePx * sizePx ARGB pixels in the layout the
 // allocating render entry point returns, or null when the type has no artwork and
 // when the artwork cannot be produced (logged, never fatal).
-
-/** Fraction of the requested square an icon's artwork fills, leaving a margin. */
-#define NAVIVEYLIN_TYPE_ICON_FIT 0.9
 
 /**
  * Magnification *level* the icon style is resolved at — a detail level at which stylesheets define
@@ -5092,11 +5092,11 @@ static bool DrawTypeIconSymbol(cairo_t *cr,
 {
   osmscout::ScreenBox box = symbol.GetBoundingBox(projection);
   double extent = std::max(box.GetWidth(), box.GetHeight());
-  if (!(extent > 0.0)) {
+  double scale = naviveylin::TypeIconFitScale(side, extent);
+  if (scale <= 0.0) {
     return false;
   }
 
-  double scale = (static_cast<double>(side) * NAVIVEYLIN_TYPE_ICON_FIT) / extent;
   osmscout::SymbolRendererCairo renderer(cr);
   renderer.Render(projection,
                   symbol,
@@ -5138,8 +5138,12 @@ static bool DrawTypeIconImage(cairo_t *cr,
     return false;
   }
 
-  double scale = (static_cast<double>(side) * NAVIVEYLIN_TYPE_ICON_FIT) /
-                 static_cast<double>(std::max(width, height));
+  double scale = naviveylin::TypeIconFitScale(side, static_cast<double>(std::max(width, height)));
+  if (scale <= 0.0) {
+    cairo_surface_destroy(image);
+    return false;
+  }
+
   cairo_save(cr);
   cairo_translate(cr, static_cast<double>(side) / 2.0, static_cast<double>(side) / 2.0);
   cairo_scale(cr, scale, scale);
@@ -5184,7 +5188,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
 
   // Fully transparent: a type without artwork paints nothing, and the caller shows
   // no icon for it.
-  std::vector<uint8_t> argb(pixelCount * 4, 0);
+  std::vector<jint> pixels(pixelCount, 0);
   bool rendered = false;
 
   data->dbThread->RunSynchronousJob(
@@ -5199,19 +5203,22 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
 
       for (const auto &db : candidates) {
         if (!db || !db->GetStyleConfig()) {
-          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-style-config type=" << typeName;
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-style-config type=" << typeName
+                               << " px=" << side;
           continue;
         }
 
         osmscout::TypeConfigRef typeConfig = db->GetDatabase()->GetTypeConfig();
         if (!typeConfig) {
-          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-type-config type=" << typeName;
+          osmscout::log.Warn() << "[JNI] renderTypeIcon stage=no-type-config type=" << typeName
+                               << " px=" << side;
           continue;
         }
 
         osmscout::TypeInfoRef typeInfo = typeConfig->GetTypeInfo(typeName);
         if (!typeInfo) {
           osmscout::log.Warn() << "[JNI] renderTypeIcon stage=unknown-type type=" << typeName
+                               << " px=" << side
                                << " db=" << db->path;
           continue;
         }
@@ -5219,7 +5226,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
         osmscout::FeatureValueBuffer buffer;
         buffer.SetType(typeInfo);
 
-        osmscout::Magnification iconMagnification(osmscout::Magnification::magVeryClose);
+        osmscout::Magnification iconMagnification(NAVIVEYLIN_TYPE_ICON_MAGNIFICATION_LEVEL);
         osmscout::MercatorProjection projection;
         if (!projection.Set(osmscout::GeoCoord(0.0, 0.0),
                             0.0,
@@ -5239,7 +5246,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
         }
         if (!iconStyle || !iconStyle->IsVisible()) {
           // The normal case for an entry whose type the stylesheet gives no icon at all (a street, an
-          // address): silent, because the caller reports the absence (Diag/ROWICON).
+          // address): silent, because the caller reports the absence.
           continue;
         }
 
@@ -5298,20 +5305,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
         for (int y = 0; y < side; y++) {
           for (int x = 0; x < side; x++) {
             int offset = y * stride + x * 4;
-            unsigned int b = cairoData[offset + 0];
-            unsigned int g = cairoData[offset + 1];
-            unsigned int r = cairoData[offset + 2];
-            unsigned int a = cairoData[offset + 3];
-            if (a != 0 && a != 255) {
-              r = std::min<unsigned int>(255, (r * 255) / a);
-              g = std::min<unsigned int>(255, (g * 255) / a);
-              b = std::min<unsigned int>(255, (b * 255) / a);
-            }
             size_t pixel = static_cast<size_t>(y) * static_cast<size_t>(side) + static_cast<size_t>(x);
-            argb[pixel * 4 + 0] = static_cast<uint8_t>(a);
-            argb[pixel * 4 + 1] = static_cast<uint8_t>(r);
-            argb[pixel * 4 + 2] = static_cast<uint8_t>(g);
-            argb[pixel * 4 + 3] = static_cast<uint8_t>(b);
+            pixels[pixel] = static_cast<jint>(naviveylin::TypeIconArgbWord(cairoData[offset + 0],
+                                                                           cairoData[offset + 1],
+                                                                           cairoData[offset + 2],
+                                                                           cairoData[offset + 3]));
           }
         }
 
@@ -5331,13 +5329,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_renderTypeIcon(JNIEnv *env, 
     return nullptr;
   }
 
-  std::vector<jint> pixels(pixelCount);
-  for (size_t i = 0; i < pixelCount; i++) {
-    pixels[i] = static_cast<jint>((static_cast<uint32_t>(argb[i * 4 + 0]) << 24) |
-                                   (static_cast<uint32_t>(argb[i * 4 + 1]) << 16) |
-                                   (static_cast<uint32_t>(argb[i * 4 + 2]) << 8) |
-                                   static_cast<uint32_t>(argb[i * 4 + 3]));
-  }
   env->SetIntArrayRegion(result, 0, static_cast<jsize>(pixelCount), pixels.data());
 
   return result;
@@ -6509,28 +6500,12 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 }
 
 /**
- * The maximum speed a profile is parametrized with, or the built-in default for the vehicle when the
- * request carries no usable value. A value outside 1-300 km/h is not a speed a vehicle profile can
- * use, so it selects the built-in default instead of failing the calculation.
- */
-static double ResolveMaxSpeedKmh(double requestedMaxSpeedKmh, double builtInMaxSpeedKmh)
-{
-  if (!std::isfinite(requestedMaxSpeedKmh) ||
-      requestedMaxSpeedKmh < 1.0 ||
-      requestedMaxSpeedKmh > 300.0) {
-    return builtInMaxSpeedKmh;
-  }
-
-  return requestedMaxSpeedKmh;
-}
-
-/**
  * Create a routing profile for the given vehicle type.
  * Car uses a speed map; bicycle and foot use built-in parametrization.
  *
  * For a car [maxSpeedKmh] is a ceiling on top of the speed map, for bicycle and foot it is the speed
  * of every routable type. A value of 0 (and any value outside 1-300 km/h) selects the built-in
- * default speed of the vehicle.
+ * default speed of the vehicle through [naviveylin::ResolveProfileMaxSpeedKmh].
  */
 static osmscout::RoutingProfileRef CreateRoutingProfile(
     const osmscout::TypeConfigRef &tc,
@@ -6568,21 +6543,21 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
       speedMap["highway_roundabout"]=40.0;
       speedMap["highway_living_street"]=10.0;
       speedMap["highway_service"]=30.0;
-      double carMaxSpeed=ResolveMaxSpeedKmh(maxSpeedKmh,120.0);
+      double carMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
       profile->ParametrizeForCar(*tc, speedMap, carMaxSpeed);
       osmscout::log.Warn() << "  created car routing profile (max speed "
                            << carMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleBicycle: {
-      double bicycleMaxSpeed=ResolveMaxSpeedKmh(maxSpeedKmh,30.0);
+      double bicycleMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
       profile->ParametrizeForBicycle(*tc, bicycleMaxSpeed);
       osmscout::log.Warn() << "  created bicycle routing profile (max speed "
                            << bicycleMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleFoot: {
-      double footMaxSpeed=ResolveMaxSpeedKmh(maxSpeedKmh,10.0);
+      double footMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
       profile->ParametrizeForFoot(*tc, footMaxSpeed);
       osmscout::log.Warn() << "  created pedestrian routing profile (max speed "
                            << footMaxSpeed << " km/h)";
@@ -6666,7 +6641,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
   bool avoidTolls = false;
   bool avoidFerries = false;
   bool avoidUnpaved = false;
-  // 0 requests the vehicle's built-in profile; ResolveMaxSpeedKmh maps every unusable value there.
+  // 0 requests the vehicle's built-in profile; ResolveProfileMaxSpeedKmh maps every unusable value there.
   double maxSpeedKmh = 0.0;
   if (profileObj != nullptr) {
     jclass profileCls = env->GetObjectClass(profileObj);

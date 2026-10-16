@@ -917,6 +917,33 @@ public class OSMScoutClient {
                                           double angle,
                                           double lat, double lon);
 
+    /**
+     * Render the artwork the active stylesheet gives a single object type, into a
+     * square, without a map frame.
+     * <p>
+     * The type's icon style comes from the active stylesheet, resolved through
+     * the stylesheet's own selectors with no object loaded. A type whose rule
+     * selects on a tag value (a religion, a brand) therefore has no artwork and
+     * yields null rather than an invented icon. The call needs no position, no
+     * viewport and no projection of the caller's: it uses a projection of its
+     * own. {@link #setPreferSymbolIcons(boolean)} decides between the entry's
+     * vector symbol and its raster icon, on the same terms as a map render.
+     * <p>
+     * One element per pixel: the word {@code 0xAARRGGBB} with straight, not
+     * premultiplied, channels, index {@code y * sizePx + x} for the pixel at
+     * {@code (x, y)} — the layout {@link #renderWithRouteAndPois} returns. The
+     * artwork is centred in the square and scaled to fit it, and a pixel nothing
+     * was painted into is fully transparent.
+     *
+     * @param objectType name of the type in the loaded type configuration, e.g.
+     *                   {@code "amenity_parking"}; the name must be known to it
+     * @param sizePx     width and height of the square in pixels, from 1 to 512
+     * @return {@code sizePx * sizePx} pixels in {@code 0xAARRGGBB} layout, or
+     *         null when the type has no artwork, when its artwork cannot be
+     *         produced, or when the request is unusable
+     */
+    public native int[] renderTypeIcon(String objectType, int sizePx);
+
     // ---- Favorite Locations ----
 
     /**
