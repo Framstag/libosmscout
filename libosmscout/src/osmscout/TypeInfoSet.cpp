@@ -26,7 +26,7 @@ namespace osmscout {
 
   TypeInfoSet::TypeInfoSet(const TypeConfig& typeConfig)
   {
-    words.resize((typeConfig.GetTypeCount()+63)/64);
+    words.resize(WordsFor(typeConfig.GetTypeCount()));
   }
 
   TypeInfoSet::TypeInfoSet(TypeInfoSet&& other) noexcept
@@ -54,12 +54,12 @@ namespace osmscout {
            contained.back()->GetIndex()>=typeCount) {
       size_t index=contained.back()->GetIndex();
 
-      words[index/64]&=~(uint64_t(1)<<(index%64));
+      ClearBit(index);
       contained.pop_back();
       count--;
     }
 
-    words.resize((typeCount+63)/64);
+    words.resize(WordsFor(typeCount));
   }
 
   void TypeInfoSet::Set(const TypeInfoRef& type)
@@ -68,17 +68,15 @@ namespace osmscout {
 
     size_t index=type->GetIndex();
 
-    if (index/64>=words.size()) {
-      words.resize(index/64+1);
+    if (WordIndex(index)>=words.size()) {
+      words.resize(WordIndex(index)+1);
     }
 
-    uint64_t mask=uint64_t(1)<<(index%64);
-
-    if ((words[index/64]&mask)!=0) {
+    if (TestBit(index)) {
       return;
     }
 
-    words[index/64]|=mask;
+    SetBit(index);
     count++;
 
     // The contained types are kept in ascending type index order, so that iteration yields
@@ -126,7 +124,7 @@ namespace osmscout {
       return;
     }
 
-    words[index/64]&=~(uint64_t(1)<<(index%64));
+    ClearBit(index);
     count--;
 
     auto pos=std::lower_bound(contained.begin(),
@@ -169,7 +167,7 @@ namespace osmscout {
         write++;
       }
       else {
-        words[index/64]&=~(uint64_t(1)<<(index%64));
+        ClearBit(index);
         count--;
       }
     }

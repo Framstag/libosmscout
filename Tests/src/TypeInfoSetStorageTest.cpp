@@ -19,7 +19,9 @@
 
 #include <atomic>
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <memory>
 #include <new>
 #include <random>
@@ -157,11 +159,13 @@ namespace {
 
   /**
    * The bytes a set of 'typeCount' defined types needs for a bit per defined type, rounded
-   * to whole 64 bit words.
+   * to whole words of the bitmap.
    */
   size_t BitmapBytes(size_t typeCount)
   {
-    return ((typeCount+63)/64)*8;
+    constexpr size_t bitsPerWord=std::numeric_limits<uint64_t>::digits;
+
+    return ((typeCount+bitsPerWord-1)/bitsPerWord)*sizeof(uint64_t);
   }
 
   osmscout::TypeConfigRef BuildTypeConfig(size_t typeCount)

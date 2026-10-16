@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <iterator>
+#include <limits>
 #include <vector>
 
 #include <osmscout/TypeConfig.h>
@@ -111,16 +112,49 @@ namespace osmscout {
   class OSMSCOUT_API TypeInfoSet CLASS_FINAL
   {
   private:
+    //! Number of type indices one bitmap word holds
+    static constexpr size_t BitsPerWord=std::numeric_limits<uint64_t>::digits;
+
     //! One bit per type index, set if the type is contained
     std::vector<uint64_t>    words;
     //! The contained types, in ascending type index order
     std::vector<TypeInfoRef> contained;
     size_t                   count = 0;
 
+    //! Number of bitmap words that cover the given number of type indices
+    static size_t WordsFor(size_t typeCount)
+    {
+      return (typeCount+BitsPerWord-1)/BitsPerWord;
+    }
+
+    //! Index of the bitmap word that holds the bit of the given type index
+    static size_t WordIndex(size_t index)
+    {
+      return index/BitsPerWord;
+    }
+
+    //! Mask of the bit of the given type index within its bitmap word
+    static uint64_t BitMask(size_t index)
+    {
+      return uint64_t(1)<<(index%BitsPerWord);
+    }
+
     bool TestBit(size_t index) const
     {
-      return index/64<words.size() &&
-             (words[index/64]&(uint64_t(1)<<(index%64)))!=0;
+      return WordIndex(index)<words.size() &&
+             (words[WordIndex(index)]&BitMask(index))!=0;
+    }
+
+    //! The word of the given type index has to exist
+    void SetBit(size_t index)
+    {
+      words[WordIndex(index)]|=BitMask(index);
+    }
+
+    //! The word of the given type index has to exist
+    void ClearBit(size_t index)
+    {
+      words[WordIndex(index)]&=~BitMask(index);
     }
 
   public:
