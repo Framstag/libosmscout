@@ -58,14 +58,12 @@
   change. The bridge part (deriving the extent from a loaded region object, applying the filter, serialising
   the verdict) therefore has no host test and no map test here; see `verification.md` for what was verified
   instead.
-- [ ] 4.5 Run the rest of the C++ and Java suites and verify no existing test regresses.
-
-  **Not done.** The shared `build/` directory holds binaries from other branches (a stale binary aborts),
-  and a full-suite run would require rebuilding every target rather than the explicit targets this
-  environment allows. The Java suite of `JavaScout` needs the client jar installed into the local Maven
-  repository and a usable map database. What covers the touched surface instead: `SearchScopeTest`,
-  `scripts/check-jni-signatures.sh` and both build systems compiling the bridge and the Java sources (see
-  `verification.md`).
+- [x] 4.5 Run the rest of the C++ and Java suites and verify no existing test regresses. RUN 2026-10-16: the
+  C++ suite passed `100% tests passed out of 158` and the JavaScout suite `Tests run: 205, Failures: 0,
+  Errors: 0, Skipped: 38`, both exit 0, with the tree and the client jar rebuilt from this revision, so the
+  blockers this item named (stale binaries in the shared `build/`, a jar of another branch in the local
+  Maven repository) no longer apply. Logs, commands and revision: `verification.md`, "Host verification
+  2026-10-16".
 - [x] 4.6 Run `openspec validate "client-java-search-scope-extent" --strict` and verify the change validates.
 
 ## 5. Documentation and change hygiene

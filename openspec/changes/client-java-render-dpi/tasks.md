@@ -57,10 +57,10 @@
   `JavaScout` reports 230 tests, 19 failures, 25 skipped — the *same* failure set as a baseline run of
   `master` with this change stashed and rebuilt (see `verification.md` §4), so nothing regressed. No test
   in the repository calls the removed setter (it has no Java declaration at all).
-- [ ] 3.5 Run the rest of the C++ suite and verify no existing test regresses.
-  Not run: no C++ test links or reads `libosmscout-client-java` (only `JniSignatureParityTest` reads the two
-  touched sources, see `Tests/CMakeLists.txt:195`), and that test passes in both build systems. Building
-  every other test target to run a suite that cannot observe this change was left out deliberately.
+- [x] 3.5 Run the rest of the C++ suite and verify no existing test regresses. RUN 2026-10-16: the full C++
+  suite passed `100% tests passed out of 158` (exit 0); the note stands that no C++ test observes this
+  change, only `JniSignatureParityTest` reads the two touched sources. Logs and revision: `verification.md`,
+  "Host verification 2026-10-16".
 - [x] 3.6 Run `openspec validate "client-java-render-dpi" --strict` and verify the change validates.
   Verified: exits 0.
 

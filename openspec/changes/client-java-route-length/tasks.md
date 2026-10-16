@@ -41,11 +41,7 @@
 - [x] 3.3 Build the CMake build with the Java client library and the jar, and verify it compiles without
   errors and without warnings from the touched file.
 - [x] 3.4 Build the Meson build the same way and verify it compiles without errors.
-- [ ] 3.5 Run the Java and C++ suites and verify no existing test regresses. NOT RUN: the JavaScout test
-  sources do not compile against the `libosmscout-client-java` artifact installed in the local Maven
-  repository (its `RouteInstruction` constructor arity differs from the working tree, a leftover of a
-  sibling branch), and the shared `build/` directory holds stale binaries of other branches, so neither
-  suite can be run meaningfully here. See `verification.md` section 5.
+- [x] 3.5 Run the Java and C++ suites and verify no existing test regresses. RUN 2026-10-16: the full C++ suite passed `100% tests passed out of 158` and the JavaScout suite `Tests run: 205, Failures: 0, Errors: 0, Skipped: 38`, both exit 0, with the tree and the client jar rebuilt from this revision, so the two blockers this item named (the jar of another branch in the local Maven repository, stale binaries in the shared `build/`) no longer apply. Logs, commands and revision: `verification.md`, "Host verification 2026-10-16".
 - [x] 3.6 Run `openspec validate "client-java-route-length" --strict` and verify the change validates.
 
 ## 4. Documentation and change hygiene

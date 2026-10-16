@@ -49,9 +49,10 @@
   without errors and without warnings from the touched files.
 - [x] 4.2 Build the Meson build the same way and verify it compiles without errors.
 - [x] 4.3 Run the Java tests and verify the new cases pass and no existing Java test regresses.
-- [ ] 4.4 Run the C++ suite and verify no existing test regresses. — NOT DONE: the change touches only the
-  Java bridge's own callbacks and Java value types, no core C++ library code, so no C++ test exercises it.
-  The JNI parity test (`meson test "Check JNI signature parity"`) was run instead.
+- [x] 4.4 Run the C++ suite and verify no existing test regresses. RUN 2026-10-16: the full C++ suite passed
+  `100% tests passed out of 158` (exit 0). The note stands that no C++ test exercises this change; the JNI
+  parity test (`meson test "Check JNI signature parity"`) was run alongside. Logs and revision:
+  `verification.md`, "Host verification 2026-10-16".
 - [x] 4.5 Run `openspec validate "client-java-route-instruction-metrics" --strict` and verify the change
   validates.
 

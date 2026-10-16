@@ -89,3 +89,34 @@ kept.
 
 `git status --porcelain` before committing lists only the files of this change; `build/`, `build-meson/`,
 `build-asan/`, `maps/repository/` and other `openspec/changes/*` directories are never staged.
+
+## Host verification 2026-10-16
+
+Run to close the suite item of the task list (the item now reads `RUN 2026-10-16`). Verified revision:
+`38aaf7a18` on branch `todo-backlog-loop-2026-10-16`, whose only delta from `master` (`a79e239c9`) is `TODO.md`, so it carries
+`master`'s code. The client jar was rebuilt from that revision
+(`build/libosmscout-client-java/libosmscoutclientjava.jar`, sha256 `b6cb25802c513f1a2e448848129d7087acd4efb159eefc02f77714c9b4a2f3af`).
+
+```
+cmake --build build -j "$(nproc)"                                  # exit 0, no target failed
+QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=../Tests TESTS_TMP_DIR=./tmp-suite \
+  ctest -j 8 --output-on-failure                                   # 100% tests passed out of 158, exit 0, 23.68 s
+cd JavaScout && ./mvnw install:install-file -Dfile=../build/libosmscout-client-java/libosmscoutclientjava.jar \
+  -DgroupId=net.sf.libosmscout -DartifactId=libosmscout-client-java -Dversion=1.0-SNAPSHOT -Dpackaging=jar -q
+./mvnw package -DskipTests                                         # BUILD SUCCESS
+xvfb-run ./mvnw test                                               # Tests run: 205, Failures: 0, Errors: 0, Skipped: 38
+```
+
+Retained logs: `evidence/cpp-suite-2026-10-16.log`, `evidence/javascout-suite-2026-10-16.log`. Each names its own command and the revision it ran on.
+
+Two facts about the environment, so the numbers can be reproduced:
+- a reused `build/` directory whose test objects predate the installed Catch2 fails to link
+  (`undefined reference to typeinfo for Catch::ITransientExpression`) until the test translation units are
+  recompiled. That is a build-directory artefact, not a source defect; no source file was changed for it.
+- the first full-suite run used the reused `build/Tests` as `TESTS_TMP_DIR` and failed `OptimizeAreaWayIdsTest`
+  on its stale temp state (`Tests/src/OptimizeAreaWayIdsTest.cpp:383`, see the retained
+  `ctest-full.log` beside this change's evidence). The same revision passes that test with a fresh temp
+  directory, which is what the numbers above use. The dependence of the test on its temp directory is filed
+  in `TODO.md`.
+
+Not covered by this run, and still open in `tasks.md`: none: this closes the last open item of the task list.
