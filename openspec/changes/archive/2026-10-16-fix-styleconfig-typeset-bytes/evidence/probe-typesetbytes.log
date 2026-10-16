@@ -1,0 +1,30 @@
+# command: QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=/home/tim/projects/libosmscout/Tests TESTS_TMP_DIR=/home/tim/projects/libosmscout/build/Tests ./build/Tests/StyleConfigLookupCostTest 'Defined but unreferenced types add no build work'
+# probe: TypeSetBytes restored to the pre-change formula (TEMP-REVERT-PROBE)
+# utc: 2026-10-16T11:09:26Z
+Filters: "Defined but unreferenced types add no build work"
+Randomness seeded to: 130517990
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+StyleConfigLookupCostTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Defined but unreferenced types add no build work
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:384
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:416: FAILED:
+  REQUIRE( smallDiagnostics.typeSetBytes==largeDiagnostics.typeSetBytes )
+with expansion:
+  3024 (0xbd0) == 14224 (0x3790)
+with messages:
+  small type set: slots 30, evaluations 4, table bytes 792, type set bytes 3024
+  large type set: slots 30, evaluations 4, table bytes 792, type set bytes
+  14224
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 6 | 5 passed | 1 failed
+
+# exit=42

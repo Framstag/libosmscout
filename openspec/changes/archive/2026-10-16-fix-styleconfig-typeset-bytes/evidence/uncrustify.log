@@ -1,0 +1,9 @@
+# Formatter conformance of the touched C++ files, uncrustify Uncrustify-0.83.0_f, at 2026-10-16T11:20:51Z
+# command per file: uncrustify -q -c .uncrustify -l CPP -f <file> > /tmp/fmt.txt; diff -u <file> /tmp/fmt.txt
+# 'added lines' is the number of diff hunks (< or > side) that carry a line this change introduced; they are found by their own text, which appears nowhere at HEAD.
+# The .uncrustify config reports the pre-existing alignment/style drift of four of the five files (the same reference/alignment class the archived fix-typeinfoset-bitmap-storage/evidence/uncrustify.log records, at its revision and at HEAD alike, 81 to 85 differing lines for TypeInfoSetStorageTest.cpp).
+== libosmscout/include/osmscout/TypeInfoSet.h: 8 differing line(s) under .uncrustify; of them this change's added lines: 0
+== libosmscout-map/src/osmscoutmap/StyleConfig.cpp: 5 differing line(s) under .uncrustify; of them this change's added lines: 0
+== libosmscout-map/include/osmscoutmap/StyleConfig.h: 67 differing line(s) under .uncrustify; of them this change's added lines: 0
+== Tests/src/StyleConfigLookupCostTest.cpp: 0 differing line(s) under .uncrustify; of them this change's added lines: 0
+== Tests/src/TypeInfoSetStorageTest.cpp: 81 differing line(s) under .uncrustify; of them this change's added lines: 0

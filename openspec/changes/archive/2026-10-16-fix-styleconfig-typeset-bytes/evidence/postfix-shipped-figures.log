@@ -1,0 +1,8 @@
+# command: QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=$PWD/Tests TESTS_TMP_DIR=$PWD/build/Tests ./build/Tests/StyleConfigLookupCostTest -s 'The build cost of the shipped stylesheets is reported'
+# utc: 2026-10-16T11:30:40Z
+# exit=0
+  slots 152560, type condition evaluations 7804, table bytes 3845544, type set
+  bytes 123152
+
+--
+# this case is a figure report, its assertions are the tolerance of two runs
