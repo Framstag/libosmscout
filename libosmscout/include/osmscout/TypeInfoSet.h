@@ -177,6 +177,15 @@ namespace osmscout {
       return count;
     }
 
+    /**
+     * The bytes the storage of the set allocates: the bitmap over the type indices, one bit per
+     * defined type rounded up to whole 64 bit words, plus one slot per contained type
+     */
+    size_t AllocatedBytes() const
+    {
+      return words.capacity()*sizeof(uint64_t)+contained.capacity()*sizeof(TypeInfoRef);
+    }
+
     bool Intersects(const TypeInfoSet& otherTypes) const;
 
     TypeInfoSetConstIterator begin() const
