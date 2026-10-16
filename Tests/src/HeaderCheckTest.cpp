@@ -461,3 +461,72 @@ TEST_CASE("Check include dependencies")
 
     REQUIRE(violationCount==0);
 }
+
+/**
+ * Standard-library includes of a file must all precede its project includes
+ * (guidelines/CodeStyles.md, "Include Order"): own header, standard library, then the
+ * project headers. Returns the standard-library includes that follow a project include
+ * other than the file's own header.
+ */
+static std::list<std::string> IncludesAfterProjectHeaders(const fs::path& filename)
+{
+  std::list<std::string> violations;
+
+  std::regex             include("#include *[<\\\"]([a-zA-Z0-9/.]+)[>\\\"]");
+  std::string            ownHeader=filename.stem().string() + ".h";
+
+  std::string            line;
+  std::ifstream          file(filename);
+  bool                   projectRead=false;
+
+  if (file.is_open()) {
+    while (getline(file, line)) {
+      std::smatch match;
+
+      if (!std::regex_search(line, match, include)) {
+        continue;
+      }
+
+      std::string included=match[1];
+
+      if (included.starts_with("osmscout")) {
+        if (!(included.ends_with("/" + ownHeader) || included == ownHeader)) {
+          projectRead=true;
+        }
+
+        continue;
+      }
+
+      if (projectRead) {
+        violations.push_back(match[0]);
+      }
+    }
+    file.close();
+  }
+
+  return violations;
+}
+
+TEST_CASE("Check include order of util/StringMatcher.cpp")
+{
+  const char * sourceRoot = getenv("SOURCE_ROOT");
+
+  CHECK(sourceRoot!= nullptr);
+
+  fs::path file=fs::path(sourceRoot) / "libosmscout/src/osmscout/util/StringMatcher.cpp";
+
+  CHECK(exists(file));
+
+  std::list<std::string> violations=IncludesAfterProjectHeaders(file);
+
+  for (const auto& violation : violations) {
+    std::cerr << "File '" << file.generic_string()
+              << "' includes a standard library header after its project includes: '"
+              << violation << "'!" << '\n';
+  }
+
+  std::cout << "SOURCE=" << file.generic_string()
+            << " STD_INCLUDES_AFTER_PROJECT=" << violations.size() << std::endl;
+
+  REQUIRE(violations.size()==0);
+}
