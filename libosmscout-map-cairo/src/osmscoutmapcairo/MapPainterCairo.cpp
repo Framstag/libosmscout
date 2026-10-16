@@ -1191,26 +1191,33 @@ namespace osmscout {
   {
     std::vector<Glyph<MapPainterCairo::CairoNativeGlyph>> result;
 
-    double horizontalOffset = 0;
-    for (size_t ch = 0; ch < label.wstr.length(); ch++){
-      result.emplace_back();
+    double verticalOffset = 0;
 
-      result.back().glyph.character = WStringToUTF8String(label.wstr.substr(ch,1));
-      result.back().glyph.font = label.font;
+    for (const auto& line : label.lines) {
+      double horizontalOffset = 0;
 
-      cairo_text_extents_t  textExtents;
-      cairo_scaled_font_text_extents(label.font,
-                                     result.back().glyph.character.c_str(),
-                                     &textExtents);
+      for (size_t ch = 0; ch < line.length(); ch++){
+        result.emplace_back();
 
-      result.back().glyph.width = textExtents.width;
-      result.back().glyph.height = textExtents.height;
-      result.back().glyph.xBearing = textExtents.x_bearing;
-      result.back().glyph.yBearing = textExtents.y_bearing;
+        result.back().glyph.character = WStringToUTF8String(line.substr(ch,1));
+        result.back().glyph.font = label.font;
 
-      result.back().position=Vertex2D(horizontalOffset,0);
+        cairo_text_extents_t  textExtents;
+        cairo_scaled_font_text_extents(label.font,
+                                       result.back().glyph.character.c_str(),
+                                       &textExtents);
 
-      horizontalOffset += textExtents.x_advance;
+        result.back().glyph.width = textExtents.width;
+        result.back().glyph.height = textExtents.height;
+        result.back().glyph.xBearing = textExtents.x_bearing;
+        result.back().glyph.yBearing = textExtents.y_bearing;
+
+        result.back().position=Vertex2D(horizontalOffset,verticalOffset);
+
+        horizontalOffset += textExtents.x_advance;
+      }
+
+      verticalOffset += label.lineAdvance;
     }
 
     return result;
@@ -1245,12 +1252,104 @@ namespace osmscout {
     cairo_set_matrix(draw, &matrix);
   }
 
+  /**
+   * Ink extents of a text string drawn with the given font, relative to the baseline
+   * start point of the string
+   */
+  static cairo_text_extents_t CairoTextExtents(MapPainterCairo::CairoFont font,
+                                               const std::wstring& text)
+  {
+    cairo_text_extents_t extents;
+
+    cairo_scaled_font_text_extents(font,
+                                   WStringToUTF8String(text).c_str(),
+                                   &extents);
+
+    return extents;
+  }
+
+  static bool IsCairoLabelSpace(wchar_t c)
+  {
+    return c==L' ' || c==L'\t' || c==L'\n' || c==L'\r';
+  }
+
+  /**
+   * Greedily wrap the text at word boundaries into lines no wider than proposedWidth
+   * (in pixels, measured as the advance of the text).
+   *
+   * A word wider than the line is kept on a line of its own: a word is never broken, so a
+   * label of a single word stays on one line whatever the width is - the rule Pango's
+   * PANGO_WRAP_WORD follows too. A proposedWidth of 0 or less leaves the text unbroken on
+   * a single line.
+   */
+  static std::vector<std::wstring> WrapCairoText(MapPainterCairo::CairoFont font,
+                                                 const std::wstring& text,
+                                                 double proposedWidth)
+  {
+    std::vector<std::wstring> lines;
+
+    if (proposedWidth<=0.0) {
+      lines.push_back(text);
+
+      return lines;
+    }
+
+    std::vector<std::wstring> words;
+    std::wstring              word;
+
+    for (wchar_t c : text) {
+      if (IsCairoLabelSpace(c)) {
+        if (!word.empty()) {
+          words.push_back(word);
+          word.clear();
+        }
+      }
+      else {
+        word.push_back(c);
+      }
+    }
+
+    if (!word.empty()) {
+      words.push_back(word);
+    }
+
+    if (words.empty()) {
+      lines.push_back(text);
+
+      return lines;
+    }
+
+    std::wstring line;
+
+    for (const auto& current : words) {
+      if (line.empty()) {
+        line=current;
+
+        continue;
+      }
+
+      std::wstring candidate=line+L' '+current;
+
+      if (CairoTextExtents(font,candidate).x_advance<=proposedWidth) {
+        line=candidate;
+      }
+      else {
+        lines.push_back(line);
+        line=current;
+      }
+    }
+
+    lines.push_back(line);
+
+    return lines;
+  }
+
   std::shared_ptr<MapPainterCairo::CairoLabel> MapPainterCairo::Layout(const Projection& projection,
                                                                        const MapParameter& parameter,
                                                                        const std::string& text,
                                                                        double fontSize,
-                                                                       double /*objectWidth*/,
-                                                                       bool /*enableWrapping*/,
+                                                                       double objectWidth,
+                                                                       bool enableWrapping,
                                                                        bool /*contourLabel*/)
   {
     auto label = std::make_shared<MapPainterCairo::CairoLabel>();
@@ -1265,12 +1364,53 @@ namespace osmscout {
     cairo_scaled_font_text_extents(label->label.font,
                                    text.c_str(),
                                    &(label->label.textExtents));
+
+    // The line width the text is wrapped into. The bounds are the map parameters of the
+    // line wrapping (minimum and maximum character count, fit to area, fit to width), read
+    // by GetProposedLabelWidth, as the Qt and Skia backends read them too.
+    double proposedWidth=-1.0;
+
+    if (enableWrapping && !label->label.wstr.empty()) {
+      cairo_text_extents_t sampleExtents;
+
+      cairo_scaled_font_text_extents(label->label.font,
+                                     "abcdefghijklmnopqrstuvwxyz",
+                                     &sampleExtents);
+
+      proposedWidth=GetProposedLabelWidth(parameter,
+                                          sampleExtents.x_advance/26.0,
+                                          objectWidth,
+                                          label->label.wstr.size());
+    }
+
+    label->label.lines=WrapCairoText(label->label.font,
+                                     label->label.wstr,
+                                     proposedWidth);
+    label->label.lineAdvance=label->label.fontExtents.height;
+
     label->text=text;
     label->fontSize=fontSize;
+
+    double width=0.0;
+
+    label->label.lineExtents.reserve(label->label.lines.size());
+
+    for (const auto& line : label->label.lines) {
+      cairo_text_extents_t extents=CairoTextExtents(label->label.font,
+                                                    line);
+
+      label->label.lineExtents.push_back(extents);
+
+      width=std::max(width,extents.width);
+    }
+
     // label dimensions describe the ink extents of the drawn text (unlike the
-    // font box from fontExtents, which is text independent)
-    label->width=label->label.textExtents.width;
-    label->height=label->label.textExtents.height;
+    // font box from fontExtents, which is text independent). A wrapped label is as
+    // wide as its widest line and as tall as its lines above each other.
+    label->width=width;
+    label->height=(label->label.lines.size()<=1)
+                    ? label->label.textExtents.height
+                    : static_cast<double>(label->label.lines.size())*label->label.lineAdvance;
 
     return label;
   }
@@ -1283,6 +1423,19 @@ namespace osmscout {
                                            double fontSize)
   {
     return MeasureLabel(Layout(projection, parameter, text, fontSize, 0, false, false),
+                        [this](const CairoNativeGlyph& glyph) {
+                          return GlyphBoundingBox(glyph);
+                        });
+  }
+
+  TextMetrics MapPainterCairo::MeasureText(const Projection& projection,
+                                           const MapParameter& parameter,
+                                           const std::string& text,
+                                           double fontSize,
+                                           double objectWidth,
+                                           bool enableWrapping)
+  {
+    return MeasureLabel(Layout(projection, parameter, text, fontSize, objectWidth, enableWrapping, false),
                         [this](const CairoNativeGlyph& glyph) {
                           return GlyphBoundingBox(glyph);
                         });
@@ -1337,28 +1490,34 @@ namespace osmscout {
         cairo_fill(draw);
       }
 #else
-      // draw so that the ink of the text starts exactly at the label rectangle
-      // origin: convert ink bearings (relative to the baseline start point) into
-      // a pen position at the baseline
+      // draw so that the ink of every line starts inside the label rectangle: convert
+      // ink bearings (relative to the baseline start point) into a pen position at the
+      // baseline. A wrapped label draws one line per element of layout.lines, centred in
+      // the width the label rectangle spans, one line advance further down each time.
       cairo_set_scaled_font(draw, layout.font);
-      cairo_move_to(draw,
-                    labelRectangle.x - layout.textExtents.x_bearing,
-                    labelRectangle.y - layout.textExtents.y_bearing);
 
-      if (style->GetStyle()==TextStyle::normal) {
-        cairo_show_text(draw,label.text.c_str());
-        cairo_stroke(draw);
-      }
-      else {
-        cairo_set_scaled_font(draw, layout.font);
-        cairo_text_path(draw,label.text.c_str());
+      for (size_t lineIndex = 0; lineIndex < layout.lines.size(); lineIndex++) {
+        const cairo_text_extents_t &lineExtents=layout.lineExtents[lineIndex];
+        const std::string          lineText=WStringToUTF8String(layout.lines[lineIndex]);
 
-        cairo_set_source_rgba(draw,1,1,1,label.alpha);
-        cairo_set_line_width(draw,2.0);
-        cairo_stroke_preserve(draw);
+        cairo_move_to(draw,
+                      labelRectangle.x+(labelRectangle.width-lineExtents.width)/2.0-lineExtents.x_bearing,
+                      labelRectangle.y+static_cast<double>(lineIndex)*layout.lineAdvance-lineExtents.y_bearing);
 
-        cairo_set_source_rgba(draw,r,g,b,label.alpha);
-        cairo_fill(draw);
+        if (style->GetStyle()==TextStyle::normal) {
+          cairo_show_text(draw,lineText.c_str());
+          cairo_stroke(draw);
+        }
+        else {
+          cairo_text_path(draw,lineText.c_str());
+
+          cairo_set_source_rgba(draw,1,1,1,label.alpha);
+          cairo_set_line_width(draw,2.0);
+          cairo_stroke_preserve(draw);
+
+          cairo_set_source_rgba(draw,r,g,b,label.alpha);
+          cairo_fill(draw);
+        }
       }
 
 #endif
@@ -1423,13 +1582,19 @@ namespace osmscout {
 
 #else
       cairo_set_scaled_font(draw, layout.font);
-      // see text style branch above: place the ink at the label rectangle origin
-      cairo_move_to(draw,
-                    labelRectangle.x - layout.textExtents.x_bearing,
-                    labelRectangle.y - layout.textExtents.y_bearing);
+      // see the text style branch above: a wrapped shield draws one line per element
+      // of layout.lines, each with its ink at the label rectangle origin
+      for (size_t lineIndex = 0; lineIndex < layout.lines.size(); lineIndex++) {
+        const cairo_text_extents_t &lineExtents=layout.lineExtents[lineIndex];
+        const std::string          lineText=WStringToUTF8String(layout.lines[lineIndex]);
 
-      cairo_show_text(draw,label.text.c_str());
-      cairo_stroke(draw);
+        cairo_move_to(draw,
+                      labelRectangle.x+(labelRectangle.width-lineExtents.width)/2.0-lineExtents.x_bearing,
+                      labelRectangle.y+static_cast<double>(lineIndex)*layout.lineAdvance-lineExtents.y_bearing);
+
+        cairo_show_text(draw,lineText.c_str());
+        cairo_stroke(draw);
+      }
 
 #endif
     }

@@ -43,6 +43,56 @@
 namespace osmscout {
 
   /**
+   * \ingroup Routing
+   *
+   * Which end of a route a position is being resolved for.
+   *
+   * The two ends attach to their way along **opposite halves** of it: the start searches forward from
+   * the attach index, the target searches backward from it (see GetStartForwardRouteNode and
+   * GetTargetForwardRouteNode). On a way that is direction-restricted — a one-way street, a slip
+   * road — a position can therefore attach as a start and not as a target, which is why a resolution
+   * that is allowed to pick the closest routable way has to know the end it resolves for.
+   *
+   * `Unspecified` means the end is not known (a via point, or a caller outside this library): no
+   * end-specific restriction is applied, which is the behaviour of the resolutions that predate this
+   * parameter.
+   */
+  enum class RouteEndpoint : uint8_t
+  {
+    Start,
+    Target,
+    Unspecified
+  };
+
+  /**
+   * \ingroup Routing
+   *
+   * Why a routing calculation did not produce a route.
+   *
+   * A route calculation fails for several unrelated reasons, and the caller of this library can
+   * neither report nor act on the failure while they all look alike. `RoutingResult` carries the
+   * reason so a caller can tell them apart. The values name the cause, not the remedy:
+   *
+   * - None: no failure (a result carrying a route, or a result nobody failed).
+   * - NoStartNode: the start position was resolved to a way, but that way offers no route node
+   *   reachable from the position in a direction the profile permits.
+   * - NoTargetNode: the same for the target position.
+   * - NoRouteFound: the search ran and found no connection (the two positions are not connected in
+   *   the loaded routing data, or the connection is longer than the profile's cost limit allows).
+   * - DataFailure: the routing data could not be read (a route node, area or way failed to load).
+   * - Aborted: the calculation was cancelled through its breaker.
+   */
+  enum class RoutingError : uint8_t
+  {
+    None,
+    NoStartNode,
+    NoTargetNode,
+    NoRouteFound,
+    DataFailure,
+    Aborted
+  };
+
+  /**
    * Result of a routing calculation. This object is always returned.
    * In case of an routing error it however may not contain a valid route
    * (route is empty).
@@ -53,6 +103,7 @@ namespace osmscout {
   {
   private:
     RouteData route;
+    RoutingError error=RoutingError::None;
     Distance  currentMaxDistance;
     Distance  overallDistance;
     std::vector<int> sectionLengths;
@@ -93,6 +144,21 @@ namespace osmscout {
     bool Success() const
     {
       return !route.IsEmpty();
+    }
+
+    /**
+     * Why this result carries no route. `Success()` is unchanged (`!route.IsEmpty()`), so a caller
+     * that only asks whether the calculation worked keeps its behaviour; this names the cause for a
+     * caller that reports it.
+     */
+    RoutingError GetError() const
+    {
+      return error;
+    }
+
+    void SetError(RoutingError error)
+    {
+      this->error=error;
     }
       
     const std::vector<int>& GetSectionLenghts() const

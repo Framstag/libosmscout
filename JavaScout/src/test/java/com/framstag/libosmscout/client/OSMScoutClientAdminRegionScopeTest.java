@@ -148,7 +148,13 @@ public class OSMScoutClientAdminRegionScopeTest {
                 // for the queries tried here is the same as without a scope, so
                 // the scope's observable effect is the reported name (the caller
                 // ranks results with it).
-                LocationEntry[] scoped = localClient.searchLocations(regionName, 20, handle);
+                final long generation = localClient.beginSearch(OSMScoutClient.SEARCH_SLOT_PLACES);
+                LocationEntry[] scoped;
+                try {
+                    scoped = localClient.searchLocations(regionName, 20, handle, generation);
+                } finally {
+                    localClient.cancelSearch(generation);
+                }
                 assertNotNull(scoped, "a scoped search must return an array");
                 assertTrue(scoped.length > 0, "a scoped search should return results");
             } finally {
