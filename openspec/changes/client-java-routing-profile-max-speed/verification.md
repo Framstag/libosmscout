@@ -86,7 +86,7 @@ Change: `client-java-routing-profile-max-speed` — a routing profile carries th
 
 ## 6. What could not be run, and why
 
-- **Not run: an end-to-end route calculation that observes the applied speed.** Every route through this JNI
+- **Not run then (2026-10-16: superseded — see "Host verification 2026-10-16 (map-dependent items)" below): an end-to-end route calculation that observes the applied speed.** Every route through this JNI
   function needs a routable database, and this machine has none: `maps/` holds format v26 databases while
   the library expects v27, and importing one is out of scope. The log line that names the applied speed and
   the per-road-type ceiling therefore cannot be observed on a real route here. The decision that selects the
@@ -105,3 +105,39 @@ Change: `client-java-routing-profile-max-speed` — a routing profile carries th
 `git status --short` after the commit lists only the pre-existing untracked entries (`maps/repository/` and
 the other `openspec/changes/client-java-*` directories); `build/`, `debug/` and the other branches' files are
 never staged. Nothing was staged with `git add -A`, `git add .` or `git commit -a`.
+
+## Host verification 2026-10-16 (map-dependent items)
+
+Task 3.6 is now ticked: the applied speed is observed end to end on a real route of the v27 database
+`maps/nordrhein-westfalen`.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  RoutingSpeedProbe maps/nordrhein-westfalen stylesheets
+```
+
+Route 51.514227/7.465279 -> 51.520/7.480, calculated twice through
+`calculateRouteWithObjectsAsync(..., RoutingProfile, ...)`. The bridge logs the applied speed at WARN level,
+which the default osmscout logger writes to stderr, so the log line and its route are in one transcript:
+
+```
+  created car routing profile (max speed 77.00000 km/h)     <- RoutingProfile(Vehicle.CAR, 77.0)
+  created car routing profile (max speed 77.00000 km/h)
+  created car routing profile (max speed 77.00000 km/h)
+PROBE: requested-77 vehicle=CAR maxSpeedKmh=77.0 -> route distance=1699.3774322313407m duration=122.35517512065651s waypoints=113
+  created car routing profile (max speed 120.00000 km/h)    <- RoutingProfile(Vehicle.CAR) (built-in)
+  created car routing profile (max speed 120.00000 km/h)
+  created car routing profile (max speed 120.00000 km/h)
+PROBE: built-in vehicle=CAR maxSpeedKmh=0.0 -> route distance=1699.3774322313407m duration=122.35517512065651s waypoints=113
+```
+
+The requested `77` and the built-in `120` each reach `CreateRoutingProfile` (three times per route, one per
+profile site), on a route the routing service actually returned (113 waypoints). **What stayed unverified:**
+the ceiling does not change this city route's published duration (both `122.355` s), because the road types it
+uses stay below the ceiling; the speed's effect on the route is therefore observed only through the log line,
+not through a changed duration. The bicycle/foot log lines were not run (no bicycle/foot route was calculated).
+
+Log: `evidence/routing-speed-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision
+`06b197a35`). Probe source: `evidence/RoutingSpeedProbe.java`.

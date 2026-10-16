@@ -150,4 +150,39 @@ Two facts about the environment, so the numbers can be reproduced:
   directory, which is what the numbers above use. The dependence of the test on its temp directory is filed
   in `TODO.md`.
 
-Not covered by this run, and still open in `tasks.md`: 3.3, the frame contract on a real map.
+Not covered by that run, and ticked in `tasks.md` on 2026-10-16: 3.3, the frame contract on a real map (see
+below).
+
+## Host verification 2026-10-16 (map-dependent items)
+
+The item that was open (3.3, the frame contract on a real map) was redone against the v27 database
+`maps/nordrhein-westfalen` (real map, real type set) and is now ticked.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  DpiProbe maps/nordrhein-westfalen stylesheets
+```
+
+| probe | result |
+|---|---|
+| database opened | `maps/nordrhein-westfalen` (v27), `stylesheets/`, 64x48 at 51.514/7.465, magnification 32768 |
+| every frame | `3072` pixels (`64 * 48`), `3072` non-transparent |
+| `NO_DPI_EQUALS_96` | `true` |
+| `NAN_EQUALS_96` | `true` |
+| `NEG_EQUALS_96` | `true` |
+| `NO_DPI_STILL_96_AFTER_400` | `true` |
+| `PIXELS_DIFFERING_96_VS_400` | `2983/3072` |
+| `PIXELS_DIFFERING_NO_DPI_VS_400` | `2983/3072` |
+
+Read: an explicit DPI reaches the projection (96 vs 400 differ in 2983 of 3072 pixels on a real map), an
+undefined or non-positive DPI renders exactly the configured-DPI frame and is not rejected, and the 400-dpi
+request leaves what a later no-DPI request projects with unchanged.
+
+**What stayed unverified:** the task's second half — "reports a skip without a map". This change adds no
+repository Java test, so the probe is a throw-away program; the skip path of a repository test is not
+exercised. The earlier `Tests/data/testregion` numbers (1400/3072) are superseded by the numbers above.
+
+Log: `evidence/dpi-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision `06b197a35`). Probe
+source: `evidence/DpiProbe.java`.

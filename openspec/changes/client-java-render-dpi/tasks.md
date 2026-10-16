@@ -42,17 +42,17 @@
   compiles and the signature test passes. Verified:
   `meson compile -C build-meson osmscout_client_java libosmscoutclientjava` rc=0 and
   `meson test -C build-meson "Check JNI signature parity"` → 1/1 OK.
-- [ ] 3.3 Verify the frame contract on a real map: a request with an explicit DPI produces a frame projected
+- [x] 3.3 Verify the frame contract on a real map: a request with an explicit DPI produces a frame projected
   at that DPI, and a request without one produces the configured-DPI frame. Verify: with a routable or
   renderable map directory the Java test reports both frames, and reports a skip without one. This is the
   only feasible level, because the DPI plumbing needs a database and a JNI environment; there is no host
   unit test for it.
-  Not run as a repository test — this change adds no Java-level DPI test (the proposal's Impact section
-  names no test file). The contract was instead observed with a throw-away Java probe over a real JNI
-  client (see `verification.md` §3): the 400-dpi frame differs from the 96-dpi frame in 1400 of 3072 pixels,
-  and the NaN / negative / omitted forms are pixel-identical to it. `maps/` holds a routable database
-  (`arnsberg-regbez`) whose `types.dat` is format version 26 while the tree expects 27, so it cannot be
-  opened; the probe used the repository fixture `Tests/data/testregion` instead.
+  RUN 2026-10-16: done against the v27 database `maps/nordrhein-westfalen` with `stylesheets/` — log
+  `evidence/dpi-probe-nrw-2026-10-16.log`, probe source `evidence/DpiProbe.java`. Every frame is 3072 px
+  (64x48); the 400-dpi frame differs from the 96-dpi frame in `2983` of 3072 pixels; the no-DPI, NaN and
+  negative forms are pixel-identical to the 96-dpi frame; and a no-DPI request after the 400-dpi request is
+  still identical to it. Still unverified: the "reports a skip without a map" half — this change adds no
+  repository Java test, so the probe is a throw-away program.
 - [x] 3.4 Run the Java client suite and verify no existing test regresses. Verified: `mvn -o test` in
   `JavaScout` reports 230 tests, 19 failures, 25 skipped — the *same* failure set as a baseline run of
   `master` with this change stashed and rebuilt (see `verification.md` §4), so nothing regressed. No test

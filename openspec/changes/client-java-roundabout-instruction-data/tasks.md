@@ -73,9 +73,11 @@
 - [x] 4.2 Build both Meson targets of this change. Verify: `meson compile -C debug osmscout_client_java`
   compiles and links the native library and `meson compile -C debug libosmscoutclientjava` creates the jar,
   both exit 0 (the jar step reports the 69 pre-existing javadoc warnings of the other classes).
-- [ ] 4.3 NOT RUN: the bare `meson compile -C debug` of the whole tree. Reason: it stalled the shell tool and
-  was abandoned; the two targets this change touches were compiled explicitly instead (4.2), which is what
-  the meson-parity check needs.
+- [x] 4.3 RUN 2026-10-16: the bare `meson compile -C debug` of the whole tree completed — `637` targets,
+  `0` compile errors, exit 0, revision `06b197a35`, log
+  `evidence/meson-compile-whole-tree-2026-10-16.log`. The earlier "stalled the shell tool and was
+  abandoned" note is superseded: the same command ran to completion in the background (`meson` 1.12.1,
+  ninja, build dir `debug/`), which is the meson-parity check this task asks for.
 - [x] 4.4 Check the JNI constructor descriptor against the built jar. Verify: `javap -s -classpath
   build/libosmscout-client-java/libosmscoutclientjava.jar
   com.framstag.libosmscout.client.RouteInstruction` prints the descriptor of the 14-parameter constructor,
@@ -95,10 +97,17 @@
   into the local repository with the mechanism the repository documents
   (`mvn -o install:install-file -Dfile=build/libosmscout-client-java/libosmscoutclientjava.jar ...`),
   and the JavaScout test then ran against it offline (3.4).
-- [ ] 4.9 NOT RUN: an end-to-end navigation test on a roundabout (a fix on the ring, the engine's enter and
-  leave callbacks). Reason: `maps/` holds format v26 databases while the library expects v27, so no routable
-  database can be opened here and no database may be imported for a check, and there is no display. The model
-  is covered by the Java tests and the JNI contract by the descriptor check.
+- [x] 4.9 RUN 2026-10-16: an end-to-end navigation test on a real roundabout of the v27 database
+  `maps/nordrhein-westfalen` — log `evidence/roundabout-navigation-probe-nrw-2026-10-16.log`, probe source
+  `evidence/RoundaboutProbe.java`. Roundabout ways were located with `osmconvert ... --add-bbox-tags` over
+  the Dortmund bbox (203 ways, list in `evidence/roundabout-ways-dortmund-2026-10-16.csv`); way `4236678`
+  (`highway=secondary`, `junction=roundabout`, bbox 7.3965235,51.5689384 .. 7.3968155,51.5691420) carries a
+  real route of 641.553 m / 46.19 s across it. The instruction list holds `ROUNDABOUT_ENTER`
+  (`roundaboutExitNumber=0`, `roundaboutClockwise=false` — entering takes no exit) and `ROUNDABOUT_LEAVE`
+  (`roundaboutExitNumber=3`, `roundaboutClockwise=false`, `shortDescription="Exit 3"`), i.e. the exit taken
+  and the circulation direction the change added. Still unverified: a non-zero
+  `nextNextRoundaboutExitNumber` (needs two roundabouts within the hint distance; none on this route) and a
+  clockwise ring.
 
 ## 5. Change hygiene
 

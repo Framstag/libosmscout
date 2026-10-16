@@ -61,11 +61,15 @@
   validates.
 - [x] 3.5 Verify the JNI declaration surface is unchanged: `bash scripts/check-jni-signatures.sh` still
   matches, and the change adds no native declaration.
-- [ ] 3.6 Verify the applied speed end to end through a real route calculation. NOT RUN: every route through
-  the JNI bridge needs a routable database, and this machine has none (`maps/` holds format v26 while the
-  library expects v27, and importing one is out of scope), so the log line that names the applied speed
-  cannot be observed on a real route here. The decision that selects the speed is covered by 3.1, and the
-  read path is covered by inspection only.
+- [x] 3.6 Verify the applied speed end to end through a real route calculation. RUN 2026-10-16: done on the
+  v27 database `maps/nordrhein-westfalen` — log `evidence/routing-speed-probe-nrw-2026-10-16.log`, probe
+  source `evidence/RoutingSpeedProbe.java`. A real route (51.514227/7.465279 -> 51.520/7.480) is calculated
+  once with `RoutingProfile(Vehicle.CAR, 77.0)` and once with the built-in profile: the bridge logs `created
+  car routing profile (max speed 77.00000 km/h)` (three times, once per profile site) for the first and
+  `(max speed 120.00000 km/h)` for the second, each followed by `route distance=1699.3774322313407m
+  duration=122.35517512065651s waypoints=113`. Still unverified: the applied speed does not change this
+  city route's published duration (both report 122.355 s), so the ceiling's effect on the road-type speeds
+  is observed only through the log line.
 
 ## 4. Documentation and change hygiene
 

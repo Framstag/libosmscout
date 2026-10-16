@@ -98,11 +98,14 @@
 - [x] 4.5 Run the JavaScout suite against the freshly built jar, as a regression check of the added
   declaration. Verify: `mvn -o -f JavaScout/pom.xml test -Dnative.lib.dir=.../build/libosmscout-client-java`
   is `BUILD SUCCESS` with 230 tests, 0 failures, 0 errors.
-- [ ] 4.6 Exercise the entry point end to end (a Java call that renders a real type's icon from a real
-  stylesheet). NOT RUN: `maps/` holds format v26 databases while the library expects v27, so no database whose
-  type configuration and stylesheet match the library can be opened here, and no such database may be
-  imported in this tree. See `verification.md` section 6; the entry point's two pure decisions are covered by
-  4.2 instead, and its request contract is covered by inspection.
+- [x] 4.6 Exercise the entry point end to end (a Java call that renders a real type's icon from a real
+  stylesheet). RUN 2026-10-16: done against the v27 database `maps/nordrhein-westfalen` with `stylesheets/`
+  and the shipped PNG icon directory — log `evidence/type-icon-probe-nrw-2026-10-16.log`, probe source
+  `evidence/TypeIconProbe.java`. `renderTypeIcon("amenity_parking", 32)` under `standard` returns 1024
+  pixels with 516 painted (`0x0E0091DA` at the first painted pixel (3,1), `0xC90894D8` at the centre);
+  `railway_station` under `railways` returns 708 painted of 1024; `amenity_fire_station_building` returns
+  900 opaque of 1024; `highway_roundabout` returns `null` (no icon for that type). Still unverified: the
+  symbol-versus-image precedence for a type whose stylesheet names both.
 
 ## 5. Change hygiene
 

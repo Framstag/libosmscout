@@ -142,3 +142,31 @@ was reworded.
   `git add .`, no `git commit -a`.
 - `scripts/format-check.sh` was not used as a gate: it is red repo-wide on this machine, including on pristine
   `master` files, so the touched lines follow the surrounding style by hand instead.
+
+## Host verification 2026-10-16 (map-dependent items)
+
+Task 4.6 is now ticked: a Java call renders real types' icons from the shipped stylesheets, on the v27
+database `maps/nordrhein-westfalen` with `stylesheets/` configured.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  TypeIconProbe maps/nordrhein-westfalen stylesheets libosmscout/data/icons/14x14/standard
+```
+
+| stylesheet | type | returned pixels |
+|---|---|---|
+| `standard` | `amenity_parking` (an `AREA.ICON` type, `stylesheets/include/amenity.oss`) | `1024` (`32x32`), `516` painted, bbox `[3,1 .. 28,30]`, first painted `(3,1)=0x0E0091DA`, centre `0xC90894D8` |
+| `standard` | `amenity_fire_station_building` | `1024`, `1024` painted, `900` opaque, centre `0xFFFFFFFF` |
+| `railways` | `railway_station` (`AREA.ICON` in `stylesheets/railways.oss`) | `1024`, `708` painted, bbox `[1,1 .. 30,30]`, centre `0x5500FF00` |
+| `standard` | `highway_roundabout` (no icon in any shipped stylesheet) | `null` |
+
+Read: the entry point resolves a real type's icon style from a real stylesheet and returns the painted
+`0xAARRGGBB` pixels (semi-transparent anti-aliased edges included); a type the stylesheets give no icon
+returns `null`. **What stayed unverified:** the symbol-versus-image precedence when a stylesheet names both
+for one type (`amenity_parking` names symbol `amenity_parking` and image `parking`; only the default order was
+observed), and the Android-side consumption of these pixels.
+
+Log: `evidence/type-icon-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision `06b197a35`).
+Probe source: `evidence/TypeIconProbe.java`.

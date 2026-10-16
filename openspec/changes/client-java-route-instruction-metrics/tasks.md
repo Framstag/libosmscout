@@ -34,14 +34,19 @@
 - [ ] 3.2 Add a Java test that reads the per-instruction arrays off a real route: the arrays are index-aligned
   with the instruction lines, their distances and times sum to the route's totals, and a route that cannot be
   aligned reports null arrays. Verify: with a routable map directory the test reports the sums, and reports a
-  skip without one. — NOT DONE: no routable (v27) map database exists on this machine, so the test could not
-  be written against anything that runs. The contract is covered by construction and by inspection of the two
-  callbacks instead; see `verification.md`.
+  skip without one. — PROBED 2026-10-16 on the v27 database `maps/nordrhein-westfalen` (log
+  `evidence/route-metrics-probe-nrw-2026-10-16.log`, probe `evidence/RouteMetricsProbe.java`): alignment holds
+  (array length equals the instruction-line count, 9/9, 17/17, 12/12), the distances sum to `distance`
+  exactly, but **the times do not sum to `duration`** (`157.0` vs `122.355` s; `494.0` vs `357.430`; `3742.0`
+  vs `6890.579`), because `duration` is the fixed 50 km/h estimate of `OSMScoutClient.cpp:6973`, which is what
+  the merged `client-java-route-length` change asks for. The clause is therefore not satisfied and the task
+  stays open; the null-array case cannot be forced from Java. See `verification.md`.
 - [ ] 3.3 Verify the step values on a city route: no step reports a value that belongs to a single geometry
   edge. Verify: the smallest reported step is larger than the largest single geometry edge of that route, or
-  the route is too short for the case to be meaningful and the test says so. — NOT DONE: same missing map
-  database; the reference implementation's own device measurement (17,3 km route, "14 m / 2 s" for one step)
-  is the case this rule fixes.
+  the route is too short for the case to be meaningful and the test says so. — PROBED 2026-10-16: the stated
+  check fails on all four routes tried (`21.885` vs `85.726` m; `11.138` vs `171.272`; `52.759` vs `829.774`;
+  `11.158` vs `1164.749`). A long straight edge is simply longer than the shortest leg between two manoeuvres,
+  so the check does not pin the property; the task stays open. Log and probe as for 3.2.
 
 ## 4. Build and regression verification (specs: route-calculation, turn-by-turn-instructions)
 

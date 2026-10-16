@@ -1,0 +1,25 @@
+# BufferColorProbe: renderWithRouteAndPois (array) vs renderInto (direct ByteBuffer)
+# database maps/nordrhein-westfalen (v27), route overlay
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:06:14Z
+# command: java -Djava.library.path=build/libosmscout-client-java -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 BufferColorProbe maps/nordrhein-westfalen stylesheets
+# source: openspec/changes/client-java-render-into-buffer/evidence/BufferColorProbe.java
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+[OSMScoutClient] no icon directory configured
+Bounding box hit rate for file nodes.dat is only 26% (120/460)
+ERROR while loading image 'parking'
+[OSMScoutClient] no icon directory configured
+PROBE: db=maps/nordrhein-westfalen size=64x48 at 51.514/7.465 overlay=3-waypoint route
+PROBE: ARRAY_PIXELS=3072 BUFFER_CAPACITY=12288 NON_TRANSPARENT=3072
+PROBE: PIXELS_DIFFERING_ARRAY_VS_BUFFER=0/3072
+# exit: 0

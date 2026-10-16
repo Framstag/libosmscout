@@ -53,11 +53,15 @@
   index, and an unscoped search returns it. Verify: with a map directory the search test reports the
   narrowed and the unscoped result sets, and reports a skip without one.
 
-  **Not done, and not feasible in this environment.** The map databases available here are format v26 while
-  the library expects v27, so no database can be opened; importing a v27 database is out of scope for this
-  change. The bridge part (deriving the extent from a loaded region object, applying the filter, serialising
-  the verdict) therefore has no host test and no map test here; see `verification.md` for what was verified
-  instead.
+  **Probed 2026-10-16 on the v27 database `maps/nordrhein-westfalen`, and left open as a divergence** (log
+  `evidence/search-scope-probe-nrw-2026-10-16.log`, probe `evidence/SearchScopeProbe.java`). Scoped to the
+  region `Innenstadt West` / scope `Regierungsbezirk Arnsberg` (handle `1`), a search still returns hits from
+  another part of the map's index (the scoped `Bahnhof` set spans lat `50.654 .. 51.986`, lon
+  `6.831 .. 9.183`) and **every** scoped hit is flagged `inSearchScope=true` (0 of 150 out of scope). The
+  shipped `OSMScoutClientAdminRegionScopeTest` documents exactly this ("the scope is a preference for
+  ranking, not a filter"), which contradicts this change's spec delta ("SHALL admit only hits whose position
+  lies inside the geographic extent"). Whether the scope is meant to filter or to rank is a reviewer's
+  decision; the task is not ticked. See `verification.md`.
 - [x] 4.5 Run the rest of the C++ and Java suites and verify no existing test regresses. RUN 2026-10-16: the
   C++ suite passed `100% tests passed out of 158` and the JavaScout suite `Tests run: 205, Failures: 0,
   Errors: 0, Skipped: 38`, both exit 0, with the tree and the client jar rebuilt from this revision, so the

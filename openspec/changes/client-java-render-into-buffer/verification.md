@@ -70,4 +70,35 @@ surface that consumes a direct buffer, and it needs a render, which needs a usab
 databases in `maps/` are v26 while the library expects v27 and cannot be opened. No map-dependent test was
 invented. The pixel contract the JNI part feeds is the host-tested layout: `FramePixelLayoutTest` pins the
 `RgbaBytes` byte order and the agreement of the two destinations, which is the failing part of the channel
-swap. Task 5.5 stays unticked for that reason.
+swap. Task 5.5 was unticked for that reason until 2026-10-16.
+
+## Host verification 2026-10-16 (map-dependent items)
+
+Task 5.5 is now ticked: the host surface the task allows was used, against the v27 database
+`maps/nordrhein-westfalen`.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  BufferColorProbe maps/nordrhein-westfalen stylesheets
+```
+
+The probe renders the same view (64x48 at 51.514/7.465, magnification 32768) twice, both with the same
+3-waypoint route overlay: once through `renderWithRouteAndPois` (int[] ARGB, 3072 elements) and once through
+`renderInto` (direct `ByteBuffer`, capacity 12288 bytes). It compares every pixel channel for channel —
+the array word `0xAARRGGBB` against the buffer bytes `R,G,B,A`.
+
+| probe | result |
+|---|---|
+| `ARRAY_PIXELS` / `BUFFER_CAPACITY` | `3072` / `12288` |
+| `NON_TRANSPARENT` | `3072` |
+| `PIXELS_DIFFERING_ARRAY_VS_BUFFER` | `0/3072` |
+
+Read: the buffer path shows exactly the colours of the array path on a real map, so the channel-swap
+regression is not present. **What stayed unverified:** a real Android/desktop surface that consumes the
+direct buffer — the `GetDirectBufferAddress` / ownership plumbing of a frame that is never copied back to
+an `int[]`.
+
+Log: `evidence/buffer-color-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision `06b197a35`).
+Probe source: `evidence/BufferColorProbe.java`.

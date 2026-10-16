@@ -50,9 +50,15 @@
 - [x] 5.2 Build the Meson build the same way and verify it compiles without errors.
 - [x] 5.3 Run the new test through both build systems and verify every case passes.
 - [x] 5.4 Run the Java client suite and the rest of the C++ suite and verify no existing test regresses.
-- [ ] 5.5 Verify on a device or host surface that a frame rendered through the buffer path shows the same
+- [x] 5.5 Verify on a device or host surface that a frame rendered through the buffer path shows the same
   colours as the array path (the channel-swap regression). Verify: this is the only level at which the JNI
   part can be checked; there is no host test for it.
+  RUN 2026-10-16: done on the host surface the task allows, against the v27 database
+  `maps/nordrhein-westfalen` — log `evidence/buffer-color-probe-nrw-2026-10-16.log`, probe source
+  `evidence/BufferColorProbe.java`. `renderWithRouteAndPois` (array, 3072 int) and `renderInto` (direct
+  ByteBuffer, capacity 12288 bytes) are compared pixel by pixel, both with the same 3-waypoint route
+  overlay: `0` of `3072` pixels differ, channel for channel. Still unverified: a real Android/desktop
+  surface that consumes the buffer (the ownership and GetDirectBufferAddress plumbing).
 - [x] 5.6 Run `openspec validate "client-java-render-into-buffer" --strict` and verify the change validates.
 
 ## 6. Documentation and change hygiene
@@ -66,7 +72,6 @@
 
 ## Notes
 
-- 5.5 is not verifiable in this environment: no Android/desktop surface that consumes a direct buffer is
-  available and no usable map database exists (the databases in `maps/` are v26 while the library expects
-  v27, so they cannot be opened). The JNI part is argument marshalling plus the precondition checks, and the
-  pixel contract it feeds is the host-tested layout — see `verification.md`.
+- 5.5 was closed on 2026-10-16 on the host surface (see `verification.md`, "Host verification 2026-10-16
+  (map-dependent items)"); the device-only half - a surface that consumes the direct buffer - stays
+  unverified.

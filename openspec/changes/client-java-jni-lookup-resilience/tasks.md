@@ -63,9 +63,11 @@
   compiles `OSMScoutClient.cpp` and links the native library, and `meson compile -C debug
   libosmscoutclientjava` creates the jar, both exit 0 (the jar step reports the 69 pre-existing javadoc
   warnings of other classes).
-- [ ] 4.3 NOT RUN: the bare `meson compile -C debug` of the whole tree. Reason: it stalls the shell tool;
-  the two targets this change touches were compiled explicitly instead (4.2), which is what the
-  meson-parity check needs.
+- [x] 4.3 RUN 2026-10-16: the bare `meson compile -C debug` of the whole tree completed — `637` targets,
+  `0` compile errors, exit 0, revision `06b197a35`, log
+  `evidence/meson-compile-whole-tree-2026-10-16.log`. The earlier "stalls the shell tool" note is
+  superseded: the same command ran to completion in the background (`meson` 1.12.1, ninja, build dir
+  `debug/`), which is the meson-parity check this task asks for.
 - [x] 4.4 Check the JNI signatures. Verify: `bash scripts/check-jni-signatures.sh` exits 0 and reports
   `JNI signatures match: 57 native declarations checked, 5 dead JNI functions reported above.` — the same
   count as before this change (no native declaration is added), and the five reported functions are
@@ -80,7 +82,11 @@
   descriptor so it matches no constructor, run a navigation session, observe no instruction list instead
   of a process abort). Reason: the helpers wrap `JNIEnv`, and only a live JVM aborts on a pending
   exception, so no host test can exercise it; there is no device or emulator here, and `maps/` holds
-  format v26 while the library expects v27, so no navigation session can be started locally either. The
+  format v26 while the library expects v27, so no navigation session can be started locally either.
+  RE-CHECKED 2026-10-16: a routable v27 database now exists (`maps/nordrhein-westfalen`) and a navigation
+  session can be started, so that half of the reason no longer applies — but the defect itself stays not
+  host-runnable, because the helpers wrap `JNIEnv` and only a live JVM aborts on a pending exception, and
+  mutating the descriptor means changing compiled source. The task stays open; see `verification.md`. The
   evidence that this is a real defect is the branch's own 2026-10-14 emulator measurement (recorded in
   `verification.md`), labelled as not taken here. What is covered instead: the build (4.1, 4.2), the
   unchanged JNI signature check (4.4) and the full C++ suite (4.6).

@@ -51,9 +51,10 @@ exactly: `diff` of the working file against `origin/naviveylin-local:<file>` is 
   libosmscout-client-java/java/libosmscoutclientjava.jar`. Exit 0. The 69 javadoc warnings it reports are
   pre-existing warnings of other classes (e.g. `BasemapManager.java:450: warning: no @throws`), not of this
   change.
-- **NOT RUN: the bare `meson compile -C debug`** (whole tree). It stalled the shell tool and was abandoned;
-  the two targets this change touches were compiled explicitly instead (above), which is what the
-  meson-parity check needs.
+- **RUN 2026-10-16: the bare `meson compile -C debug`** (whole tree). It completed here: 637 targets,
+  0 compile errors, exit 0, revision `06b197a35`; log
+  `evidence/meson-compile-whole-tree-2026-10-16.log`. The earlier stall was an artefact of running it in
+  the foreground of the shell tool.
 
 ## 4. JNI constructor descriptor check (done by hand, no script covers it)
 
@@ -159,14 +160,14 @@ passed). No failure to report and no regression observed.
 
 ## 9. What could not be run
 
-- **NOT RUN: an end-to-end navigation test on a roundabout** (a position on the ring, the engine's enter and
+- **NOT RUN then (2026-10-16: superseded — see "Host verification 2026-10-16 (map-dependent items)" below): an end-to-end navigation test on a roundabout** (a position on the ring, the engine's enter and
   leave callbacks reaching Java). Every route-measuring test needs a routable database; `maps/` holds format
   v26 databases while this library expects v27, so no routable database can be opened on this machine, no
   database may be imported for a check, and there is no display. The model side is covered by the Java tests
   (section 8), the bridge's data flow by the descriptor check (section 4) and the build (sections 2 and 3);
   the requirement scenarios that describe the bridge marshalling a description are satisfied by inspection of
   the callbacks, not by a runtime test.
-- **NOT RUN: the bare `meson compile -C debug`** — see section 3.
+- **RUN 2026-10-16: the bare `meson compile -C debug`** — see section 3.
 
 ## 10. Two differences of wording from the task brief, and what was done
 
@@ -188,3 +189,43 @@ passed). No failure to report and no regression observed.
 (`proposal.md`, `spec.md`, `design.md`, `tasks.md`, `verification.md`), plus the pre-existing untracked
 `maps/repository/` and the other units' change directories, which are not staged. The commit stages only the
 three source paths and this change directory.
+
+## Host verification 2026-10-16 (map-dependent items)
+
+Task 4.9 is now ticked: an end-to-end navigation session on a real roundabout of the v27 database
+`maps/nordrhein-westfalen`.
+
+Finding the roundabout (the DB stores no tag strings, so the source PBF was scanned):
+
+```bash
+osmconvert maps/nordrhein-westfalen.osm.pbf -b=7.30,51.40,7.60,51.60 --add-bbox-tags \
+  --out-csv --csv='@otype @id highway junction bBox' | grep -i roundabout \
+  > build/loop-evidence-2026-10-16/roundabout-bbox-dortmund.csv
+```
+
+203 roundabout ways in a Dortmund bbox; way `4236678` (`highway=secondary`, `junction=roundabout`, bbox
+`7.3965235,51.5689384 .. 7.3968155,51.5691420`) was used. The list is retained as
+`evidence/roundabout-ways-dortmund-2026-10-16.csv`.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  RoundaboutProbe route 51.5690402 7.3966695 0.003
+```
+
+A route from 51.5690402/7.3936695 to 51.5690402/7.3996695 (641.553 m, 46.19 s, 46 waypoints) crosses the
+ring; navigating from its start delivers the instruction list. The two instructions the change targets:
+
+```
+PROBE:   turn=ROUNDABOUT_ENTER distanceTo=396.703... legDistance=241.237... exitNumber=0  clockwise=false short='Roundabout'
+PROBE:   turn=ROUNDABOUT_LEAVE distanceTo=450.831... legDistance=54.128...  exitNumber=3  clockwise=false short='Exit 3'
+```
+
+Read: the leave instruction carries the exit *taken* (`3`) and the ring's circulation direction
+(`clockwise=false`, consistent on enter and leave); the enter instruction carries `0`, because entering the
+ring takes no exit. **What stayed unverified:** a non-zero `nextNextRoundaboutExitNumber` (the hint's own
+ordinal needs a second roundabout within the hint distance; this route has none) and a clockwise ring.
+
+Log: `evidence/roundabout-navigation-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision
+`06b197a35`). Probe source: `evidence/RoundaboutProbe.java`.
