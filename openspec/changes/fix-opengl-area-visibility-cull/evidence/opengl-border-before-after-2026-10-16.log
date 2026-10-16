@@ -1,0 +1,140 @@
+# Before/after of the OpenGL border-only area path - task 4.2 of fix-opengl-area-visibility-cull
+#
+# revision 3b247dce5 (openspec-host-verification-2026-10-16), not changed by this run
+# host UTC 2026-10-16T15:41:28Z .. 2026-10-16T15:44:30Z
+# build build/ (CMake, Ninja, Release); the GL context is created headlessly under xvfb-run
+# database maps/Dortmund (v27), stylesheet stylesheets/standard.oss
+#
+# The before state is a temporary revert of exactly the source hunk of the archived change
+# 2026-10-10-fix-opengl-border-only-rings (implementation commit e6d24f998), marked
+# TEMP-REVERT-PROBE on the reverted lines:
+#
+#   libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp, MapPainterOpenGL::ProcessAreas
+#   +          // TEMP-REVERT-PROBE: before-state of the archived change 2026-10-10-fix-opengl-border-only-rings
+#   +          // (commit e6d24f998): the ring loop dropped a ring that resolves no fill style before it
+#   +          // reached the border loop. Removed again after the probe.
+#   +          if (!fillStyle) {
+#   +            continue;
+#   +          }
+#
+#   git diff --stat: 1 file changed, 7 insertions(+)
+# The hunk makes the fill path of the ring loop conditional on the resolved fill style, so the border
+# loop below it draws the border of a ring the stylesheet draws by a border only. The revert puts the
+# early-out of the pre-e6d24f998 code back in front of the guard.
+
+# ---------------------------------------------------------------- 1. before state
+# 2026-10-16T15:41:28Z  git status --porcelain: M libosmscout-map-opengl/.../MapPainterOpenGL.cpp, ?? maps/repository/
+# 2026-10-16T15:41:30Z  cmake --build build --target OSMScoutMapOpenGL DrawMapOpenGL DrawMapAll
+#                       exit 0 (4.4 s)
+# 2026-10-16T15:42:07Z  sh build/probe42-2026-10-16/render.sh before
+#                       exit 0 (16.2 s); full output in build/probe42-2026-10-16/before/render.log
+#                       renders into build/probe42-2026-10-16/before/<view>.ppm
+#
+# render.sh renders, from /home/tim/projects/libosmscout (R=$PWD):
+#   xvfb-run -a $R/build/Demos/DrawMapOpenGL-1.1.1 \
+#     --database $R/maps/Dortmund \
+#     --shaders $R/libosmscout-map-opengl/data/shaders \
+#     --fontName $R/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf \
+#     --iconPath $R/libosmscout/data/icons/14x14/standard \
+#     --patternPath $R/libosmscout/data/icons/14x14/standard \
+#     --width 400 --height 400 --dpi <dpi> $R/stylesheets/standard.oss <lat> <lon> <magnification> <out>.ppm
+#   xvfb-run -a $R/build/Demos/DrawMapAll-1.1.1 <same arguments>   # Cairo and OpenGL from one invocation
+#
+# The views (the third positional argument of the demo is the magnification, 2^level):
+#   D  96 dpi 51.5030 7.4210 32768   area of type boundary_protected_area (OSM way 367958283,
+#                                    "Siedlung Oberdorstfeld"), its border crosses the left viewport edge
+#   B 300 dpi 51.531599 7.519315 65536  area of type barrier_fence (OSM way 24414688), its border crosses
+#                                    the right viewport edge
+#   E  96 dpi 51.4375 7.2690 32768   area of type boundary_protected_area (OSM way 403926788,
+#                                    "NSG Waldsiepen"), border wholly inside the frame (second instance)
+#   A 300 dpi 51.499275 7.478769 65536  fence (OSM way 17707818) that turned out not to be a loaded area
+#                                    of the database: 0 differing pixels, not used
+#
+# How the areas were located: the closed ways of maps/Dortmund.osm.pbf were dumped with
+#   osmconvert maps/Dortmund.osm.pbf > build/probe42-2026-10-16/dortmund.osm
+# and their rings projected with the mapping of MercatorProjection (MercatorProjection.cpp:192):
+#   x = (lon-lon0)*scale*pi/180 + width/2,  y = height/2 - (atanh(sin lat)-atanh(sin lat0))*scale,
+#   scale = width/(2*pi*groundWidthEquatorMeter/extentMeter),
+#   groundWidthEquatorMeter = width*(extentMeter/magnification/256)*(96/dpi),
+#   extentMeter = 2*pi*6371000, tileDPI = 96.
+# That gave, for view D, the crossings of the ring with the frame edges before any render:
+#   left edge x=0 at y=179.3 and y=346.6. For view B: right edge x=399 at y=77.7 and y=308.9.
+
+# ---------------------------------------------------------------- 2. restore
+# 2026-10-16T15:42:25Z  git checkout -- libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp
+#                       git status --porcelain: ?? maps/repository/  (no modified source file)
+#                       grep -rn TEMP-REVERT-PROBE libosmscout-map-opengl/ Tests/ -> no hit
+# 2026-10-16T15:42:30Z  cmake --build build --target OSMScoutMapOpenGL DrawMapOpenGL DrawMapAll
+#                       exit 0 (4.2 s); libosmscout_map_opengl.so.1.1.1 and DrawMapOpenGL-1.1.1 are
+#                       timestamped 15:42:29, the restored source 15:42:25, so the binaries are the
+#                       after state again
+# 2026-10-16T15:42:32Z  sh build/probe42-2026-10-16/render.sh after
+#                       exit 0 (16.1 s); renders into build/probe42-2026-10-16/after/<view>.ppm
+
+# ---------------------------------------------------------------- 3. the two claims
+# Claim 1 - the border pixels are present after and absent before. Count of differing pixels of the
+# 400x400 frame, from the two PPM rasters (the recipe is a pixel count, checked against a one-pixel
+# control that reports 1):
+#   convert before/<v>.ppm after/<v>.ppm -compose difference -composite -threshold 0 \
+#     -format "%[fx:int(mean*w*h+0.5)]" info:
+#
+#   view D  368 of 160000 (0.230 %)   difference bbox x 0..86, y 179..346
+#   view B  690 of 160000 (0.431 %)   difference bbox x 200..399, y 76..387
+#   view E  564 of 160000 (0.352 %)   difference bbox x 95..239, y 156..277
+#   view A    0 of 160000
+#
+# View D: the difference bbox starts at x=0 and spans y 179..346, which are the two places where the
+# projected ring of way 367958283 crosses the left viewport edge (y=179.3 and y=346.6): the difference
+# is the stretch of that area's border that enters and leaves through the viewport's left edge.
+# View B: same shape on the right edge (crossings at y=77.7 and y=308.9, difference bbox x 200..399).
+#
+# The colours of the differing pixels: the before image shows the map content, the after image the
+# border of the area. Most frequent (before -> after) pairs, view D:
+#   (235,235,235) -> (179,199,170)  9 px      (235,235,235) -> (170,194,160)  6 px
+#   (235,235,235) -> (210,219,206)  5 px      (235,235,235) -> (173,195,163)  5 px
+# View B (fence, colour #aaaaaa of its AREA.BORDER):
+#   (241,238,233) -> (239,236,231) 19 px      (241,238,233) -> (223,221,217) 15 px
+#   (241,238,233) -> (214,212,209) 12 px
+#
+# How the difference was checked to lie on that area's border and not to be scattered: every differing
+# pixel was set against the projected OSM ring of the way, and its distance to the closest ring segment
+# computed (python over the two PPM rasters):
+#   view D  max distance 0.78 px,  differing pixels farther than 4 px: 0
+#   view B  max distance 1.25 px,  differing pixels farther than 4 px: 0
+#   view E  max distance 0.75 px,  differing pixels farther than 4 px: 0
+# (the projection of the render matches the formula above to below one pixel, which also shows that the
+# database carries the ring of the OSM way unchanged)
+#
+# Claim 2 - the output strictly inside the view is unchanged. The whole difference bounding box lies
+# outside a sub-rectangle of the frame that keeps the map content in it, and that sub-rectangle
+# differs in no pixel:
+#   view D  crop 280x400+120+0 (x 120..399, 33 px right of the difference bbox): 0 differing pixels
+#   view B  crop 200x400+0+0 (x 0..199, the left half): 0 differing pixels
+#   convert before/<v>.ppm -crop <geometry> +repage b.png; convert after/<v>.ppm -crop <geometry> +repage a.png
+#   convert b.png a.png -compose difference -composite -threshold 0 -format "%[fx:int(mean*w*h+0.5)]" info:
+# Together with the corridor check of claim 1 (no differing pixel farther than 0.78 / 1.25 px from the
+# border of the identified area) this says: the only pixels that change are the border pixels of the
+# area whose border crosses the viewport edge; the rest of the frame, the interior of that area
+# included, is byte-identical.
+#
+# Control - the Cairo, Qt, Skia and SVG backend are not touched by the reverted hunk, so they must
+# render identically in both states (the same command, DrawMapAll, one invocation renders all backends):
+#   view D, DrawMapAll: Cairo before vs after 0 differing pixels, Qt 0, Skia 0, the SVG file identical,
+#                       OpenGL before vs after 368 differing pixels (the count of DrawMapOpenGL above)
+# The other backends' images therefore also serve as the negative control of the comparison recipe.
+#
+# Retained images (400x400 PNG, rendered from the PPMs with `convert <v>.ppm <v>.png`, the difference
+# with `-compose difference -composite -auto-level`):
+#   evidence/border-only-area-before-2026-10-16.png        view D, before state
+#   evidence/border-only-area-after-2026-10-16.png         view D, after state
+#   evidence/border-only-area-difference-2026-10-16.png    view D, difference
+#   evidence/border-only-fence-before-2026-10-16.png       view B, before state
+#   evidence/border-only-fence-after-2026-10-16.png        view B, after state
+#   evidence/border-only-fence-difference-2026-10-16.png   view B, difference
+#
+# Caveat on the tool: ImageMagick 7.1.2-34 Q16-HDRI reports `compare -metric AE` as a normalized error,
+# not as a pixel count - it prints 0.930719 for an image that differs in exactly one pixel. The counts
+# above are therefore taken from the -threshold 0 recipe, which returns 1 for that control.
+#
+# Exit codes of every command in this log: 0. The probe left no source modification behind:
+# git status --porcelain at 2026-10-16T15:44:30Z names ?? maps/repository/ only.

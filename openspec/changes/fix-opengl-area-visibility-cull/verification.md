@@ -288,16 +288,109 @@ through both drivers with the same stylesheet, size and shaders (command in the 
 
 Read: the two drivers differ globally (labels, anti-aliasing), and no border of an area is present in one
 and absent in the other in the frame; there is no localised border-pixel difference to attribute to this
-change. **What stayed unverified, and why 4.2 stays open:** the task's acceptance evidence is a *before/after*
-statement — the border pixels of an area crossing the viewport edge "appear in the OpenGL output after the
-change and not before". Producing it needs a second build of `libosmscout-map-opengl` with the change
-reverted, which this run's working rules forbid (no source change, no `git`). The same was already noted in
-section 4.1 for the sampled data (no ring in the tolerance band).
+change. **The before/after statement 4.2 asks for** — the border pixels of an area crossing the viewport edge
+"appear in the OpenGL output after the change and not before" — is not what this cross-driver sample
+shows; it needs a second build of `libosmscout-map-opengl` with a source hunk reverted, which this run's
+working rules did not allow. The section *Host verification 2026-10-16 (task 4.2, before/after)* below
+was run afterwards with that second build and carries the statement, on the hunk whose revert changes
+the border pixels at all - not on the tolerance band, for which section 4.1 keeps its finding that the
+sampled data has no ring in it.
 
 A tool note for anyone repeating this: `DrawMapAll`'s third positional argument is a magnification
 *factor*, not a level — `15` renders the whole world (400x400 mostly empty, `937` B PNG), `32768` renders
 level 15. The comparison above uses `32768`.
 
 Log: `evidence/opengl-cairo-cross-backend-2026-10-16.log` (commands, UTC timestamp, exit 0, revision
-`06b197a35`).
+`06b197a35`). The before/after half of the task was produced afterwards, in the section below.
+
+## Host verification 2026-10-16 (task 4.2, before/after)
+
+Revision `3b247dce5` (branch `openspec-host-verification-2026-10-16`), build `build/` (CMake, Ninja,
+Release), database `maps/Dortmund`, stylesheet `stylesheets/standard.oss`, 400x400, GL context created
+headlessly under `xvfb-run`. Log: `evidence/opengl-border-before-after-2026-10-16.log` (every command,
+the UTC timestamps, the exit codes and the numbers; the PPMs themselves live in
+`build/probe42-2026-10-16/{before,after}/`).
+
+**The before state.** A temporary revert of exactly the source hunk of the archived change
+`2026-10-10-fix-opengl-border-only-rings` (implementation commit `e6d24f998`), marked
+`TEMP-REVERT-PROBE` on the reverted lines: `if (!fillStyle) { continue; }` back in front of the fill
+guard of the ring loop of `MapPainterOpenGL::ProcessAreas` (one file, 7 added lines).
+`cmake --build build --target OSMScoutMapOpenGL DrawMapOpenGL DrawMapAll` exited 0 at 15:41:30Z
+(4.4 s), the render of the before state ran at 15:42:07Z (exit 0, 16.2 s). The restore
+(`git checkout -- …/MapPainterOpenGL.cpp`) was at 15:42:25Z, the rebuild of the same targets exited 0
+at 15:42:30Z (4.2 s, the library and the tool timestamped 15:42:29 - after the restored source at
+15:42:25), and the render of the after state ran at 15:42:32Z (exit 0, 16.1 s). `git status
+--porcelain` after the probe names `?? maps/repository/` only and `grep -rn TEMP-REVERT-PROBE
+libosmscout-map-opengl/ Tests/` finds nothing.
+
+What the two states isolate is the border-only ring path only: the visibility decision of *this*
+change is in both of them, and the reverted hunk only decides whether a ring that resolves no fill
+style reaches the border loop. The tolerance band of the conversion that *this* change fixes is not
+what these two images differ by; §4 and §4.1 keep their finding that the sampled data has no ring in
+that band.
+
+**The views and how the areas were located.** The closed ways of `maps/Dortmund.osm.pbf` were dumped
+(`osmconvert maps/Dortmund.osm.pbf > build/probe42-2026-10-16/dortmund.osm`) and their rings projected
+with the mapping of `MercatorProjection::GeoToPixel` (`MercatorProjection.cpp:192`, scale and
+`groundWidthEquatorMeter` from `MercatorProjection.cpp:93-112`, `tileDPI = 96`). That predicts, before
+any render, where a ring crosses the frame edges; the render then confirmed the prediction to below
+one pixel (see claim 1).
+
+| view | area (OSM way) | driver arguments | its border crosses the viewport |
+|---|---|---|---|
+| D | `boundary_protected_area` "Siedlung Oberdorstfeld" (way 367958283), drawn by a border only at this magnification | 96 dpi, 51.5030 7.4210, magnification 32768 | left edge, at y=179.3 and y=346.6 (predicted) |
+| B | `barrier_fence` (way 24414688), `AREA.BORDER` 0.1 mm and no `AREA` fill | 300 dpi, 51.531599 7.519315, magnification 65536 | right edge, at y=77.7 and y=308.9 (predicted) |
+| E | `boundary_protected_area` "NSG Waldsiepen" (way 403926788) | 96 dpi, 51.4375 7.2690, magnification 32768 | wholly inside the frame (second instance) |
+| A | fence way 17707818 | 300 dpi, 51.499275 7.478769, magnification 65536 | - (`0` differing pixels: that way is not a loaded area) |
+
+**Claim 1 - the border pixels are present in the after state and absent in the before state.** Count
+of differing pixels of the 400x400 frame, from the two PPM rasters with
+`convert before/<v>.ppm after/<v>.ppm -compose difference -composite -threshold 0 -format
+"%[fx:int(mean*w*h+0.5)]" info:`:
+
+| view | differing pixels | difference bounding box | distance of the differing pixels to the projected ring of the area |
+|---|---|---|---|
+| D | 368 of 160000 (0.230 %) | x 0..86, y 179..346 | max 0.78 px, none farther than 4 px |
+| B | 690 of 160000 (0.431 %) | x 200..399, y 76..387 | max 1.25 px, none farther than 4 px |
+| E | 564 of 160000 (0.352 %) | x 95..239, y 156..277 | max 0.75 px, none farther than 4 px |
+
+View D: the difference bounding box starts at x=0 and spans y 179..346, which are exactly the two
+places where the ring crosses the left viewport edge: the difference *is* the stretch of the area's
+border that enters and leaves the frame through that edge. At the differing pixels the before image
+shows the map content and the after image the border colour - the most frequent pairs are
+`(235,235,235) -> (179,199,170)`, `-> (170,194,160)`, `-> (210,219,206)`; for the fence of view B
+`(241,238,233) -> (239,236,231)`, `-> (223,221,217)`, `-> (214,212,209)`. The difference is on the
+border of the identified area and not scattered: no differing pixel is farther than 0.78 px (D) or
+1.25 px (B) from that area's projected ring.
+
+**Claim 2 - the output strictly inside the view is unchanged.** The whole difference bounding box lies
+outside a sub-rectangle of the frame that keeps map content in it, and that sub-rectangle differs in no
+pixel:
+
+| view | sub-rectangle | differing pixels of the sub-rectangle |
+|---|---|---|
+| D | `-crop 280x400+120+0`, i.e. x 120..399, 33 px right of the difference bbox | 0 |
+| B | `-crop 200x400+0+0`, the left half | 0 |
+
+`convert <v>.ppm -crop <geometry> +repage b.png`, the same for the after image, then the
+`-threshold 0` count above. Together with the corridor check of claim 1 this says: the only pixels
+that change between the two states are the border pixels of the area whose border crosses the
+viewport edge; the rest of the frame, the interior of that area included, is byte-identical.
+
+**Control.** The Cairo, the Qt, the Skia and the SVG backend are untouched by the reverted hunk, so they
+must render the same view identically in both states. `DrawMapAll` renders all backends from one
+invocation: for view D its Cairo image differs in **0** pixels, its Qt image in **0** and its Skia image
+in **0** pixels between the two states and its SVG file is byte-identical, while its OpenGL image
+differs in the same **368** pixels the `DrawMapOpenGL` run of the same view reports. Those images are
+therefore also the negative control of the counting recipe.
+
+**Tool caveat.** ImageMagick 7.1.2-34 Q16-HDRI reports `compare -metric AE` as a normalized error and
+not as a pixel count (it prints `0.930719` for an image that differs in exactly one pixel), so the
+counts above come from the `-threshold 0` recipe, which returns 1 for that same one-pixel control.
+
+**Retained images.** `evidence/border-only-area-before-2026-10-16.png`,
+`border-only-area-after-2026-10-16.png`, `border-only-area-difference-2026-10-16.png` (view D) and
+`border-only-fence-before-2026-10-16.png`, `border-only-fence-after-2026-10-16.png`,
+`border-only-fence-difference-2026-10-16.png` (view B); the difference images were made with
+`-compose difference -composite -auto-level`.
 
