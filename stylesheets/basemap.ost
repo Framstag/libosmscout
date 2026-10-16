@@ -37,6 +37,9 @@ TYPES
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
       {Name, NameAlt, AdminLevel}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      DESC
+        en: "national border"
+        de: "Staatsgrenze"
 
   // Do not delete the following type, they are required by the GenLocation import step
   // just add IGNORE when you want to skip them
@@ -46,6 +49,9 @@ TYPES
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="2")
       {Name, NameAlt, AdminLevel}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      DESC
+        en: "national border"
+        de: "Staatsgrenze"
 
   TYPE boundary_state
     IGNORE
@@ -53,6 +59,9 @@ TYPES
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="4")
       {Name, NameAlt, AdminLevel}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      DESC
+        en: "state boundary"
+        de: "Bundeslandgrenze"
 
   TYPE boundary_county
     IGNORE
@@ -60,6 +69,9 @@ TYPES
       RELATION ("type"=="boundary" AND "boundary"=="administrative" AND "admin_level"=="6")
       {Name, NameAlt, AdminLevel}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      DESC
+        en: "county boundary"
+        de: "Kreisgrenze"
 
   TYPE boundary_administrative
     IGNORE
@@ -67,39 +79,66 @@ TYPES
       RELATION ("type"=="boundary" AND "boundary"=="administrative")
       {Name, NameAlt, AdminLevel}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      DESC
+        en: "administrative boundary"
+        de: "Verwaltungsgrenze"
 
   // significant places
   TYPE place_continent
     = NODE AREA ("place"=="continent")
       {Name, NameAlt}
+      DESC
+        en: "continent"
+        de: "Kontinent"
 
   TYPE place_country
     = NODE ("place"=="country")
       {Name, NameAlt}
+      DESC
+        en: "country"
+        de: "Land"
 
   TYPE place_capitalcity
     = NODE AREA ("place"=="city" AND EXISTS "capital" AND "capital"=="yes")
       {Name, NameAlt}
+      DESC
+        en: "capital"
+        de: "Hauptstadt"
 
   TYPE place_millioncity
     = NODE AREA ("place"=="city" AND EXISTS "population" AND "population">1000000)
       {Name, NameAlt}
+      DESC
+        en: "city of a million"
+        de: "Millionenstadt"
 
   TYPE place_ocean
     = NODE ("place"=="ocean")
       {Name, NameAlt}
+      DESC
+        en: "ocean"
+        de: "Ozean"
 
   TYPE place_sea
     = NODE WAY AREA RELATION ("place"=="sea")
       {Name, NameAlt}
       MULTIPOLYGON IGNORESEALAND OPTIMIZE_LOW_ZOOM
+      DESC
+        en: "sea"
+        de: "Meer"
 
   // TYPE natural_bay
   //   = NODE WAY RELATION ("natural"=="bay")
   //     {Name, NameAlt}
+  //     DESC
+  //       en: "bay"
+  //       de: "Bucht"
 
   // TYPE natural_mountain_range
   //   = WAY RELATION ("natural"=="mountain_range)
   //     {Name, NameAlt}
+  //     DESC
+  //       en: "mountain range"
+  //       de: "Gebirgszug"
 
 END

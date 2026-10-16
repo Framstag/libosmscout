@@ -42,6 +42,21 @@ public class DescriptionOverlay extends StackPane {
     private boolean expanded = false;
 
     /**
+     * Return the title of the dialog: the description of the object's type when the database
+     * carries one, the technical type name otherwise, and a generic title for an object whose type
+     * is unknown.
+     *
+     * @param description structured description of the object
+     * @return the title of the dialog
+     */
+    static String dialogTitle(ObjectDescription description) {
+        String typeLabel = DescriptionLanguage.typeLabel(description.getObjectTypeDescription(),
+                                                        description.getObjectTypeName());
+
+        return typeLabel.isEmpty() ? "Object Description" : typeLabel;
+    }
+
+    /**
      * Create a description overlay with the given object description.
      *
      * @param description the structured description to display
@@ -83,7 +98,7 @@ public class DescriptionOverlay extends StackPane {
         titleBar.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #ddd; -fx-border-width: 0 0 1px 0;");
         titleBar.setPadding(uiScale.insets(8));
 
-        Label titleLabel = new Label("Object Description");
+        Label titleLabel = new Label(dialogTitle(description));
         titleLabel.setStyle("-fx-font-size: " + baseFont + "px; -fx-font-weight: bold;");
         titleLabel.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(titleLabel, Priority.ALWAYS);

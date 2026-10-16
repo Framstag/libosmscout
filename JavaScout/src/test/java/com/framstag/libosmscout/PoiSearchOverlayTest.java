@@ -92,4 +92,37 @@ public class PoiSearchOverlayTest {
         PoiSearchOverlay overlay = createOverlay();
         assertTrue(overlay.isMouseTransparent(), "overlay must not block the map while closed");
     }
+
+    private static com.framstag.libosmscout.client.PoiEntry poi(String objectType,
+                                                                String objectTypeDescription) {
+        com.framstag.libosmscout.client.PoiEntry entry =
+            new com.framstag.libosmscout.client.PoiEntry();
+        entry.label = "Hotel Central";
+        entry.objectType = objectType;
+        entry.objectTypeDescription = objectTypeDescription;
+
+        return entry;
+    }
+
+    @Test
+    public void testTheResultNamesTheObjectTypeByItsDescription() {
+        assertEquals("Hotel", PoiSearchOverlay.objectTypeLabel(poi("tourism_hotel", "Hotel")));
+    }
+
+    @Test
+    public void testAMissingDescriptionFallsBackToTheTypeName() {
+        assertEquals("tourism_hotel", PoiSearchOverlay.objectTypeLabel(poi("tourism_hotel", "")));
+    }
+
+    @Test
+    public void testANullDescriptionFallsBackToTheTypeName() {
+        // A native library that does not set the field leaves it null.
+        assertEquals("tourism_hotel", PoiSearchOverlay.objectTypeLabel(poi("tourism_hotel", null)));
+    }
+
+    @Test
+    public void testAResultWithoutAnObjectTypeIsNamedAsAPoi() {
+        assertEquals("poi", PoiSearchOverlay.objectTypeLabel(poi(null, null)));
+        assertEquals("poi", PoiSearchOverlay.objectTypeLabel(poi(null, "")));
+    }
 }

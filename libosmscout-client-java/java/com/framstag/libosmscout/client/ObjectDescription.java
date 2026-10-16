@@ -31,6 +31,13 @@ public class ObjectDescription {
     /** OSM type name of the described object (e.g. "building"), or null. */
     private final String objectTypeName;
 
+    /**
+     * Description of the OSM type in the configured description language
+     * (see {@link OSMScoutClientBuilder#withDescriptionLanguage(String)}),
+     * or null when the database carries none.
+     */
+    private final String objectTypeDescription;
+
     /** File offset of the described object in the database. */
     private final long objectFileOffset;
 
@@ -51,7 +58,7 @@ public class ObjectDescription {
      * @param objectLon longitude of the described object
      */
     public ObjectDescription(List<DescriptionEntry> entries, double objectLat, double objectLon) {
-        this(entries, objectLat, objectLon, null, null, 0);
+        this(entries, objectLat, objectLon, null, null, null, 0);
     }
 
     /**
@@ -67,11 +74,30 @@ public class ObjectDescription {
      */
     public ObjectDescription(List<DescriptionEntry> entries, double objectLat, double objectLon,
                              String objectRefType, String objectTypeName, long objectFileOffset) {
+        this(entries, objectLat, objectLon, objectRefType, objectTypeName, null, objectFileOffset);
+    }
+
+    /**
+     * Construct an ObjectDescription with the given entries, object location,
+     * object identity, and the description of the object type.
+     *
+     * @param entries              list of description entries, may be empty
+     * @param objectLat            latitude of the described object
+     * @param objectLon            longitude of the described object
+     * @param objectRefType        ref type of the described object ("node", "way", "area")
+     * @param objectTypeName       OSM type name of the described object
+     * @param objectTypeDescription description of the type in the configured language, or null
+     * @param objectFileOffset     file offset of the described object in the database
+     */
+    public ObjectDescription(List<DescriptionEntry> entries, double objectLat, double objectLon,
+                             String objectRefType, String objectTypeName, String objectTypeDescription,
+                             long objectFileOffset) {
         this.entries = entries != null ? entries : List.of();
         this.objectLat = objectLat;
         this.objectLon = objectLon;
         this.objectRefType = objectRefType;
         this.objectTypeName = objectTypeName;
+        this.objectTypeDescription = objectTypeDescription;
         this.objectFileOffset = objectFileOffset;
     }
 
@@ -120,6 +146,15 @@ public class ObjectDescription {
      */
     public String getObjectTypeName() {
         return objectTypeName;
+    }
+
+    /**
+     * Return the description of the OSM type of the described object in the configured language.
+     *
+     * @return description (e.g. "Gebäude"), or null when the database carries none
+     */
+    public String getObjectTypeDescription() {
+        return objectTypeDescription;
     }
 
     /**

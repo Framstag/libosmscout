@@ -719,6 +719,22 @@ namespace osmscout {
 
     std::string GetDescription(const std::string& languageCode) const;
 
+    /**
+     * Returns the description for the given language code, falling back to the
+     * English description.
+     *
+     * If the type carries no description for the given language, the description
+     * for 'en' is returned. If it carries neither, an empty string is returned,
+     * so that a caller can tell a type without a description from a described
+     * one.
+     *
+     * @param languageCode
+     *    languageCode like for example 'de'
+     * @return
+     *    Description or empty string
+     */
+    std::string GetLocalizedDescription(const std::string& languageCode) const;
+
     static TypeInfoRef Read(FileScanner& scanner);
   };
 
