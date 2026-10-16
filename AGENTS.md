@@ -46,7 +46,7 @@ Each directory is a standalone CMake/Meson subproject:
 | `WellScoutedRoute/` | Routing demo |
 | `DumpData/` | Data debug/dump tool |
 | `Java/` | Java examples (location lookup, routing, renderer, open db) |
-| `stylesheets/` | `.oss` (styles) and `.ost` (type defs) style definitions |
+| `stylesheets/` | `.oss` (styles) and `.ost` (type defs) style definitions, including the German and English description of every type and feature (`DESC` blocks, see `guidelines/TypeDescriptions.md`) |
 | `Documentation/` | Build guides, style syntax docs, notes per platform; `MapRepository.md` documents the map repository pipeline (imports manifest, region index, basemap configuration, db.json metadata, regeneration script including the basemap step, container, client update check); `FavoritesFileFormat.md` documents the client favorites file (format versions, ordered groups, favorites and their attributes, star order, compatibility and the planned end of the pre-version read path) |
 | `setup/` | (empty — reserved for dev setup scripts) |
 | `scripts/` | cppcheck.sh, check-jni-signatures.sh, check-vector-self-append.sh (tree check for appends that read an element of the sequence they append to), etc.; `mapgen/` holds the map regeneration script (`mapgen.sh`), the basemap step (`mapgen-basemap.sh`), example configs (`imports.example.json`, `names.example.json`, `basemap.example.json`), nginx example, the client-check and basemap-check test harnesses, and the mapgen Dockerfile |
@@ -194,7 +194,9 @@ libosmscout/
 
 ### Style Files
 - `.oss` — Style definitions (e.g., `standard.oss`, `cycle.oss`, `railways.oss`)
-- `.ost` — Type definitions (e.g., `map.ost`, `contour_lines.ost`)
+- `.ost` — Type definitions (e.g., `map.ost`, `contour_lines.ost`, `motorways.ost`), including the
+  German and English description of each type and feature; the wording they follow, the syntax and
+  the types that deliberately carry none are in `guidelines/TypeDescriptions.md`
 - Located in `stylesheets/`
 
 ### Error Handling

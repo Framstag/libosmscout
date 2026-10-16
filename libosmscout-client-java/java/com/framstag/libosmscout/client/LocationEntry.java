@@ -34,6 +34,17 @@ public class LocationEntry {
     /** OSM type name of the referenced object (e.g. "building", "highway_residential"). */
     public String objectTypeName;
 
+    /**
+     * Description of the object type in the configured description language
+     * (see {@link OSMScoutClientBuilder#withDescriptionLanguage(String)}),
+     * e.g. "Haus".
+     * <p>
+     * Empty when the database carries no description for that type in that
+     * language and none in English either; a caller then shows
+     * {@link #objectTypeName}.
+     */
+    public String objectTypeDescription;
+
     /** OSM name of the referenced object (e.g. "Aldi", "Hauptstraße"), or empty if unknown. */
     public String name;
 

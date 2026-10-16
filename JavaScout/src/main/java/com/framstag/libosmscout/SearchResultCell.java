@@ -25,7 +25,7 @@ public final class SearchResultCell {
      * @param uiScale    DPI-aware UI scale helper
      * @param line1      primary line (label/name)
      * @param line2      secondary line (e.g. admin hierarchy), may be null or empty
-     * @param line3      tertiary line (e.g. object type + offset), may be null or empty
+     * @param line3      tertiary line (e.g. object type description + offset), may be null or empty
      * @param distanceKm distance to display right-aligned, may be null to omit
      * @return cell VBox
      */

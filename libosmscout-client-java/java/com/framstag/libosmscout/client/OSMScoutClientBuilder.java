@@ -22,6 +22,8 @@ public class OSMScoutClientBuilder {
     private double fontSizeMm = 2.5;
     /** Measurement system: "metrics" or "imperial". */
     private String units;
+
+    private String descriptionLanguage = "en";
     /** Directory containing .oss stylesheet files. */
     private String stylesheetDirectory;
     /** Stylesheet the basemap renders with, file name with or without ".oss". */
@@ -98,6 +100,25 @@ public class OSMScoutClientBuilder {
      */
     public OSMScoutClientBuilder withUnits(String units) {
         this.units = units;
+        return this;
+    }
+
+    /**
+     * Set the language of the descriptions the client reports for the type of a found object.
+     *
+     * <p>A search result carries the description of its object type in this language when the
+     * database carries one. When the database does not carry that language, the English
+     * description answers; when the type carries no description at all, the description of the
+     * result is empty, and the caller shows the technical type name (e.g. {@code amenity_bank})
+     * instead.
+     *
+     * <p>Defaults to {@code "en"}.
+     *
+     * @param languageCode language code of the description, e.g. {@code "de"} or {@code "en"}
+     * @return this builder for chaining
+     */
+    public OSMScoutClientBuilder withDescriptionLanguage(String languageCode) {
+        this.descriptionLanguage = languageCode;
         return this;
     }
 

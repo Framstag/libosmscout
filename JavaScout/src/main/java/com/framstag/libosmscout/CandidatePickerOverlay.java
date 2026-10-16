@@ -176,7 +176,7 @@ public class CandidatePickerOverlay extends StackPane {
      * Display name of a candidate, taken from the description entries
      * (Name / NameAlt / NameShort), falling back to the first non-type value.
      */
-    private static String candidateName(ObjectDescription desc) {
+    static String candidateName(ObjectDescription desc) {
         for (DescriptionEntry e : desc.getEntries()) {
             if (("Name".equals(e.labelKey) || "NameAlt".equals(e.labelKey) || "NameShort".equals(e.labelKey))
                 && e.value != null && !e.value.isEmpty()) {
@@ -189,19 +189,22 @@ public class CandidatePickerOverlay extends StackPane {
             }
         }
         if (desc.getObjectTypeName() != null && !desc.getObjectTypeName().isEmpty()) {
-            return desc.getObjectTypeName();
+            return DescriptionLanguage.typeLabel(desc.getObjectTypeDescription(),
+                                                  desc.getObjectTypeName());
         }
         return "(unnamed)";
     }
 
     /**
      * Tertiary line mirroring the search result format:
-     * "- &lt;refType&gt; &lt;fileOffset&gt; &lt;typeName&gt;".
+     * "- &lt;refType&gt; &lt;fileOffset&gt; &lt;type label&gt;". The label is the description of the
+     * object type when the database carries one, the technical type name otherwise.
      */
-    private static String candidateRefLine(ObjectDescription desc) {
+    static String candidateRefLine(ObjectDescription desc) {
         String refType = desc.getObjectRefType() != null ? desc.getObjectRefType() : "object";
-        String typeName = desc.getObjectTypeName() != null ? desc.getObjectTypeName() : "";
-        return "   - " + refType + " " + desc.getObjectFileOffset() + " " + typeName;
+        String typeLabel = DescriptionLanguage.typeLabel(desc.getObjectTypeDescription(),
+                                                        desc.getObjectTypeName());
+        return "   - " + refType + " " + desc.getObjectFileOffset() + " " + typeLabel;
     }
 
     /**

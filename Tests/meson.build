@@ -114,6 +114,31 @@ TypeInfoSetStorageTest =  executable('TypeInfoSetStorageTest',
 
 test('Check type set storage', TypeInfoSetStorageTest)
 
+TypeDescriptionCoverageTest =  executable('TypeDescriptionCoverageTest',
+             'src/TypeDescriptionCoverageTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check type description coverage', TypeDescriptionCoverageTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+TypeConfigDescriptionTest =  executable('TypeConfigDescriptionTest',
+             'src/TypeConfigDescriptionTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+typeConfigDescriptionEnv = environment()
+typeConfigDescriptionEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+typeConfigDescriptionEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check type config descriptions', TypeConfigDescriptionTest, env: typeConfigDescriptionEnv)
+
 TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
              'src/TypeResolutionPerformanceTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

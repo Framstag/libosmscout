@@ -222,7 +222,7 @@ public class PoiSearchOverlay extends StackPane {
                     Label line1 = new Label(label);
                     line1.getStyleClass().add("search-result-line1");
 
-                    String objectType = item.objectType != null ? item.objectType : "poi";
+                    String objectType = objectTypeLabel(item);
                     Label line2 = new Label("   " + objectType + "  \u00b7  " + formatDistance(item.distance));
                     line2.getStyleClass().add("search-result-line2");
 
@@ -249,6 +249,18 @@ public class PoiSearchOverlay extends StackPane {
         step = Math.max(0, Math.min(step, RADIUS_STEPS_M.length - 1));
         double meters = RADIUS_STEPS_M[step];
         radiusValueLabel.setText(formatDistance(meters));
+    }
+
+    /**
+     * Return the label that names the object type of a result: its description when the client
+     * reported one, the technical type name otherwise.
+     *
+     * @param item POI search result
+     * @return the description, the technical type name, or "poi" when the result names neither
+     */
+    static String objectTypeLabel(PoiEntry item) {
+        return DescriptionLanguage.typeLabel(item.objectTypeDescription,
+                                             item.objectType != null ? item.objectType : "poi");
     }
 
     private String formatDistance(double meters) {

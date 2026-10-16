@@ -19,6 +19,17 @@ public class PoiEntry {
     /** OSM object type (e.g. "tourism_hotel", "amenity_restaurant", "shop"). */
     public String objectType;
 
+    /**
+     * Description of the object type in the configured description language
+     * (see {@link OSMScoutClientBuilder#withDescriptionLanguage(String)}),
+     * e.g. "Hotel".
+     * <p>
+     * Empty when the database carries no description for that type in that
+     * language and none in English either; a caller then shows
+     * {@link #objectType}.
+     */
+    public String objectTypeDescription;
+
     /** Latitude in degrees. */
     public double lat;
 

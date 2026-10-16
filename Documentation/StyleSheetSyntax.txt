@@ -1,3 +1,8 @@
 For a detailed description of the style sheet syntax, pleas etake a look
 at the standard.oss file which contains a summary in its initial
 comment block.
+
+The type definition files (`.ost`) are described in
+guidelines/TypeDescriptions.md: the `DESC` block that gives a type and a
+feature a German and an English description, the wording a description
+follows, and the types that deliberately carry none.

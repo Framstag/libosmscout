@@ -9,14 +9,23 @@ TYPES
     = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_major")
       {Ele}
       IGNORESEALAND PIN_WAY
+      DESC
+        en: "contour line"
+        de: "Höhenlinie"
 
   TYPE elevation_contour_medium
     = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_medium")
       {Ele}
       IGNORESEALAND PIN_WAY
+      DESC
+        en: "contour line"
+        de: "Höhenlinie"
 
   TYPE elevation_contour_minor
     = WAY ("contour"=="elevation" AND "contour_ext"=="elevation_minor")
       {Ele}
       IGNORESEALAND PIN_WAY
+      DESC
+        en: "contour line"
+        de: "Höhenlinie"
 END
