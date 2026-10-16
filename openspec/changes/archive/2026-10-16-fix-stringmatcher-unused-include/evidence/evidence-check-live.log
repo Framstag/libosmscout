@@ -1,0 +1,11 @@
+# live run of the evidence check, before archive (Phase F step 2)
+# command: .pi/skills/fix-loop/scripts/evidence-check.sh openspec/changes/fix-stringmatcher-unused-include
+# run at 2026-10-16T11:48:19Z (UTC), exit code 0
+
+ok   C1 §references: 7 checked, 0 exempted as archived pointers
+ok   C2 tallies: 3 confirmed against 14 carrier(s), 0 exempted (not retained), 1 unparsable, 0 drift
+ok   C3 /tmp pointers: none cited
+ok   C4 markers: no probe marker in any source file under .
+ok   C5 file:line: 270 resolved and in range, 0 unresolved or ambiguous
+----
+evidence-check: PASS

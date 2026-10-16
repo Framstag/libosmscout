@@ -1,0 +1,18 @@
+# Symbol audit of phase A: which std:: names the file uses, and whether any of them comes from <algorithm>
+# command: grep -o 'std::[a-zA-Z_:]*' libosmscout/src/osmscout/util/StringMatcher.cpp | sort | uniq -c
+#   plus a grep for every std algorithm name the file could use
+# run at 2026-10-16T11:43:40Z (UTC), exit code 0
+
+      3 std::make_shared
+     13 std::string
+      3 std::string::npos
+      2 std::vector
+
+# algorithm-only names searched for:
+# none of them occurs
+
+# what the other two includes provide (libosmscout/include/osmscout/util/StringMatcher.h):
+23:#include <memory>
+24:#include <string>
+25:#include <vector>
+27:#include <osmscout/lib/CoreImportExport.h>

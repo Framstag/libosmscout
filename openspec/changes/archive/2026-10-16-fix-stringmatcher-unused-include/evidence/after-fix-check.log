@@ -1,0 +1,15 @@
+# after-fix run of the whole check binary (case now among its 3 cases)
+# command: SOURCE_ROOT=$PWD ./build/Tests/HeaderCheckTest
+# run at 2026-10-16T11:42:25Z (UTC), exit code 0
+# pins:
+74aa3107c9fc2a4956b936febd9eb2e22346a5e4bf7a430e374fd55482ba6c39  libosmscout/src/osmscout/util/StringMatcher.cpp
+17bc7e0d3b927124e8b166e23d035a08b43554203d7ff20c3b7444eb6075a1e9  Tests/src/HeaderCheckTest.cpp
+
+Randomness seeded to: 2126383701
+SOURCE=/home/tim/projects/libosmscout/libosmscout/src/osmscout/util/StringMatcher.cpp STD_INCLUDES_AFTER_PROJECT=0
+SOURCE_ROOT="/home/tim/projects/libosmscout"
+SOURCE_ROOT="/home/tim/projects/libosmscout"
+===============================================================================
+All tests passed (15 assertions in 3 test cases)
+
+# exit code: 0

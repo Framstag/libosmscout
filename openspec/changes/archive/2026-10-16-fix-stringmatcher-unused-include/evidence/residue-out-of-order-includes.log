@@ -1,0 +1,119 @@
+# Residue measured in phase A of fix-stringmatcher-unused-include: the include-order rule of
+# guidelines/CodeStyles.md ("Include Order") is violated outside the file this change cleans.
+# command: awk -f out-of-order-includes.awk $(find libosmscout libosmscout-map libosmscout-import libosmscout-client libosmscout-gpx libosmscout-test -name '*.cpp' -o -name '*.h')
+# run at 2026-10-16T11:40:12Z (UTC), exit code 0
+
+libosmscout-client/include/osmscoutclient/DBThread.h: 40:#include <shared_mutex> 41:#include <filesystem> 42:#include <map> 43:#include <string>
+libosmscout-client/src/osmscoutclient/MapManager.cpp: 24:#include <algorithm>
+libosmscout-import/include/osmscoutimport/GenOptimizeWaysLowZoom.h: 25:#include <list> 26:#include <set> 27:#include <unordered_map> 28:#include <vector>
+libosmscout-import/src/osmscoutimport/PreprocessPBF.cpp: 25:#include <cstdio>
+libosmscout-import/src/osmscoutimport/GenTextIndex.cpp: 47:#include <fstream> 48:#include <locale> 50:#include <marisa.h>
+libosmscout-map/include/osmscoutmap/LabelLayouter.h: 42:#include <iostream>
+libosmscout/include/osmscout/Pixel.h: 32:#include <ostream> 33:#include <string> 34:#include <array> 35:#include <type_traits> 36:#include <tuple>
+libosmscout/include/osmscout/util/Tiling.h: 25:#include <iterator>
+libosmscout-gpx/include/osmscoutgpx/Import.h: 32:#include <cstdio> 33:#include <string>
+libosmscout-gpx/include/osmscoutgpx/Extensions.h: 25:#include <string> 26:#include <vector>
+libosmscout-client/include/osmscoutclient/LocationInfo.h: 27:#include <string>
+libosmscout/include/osmscout/ObjectRef.h: 25:#include <string> 26:#include <tuple>
+libosmscout/include/osmscout/util/NodeUseMap.h: 25:#include <bitset> 26:#include <unordered_map>
+libosmscout/src/osmscout/async/Thread.cpp: 24:#include <type_traits> 26:#include <pthread.h>
+libosmscout/src/osmscout/routing/RouteDescriptionPostprocessor.cpp: 26:#include <sstream>
+libosmscout/src/osmscout/util/Geometry.cpp: 23:#include <cstdlib>
+libosmscout/src/osmscout/io/FileWriter.cpp: 26:#include <algorithm>
+libosmscout/src/osmscout/io/FileScanner.cpp: 24:#include <cerrno> 25:#include <cstdio> 26:#include <cstring> 28:#include <limits>
+libosmscout-import/include/osmscoutimport/GenWayAreaDat.h: 25:#include <tuple> 26:#include <unordered_set>
+libosmscout/include/osmscout/db/TypeDistributionDataFile.h: 25:#include <memory> 26:#include <vector>
+libosmscout/include/osmscout/util/Distance.h: 26:#include <utility> 27:#include <limits> 28:#include <algorithm> 29:#include <string> 30:#include <ostream> 31:#include <memory>
+libosmscout/include/osmscout/util/SunriseSunset.h: 36:#include <optional> 37:#include <string>
+libosmscout-client/include/osmscoutclient/FavoriteLocationService.h: 25:#include <map> 26:#include <shared_mutex> 27:#include <string> 28:#include <vector>
+libosmscout-client/src/osmscoutclient/FavoriteLocationService.cpp: 24:#include <algorithm> 25:#include <cctype> 26:#include <cstddef> 27:#include <exception> 28:#include <fstream> 29:#include <filesystem> 30:#include <mutex> 31:#include <ostream> 32:#include <shared_mutex> 33:#include <string> 34:#include <system_error> 35:#include <utility> 36:#include <vector>
+libosmscout/include/osmscout/async/Signal.h: 25:#include <functional> 26:#include <mutex> 27:#include <set> 28:#include <memory> 29:#include <vector>
+libosmscout/include/osmscout/navigation/RouteStateAgent.h: 28:#include <optional>
+libosmscout/include/osmscout/util/Locale.h: 29:#include <string>
+libosmscout/include/osmscout/util/Bearing.h: 27:#include <string> 28:#include <ostream>
+libosmscout/include/osmscout/elevation/ElevationService.h: 31:#include <vector>
+libosmscout/src/osmscout/navigation/RouteStateAgent.cpp: 25:#include <chrono> 26:#include <memory>
+libosmscout/src/osmscout/navigation/RouteInstructionAgent.cpp: 23:#include <chrono>
+libosmscout/src/osmscout/navigation/BearingAgent.cpp: 24:#include <chrono>
+libosmscout/src/osmscout/util/Color.cpp: 23:#include <map> 24:#include <tuple>
+libosmscout-gpx/include/osmscoutgpx/Waypoint.h: 29:#include <string> 30:#include <optional>
+libosmscout-gpx/include/osmscoutgpx/Track.h: 29:#include <string> 30:#include <vector> 31:#include <optional>
+libosmscout-gpx/src/osmscoutgpx/Export.cpp: 24:#include <libxml/xmlwriter.h> 26:#include <cstring> 27:#include <iomanip> 28:#include <iostream> 29:#include <sstream>
+libosmscout-import/src/osmscoutimport/ImportProgress.cpp: 25:#include <algorithm> 26:#include <iomanip>
+libosmscout-import/src/osmscoutimport/GenOptimizeAreaWayIds.cpp: 26:#include <execution> 29:#include <algorithm> 30:#include <numeric>
+libosmscout/include/osmscout/db/BoundingBoxDataFile.h: 25:#include <memory>
+libosmscout/src/osmscout/routing/RouteDescription.cpp: 25:#include <sstream> 26:#include <string_view>
+libosmscout-client/include/osmscoutclient/DBInstance.h: 36:#include <chrono> 37:#include <thread>
+libosmscout-import/include/osmscoutimport/GenAreaWayIndex.h: 26:#include <list> 27:#include <map>
+libosmscout/include/osmscout/util/Parsing.h: 25:#include <cstddef>
+libosmscout/include/osmscout/util/Number.h: 25:#include <array> 26:#include <limits> 27:#include <cstddef> 28:#include <cassert>
+libosmscout/include/osmscout/util/PolygonCenter.h: 29:#include <vector>
+libosmscout/include/osmscout/util/OpeningHours.h: 25:#include <cstdint> 26:#include <vector> 27:#include <string> 28:#include <optional>
+libosmscout/include/osmscout/util/ObjectPool.h: 25:#include <vector> 26:#include <memory> 27:#include <mutex> 28:#include <functional>
+libosmscout/src/osmscout/ost/Parser.cpp: 43:#include <iostream> 44:#include <sstream>
+libosmscout-gpx/include/osmscoutgpx/TrackPoint.h: 28:#include <chrono> 29:#include <optional>
+libosmscout-gpx/include/osmscoutgpx/Export.h: 32:#include <cstdio> 33:#include <string>
+libosmscout-gpx/include/osmscoutgpx/GpxFile.h: 30:#include <vector> 31:#include <optional>
+libosmscout-client/include/osmscoutclient/MapDownloadService.h: 33:#include <filesystem> 34:#include <functional> 35:#include <memory> 36:#include <mutex> 37:#include <string> 38:#include <vector>
+libosmscout-client/include/osmscoutclient/MapDirectory.h: 27:#include <vector> 28:#include <string> 29:#include <filesystem>
+libosmscout-client/src/osmscoutclient/MapDownloadService.cpp: 27:#include <chrono> 28:#include <fstream> 29:#include <set>
+libosmscout-import/src/osmscoutimport/GenWaterIndex.cpp: 51:#include <iostream>
+libosmscout-map/include/osmscoutmap/LabelPath.h: 25:#include <vector>
+libosmscout-map/src/osmscoutmap/StyleConfig.cpp: 38:#include <iostream>
+libosmscout/include/osmscout/system/SystemTypes.h: 25:#include <cstddef> 26:#include <cstdint>
+libosmscout/include/osmscout/system/Assert.h: 26:#include <cassert>
+libosmscout/src/osmscout/util/PolygonCenter.cpp: 30:#include <queue> 31:#include <vector>
+libosmscout/src/osmscout/Way.cpp: 31:#include <string>
+libosmscout/src/osmscout/Node.cpp: 24:#include <string>
+libosmscout-test/src/osmscout-test/olt/Parser.cpp: 43:#include <iostream> 44:#include <sstream>
+libosmscout-gpx/include/osmscoutgpx/Utils.h: 25:#include <string> 26:#include <memory> 27:#include <vector>
+libosmscout-client/include/osmscoutclient/AvailableMapEntry.h: 30:#include <memory> 31:#include <string> 32:#include <vector>
+libosmscout-client/include/osmscoutclient/FavoriteStore.h: 26:#include <memory> 27:#include <mutex> 28:#include <string> 29:#include <vector>
+libosmscout-client/src/osmscoutclient/FavoriteStore.cpp: 24:#include <cstddef> 25:#include <memory> 26:#include <mutex> 27:#include <string> 28:#include <vector>
+libosmscout/include/osmscout/async/Thread.h: 27:#include <string> 28:#include <thread> 29:#include <optional>
+libosmscout/include/osmscout/navigation/DataAgent.h: 26:#include <list>
+libosmscout/src/osmscout/routing/RoutePostprocessor.cpp: 29:#include <algorithm> 30:#include <cassert> 31:#include <iostream> 32:#include <numeric> 33:#include <set> 34:#include <string_view>
+libosmscout-gpx/src/osmscoutgpx/Utils.cpp: 25:#include <algorithm>
+libosmscout-client/include/osmscoutclient/DBJob.h: 30:#include <thread> 31:#include <list> 32:#include <shared_mutex>
+libosmscout-client/include/osmscoutclient/OnlineTileProvider.h: 27:#include <string> 28:#include <vector>
+libosmscout-client/include/osmscoutclient/MapManager.h: 30:#include <filesystem>
+libosmscout-import/include/osmscoutimport/ImportParameter.h: 27:#include <memory>
+libosmscout-import/include/osmscoutimport/GenWayWayDat.h: 25:#include <map> 26:#include <unordered_map>
+libosmscout-map/include/osmscoutmap/LabelLayouterHelper.h: 38:#include <iostream>
+libosmscout/include/osmscout/async/CancelableFuture.h: 26:#include <future>VIOLATING_FILES=113
+ 27:#include <functional> 28:#include <optional> 29:#include <vector>
+libosmscout/src/osmscout/routing/AbstractRoutingService.cpp: 35:#include <iomanip> 36:#include <iostream> 37:#include <limits>
+libosmscout/src/osmscout/util/TileId.cpp: 24:#include <tuple>
+libosmscout/include/osmscout/async/ReadWriteLock.h: 25:#include <atomic> 26:#include <thread> 27:#include <mutex> 28:#include <condition_variable>
+libosmscout/include/osmscout/util/NumberSet.h: 25:#include <bitset> 26:#include <unordered_map>
+libosmscout/include/osmscout/util/Exception.h: 27:#include <system_error>
+libosmscout/include/osmscout/system/SSEMathPublic.h: 28:#include <xmmintrin.h> 29:#include <emmintrin.h>
+libosmscout-gpx/include/osmscoutgpx/Route.h: 27:#include <vector> 28:#include <string> 29:#include <optional>
+libosmscout-client/include/osmscoutclient/DatabasePathRegistry.h: 25:#include <filesystem> 26:#include <mutex> 27:#include <vector>
+libosmscout-client/include/osmscoutclient/Settings.h: 31:#include <memory> 32:#include <map>
+libosmscout-import/include/osmscoutimport/AreaIndexGenerator.h: 25:#include <list> 26:#include <map> 27:#include <utility>
+libosmscout-import/include/osmscoutimport/GenOptimizeAreasLowZoom.h: 25:#include <map> 26:#include <unordered_map>
+libosmscout-import/include/osmscoutimport/GenRelAreaDat.h: 25:#include <map> 26:#include <unordered_map> 27:#include <unordered_set>
+libosmscout-map/include/osmscoutmap/StyleError.h: 25:#include <string>
+libosmscout/include/osmscout/util/Magnification.h: 25:#include <functional> 26:#include <ostream> 27:#include <string> 28:#include <unordered_map>
+libosmscout/include/osmscout/util/utf8helper.h: 25:#include <string> 26:#include <vector>
+libosmscout-import/include/osmscoutimport/ImportProgress.h: 30:#include <map>
+libosmscout-import/include/osmscoutimport/GenAreaRouteIndex.h: 26:#include <list> 27:#include <map>
+libosmscout-import/src/osmscoutimport/GenCoordDat.cpp: 27:#include <limits> 28:#include <map>
+libosmscout/include/osmscout/log/LoggerImpl.h: 27:#include <sstream>
+libosmscout/include/osmscout/GeoCoord.h: 25:#include <array> 26:#include <cstddef> 27:#include <string> 28:#include <tuple>
+libosmscout/include/osmscout/util/Color.h: 25:#include <string>
+libosmscout/src/osmscout/Area.cpp: 28:#include <string>
+libosmscout/src/osmscout/navigation/PositionAgent.cpp: 26:#include <chrono>
+libosmscout/src/osmscout/util/MemoryMonitor.cpp: 25:#include <unistd.h> 27:#include <fstream> 30:#include <algorithm>
+libosmscout/src/osmscout/util/OpeningHours.cpp: 24:#include <array>
+libosmscout-gpx/include/osmscoutgpx/TrackSegment.h: 28:#include <vector>
+libosmscout-client/include/osmscoutclient/HttpClient.h: 25:#include <filesystem> 26:#include <functional> 27:#include <string>
+libosmscout-import/src/osmscoutimport/ImportParameter.cpp: 24:#include <thread>
+libosmscout-import/src/osmscoutimport/ShapeFileScanner.cpp: 24:#include <cstring> 25:#include <array> 26:#include <cstdint> 27:#include <limits>
+libosmscout-import/src/osmscoutimport/Import.cpp: 23:#include <algorithm>
+libosmscout/include/osmscout/async/AsyncWorker.h: 30:#include <atomic> 31:#include <exception> 32:#include <memory> 33:#include <mutex> 34:#include <string> 35:#include <thread> 36:#include <vector> 37:#include <cassert>
+libosmscout/include/osmscout/db/TextSearchIndex.h: 29:#include <marisa.h>
+libosmscout/src/osmscout/GeoCoord.cpp: 25:#include <sstream>
+libosmscout/src/osmscout/async/AsyncWorker.cpp: 25:#include <algorithm> 26:#include <exception> 27:#include <memory> 28:#include <mutex> 29:#include <string> 30:#include <thread> 31:#include <vector>
+libosmscout/src/osmscout/async/ReadWriteLock.cpp: 26:#include <cassert> 27:#include <chrono>
