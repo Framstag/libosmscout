@@ -239,6 +239,41 @@ namespace osmscout {
     return !scanner.HasError();
   }
 
+  bool LocationIndex::LoadAdminRegion(FileScanner& scanner,
+                                      FileOffset offset,
+                                      AdminRegionRef& region) const
+  {
+    {
+      std::scoped_lock<std::mutex> guard(regionCacheMutex);
+
+      if (auto cachedRegion=regionCache.find(offset);
+          cachedRegion!=regionCache.end()) {
+        region=cachedRegion->second;
+
+        return true;
+      }
+    }
+
+    auto loadedRegion=std::make_shared<AdminRegion>();
+
+    scanner.SetPos(offset);
+
+    if (!LoadAdminRegion(scanner,*loadedRegion)) {
+      return false;
+    }
+
+    {
+      std::scoped_lock<std::mutex> guard(regionCacheMutex);
+
+      regionCache.insert_or_assign(offset,loadedRegion);
+      regionReadCount++;
+    }
+
+    region=loadedRegion;
+
+    return true;
+  }
+
   AdminRegionVisitor::Action LocationIndex::VisitRegionEntries(const AdminRegion& region,
                                                                FileScanner& scanner,
                                                                AdminRegionVisitor& visitor) const
@@ -259,16 +294,15 @@ namespace osmscout {
 
     try {
       for (auto childOffset : region.childrenOffsets) {
-        AdminRegion childRegion;
-
-        scanner.SetPos(childOffset);
+        AdminRegionRef childRegion;
 
         if (!LoadAdminRegion(scanner,
+                             childOffset,
                              childRegion)) {
           return AdminRegionVisitor::error;
         }
 
-        action=VisitRegionEntries(childRegion,
+        action=VisitRegionEntries(*childRegion,
                                   scanner,
                                   visitor);
 
@@ -343,18 +377,17 @@ namespace osmscout {
     }
 
     for (const auto offset : adminRegion.childrenOffsets) {
-      AdminRegion childRegion;
-
-      scanner.SetPos(offset);
+      AdminRegionRef childRegion;
 
       if (!LoadAdminRegion(scanner,
+                           offset,
                            childRegion)) {
         return false;
       }
 
-      //std::cout << "Visiting child region " << childRegion.name << " of " << adminRegion.name << std::endl;
+      //std::cout << "Visiting child region " << childRegion->name << " of " << adminRegion.name << std::endl;
 
-      if (!VisitLocations(childRegion,
+      if (!VisitLocations(*childRegion,
                           scanner,
                           visitor,
                           recursive,
@@ -447,16 +480,15 @@ namespace osmscout {
     }
 
     for (const auto offset : region.childrenOffsets) {
-      AdminRegion childRegion;
-
-      scanner.SetPos(offset);
+      AdminRegionRef childRegion;
 
       if (!LoadAdminRegion(scanner,
+                           offset,
                            childRegion)) {
         return false;
       }
 
-      if (!VisitRegionPOIs(childRegion,
+      if (!VisitRegionPOIs(*childRegion,
                            scanner,
                            visitor,
                            recursive,
@@ -494,20 +526,19 @@ namespace osmscout {
     }
 
     for (const auto offset : adminRegion.childrenOffsets) {
-      AdminRegion childRegion;
-
-      scanner.SetPos(offset);
+      AdminRegionRef childRegion;
 
       if (!LoadAdminRegion(scanner,
+                           offset,
                            childRegion)) {
         return false;
       }
 
-      //std::cout << "Visiting child region " << childRegion.name << " of " << postalArea.name << " " << adminRegion.name << std::endl;
+      //std::cout << "Visiting child region " << childRegion->name << " of " << postalArea.name << " " << adminRegion.name << std::endl;
 
-      for (const auto& childPostalArea : childRegion.postalAreas) {
-        //std::cout << "Visiting child region " << childPostalArea.name << " " << childRegion.name << " of " << postalArea.name << " " << adminRegion.name << std::endl;
-        if (!VisitPostalArea(childRegion,
+      for (const auto& childPostalArea : childRegion->postalAreas) {
+        //std::cout << "Visiting child region " << childPostalArea.name << " " << childRegion->name << " of " << postalArea.name << " " << adminRegion.name << std::endl;
+        if (!VisitPostalArea(*childRegion,
                              childPostalArea,
                              scanner,
                              visitor,
@@ -594,11 +625,10 @@ namespace osmscout {
       }
 
       for (uint32_t i=0; i<regionCount; i++) {
-        AdminRegion region;
-
-        scanner->SetPos(rootRegionOffsets[i]);
+        AdminRegionRef region;
 
         if (!LoadAdminRegion(*scanner,
+                             rootRegionOffsets[i],
                              region)) {
           scanner->Close();
           return false;
@@ -608,7 +638,7 @@ namespace osmscout {
         FileOffset                 currentPos=scanner->GetPos();
 
 
-        action=VisitRegionEntries(region,
+        action=VisitRegionEntries(*region,
                                   *scanner,
                                   visitor);
 
@@ -807,19 +837,18 @@ namespace osmscout {
             continue;
           }
 
-          scanner->SetPos(offset);
-
-          AdminRegion currentAdminRegion;
+          AdminRegionRef currentAdminRegion;
 
           if (!LoadAdminRegion(*scanner,
+                               offset,
                                currentAdminRegion)) {
             return false;
           }
 
-          refs[currentAdminRegion.regionOffset]=std::make_shared<AdminRegion>(currentAdminRegion);
+          refs[currentAdminRegion->regionOffset]=currentAdminRegion;
 
-          if (currentAdminRegion.parentRegionOffset!=0) {
-            newOffsets.push_back(currentAdminRegion.parentRegionOffset);
+          if (currentAdminRegion->parentRegionOffset!=0) {
+            newOffsets.push_back(currentAdminRegion->parentRegionOffset);
           }
 
         }
@@ -846,7 +875,21 @@ namespace osmscout {
 
   void LocationIndex::FlushCache() const
   {
+    {
+      std::scoped_lock<std::mutex> guard(regionCacheMutex);
+
+      regionCache.clear();
+      regionReadCount=0;
+    }
+
     fileScannerPool.Clear();
+  }
+
+  size_t LocationIndex::GetRegionReadCount() const
+  {
+    std::scoped_lock<std::mutex> guard(regionCacheMutex);
+
+    return regionReadCount;
   }
 }
 

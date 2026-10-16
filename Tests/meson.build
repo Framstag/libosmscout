@@ -437,7 +437,8 @@ if buildImport
                    'src/LocationServiceTest.cpp',
                    'src/SearchForLocationByStringTest.cpp',
                    'src/SearchForLocationByFormTest.cpp',
-                   'src/SearchForPOIByFormTest.cpp'
+                   'src/SearchForPOIByFormTest.cpp',
+                   'src/LocationIndexRegionCacheTest.cpp'
                  ],
                  include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
                  dependencies: [mathDep, openmpDep, catch2Dep],
