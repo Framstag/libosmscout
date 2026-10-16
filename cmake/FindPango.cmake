@@ -109,11 +109,14 @@ IF(PANGO_FOUND)
     )
     IF(PANGOFT2_INCLUDE_DIRS)
         SET(PANGOFT2_INCLUDE_DIRS ${PANGO_INCLUDE_DIRS} ${PANGOFT2_INCLUDE_DIRS})
-        FIND_PACKAGE(Freetype REQUIRED)
+        # FreeType and the font configuration are optional for the Cairo backend and for libosmscout-map
+        # (cmake/features.cmake feature-gates both), so the configure has to stay possible with either
+        # of them disabled. Only the include directories are taken from them here.
+        FIND_PACKAGE(Freetype)
         IF(FREETYPE_FOUND)
             SET(PANGOFT2_INCLUDE_DIRS ${PANGOFT2_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
         ENDIF()
-        FIND_PACKAGE(Fontconfig REQUIRED)
+        FIND_PACKAGE(Fontconfig)
         IF(FONTCONFIG_FOUND)
             SET(PANGOFT2_INCLUDE_DIRS ${PANGOFT2_INCLUDE_DIRS} ${FONTCONFIG_INCLUDE_DIRS})
         ENDIF()
