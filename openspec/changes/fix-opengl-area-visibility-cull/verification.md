@@ -262,3 +262,42 @@ Verification: `Tests/meson.build` was configured with a `pkg-config` wrapper tha
 stays on, and the target is back with the real `pkg-config`. The Windows and macOS jobs verify the
 `PATH` and the skip behaviour themselves.
 
+## Host verification 2026-10-16 (map-dependent items)
+
+Task 4.2 was attempted again. **A GL context can be created headlessly here** — the blocker the task assumed
+("no GL context") does not apply on this machine:
+
+```bash
+xvfb-run -a ./build/Tests/OpenGLAreaVisibilityTest-1.1.1     # All tests passed (148 assertions in 8 test cases)
+```
+
+All eight cases ran; the fifth case (`The per-ring work of the area step follows the rings it keeps`)
+creates the offscreen GLFW context and reached its checks (`GetExaminedRingCount()==1+outsideAreaCount`,
+`GetKeptRingCount()==1`), so it did not take its skip branch.
+
+The cross-backend render was then performed on the v27 database `maps/nordrhein-westfalen`, one view
+through both drivers with the same stylesheet, size and shaders (command in the retained log):
+
+| sample | result |
+|---|---|
+| view | 400x400, `stylesheets/standard.oss`, centre 51.515/7.465, magnification 32768, `--database maps/nordrhein-westfalen` |
+| Cairo vs OpenGL, whole image | `compare -metric AE` = `12838.4` of `160000` (`8.02 %`) |
+| Cairo vs OpenGL, inner 384x384 (`-shave 8x8`) | `11787.3` of `147456` (`7.99 %`) |
+| 8-px frame (by difference) | `1051.1` of `12544` (`8.4 %`) — the same rate as the interior, no localised border effect |
+| distinct colours | Cairo `18578`, OpenGL `19248` |
+
+Read: the two drivers differ globally (labels, anti-aliasing), and no border of an area is present in one
+and absent in the other in the frame; there is no localised border-pixel difference to attribute to this
+change. **What stayed unverified, and why 4.2 stays open:** the task's acceptance evidence is a *before/after*
+statement — the border pixels of an area crossing the viewport edge "appear in the OpenGL output after the
+change and not before". Producing it needs a second build of `libosmscout-map-opengl` with the change
+reverted, which this run's working rules forbid (no source change, no `git`). The same was already noted in
+section 4.1 for the sampled data (no ring in the tolerance band).
+
+A tool note for anyone repeating this: `DrawMapAll`'s third positional argument is a magnification
+*factor*, not a level — `15` renders the whole world (400x400 mostly empty, `937` B PNG), `32768` renders
+level 15. The comparison above uses `32768`.
+
+Log: `evidence/opengl-cairo-cross-backend-2026-10-16.log` (commands, UTC timestamp, exit 0, revision
+`06b197a35`).
+
