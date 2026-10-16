@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstdint>
 #include <iterator>
 #include <vector>
 
@@ -101,16 +102,26 @@ namespace osmscout {
   /**
    * Custom data structure to efficiently handle a set of TypeInfoRef.
    *
-   * All operations on the set are O(1) using the fact, that TypeInfo internally
-   * have a continuously running index variable (Set may be slower if the
-   * internal array was not preinitialized to it maximum size by passing a
-   * TypeConfig or another TypeInfoSet in the constructor.
+   * The set holds one bit per type index and the contained types in ascending index order,
+   * using the fact, that TypeInfo internally have a continuously running index variable. Its
+   * operations are independent of the number of types the type configuration defines; the
+   * bytes the set allocates follow the contained types and not the number of types the type
+   * configuration defines.
    */
   class OSMSCOUT_API TypeInfoSet CLASS_FINAL
   {
   private:
-    std::vector<TypeInfoRef> types;
+    //! One bit per type index, set if the type is contained
+    std::vector<uint64_t>    words;
+    //! The contained types, in ascending type index order
+    std::vector<TypeInfoRef> contained;
     size_t                   count = 0;
+
+    bool TestBit(size_t index) const
+    {
+      return index/64<words.size() &&
+             (words[index/64]&(uint64_t(1)<<(index%64)))!=0;
+    }
 
   public:
     TypeInfoSet() = default;
@@ -122,15 +133,8 @@ namespace osmscout {
     TypeInfoSet(const TypeInfoSet& other) = default;
     TypeInfoSet(TypeInfoSet&& other) noexcept;
 
-    TypeInfoSet& operator=(const TypeInfoSet& other)
-    {
-      if (&other!=this) {
-        this->types=other.types;
-        this->count=other.count;
-      }
-
-      return *this;
-    }
+    TypeInfoSet& operator=(const TypeInfoSet& other) = default;
+    TypeInfoSet& operator=(TypeInfoSet&& other) noexcept = default;
 
     bool operator==(const TypeInfoSet& other) const;
     bool operator!=(const TypeInfoSet& other) const;
@@ -139,9 +143,8 @@ namespace osmscout {
 
     void Clear()
     {
-      if (count>0) {
-        types.clear();
-      }
+      words.clear();
+      contained.clear();
 
       count=0;
     }
@@ -161,8 +164,7 @@ namespace osmscout {
     {
       assert(type);
 
-      return type->GetIndex()<types.size() &&
-             types[type->GetIndex()];
+      return TestBit(type->GetIndex());
     }
 
     bool Empty() const
@@ -179,14 +181,14 @@ namespace osmscout {
 
     TypeInfoSetConstIterator begin() const
     {
-      return TypeInfoSetConstIterator(types.begin(),
-                                      types.end());
+      return TypeInfoSetConstIterator(contained.begin(),
+                                      contained.end());
     }
 
     TypeInfoSetConstIterator end() const
     {
-      return TypeInfoSetConstIterator(types.end(),
-                                      types.end());
+      return TypeInfoSetConstIterator(contained.end(),
+                                      contained.end());
     }
   };
 }
