@@ -23,6 +23,7 @@
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <set>
 #include <string>
 
 #if defined(HAVE_LIB_FONTCONFIG)
@@ -145,6 +146,42 @@ namespace {
     FcPatternDestroy(pattern);
 
     return file;
+  }
+
+#endif
+
+#if !defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+
+  /**
+   * A map parameter whose wrapping is bounded only by fit-to-width: the character bounds are set
+   * wide enough not to bind, so the pixel bound is the one under test.
+   */
+  osmscout::MapParameter CreateWrappingParameter(double fitToWidth,
+                                                 size_t minCharCount=0,
+                                                 size_t maxCharCount=1000)
+  {
+    osmscout::MapParameter parameter=CreateParameter(TEXT_METRICS_FONT_PATH);
+
+    parameter.SetLabelLineMinCharCount(minCharCount);
+    parameter.SetLabelLineMaxCharCount(maxCharCount);
+    parameter.SetLabelLineFitToArea(false);
+    parameter.SetLabelLineFitToWidth(fitToWidth);
+
+    return parameter;
+  }
+
+  /**
+   * Number of distinct baselines the glyphs of a measurement sit on, one per line of a wrapped label
+   */
+  size_t CountBaselines(const osmscout::TextMetrics& metrics)
+  {
+    std::set<long> baselines;
+
+    for (const auto& glyph : metrics.glyphs) {
+      baselines.insert(std::lround(glyph.position.GetY()));
+    }
+
+    return baselines.size();
   }
 
 #endif
@@ -525,3 +562,134 @@ TEST_CASE("Cairo measurement follows a font-name change on one painter", "[TextM
   cairo_destroy(liveContext);
   cairo_surface_destroy(surface);
 }
+
+#if !defined(OSMSCOUT_MAP_CAIRO_HAVE_LIB_PANGO)
+
+/**
+ * The line wrapping of the map parameter reaches the text layout of the variant without a text
+ * stack: a multi-word label is broken into lines that fit the proposed width, and the lines are
+ * reported as the height of the label so the layouter places the label it draws.
+ */
+TEST_CASE("Cairo wraps a multi-word label into the proposed width", "[TextMetricsCairo]")
+{
+  cairo_surface_t *surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                      800,
+                                                      480);
+
+  REQUIRE(surface!=nullptr);
+
+  cairo_t *cr=cairo_create(surface);
+
+  REQUIRE(cr!=nullptr);
+
+  osmscout::MapPainterCairo painter;
+
+  painter.DrawMap(CreateProjection(),
+                  CreateParameter(TEXT_METRICS_FONT_PATH),
+                  {},
+                  cr);
+
+  const std::string text="ein und noch viel mehr davon hier";
+
+  auto unwrapped=painter.MeasureText(CreateProjection(),
+                                     CreateWrappingParameter(10000.0),
+                                     text,
+                                     1.0,
+                                     0.0,
+                                     true);
+
+  // half the unwrapped width guarantees that the text does not fit one line, while every word of
+  // the text is far narrower than half of it, so several words fit on a line
+  auto wrapped=painter.MeasureText(CreateProjection(),
+                                   CreateWrappingParameter(unwrapped.width/2.0),
+                                   text,
+                                   1.0,
+                                   0.0,
+                                   true);
+
+  INFO("unwrapped width=" << unwrapped.width << ", wrapped width=" << wrapped.width
+       << ", baselines=" << CountBaselines(wrapped));
+
+  // every character is drawn once except the space at a line break, the label is narrower than the
+  // whole text and its lines are stacked below each other
+  REQUIRE(wrapped.glyphs.size()==unwrapped.glyphs.size()-(CountBaselines(wrapped)-1));
+  REQUIRE(wrapped.width<=unwrapped.width);
+  REQUIRE(wrapped.width<=unwrapped.width/2.0+1.0);
+  REQUIRE(wrapped.height>unwrapped.height);
+  REQUIRE(CountBaselines(wrapped)>=2);
+
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
+
+/**
+ * A word is the smallest unit the wrapping breaks at: a word wider than the proposed width stays on
+ * a line of its own, and the minimum character count keeps a short label on one line.
+ */
+TEST_CASE("Cairo never breaks a word and keeps a short label on one line", "[TextMetricsCairo]")
+{
+  cairo_surface_t *surface=cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                      800,
+                                                      480);
+
+  REQUIRE(surface!=nullptr);
+
+  cairo_t *cr=cairo_create(surface);
+
+  REQUIRE(cr!=nullptr);
+
+  osmscout::MapPainterCairo painter;
+
+  painter.DrawMap(CreateProjection(),
+                  CreateParameter(TEXT_METRICS_FONT_PATH),
+                  {},
+                  cr);
+
+  const std::string oneWord="Musterstrassenverzeichnis";
+
+  auto unwrapped=painter.MeasureText(CreateProjection(),
+                                     CreateWrappingParameter(10000.0),
+                                     oneWord,
+                                     1.0,
+                                     0.0,
+                                     true);
+
+  // a width far below the width of the single word: no word boundary to break at, so it stays whole
+  auto wrapped=painter.MeasureText(CreateProjection(),
+                                   CreateWrappingParameter(unwrapped.width/2.0),
+                                   oneWord,
+                                   1.0,
+                                   0.0,
+                                   true);
+
+  REQUIRE(CountBaselines(wrapped)==1);
+  REQUIRE(wrapped.width==Catch::Approx(unwrapped.width).margin(1.0));
+  REQUIRE(wrapped.height==Catch::Approx(unwrapped.height).margin(1.0));
+
+  // a minimum character count above the length of the text keeps a multi-word label on one line
+  const std::string shortText="Am Alten Hafen";
+
+  auto shortUnwrapped=painter.MeasureText(CreateProjection(),
+                                          CreateWrappingParameter(10000.0),
+                                          shortText,
+                                          1.0,
+                                          0.0,
+                                          true);
+
+  auto shortKept=painter.MeasureText(CreateProjection(),
+                                     CreateWrappingParameter(1.0,
+                                                             shortText.size()+1),
+                                     shortText,
+                                     1.0,
+                                     0.0,
+                                     true);
+
+  REQUIRE(CountBaselines(shortKept)==1);
+  REQUIRE(shortKept.width==Catch::Approx(shortUnwrapped.width).margin(1.0));
+  REQUIRE(shortKept.height==Catch::Approx(shortUnwrapped.height).margin(1.0));
+
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
+
+#endif
