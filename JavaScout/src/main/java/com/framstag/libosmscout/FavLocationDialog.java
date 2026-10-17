@@ -665,7 +665,7 @@ public class FavLocationDialog extends Stage {
             javafx.concurrent.Task<List<LocationEntry>> searchTask = new javafx.concurrent.Task<>() {
                 @Override
                 protected List<LocationEntry> call() {
-                    LocationEntry[] results = client.searchLocations(query, 20, 0L);
+                    LocationEntry[] results = client.searchLocations(query, 20);
                     return results != null ? List.of(results) : List.of();
                 }
             };

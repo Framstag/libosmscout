@@ -264,9 +264,19 @@ public class OSMScoutClient {
 
     /**
      * Sentinel for "no default admin region" — pass to
-     * {@link #searchLocations(String, int, long)} for an unconstrained search.
+     * {@link #searchLocations(String, int, long, long)} for an unconstrained search.
      */
     public static final long NO_ADMIN_REGION = 0L;
+
+    /**
+     * Search slots: one per search surface, so a supersede or a cancel stops exactly the
+     * request it names and nothing another surface is running. The same names are the
+     * registry's slot keys (search_breaker.h, spec `search-cancellation`).
+     */
+    public static final String SEARCH_SLOT_PLACES = "places";
+    public static final String SEARCH_SLOT_POI = "poi";
+    public static final String SEARCH_SLOT_ROUTE = "route";
+    public static final String SEARCH_SLOT_CAR = "car";
 
     /**
      * Search for locations matching a free-text query.
@@ -282,48 +292,84 @@ public class OSMScoutClient {
      *        {@link #resolveAdminRegion(double, double)}) used as default region
      *        fallback for incomplete queries, or {@link #NO_ADMIN_REGION} for an
      *        unconstrained search
+     * @param generation the request's generation, from {@link #beginSearch(String)}; every
+     *        abort check inside the search asks it, so a supersede or a cancel stops the
+     *        search at its next check
      * @return array of matching LocationEntry objects, or empty array if none found
      */
-    public native LocationEntry[] searchLocations(String query, int limit, long adminRegionHandle);
+    public native LocationEntry[] searchLocations(String query, int limit, long adminRegionHandle,
+                                                  long generation);
 
     /**
-     * Search for locations matching a free-text query with a region-name
-     * default region and optional cancellation.
+     * Search for locations matching a free-text query with a region-name default region.
      * <p>
      * Uses the core {@code LocationService::SearchForLocationByString()} to find
      * admin regions, locations, POIs, and addresses matching the query, and the
-     * text search index for free-text hits on named objects. Region scoping and
-     * cancellation mirror OSMScout2 behaviour.
+     * text search index for free-text hits on named objects.
      *
      * @param query         free-text search string (e.g. "Berlin", "Dortmund Hbf")
      * @param limit         maximum number of results to return
      * @param defaultRegion optional region name to scope the search, or null
-     * @param cancel        if true, cancel any in-progress search and return empty
+     * @param generation    the request's generation, from {@link #beginSearch(String)}
      * @return array of matching LocationEntry objects, or empty array if none found
      */
-    public native LocationEntry[] searchLocations(String query, int limit, String defaultRegion, boolean cancel);
+    public native LocationEntry[] searchLocations(String query, int limit, String defaultRegion,
+                                                  long generation);
 
     /**
      * Search for locations matching a free-text query without region context.
      * <p>
-     * Convenience overload of
-     * {@link #searchLocations(String, int, String, boolean)}.
+     * Convenience path for a caller that does not manage the request itself: it begins a
+     * request for the place slot, runs the search with it and ends it, so a previous
+     * search of that slot is superseded and a later one is not blocked. A caller that has
+     * to be able to cancel a running search begins its own request with
+     * {@link #beginSearch(String)} and uses the generation-carrying overload.
      *
      * @param query free-text search string
      * @param limit maximum number of results to return
      * @return array of matching LocationEntry objects, or empty array if none found
      */
     public LocationEntry[] searchLocations(String query, int limit) {
-        return searchLocations(query, limit, null, false);
+        return searchLocations(query, limit, null);
     }
 
     /**
-     * Cancel the currently running location search, if any.
-     * <p>
-     * A new search cancels the previously running one automatically; this
-     * method allows explicit cancellation (e.g. from a cancel button).
+     * Convenience overload of {@link #searchLocations(String, int, String, long)} that
+     * begins and ends the place slot's request itself (see the two-argument overload).
      */
-    public native void cancelSearch();
+    public LocationEntry[] searchLocations(String query, int limit, String defaultRegion) {
+        final long generation = beginSearch(SEARCH_SLOT_PLACES);
+
+        try {
+            return searchLocations(query, limit, defaultRegion, generation);
+        } finally {
+            cancelSearch(generation);
+        }
+    }
+
+    /**
+     * Begins a search request for a slot and returns its generation.
+     * <p>
+     * Beginning a request supersedes the slot's previous one, which stops at its next
+     * abort check. The generation identifies the request for every call that belongs to
+     * it and for {@link #cancelSearch(long)}.
+     *
+     * @param slot one of the {@code SEARCH_SLOT_*} constants
+     * @return the request's generation, or 0 when the client is not usable
+     */
+    public native long beginSearch(String slot);
+
+    /**
+     * Cancels the request with this generation and reports whether that request was live.
+     * <p>
+     * {@code false} means a newer request of its slot had already replaced it, or it had
+     * ended, so nothing was aborted — which is what makes a cancellation that arrives
+     * late harmless.
+     *
+     * @param generation generation returned by {@link #beginSearch(String)}
+     * @return true when the request was still running and is now cancelled
+     */
+    public native boolean cancelSearch(long generation);
 
     /**
      * Search for POIs of the given OSM types within a radius around a coordinate.
@@ -337,20 +383,23 @@ public class OSMScoutClient {
      * @param lon          center longitude in degrees
      * @param radiusMeters search radius in meters
      * @param limit        maximum number of results to return
+     * @param generation   the request's generation, from {@link #beginSearch(String)}
      * @return array of matching PoiEntry objects, or empty array if none found
      */
     public native PoiEntry[] searchPOIsByTypes(String[] typeNames,
                                                double lat,
                                                double lon,
                                                double radiusMeters,
-                                               int limit);
+                                               int limit,
+                                               long generation);
 
     /**
      * Search for POIs of the given category within a radius around a coordinate.
      * <p>
      * Resolves the category to its hardcoded OSM type names via
      * {@link PoiCategories} and delegates to
-     * {@link #searchPOIsByTypes(String[], double, double, double, int)}.
+     * {@link #searchPOIsByTypes(String[], double, double, double, int, long)}, beginning
+     * and ending the POI slot's request itself.
      *
      * @param category     category id (see {@link PoiCategories#HOTELS},
      *                     {@link PoiCategories#RESTAURANTS}, {@link PoiCategories#GROCERY})
@@ -369,7 +418,14 @@ public class OSMScoutClient {
         if (typeNames == null || typeNames.length == 0 || radiusMeters <= 0) {
             return new PoiEntry[0];
         }
-        return searchPOIsByTypes(typeNames, lat, lon, radiusMeters, limit);
+
+        final long generation = beginSearch(SEARCH_SLOT_POI);
+
+        try {
+            return searchPOIsByTypes(typeNames, lat, lon, radiusMeters, limit, generation);
+        } finally {
+            cancelSearch(generation);
+        }
     }
 
     /**

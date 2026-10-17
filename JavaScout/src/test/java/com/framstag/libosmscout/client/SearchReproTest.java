@@ -73,12 +73,12 @@ class SearchReproTest {
         Assumptions.assumeTrue(client != null, "client not initialised");
 
         for (String query : new String[]{"Aldi Eving", "Java Eving"}) {
-            LocationEntry[] first = client.searchLocations(query, 50, "Nordrhein-Westfalen", false);
+            LocationEntry[] first = client.searchLocations(query, 50, "Nordrhein-Westfalen");
             assertNoGarbageResults(first, query);
             assertEquals(0, first.length,
                 "no database open - search must not return entries for query '" + query + "'");
 
-            LocationEntry[] second = client.searchLocations(query, 50, "Nordrhein-Westfalen", false);
+            LocationEntry[] second = client.searchLocations(query, 50, "Nordrhein-Westfalen");
             assertNoGarbageResults(second, query);
             assertEquals(0, second.length,
                 "repeated search must stay empty for query '" + query + "'");
@@ -95,7 +95,7 @@ class SearchReproTest {
         OSMScoutClient client = buildClient();
         Assumptions.assumeTrue(client != null, "client not initialised");
 
-        LocationEntry[] results = client.searchLocations("", 50, null, false);
+        LocationEntry[] results = client.searchLocations("", 50);
         assertNoGarbageResults(results, "");
         assertEquals(0, results.length, "empty query must not return entries");
 
@@ -128,7 +128,7 @@ class SearchReproTest {
         assertTrue(client.openDatabase(mapDir.toString()), "database should open");
 
         for (String query : new String[]{"Aldi Eving", "Java Eving"}) {
-            LocationEntry[] results = client.searchLocations(query, 50, "Nordrhein-Westfalen", false);
+            LocationEntry[] results = client.searchLocations(query, 50, "Nordrhein-Westfalen");
             Assumptions.assumeTrue(results != null, "null results");
             assertNoGarbageResults(results, query);
         }

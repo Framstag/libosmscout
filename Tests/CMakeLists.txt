@@ -275,6 +275,13 @@ osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
 #---- SearchScope
 osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- SearchBreaker
+# The search-request lifecycle (one slot per surface, one generation per request, the
+# abort predicate) is the single decision every search surface's cancellation rests on,
+# so it is unit-tested here rather than only through the Kotlin seam tests, which go
+# through a fake client and cannot see a supersede or a cancellation at all.
+osmscout_test_project(NAME SearchBreakerTest SOURCES src/SearchBreakerTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- RoutingProgressThrottle
 osmscout_test_project(NAME RoutingProgressThrottleTest SOURCES src/RoutingProgressThrottleTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
