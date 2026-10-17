@@ -1,0 +1,191 @@
+# SearchScopeProbe: scoped vs unscoped search on the v27 database maps/nordrhein-westfalen
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:23:44Z
+# command: java -Djava.library.path=build/libosmscout-client-java -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 SearchScopeProbe maps/nordrhein-westfalen stylesheets
+# source: openspec/changes/client-java-search-scope-extent/evidence/SearchScopeProbe.java
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+PROBE: db=maps/nordrhein-westfalen city=51.514/7.465 handle=1 regionName=Innenstadt West scopeName=Regierungsbezirk Arnsberg
+PROBE: query='Bahnhof' unscoped=9 scoped=50
+PROBE:   scopedOutOfScopeFlags=0 scopedFarFromCity=1
+PROBE:   unscopedMaxDistanceDeg=1.7256146807964587
+PROBE:   scopedNotInUnscoped=50
+PROBE:   unscoped label='Münster-Mitte' refType=area objectType=boundary_administrative matchQuality=match lat=51.955178916120374 lon=7.627250310981651 inScope=true
+PROBE:   unscoped label='Kreis Borken' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.98596598197494 lon=6.83068921290851 inScope=true
+PROBE:   unscoped label='Kreis Gütersloh' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.92614333276556 lon=8.41196409174772 inScope=true
+PROBE:   unscoped label='Kreis Höxter' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.67648666856054 lon=9.182947644464278 inScope=true
+PROBE:   unscoped label='Kreis Siegen-Wittgenstein' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.91762535957713 lon=8.187956721990972 inScope=true
+PROBE:   unscoped label='Kreis Warendorf' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.881068809934476 lon=7.965727656824342 inScope=true
+PROBE:   unscoped label='Lüftelberg' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.65414727221538 lon=7.009792380107882 inScope=true
+PROBE:   unscoped label='Märkischer Kreis' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.27350353653358 lon=7.684248594077289 inScope=true
+PROBE:   unscoped label='Rhein-Sieg-Kreis' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.75280093217492 lon=7.26846461943137 inScope=true
+PROBE:   scoped label='Bahnhof' type=object refType=area objectType=boundary_administrative lat=51.64504849646276 lon=8.509989444240844 inScope=true
+PROBE:   scoped label='Aplerbecker Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.49053045727709 lon=7.551286127800395 inScope=true
+PROBE:   scoped label='Alte Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47061103187957 lon=7.314585203786081 inScope=true
+PROBE:   scoped label='Alte Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.4705634226692 lon=7.314624095817095 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47385248149821 lon=7.140984588421759 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47385248149821 lon=7.140984588421759 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.27749667523426 lon=7.528268750967584 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.39936954825647 lon=7.1809495030414325 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.400438408556866 lon=7.4327083485775205 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.43752128956855 lon=7.331029827378899 inScope=true
+PROBE:   scoped label='Am Zechenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.54186257378653 lon=7.466580625374462 inScope=true
+PROBE:   scoped label='Am Hasper Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.35175564402161 lon=7.422581668366348 inScope=true
+PROBE:   scoped label='Am Hauptbahnhof' type=object refType=way objectType=boundary_administrative lat=51.36332870545483 lon=7.462496962118877 inScope=true
+PROBE:   scoped label='Am Hauptbahnhof' type=object refType=way objectType=boundary_administrative lat=51.36332870545483 lon=7.462496962118877 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.36030116200671 lon=7.466864939532158 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5368066097558 lon=7.225411141108054 inScope=true
+PROBE:   scoped label='Bahnhofsplatz' type=object refType=way objectType=boundary_administrative lat=51.544281255783744 lon=7.216003292918231 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5368066097558 lon=7.225411141108054 inScope=true
+PROBE:   scoped label='Bahnhofsplatz' type=object refType=way objectType=boundary_administrative lat=51.544281255783744 lon=7.216003292918231 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5368066097558 lon=7.225411141108054 inScope=true
+PROBE:   scoped label='Am Bahnhof Tierpark' type=object refType=way objectType=boundary_administrative lat=51.47775643674848 lon=7.459455337073322 inScope=true
+PROBE:   scoped label='Baroper Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47553355601082 lon=7.431070859961736 inScope=true
+PROBE:   scoped label='Am Hafenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.53432690750306 lon=7.424254025699597 inScope=true
+PROBE:   scoped label='Hörder Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.48852282381448 lon=7.496831919974312 inScope=true
+PROBE:   scoped label='Hörder Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.48852282381448 lon=7.496831919974312 inScope=true
+PROBE:   scoped label='Bahnhof Märkische Straße' type=object refType=area objectType=boundary_administrative lat=51.50068865344441 lon=7.483241166794599 inScope=true
+PROBE:   scoped label='Am Alten Ostbahnhof' type=object refType=way objectType=boundary_administrative lat=51.51408896978266 lon=7.482192423061974 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5164466315243 lon=7.455123569481984 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.50435858595638 lon=7.618110683695306 inScope=true
+PROBE:   scoped label='Am Preußenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.58934370867419 lon=7.538796421429495 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofsallee' type=object refType=way objectType=boundary_administrative lat=51.4762014260605 lon=7.705357579181765 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.50435858595638 lon=7.618110683695306 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.50435858595638 lon=7.618110683695306 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Zum alten Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.57627196294271 lon=7.788756845807711 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.50435858595638 lon=7.618110683695306 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.50435858595638 lon=7.618110683695306 inScope=true
+PROBE:   scoped label='Hemmerder Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5535831567167 lon=7.803769169775904 inScope=true
+PROBE:   scoped label='Lünerner Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.545700144363195 lon=7.755455879535191 inScope=true
+PROBE:   scoped label='Massener Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.539082464121904 lon=7.64684787129498 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Am Güterbahnhof' type=object refType=way objectType=boundary_administrative lat=51.49934352561341 lon=7.367746586857336 inScope=true
+PROBE: query='Dom' unscoped=2 scoped=50
+PROBE:   scopedOutOfScopeFlags=0 scopedFarFromCity=10
+PROBE:   unscopedMaxDistanceDeg=1.0309210265891973
+PROBE:   scopedNotInUnscoped=50
+PROBE:   unscoped label='Dom-Esch' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.67873038857229 lon=6.860746047353331 inScope=true
+PROBE:   unscoped label='Rheinisch-Bergischer Kreis' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.0140400455448 lon=7.1934392094123325 inScope=true
+PROBE:   scoped label='Domplatz' type=object refType=way objectType=boundary_administrative lat=51.40412979874111 lon=7.135899120091636 inScope=true
+PROBE:   scoped label='Vendômer Platz' type=object refType=area objectType=boundary_administrative lat=51.32046097010718 lon=7.339643741694417 inScope=true
+PROBE:   scoped label='Domplatz' type=object refType=way objectType=boundary_administrative lat=51.40412979874111 lon=7.135899120091636 inScope=true
+PROBE:   scoped label='Dompfaffweg' type=object refType=way objectType=boundary_administrative lat=51.450652043898785 lon=7.336886430806572 inScope=true
+PROBE:   scoped label='Dömbergstraße' type=object refType=way objectType=boundary_administrative lat=51.35102273040282 lon=7.458005603089973 inScope=true
+PROBE:   scoped label='Dombkebach' type=object refType=way objectType=boundary_administrative lat=51.40463472459193 lon=7.909666805786387 inScope=true
+PROBE:   scoped label='Zur Dombke' type=object refType=way objectType=boundary_administrative lat=51.41642571550925 lon=7.909654735845734 inScope=true
+PROBE:   scoped label='Dompfaffenweg' type=object refType=way objectType=boundary_administrative lat=51.42698758413633 lon=7.982077061996435 inScope=true
+PROBE:   scoped label='Dompfaffweg' type=object refType=way objectType=boundary_administrative lat=51.34865836313857 lon=7.953888386144399 inScope=true
+PROBE:   scoped label='Domänenstraße' type=object refType=way objectType=boundary_administrative lat=51.355121816360366 lon=8.187050135337188 inScope=true
+PROBE:   scoped label='Dominitstraße' type=object refType=way objectType=boundary_administrative lat=51.37115941473215 lon=8.626664196153456 inScope=true
+PROBE:   scoped label='Domänenstraße' type=object refType=way objectType=boundary_administrative lat=51.4711025466852 lon=7.442302610295286 inScope=true
+PROBE:   scoped label='Dompfaffweg' type=object refType=way objectType=boundary_administrative lat=51.50119626150426 lon=7.4987859092562275 inScope=true
+PROBE:   scoped label='Dompfaffweg' type=object refType=way objectType=boundary_administrative lat=50.91277793729884 lon=7.99912920593566 inScope=true
+PROBE:   scoped label='Domcenter' type=object refType=area objectType=boundary_administrative lat=51.44207769216655 lon=8.352150830269977 inScope=true
+PROBE:   scoped label='An den Dominikanern' type=object refType=way objectType=boundary_administrative lat=51.57505289893636 lon=8.102855593732414 inScope=true
+PROBE:   scoped label='Dominikanerstraße' type=object refType=way objectType=boundary_administrative lat=51.574609663893355 lon=8.103406787689082 inScope=true
+PROBE:   scoped label='Domplatz' type=object refType=way objectType=boundary_administrative lat=51.57178462722737 lon=8.108081878036856 inScope=true
+PROBE:   scoped label='Dome' type=object refType=way objectType=boundary_administrative lat=51.49584458392742 lon=8.158080936655992 inScope=true
+PROBE:   scoped label='Domring' type=object refType=way objectType=boundary_administrative lat=51.44176119150043 lon=8.35219508671905 inScope=true
+PROBE:   scoped label='Domhof' type=object refType=way objectType=boundary_administrative lat=51.66203358517612 lon=7.6347108754121535 inScope=true
+PROBE:   scoped label='Dompfaffweg' type=object refType=way objectType=boundary_administrative lat=51.51987918853669 lon=7.35352551455442 inScope=true
+PROBE:   scoped label='Dompfad' type=object refType=way objectType=boundary_administrative lat=51.361537660371795 lon=7.714124379412269 inScope=true
+PROBE:   scoped label='Domgasse' type=object refType=way objectType=boundary_administrative lat=51.21553697597636 lon=7.634767201801893 inScope=true
+PROBE:   scoped label='Dompeweg' type=object refType=way objectType=boundary_administrative lat=51.35674321172195 lon=7.881333290646467 inScope=true
+PROBE:   scoped label='Hilde-Domin-Weg' type=object refType=way objectType=boundary_administrative lat=51.213225582340556 lon=7.881377547095553 inScope=true
+PROBE:   scoped label='Domherrnkamp' type=object refType=way objectType=boundary_administrative lat=51.57495432775434 lon=7.954962610862864 inScope=true
+PROBE:   scoped label='Auf dem Domm' type=object refType=way objectType=boundary_administrative lat=51.63963848083942 lon=7.920356749894893 inScope=true
+PROBE:   scoped label='Dompfaffenweg' type=object refType=way objectType=boundary_administrative lat=51.639395740921756 lon=7.85046777017763 inScope=true
+PROBE:   scoped label='Gesundheitshaus Heiden und Dömer' type=object refType=node objectType=boundary_administrative lat=51.50059343502366 lon=7.522471156138721 inScope=true
+PROBE:   scoped label='Adom Afro Beauty Shop' type=object refType=node objectType=boundary_administrative lat=51.488830607301225 lon=7.20838447815467 inScope=true
+PROBE:   scoped label='Auto Crew Domagala' type=object refType=node objectType=boundary_administrative lat=51.48097575814259 lon=7.212088608831834 inScope=true
+PROBE:   scoped label='DomCare' type=object refType=node objectType=boundary_administrative lat=51.47405699993712 lon=7.239744866190449 inScope=true
+PROBE:   scoped label='Domino's' type=object refType=node objectType=boundary_administrative lat=51.47217945361271 lon=7.214003706082735 inScope=true
+PROBE:   scoped label='Domino's Pizza' type=object refType=node objectType=boundary_administrative lat=51.29981131329993 lon=7.34257807837858 inScope=true
+PROBE:   scoped label='Fahrschule Domogalla' type=object refType=node objectType=boundary_administrative lat=51.41615481239671 lon=7.337723280025443 inScope=true
+PROBE:   scoped label='Freizeitdomizil Ruhrtal' type=object refType=area objectType=boundary_administrative lat=51.39266737843057 lon=7.148989641286363 inScope=true
+PROBE:   scoped label='Eis-Café Domenici' type=object refType=node objectType=boundary_administrative lat=51.34651661922422 lon=7.424744869952974 inScope=true
+PROBE:   scoped label='Domino's' type=object refType=node objectType=boundary_administrative lat=51.36804402893813 lon=7.463438417490124 inScope=true
+PROBE:   scoped label='Domröse druckt' type=object refType=node objectType=boundary_administrative lat=51.37809560729633 lon=7.45670607281258 inScope=true
+PROBE:   scoped label='Zur Domschänke' type=object refType=node objectType=boundary_administrative lat=51.703717125234874 lon=7.844910233057362 inScope=true
+PROBE:   scoped label='Domenico' type=object refType=node objectType=boundary_administrative lat=51.661320788125096 lon=7.743753401516017 inScope=true
+PROBE:   scoped label='Handomedo' type=object refType=node objectType=boundary_administrative lat=51.494046162769536 lon=7.515765633551524 inScope=true
+PROBE:   scoped label='GYNDOMED' type=object refType=node objectType=boundary_administrative lat=51.51323468620504 lon=7.466595377524158 inScope=true
+PROBE:   scoped label='Jazzclub Domicil' type=object refType=node objectType=boundary_administrative lat=51.51564867433643 lon=7.463762964783342 inScope=true
+PROBE:   scoped label='Kingdom of Perfumes' type=object refType=node objectType=boundary_administrative lat=51.51433036859581 lon=7.469650413614886 inScope=true
+PROBE:   scoped label='Gesundheitshaus Heiden & Dömer' type=object refType=node objectType=boundary_administrative lat=51.662955594531866 lon=7.63703098622733 inScope=true
+PROBE:   scoped label='Karl Blödom' type=object refType=node objectType=boundary_administrative lat=51.596797567582115 lon=7.603865471511085 inScope=true
+PROBE:   scoped label='SPORTSDOME' type=object refType=node objectType=boundary_administrative lat=51.51303486163195 lon=7.61741062713719 inScope=true
+PROBE:   scoped label='Curae Domi' type=object refType=node objectType=boundary_administrative lat=51.53856278612139 lon=7.24779953992217 inScope=true
+PROBE: query='Aldi' unscoped=0 scoped=50
+PROBE:   scopedOutOfScopeFlags=0 scopedFarFromCity=0
+PROBE:   unscopedMaxDistanceDeg=0.0
+PROBE:   scopedNotInUnscoped=50
+PROBE:   scoped label='Vivaldistraße' type=object refType=way objectType=boundary_administrative lat=51.46629401643793 lon=7.1559566792544445 inScope=true
+PROBE:   scoped label='Aldinghofer Straße' type=object refType=way objectType=boundary_administrative lat=51.489316087136544 lon=7.498185094432429 inScope=true
+PROBE:   scoped label='Aldi-Dach' type=object refType=area objectType=boundary_administrative lat=51.107504972126364 lon=7.639416811163841 inScope=true
+PROBE:   scoped label='Ewaldistraße' type=object refType=way objectType=boundary_administrative lat=51.448499571148304 lon=7.788208334060073 inScope=true
+PROBE:   scoped label='Vivaldistraße' type=object refType=way objectType=boundary_administrative lat=51.65400573353473 lon=7.854980586878796 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.50459663200823 lon=7.568315472962809 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.49544292312446 lon=7.5198922121516745 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.49484143774838 lon=7.5519607033726714 inScope=true
+PROBE:   scoped label='ALDI' type=object refType=node objectType=boundary_administrative lat=51.481478672336635 lon=7.209218645164498 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.47444994356073 lon=7.209712171626933 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.49093748249811 lon=7.2432558778170915 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.48380012425632 lon=7.225356155822851 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.49315164605642 lon=7.309334779600306 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.47364796305931 lon=7.31790711967578 inScope=true
+PROBE:   scoped label='ALDI' type=object refType=area objectType=boundary_administrative lat=51.453751336438586 lon=7.247916216015199 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.43579059418879 lon=7.1795936463743 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.44122474969345 lon=7.212564700935516 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.43595018562638 lon=7.179443442668344 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.44137160063812 lon=7.212641143893023 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.49522901695393 lon=7.146078103378997 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.481077682085925 lon=7.15929334729384 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.28823087579184 lon=7.28312423291149 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.335727433381436 lon=7.284607494507782 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.39808879344233 lon=7.170702123423666 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.437855895145645 lon=7.325641269427834 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.4011103019201 lon=7.431470509107939 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.31797322122732 lon=7.328440154555736 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.579204958522354 lon=7.463823314486618 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.377912546529714 lon=7.473515476834137 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.52259693684128 lon=7.210095727518905 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.553186189779524 lon=7.202140295521474 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.34954885653815 lon=7.572078612238755 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.35911629616555 lon=7.563180383765555 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.46983386181171 lon=7.46064087346673 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.477769177241385 lon=7.433998491123305 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.45743065668218 lon=7.414203788445917 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.47973054259813 lon=7.505549099337671 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.530565779883915 lon=7.471181954973787 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.51555345591569 lon=7.500110920519461 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.51148387425752 lon=7.433911319329667 inScope=true
+PROBE:   scoped label='ALDI' type=object refType=area objectType=boundary_administrative lat=51.59056076102377 lon=7.65101602413516 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.66409218061038 lon=7.645443734865211 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.58215270625169 lon=7.647659239528025 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.59775645731207 lon=7.760281173588936 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.59457736905348 lon=7.436149622769278 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.49586872380874 lon=7.374676073898939 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.50790916016629 lon=7.381534482401122 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.55049459301303 lon=7.3750006211921715 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=area objectType=boundary_administrative lat=51.570108246580574 lon=7.383353020126776 inScope=true
+PROBE:   scoped label='Aldi' type=object refType=node objectType=boundary_administrative lat=51.56828434443685 lon=7.525013890303768 inScope=true
+# exit: 0

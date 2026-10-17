@@ -1,0 +1,38 @@
+# TypeIconProbe: renderTypeIcon against the v27 database and the shipped stylesheets
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:06:44Z
+# command: java -Djava.library.path=build/libosmscout-client-java -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 TypeIconProbe maps/nordrhein-westfalen stylesheets libosmscout/data/icons/14x14/standard
+# source: openspec/changes/client-java-type-icon-entry-point/evidence/TypeIconProbe.java
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+PROBE: db=maps/nordrhein-westfalen stylesheets=stylesheets icons=libosmscout/data/icons/14x14/standard size=32x32
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Created new style with stylesheets/standard.oss
+PROBE: stylesheet=standard type=amenity_parking loadStyleSheet=true length=1024 painted=516 opaque=0 bbox=[3,1 .. 28,30] center=0xC90894D8
+PROBE:   first painted pixel=(3,1)=0x0E0091DA
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Created new style with stylesheets/standard.oss
+PROBE: stylesheet=standard type=amenity_fire_station_building loadStyleSheet=true length=1024 painted=1024 opaque=900 bbox=[0,0 .. 31,31] center=0xFFFFFFFF
+PROBE:   first painted pixel=(0,0)=0x03AA5555
+Created new style with stylesheets/railways.oss
+PROBE: stylesheet=railways type=railway_station loadStyleSheet=true length=1024 painted=708 opaque=0 bbox=[1,1 .. 30,30] center=0x5500FF00
+PROBE:   first painted pixel=(12,1)=0x0100FF00
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Created new style with stylesheets/standard.oss
+PROBE: stylesheet=standard type=highway_roundabout loadStyleSheet=true -> null
+# exit: 0

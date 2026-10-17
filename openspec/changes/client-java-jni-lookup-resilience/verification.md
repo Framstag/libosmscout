@@ -76,9 +76,10 @@ Exit 0.
 
 Exit 0. The 69 warnings are the pre-existing javadoc warnings of other classes (e.g.
 `PoiCategories.java:66: warning: no @return`), not of this change.
-- **NOT RUN: the bare `meson compile -C debug`** (whole tree). It stalls the shell tool; the two targets
-  this change touches were compiled explicitly instead (above), which is what the meson-parity check
-  needs.
+- **RUN 2026-10-16: the bare `meson compile -C debug`** (whole tree). It completed here: 637 targets,
+  0 compile errors, exit 0, revision `06b197a35`; log
+  `evidence/meson-compile-whole-tree-2026-10-16.log`. The earlier stall was an artefact of running it in
+  the foreground of the shell tool.
 
 ## 4. `scripts/check-jni-signatures.sh`
 
@@ -136,7 +137,7 @@ no failure and no regression was observed.
   full C++ suite (section 6). The spec scenarios about a mismatching descriptor, a missing class and a
   complete set of ids are satisfied by inspection of the converted lookups and the build-then-allocate
   dispatch, not by a runtime test.
-- **NOT RUN: the bare `meson compile -C debug`** — see section 3.
+- **RUN 2026-10-16: the bare `meson compile -C debug`** — see section 3.
 
 ## 8. The risk this change cannot cover here
 
@@ -155,3 +156,21 @@ uncommitted and no other unit's file is touched. The commit stages only
 `libosmscout-client-java/src/OSMScoutClient.cpp` and
 `openspec/changes/client-java-jni-lookup-resilience/`; `git add -A`, `git add .` and `git commit -a` were
 not used.
+
+## Host verification 2026-10-16 (item 4.7)
+
+Task 4.7 stays open: the defect itself is **not host-runnable here**, and one of the reasons it named no
+longer applies.
+
+- Still not host-runnable, for the reason the task gives: the helpers wrap `JNIEnv`, and a pending exception
+  only makes a *live JVM* abort at the next JNI call (`JNI DETECTED ERROR IN APPLICATION: JNI FindClass
+  called with pending exception`). The Catch2 suite has no JNI environment. A fake `JNIEnv` would test the
+  fake, not the abort; there is no device or emulator on this machine.
+- No longer a reason: a routable v27 database **does** exist now (`maps/nordrhein-westfalen`, with
+  `route.dat`/`router.dat`/`intersections.dat`), and a navigation session can be started (see the roundabout
+  change's host verification). That only removes the "no navigation session" half; a session with an
+  unmutated descriptor cannot reach the defect, and mutating the descriptor means changing compiled source,
+  which the run's rules forbid.
+
+The defect and the emulator measurement therefore stay as the change records them, taken on the reference
+branch on 2026-10-14, not reproduced here. No code was changed.

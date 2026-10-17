@@ -1,0 +1,213 @@
+# RouteMetricsProbe on the v27 database maps/nordrhein-westfalen (tasks 3.2 and 3.3)
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:27:00Z
+# source: openspec/changes/client-java-route-instruction-metrics/evidence/RouteMetricsProbe.java
+
+# run 1: java -Djava.library.path=build/libosmscout-client-java -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 RouteMetricsProbe maps/nordrhein-westfalen stylesheets
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+calculateRouteAsync: 1 databases available for routing
+  db path=maps/nordrhein-westfalen hasRouterDir=yes
+  created car routing profile
+calculateRouteAsync: routing service opened OK
+calculateRouteAsync: 1 databases in routing mapping
+  dbId=0 path=maps/nordrhein-westfalen
+calculateRouteAsync: resolving start at 51.51423 N 7.46528 E
+calculateRouteAsync: start resolved OK
+calculateRouteAsync: resolving dest at 51.52000 N 7.48000 E
+calculateRouteAsync: dest resolved OK
+calculateRouteAsync: calling CalculateRoute...
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+calculateRouteAsync: route OK, air-line estimate=1128.76353m
+Loading path data: 0.000
+Scanning locations: 0.004
+Loading candidates: 0.004
+Analysing candidates: 0.000
+calculateRouteAsync: generated 10 description lines
+PROBE: === city 51.514227/7.465279 -> 51.52/7.48
+PROBE: desc: --- Route ---
+PROBE: desc: Start: Start on highway_service  []
+PROBE: desc: Left onto highway_residential Gerberstraße  [53 m, 6 s]
+PROBE: desc: Right onto highway_residential Hansastraße  [182 m, 32 s]
+PROBE: desc: Left onto highway_primary Schwanenwall (B 54)  [587 m, 53 s]
+PROBE: desc: Left onto highway_tertiary Geschwister-Scholl-Straße  [83 m, 6 s]
+PROBE: desc: Right onto highway_service Weißenburger Straße  [708 m, 51 s]
+PROBE: desc: Right onto highway_service  [42 m, 5 s]
+PROBE: desc: Left onto highway_service  [22 m, 2 s]
+PROBE: desc: Destination: Target  [22 m, 2 s]
+PROBE: distance=1699.3774322313407 duration=122.35517512065651 waypoints=113 descriptions=10 instructionLines=9
+PROBE: ARRAYS_NON_NULL=true
+PROBE: arrayLengths=9,9,9,9
+PROBE: ALIGNED_WITH_INSTRUCTION_LINES=true
+PROBE: sumDistances=1699.3774322313404 diffVsDistance=-2.2737367544323206E-13
+PROBE: sumTimes=157.0 diffVsDuration=34.64482487934349
+PROBE: maxSingleGeometryEdge=85.72551414842444 minReportedLeg=21.885385765631593 MIN_LEG_LARGER_THAN_MAX_EDGE=false
+PROBE: legs=[0.0, 52.75915101783235, 182.23620531114057, 587.0085299878718, 83.41246916859323, 707.8316695963778, 42.14554083173616, 21.885385765631593, 22.098480552157127]
+calculateRouteAsync: 1 databases available for routing
+  db path=maps/nordrhein-westfalen hasRouterDir=yes
+  created car routing profile
+calculateRouteAsync: routing service opened OK
+calculateRouteAsync: 1 databases in routing mapping
+  dbId=0 path=maps/nordrhein-westfalen
+calculateRouteAsync: resolving start at 51.51423 N 7.46528 E
+calculateRouteAsync: start resolved OK
+calculateRouteAsync: resolving dest at 51.50000 N 7.50000 E
+calculateRouteAsync: dest resolved OK
+calculateRouteAsync: calling CalculateRoute...
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+calculateRouteAsync: route OK, air-line estimate=2961.10033m
+Loading path data: 0.000
+Scanning locations: 0.001
+Loading candidates: 0.002
+Analysing candidates: 0.001
+calculateRouteAsync: generated 18 description lines
+PROBE: === longer 51.514227/7.465279 -> 51.5/7.5
+PROBE: desc: --- Route ---
+PROBE: desc: Start: Start on highway_service  []
+PROBE: desc: Left onto highway_residential Gerberstraße  [53 m, 6 s]
+PROBE: desc: Right onto highway_residential Hansastraße  [182 m, 32 s]
+PROBE: desc: Left onto highway_primary Schwanenwall (B 54)  [751 m, 1 min]
+PROBE: desc: Left onto highway_secondary Brüderweg (L 663)  [175 m, 12 s]
+PROBE: desc: Right onto highway_tertiary Franziskanerstraße  [1.1 km, 1 min]
+PROBE: desc: Right onto highway_tertiary Prinz-Friedrich-Karl-Straße  [196 m, 15 s]
+PROBE: desc: Left onto highway_tertiary Düsseldorfer Straße  [68 m, 8 s]
+PROBE: desc: Right onto highway_tertiary Kronprinzenstraße  [384 m, 46 s]
+PROBE: desc: Right onto highway_tertiary Kronprinzenstraße  [38 m, 4 s]
+PROBE: desc: Slight right onto highway_tertiary Im Defdahl  [11 m, 1 s]
+PROBE: desc: Slight right onto highway_tertiary Voßkuhle  [262 m, 27 s]
+PROBE: desc: Left onto highway_secondary Semerteichstraße  [1.0 km, 1 min]
+PROBE: desc: Left onto highway_residential Rathenaustraße  [60 m, 5 s]
+PROBE: desc: Left onto highway_residential Strohnstraße  [397 m, 1 min]
+PROBE: desc: Left onto highway_service  [301 m, 52 s]
+PROBE: desc: Destination: Target  []
+PROBE: distance=4964.30637550975 duration=357.430059036702 waypoints=259 descriptions=18 instructionLines=17
+PROBE: ARRAYS_NON_NULL=true
+PROBE: arrayLengths=17,17,17,17
+PROBE: ALIGNED_WITH_INSTRUCTION_LINES=true
+PROBE: sumDistances=4964.30637550975 diffVsDistance=0.0
+PROBE: sumTimes=494.0 diffVsDuration=136.569940963298
+PROBE: maxSingleGeometryEdge=171.27150254636123 minReportedLeg=11.138197252707371 MIN_LEG_LARGER_THAN_MAX_EDGE=false
+PROBE: legs=[0.0, 52.75915101783235, 182.23620531114057, 751.494704910625, 174.99161184553668, 1070.2304999279318, 195.76405387551787, 67.8350874171949, 383.68142947160953, 38.017218688402906, 11.138197252707371, 261.7201180899413, 1016.6269140166038, 59.795864419536215, 397.1946134364384, 300.8207058287313, 0.0]
+# exit: 0
+
+# run: RouteMetricsProbe maps/nordrhein-westfalen stylesheets pair 51.514227 7.465279 50.938 6.960
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+calculateRouteAsync: 1 databases available for routing
+  db path=maps/nordrhein-westfalen hasRouterDir=yes
+  created car routing profile
+calculateRouteAsync: routing service opened OK
+calculateRouteAsync: 1 databases in routing mapping
+  dbId=0 path=maps/nordrhein-westfalen
+calculateRouteAsync: resolving start at 51.51423 N 7.46528 E
+calculateRouteAsync: start resolved OK
+calculateRouteAsync: resolving dest at 50.93800 N 6.96000 E
+calculateRouteAsync: dest resolved OK
+calculateRouteAsync: calling CalculateRoute...
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+calculateRouteAsync: route OK, air-line estimate=73272.70619m
+Loading path data: 0.000
+Scanning locations: 0.018
+Loading candidates: 0.018
+Analysing candidates: 0.001
+calculateRouteAsync: generated 13 description lines
+PROBE: === pair 51.514227/7.465279 -> 50.938/6.96
+PROBE: desc: --- Route ---
+PROBE: desc: Start: Start on highway_service  []
+PROBE: desc: Left onto highway_residential Gerberstraße  [53 m, 6 s]
+PROBE: desc: Right onto highway_residential Hansastraße  [182 m, 32 s]
+PROBE: desc: Left onto highway_primary B 54  [1.7 km, 2 min]
+PROBE: desc: Slight right onto highway_motorway_link  [8.0 km, 6 min]
+PROBE: desc: Slight right onto highway_motorway_link  [3.9 km, 2 min]
+PROBE: desc: Slight right onto highway_motorway_link  [75.1 km, 42 min]
+PROBE: desc: Right onto highway_primary Deutz-Mülheimer Straße (L 188)  [5.0 km, 4 min]
+PROBE: desc: Right onto highway_secondary_link Opladener Straße  [83 m, 6 s]
+PROBE: desc: Right onto highway_secondary_link  [495 m, 35 s]
+PROBE: desc: Slight right onto highway_residential Heumarkt  [1.1 km, 1 min]
+PROBE: desc: Destination: Target  [189 m, 34 s]
+PROBE: distance=95702.49217507472 duration=6890.579436605379 waypoints=1678 descriptions=13 instructionLines=12
+PROBE: ARRAYS_NON_NULL=true
+PROBE: arrayLengths=12,12,12,12
+PROBE: ALIGNED_WITH_INSTRUCTION_LINES=true
+PROBE: sumDistances=95702.49217507472 diffVsDistance=0.0
+PROBE: sumTimes=3742.0 diffVsDuration=-3148.5794366053788
+PROBE: maxSingleGeometryEdge=829.773641073099 minReportedLeg=52.75915101783235 MIN_LEG_LARGER_THAN_MAX_EDGE=false
+PROBE: legs=[0.0, 52.75915101783235, 182.23620531114057, 1652.2160354984842, 8015.737921163083, 3887.0297828150005, 75100.68273864304, 4989.677406386292, 83.41274567771961, 494.8695804263821, 1054.6931114249533, 189.17749671078354]
+# exit: 0
+
+# run: RouteMetricsProbe maps/nordrhein-westfalen stylesheets pair 51.514227 7.465279 51.960 7.630
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+calculateRouteAsync: 1 databases available for routing
+  db path=maps/nordrhein-westfalen hasRouterDir=yes
+  created car routing profile
+calculateRouteAsync: routing service opened OK
+calculateRouteAsync: 1 databases in routing mapping
+  dbId=0 path=maps/nordrhein-westfalen
+calculateRouteAsync: resolving start at 51.51423 N 7.46528 E
+calculateRouteAsync: start resolved OK
+calculateRouteAsync: resolving dest at 51.96000 N 7.63000 E
+calculateRouteAsync: dest resolved OK
+calculateRouteAsync: calling CalculateRoute...
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+calculateRouteAsync: route OK, air-line estimate=50692.15857m
+Loading path data: 0.000
+Scanning locations: 0.008
+Loading candidates: 0.009
+Analysing candidates: 0.004
+calculateRouteAsync: generated 18 description lines
+PROBE: === pair 51.514227/7.465279 -> 51.96/7.63
+PROBE: desc: --- Route ---
+PROBE: desc: Start: Start on highway_service  []
+PROBE: desc: Left onto highway_residential Gerberstraße  [53 m, 6 s]
+PROBE: desc: Right onto highway_residential Hansastraße  [182 m, 32 s]
+PROBE: desc: Left onto highway_primary Schwanenwall (B 54)  [587 m, 53 s]
+PROBE: desc: Left onto highway_tertiary Geschwister-Scholl-Straße  [83 m, 6 s]
+PROBE: desc: Slight right onto highway_secondary Brackeler Straße (K 17)  [1.1 km, 1 min]
+PROBE: desc: Slight right onto highway_motorway_link  [8.4 km, 6 min]
+PROBE: desc: Slight right onto highway_motorway_link  [50.8 km, 29 min]
+PROBE: desc: Left onto highway_trunk_link  [5.7 km, 4 min]
+PROBE: desc: Left onto highway_trunk_link  [51 m, 3 s]
+PROBE: desc: Slight right onto highway_secondary Hammer Straße (K 6)  [387 m, 27 s]
+PROBE: desc: Slight right onto highway_secondary Hammer Straße (K 6)  [55 m, 3 s]
+PROBE: desc: Slight right onto highway_secondary Hammer Straße (K 6)  [48 m, 3 s]
+PROBE: desc: Right onto highway_service Promenade  [1.8 km, 2 min]
+PROBE: desc: Left onto highway_residential Windthorststraße  [332 m, 40 s]
+PROBE: desc: Left onto highway_service  [282 m, 48 s]
+PROBE: desc: Destination: Target  [11 m, 1 s]
+PROBE: distance=69942.45708353417 duration=5035.856910014461 waypoints=1044 descriptions=18 instructionLines=17
+PROBE: ARRAYS_NON_NULL=true
+PROBE: arrayLengths=17,17,17,17
+PROBE: ALIGNED_WITH_INSTRUCTION_LINES=true
+PROBE: sumDistances=69942.45708353419 diffVsDistance=1.4551915228366852E-11
+PROBE: sumTimes=2874.0 diffVsDuration=-2161.8569100144614
+PROBE: maxSingleGeometryEdge=1164.7486376109407 minReportedLeg=11.1579589744224 MIN_LEG_LARGER_THAN_MAX_EDGE=false
+PROBE: legs=[0.0, 52.75915101783235, 182.23620531114057, 587.0085299878718, 83.41246916859323, 1143.999768985199, 8376.450883887755, 50838.26094931652, 5703.868386763148, 51.34812910166886, 386.7864572481068, 54.91769886258169, 48.32247801667222, 1807.7761141734356, 332.1929201874241, 281.95898253180474, 11.1579589744224]
+# exit: 0

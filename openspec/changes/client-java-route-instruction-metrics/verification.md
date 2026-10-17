@@ -99,7 +99,10 @@ contract is instead held by construction and by inspection of the two `DescCallb
   entries telescope to the distance of the last emitted node, the route's own total; `instructionTimes`
   telescopes the same way to the description's total time. The equality with the *published*
   `RouteEntry.distance`/`duration` is completed by the companion change `client-java-route-length`, which
-  derives those two from exactly these legs; this change does not alter them.
+  derives those two from exactly these legs; this change does not alter them. (Measured on the v27 database
+  on 2026-10-16: the distance half holds exactly; the time half does not — `instructionTimes` sums to the
+  description's own time, while the published `duration` is the 50 km/h estimate of
+  `client-java-route-length`. See "Host verification 2026-10-16 (map-dependent items)".)
 - [x] 4.4 `RouteEntry`'s four arrays are documented in the Java source (`instructionLats`,
   `instructionLons`, `instructionDistances`, `instructionTimes`), `RouteInstruction.legDistance` documents
   `0.0` as unknown, and `RouteInstruction.timeTo` documents the leg semantics and the remaining-time
@@ -121,3 +124,82 @@ contract is instead held by construction and by inspection of the two `DescCallb
 - [x] 5.3 The description line text is unchanged: `AppendDistanceTime` still renders the same
   `"  [x km, y min]"` / `"  [x m, y min]"` columns; the seconds value the new arrays carry is computed
   separately from the same `time - prevTime` difference and does not feed the text.
+
+## Host verification 2026-10-16
+
+Run to close the suite item of the task list (the item now reads `RUN 2026-10-16`). Verified revision:
+`38aaf7a18` on branch `todo-backlog-loop-2026-10-16`, whose only delta from `master` (`a79e239c9`) is `TODO.md`, so it carries
+`master`'s code. The client jar was rebuilt from that revision
+(`build/libosmscout-client-java/libosmscoutclientjava.jar`, sha256 `b6cb25802c513f1a2e448848129d7087acd4efb159eefc02f77714c9b4a2f3af`).
+
+```
+cmake --build build -j "$(nproc)"                                  # exit 0, no target failed
+QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=../Tests TESTS_TMP_DIR=./tmp-suite \
+  ctest -j 8 --output-on-failure                                   # 100% tests passed out of 158, exit 0, 23.68 s
+cd JavaScout && ./mvnw install:install-file -Dfile=../build/libosmscout-client-java/libosmscoutclientjava.jar \
+  -DgroupId=net.sf.libosmscout -DartifactId=libosmscout-client-java -Dversion=1.0-SNAPSHOT -Dpackaging=jar -q
+./mvnw package -DskipTests                                         # BUILD SUCCESS
+xvfb-run ./mvnw test                                               # Tests run: 205, Failures: 0, Errors: 0, Skipped: 38
+```
+
+Retained logs: `evidence/cpp-suite-2026-10-16.log`. Each names its own command and the revision it ran on.
+
+Two facts about the environment, so the numbers can be reproduced:
+- a reused `build/` directory whose test objects predate the installed Catch2 fails to link
+  (`undefined reference to typeinfo for Catch::ITransientExpression`) until the test translation units are
+  recompiled. That is a build-directory artefact, not a source defect; no source file was changed for it.
+- the first full-suite run used the reused `build/Tests` as `TESTS_TMP_DIR` and failed `OptimizeAreaWayIdsTest`
+  on its stale temp state (`Tests/src/OptimizeAreaWayIdsTest.cpp:383`, see the retained
+  `ctest-full.log` beside this change's evidence). The same revision passes that test with a fresh temp
+  directory, which is what the numbers above use. The dependence of the test on its temp directory is filed
+  in `TODO.md`.
+
+Not covered by this run, and still open in `tasks.md` on 2026-10-16 (now for a measured reason): 3.2 and
+3.3, the values read off a real route.
+
+## Host verification 2026-10-16 (map-dependent items)
+
+Tasks 3.2 and 3.3 were probed on real routes of the v27 database `maps/nordrhein-westfalen`. **They stay
+open:** the alignment and distance clauses hold, the time clause does not, and the min-leg check of 3.3
+fails on every route tried. Log: `evidence/route-metrics-probe-nrw-2026-10-16.log`; probe source
+`evidence/RouteMetricsProbe.java`.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  RouteMetricsProbe maps/nordrhein-westfalen stylesheets
+```
+
+| route | instruction lines | array length | sum(distance) vs `distance` | sum(time) vs `duration` | min reported leg | max single geometry edge | 3.3 holds |
+|---|---|---|---|---|---|---|---|
+| city 51.514227/7.465279 -> 51.520/7.480 | 9 | 9 | `1699.377` vs `1699.377` (diff `-2.3e-13`) | `157.0` vs `122.355` (diff `+34.645`) | `21.885` m | `85.726` m | no |
+| 51.514227/7.465279 -> 51.500/7.500 | 17 | 17 | `4964.306` vs `4964.306` (diff `0.0`) | `494.0` vs `357.430` (diff `+136.570`) | `11.138` m | `171.272` m | no |
+| 51.514227/7.465279 -> 50.938/6.960 (Cologne) | 12 | 12 | `95702.492` vs `95702.492` (diff `0.0`) | `3742.0` vs `6890.579` (diff `-3148.579`) | `52.759` m | `829.774` m | no |
+| 51.514227/7.465279 -> 51.960/7.630 (Münster) | 17 | 17 | `69942.457` vs `69942.457` | `2874.0` vs `5035.857` | `11.158` m | `1164.749` m | no |
+
+What this means:
+
+- **3.2, alignment clause: satisfied.** The four arrays are non-null, all the same length, and that length
+equals the number of description lines that are not the `--- Route ---` header (9/9, 17/17, 12/12).
+- **3.2, distance clause: satisfied.** The leg distances telescope to the published `distance` exactly
+  (diffs at the last bit or `0.0`).
+- **3.2, time clause: NOT satisfied.** `sum(instructionTimes)` never equals the published `duration`
+  (`157.0` vs `122.355`, `494.0` vs `357.430`, `3742.0` vs `6890.579`). `duration` is not derived from the
+  description's times: `OSMScoutClient.cpp:6973` sets it to `totalDistance / 50 km/h`, which is what the
+  merged companion change `client-java-route-length` asks for (its spec: "The estimated duration SHALL be
+  derived from the published length"). The metrics spec's scenario "Per-step leg values sum to the route's
+  totals ... their entries SHALL add up to `distance` and `duration`" is therefore **contradicted by the
+  implementation of the two merged changes**: the published duration is a fixed-speed estimate, not the
+  description's total time.
+- **3.2, null-array clause: not exercisable from Java.** The arrays are dropped only when the description
+  cannot be aligned, which needs a `DescCallback` misalignment the JNI call path never produces; the probe
+  cannot force it.
+- **3.3: NOT satisfied as stated.** The smallest reported leg is smaller than the largest single geometry
+  edge of the same route on all four routes (`21.885 < 85.726`, `11.138 < 171.272`, `52.759 < 829.774`,
+  `11.158 < 1164.749`). A long straight edge on the route is simply longer than the shortest leg between two
+  manoeuvres, which is normal where instructions sit close together, so this check cannot pin the property
+  the task means (a leg must not be a single geometry edge). The leg distances do telescope to the route
+  total, which is the property the alignment check above pins, but the clause as written was not observed.
+
+Nothing here is a code change; both tasks stay open.

@@ -53,14 +53,16 @@
 
 - The bridge part — deriving the extent from a loaded region object, dropping free-text hits outside it and
   writing the verdict into each result — has no host test: it needs an open database and a resolved admin
-  region. The map databases on this machine are format v26 while the library expects v27, so they cannot be
-  opened, and importing a v27 database is out of scope for this change. `tasks.md` 4.4 (verify on a real
-  map) is therefore left unticked. No map-dependent test was invented for it.
-- `tasks.md` 4.5 (the rest of the C++ and Java suites) is left unticked: the shared `build/` directory holds
-  binaries from other branches and a full-suite run would need every target rebuilt, which the environment
-  rules here do not allow; the `JavaScout` Maven suite needs the client jar installed into the local Maven
-  repository and a usable map database. The touched surface is covered by `SearchScopeTest`, the JNI
-  signature parity check and both build systems compiling the bridge and the Java sources.
+  region. The map databases on this machine were format v26 while the library expects v27 when this was
+  written (a v27 database, `maps/nordrhein-westfalen`, is available now and 4.4 was probed against it — see
+  "Host verification 2026-10-16 (map-dependent items)"), and importing a v27 database was out of scope for
+  this change. `tasks.md` 4.4 (verify on a real map) is therefore left unticked. No map-dependent test was
+  invented for it.
+- `tasks.md` 4.5 (the rest of the C++ and Java suites) was left unticked when this was written: the shared
+  `build/` directory holds binaries from other branches and a full-suite run would need every target
+  rebuilt, which the environment rules here do not allow; the `JavaScout` Maven suite needs the client jar
+  installed into the local Maven repository and a usable map database. It is ticked now — see the "Host
+  verification 2026-10-16" section above, which ran both suites from this revision.
 - `scripts/format-check.sh` is red repo-wide on this machine, including pristine master files, so it is not
   used as a gate; the added lines follow the style of the code around them.
 
@@ -78,3 +80,85 @@
   product name (see `tasks.md` 1.2).
 - `openspec validate client-java-search-scope-extent --strict` — `Change 'client-java-search-scope-extent'
   is valid`.
+
+## Host verification 2026-10-16
+
+Run to close the suite item of the task list (the item now reads `RUN 2026-10-16`). Verified revision:
+`38aaf7a18` on branch `todo-backlog-loop-2026-10-16`, whose only delta from `master` (`a79e239c9`) is `TODO.md`, so it carries
+`master`'s code. The client jar was rebuilt from that revision
+(`build/libosmscout-client-java/libosmscoutclientjava.jar`, sha256 `b6cb25802c513f1a2e448848129d7087acd4efb159eefc02f77714c9b4a2f3af`).
+
+```
+cmake --build build -j "$(nproc)"                                  # exit 0, no target failed
+QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=../Tests TESTS_TMP_DIR=./tmp-suite \
+  ctest -j 8 --output-on-failure                                   # 100% tests passed out of 158, exit 0, 23.68 s
+cd JavaScout && ./mvnw install:install-file -Dfile=../build/libosmscout-client-java/libosmscoutclientjava.jar \
+  -DgroupId=net.sf.libosmscout -DartifactId=libosmscout-client-java -Dversion=1.0-SNAPSHOT -Dpackaging=jar -q
+./mvnw package -DskipTests                                         # BUILD SUCCESS
+xvfb-run ./mvnw test                                               # Tests run: 205, Failures: 0, Errors: 0, Skipped: 38
+```
+
+Retained logs: `evidence/cpp-suite-2026-10-16.log`, `evidence/javascout-suite-2026-10-16.log`. Each names its own command and the revision it ran on.
+
+Two facts about the environment, so the numbers can be reproduced:
+- a reused `build/` directory whose test objects predate the installed Catch2 fails to link
+  (`undefined reference to typeinfo for Catch::ITransientExpression`) until the test translation units are
+  recompiled. That is a build-directory artefact, not a source defect; no source file was changed for it.
+- the first full-suite run used the reused `build/Tests` as `TESTS_TMP_DIR` and failed `OptimizeAreaWayIdsTest`
+  on its stale temp state (`Tests/src/OptimizeAreaWayIdsTest.cpp:383`, see the retained
+  `ctest-full.log` beside this change's evidence). The same revision passes that test with a fresh temp
+  directory, which is what the numbers above use. The dependence of the test on its temp directory is filed
+  in `TODO.md`.
+
+Not covered by this run, and still open in `tasks.md`: 4.4, the scoped search on a real map.
+
+## Host verification 2026-10-16 (map-dependent items)
+
+Task 4.4 was probed on the v27 database `maps/nordrhein-westfalen`. **It stays open, and the probe turned it
+into a divergence** between this change's spec delta and what the shipped bridge does on real data.
+
+```bash
+# compiled once into build/loop-probes-2026-10-16
+java -Djava.library.path=build/libosmscout-client-java \
+  -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 \
+  SearchScopeProbe maps/nordrhein-westfalen stylesheets
+```
+
+The scope resolves from the Dortmund centre (51.514/7.465) to handle `1`, region `Innenstadt West`, scope
+name `Regierungsbezirk Arnsberg`. Each query is run unscoped and then scoped by that handle:
+
+| query | unscoped | scoped | scoped hits outside `>0.5 deg` of Dortmund | of those, flagged `inSearchScope=false` |
+|---|---|---|---|---|
+| `Bahnhof` | 9 | 50 | 1 | 0 |
+| `Dom` | 2 | 50 | 10 | 0 |
+| `Aldi` | 0 | 50 | 0 | 0 |
+
+The scoped `Bahnhof` set spans lat `50.654 .. 51.986`, lon `6.831 .. 9.183` — hits in the Rhineland and
+north of the Ruhr, far outside the Regierungsbezirk Arnsberg the scope names — and **every** hit of every
+scoped search is flagged `inSearchScope=true` (0 of 150 entries out of scope). So on this data the scoped
+search still returns hits from another part of the map's index, and the verdict does not mark them.
+
+What this means for the divergence:
+
+- This change's own spec delta claims a **filter**: "A search with a default admin region SHALL admit only
+  hits whose position lies inside the geographic extent of that region, whichever loaded database produced
+  the hit, including hits from the free-text index".
+- The shipped `OSMScoutClientAdminRegionScopeTest` documents the opposite: "the scope is a preference
+  for ranking, not a filter: entries from outside the scope may still be returned ... the scope's observable
+  effect is the reported name", and it asserts only `scoped.length > 0`. Re-run on this v27 database on
+  2026-10-16 it passes (`Tests run: 2, Failures: 0, Errors: 0, Skipped: 0`, log
+  `evidence/admin-region-scope-test-v27-2026-10-16.log`).
+- The probe agrees with the test's documentation, not with the spec delta: the observed scoped results are
+  not narrowed to the scope's region and no result is reported out of scope. (The bridge does contain the
+  free-text extent filter at `OSMScoutClient.cpp:4422-4441`, but its effect is not observable on this data —
+  either the extent is not set, which is the documented fail-open case, or it spans the whole database. Its
+  drop counter is debug-gated and off by default, so it cannot tell the two apart here.)
+- The item's own comparison could not be established either: the unscoped searches return *fewer* or
+  different results than the scoped ones (`9 / 2 / 0` vs `50 / 50 / 50`), so "an unscoped search returns it"
+  has no observed counterpart.
+
+A reviewer has to decide whether the scope is a filter (spec) or a ranking preference (test, and the observed
+behaviour); the task is not ticked. No code was changed.
+
+Log: `evidence/search-scope-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision
+`06b197a35`). Probe source: `evidence/SearchScopeProbe.java`.

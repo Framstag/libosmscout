@@ -1,0 +1,101 @@
+# xvfb-run ./mvnw test at 2026-10-16T14:40:23Z
+# revision 38aaf7a18
+# jar sha256 b6cb25802c513f1a2e448848129d7087acd4efb159eefc02f77714c9b4a2f3af
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< net.sf.libosmscout:javascout >--------------------
+[INFO] Building JavaScout 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] 6 problems were encountered while building the effective model for org.openjfx:javafx-controls:jar:21 during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ javascout ---
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ javascout ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ javascout ---
+[INFO] skip non existing resourceDirectory /home/tim/projects/libosmscout/JavaScout/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ javascout ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ javascout ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.framstag.libosmscout.TrackPlayerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.322 s -- in com.framstag.libosmscout.TrackPlayerTest
+[INFO] Running com.framstag.libosmscout.LocationSearchRankerTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in com.framstag.libosmscout.LocationSearchRankerTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientInstructionDistanceTest
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.007 s -- in com.framstag.libosmscout.client.OSMScoutClientInstructionDistanceTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientNavigationTest
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.framstag.libosmscout.client.OSMScoutClientNavigationTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientGetRoadAtTest
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.framstag.libosmscout.client.OSMScoutClientGetRoadAtTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientImportGpxTest
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.framstag.libosmscout.client.OSMScoutClientImportGpxTest
+[INFO] Running com.framstag.libosmscout.client.RouteInstructionTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in com.framstag.libosmscout.client.RouteInstructionTest
+[INFO] Running com.framstag.libosmscout.client.RoutingProfileTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.framstag.libosmscout.client.RoutingProfileTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientBasemapConfigTest
+[WARNING] Tests run: 14, Failures: 0, Errors: 0, Skipped: 14, Time elapsed: 0.050 s -- in com.framstag.libosmscout.client.OSMScoutClientBasemapConfigTest
+[INFO] Running com.framstag.libosmscout.client.TrackPointTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in com.framstag.libosmscout.client.TrackPointTest
+[INFO] Running com.framstag.libosmscout.client.MapRendererBlitTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in com.framstag.libosmscout.client.MapRendererBlitTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientPoiSearchTest
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in com.framstag.libosmscout.client.OSMScoutClientPoiSearchTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientAdminRegionScopeTest
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.003 s -- in com.framstag.libosmscout.client.OSMScoutClientAdminRegionScopeTest
+[INFO] Running com.framstag.libosmscout.client.ObjectDescriptionTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.framstag.libosmscout.client.ObjectDescriptionTest
+[INFO] Running com.framstag.libosmscout.client.DescriptionEntryTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.framstag.libosmscout.client.DescriptionEntryTest
+[INFO] Running com.framstag.libosmscout.client.PoiCategoriesTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in com.framstag.libosmscout.client.PoiCategoriesTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientNavigationLiveTest
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in com.framstag.libosmscout.client.OSMScoutClientNavigationLiveTest
+[INFO] Running com.framstag.libosmscout.client.BasemapManagerTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in com.framstag.libosmscout.client.BasemapManagerTest
+[INFO] Running com.framstag.libosmscout.client.SearchReproTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 0.003 s -- in com.framstag.libosmscout.client.SearchReproTest
+[INFO] Running com.framstag.libosmscout.client.PoiEntryTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in com.framstag.libosmscout.client.PoiEntryTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientStyleTest
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in com.framstag.libosmscout.client.OSMScoutClientStyleTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientSearchQualityTest
+[WARNING] Tests run: 3, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 0.006 s -- in com.framstag.libosmscout.client.OSMScoutClientSearchQualityTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientFavoriteOrderingTest
+[WARNING] Tests run: 8, Failures: 0, Errors: 0, Skipped: 8, Time elapsed: 0.022 s -- in com.framstag.libosmscout.client.OSMScoutClientFavoriteOrderingTest
+[INFO] Running com.framstag.libosmscout.client.OSMScoutClientDataCacheSizeTest
+[WARNING] Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.004 s -- in com.framstag.libosmscout.client.OSMScoutClientDataCacheSizeTest
+[INFO] Running com.framstag.libosmscout.ConfigTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in com.framstag.libosmscout.ConfigTest
+[INFO] Running com.framstag.libosmscout.ProjectionUtilsTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in com.framstag.libosmscout.ProjectionUtilsTest
+[INFO] Running com.framstag.libosmscout.MapRendererStateTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in com.framstag.libosmscout.MapRendererStateTest
+[INFO] Running com.framstag.libosmscout.FavLocationDialogOrderingTest
+[WARNING] Tests run: 5, Failures: 0, Errors: 0, Skipped: 5, Time elapsed: 0.010 s -- in com.framstag.libosmscout.FavLocationDialogOrderingTest
+[INFO] Running com.framstag.libosmscout.MapRendererBlitOffsetTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.framstag.libosmscout.MapRendererBlitOffsetTest
+[INFO] Running com.framstag.libosmscout.PoiSearchOverlayTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in com.framstag.libosmscout.PoiSearchOverlayTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[WARNING] Tests run: 205, Failures: 0, Errors: 0, Skipped: 38
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.632 s
+[INFO] Finished at: 2026-10-16T16:40:31+02:00
+[INFO] ------------------------------------------------------------------------
+# test exit: 0
