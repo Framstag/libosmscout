@@ -72,6 +72,7 @@
 
 #include "admin_region_hierarchy.h"
 #include "frame_pixel_layout.h"
+#include "route_failure_kind.h"
 #include "route_length.h"
 #include "route_step_time.h"
 #include "routing_profile_speed.h"
@@ -6203,6 +6204,7 @@ struct RouteCallbackMethods
   jmethodID onProgress;
   jmethodID onSuccess;
   jmethodID onError;
+  jmethodID onErrorDetail;
   jmethodID onCancel;
 };
 
@@ -6213,8 +6215,67 @@ static RouteCallbackMethods GetRouteCallbackMethods(JNIEnv *env, jobject callbac
   methods.onProgress = env->GetMethodID(cls, "onProgress", "(I)V");
   methods.onSuccess = env->GetMethodID(cls, "onSuccess", "(Lcom/framstag/libosmscout/client/RouteEntry;)V");
   methods.onError = env->GetMethodID(cls, "onError", "(Ljava/lang/String;)V");
+  // A default method of the interface: GetMethodID finds it on the implementing class, and the
+  // default body keeps an implementation that predates it working (it delegates to onError).
+  methods.onErrorDetail = env->GetMethodID(cls, "onErrorDetail", "(ILjava/lang/String;D)V");
   methods.onCancel = env->GetMethodID(cls, "onCancel", "()V");
   return methods;
+}
+
+// --------------------------------------------------------------------------
+// Route failure reporting
+// --------------------------------------------------------------------------
+
+/**
+ * Report a failed route calculation to the callback: the kind that names the cause, plus the
+ * message for the log.
+ *
+ * Falls back to `onError(String)` when the callback does not expose `onErrorDetail` — a Java class
+ * that implements the interface without inheriting its default method, or a lookup that failed — so
+ * an existing Java caller keeps working unchanged.
+ */
+static void CallOnRouteError(JNIEnv *env,
+                             jobject callback,
+                             const RouteCallbackMethods &methods,
+                             int kind,
+                             const char *message,
+                             double nearestRoadDistanceMeters = std::numeric_limits<double>::quiet_NaN())
+{
+  if (methods.onErrorDetail!=nullptr) {
+    env->CallVoidMethod(callback,
+                        methods.onErrorDetail,
+                        static_cast<jint>(kind),
+                        env->NewStringUTF(message),
+                        static_cast<jdouble>(nearestRoadDistanceMeters));
+    return;
+  }
+
+  if (methods.onError!=nullptr) {
+    env->CallVoidMethod(callback, methods.onError, env->NewStringUTF(message));
+  }
+}
+
+/**
+ * The bridge's cause for the reason the router reported. One translation for both route entry
+ * points, so the two cannot describe the same failure differently.
+ */
+static naviveylin::RouteFailureCause RouteFailureCauseOf(const osmscout::RoutingResult &result)
+{
+  switch (result.GetError()) {
+    case osmscout::RoutingError::NoStartNode:
+      return naviveylin::RouteFailureCause::NoStartNode;
+    case osmscout::RoutingError::NoTargetNode:
+      return naviveylin::RouteFailureCause::NoTargetNode;
+    case osmscout::RoutingError::NoRouteFound:
+      return naviveylin::RouteFailureCause::NoRouteFound;
+    case osmscout::RoutingError::DataFailure:
+      return naviveylin::RouteFailureCause::DataFailure;
+    case osmscout::RoutingError::Aborted:
+    case osmscout::RoutingError::None:
+      break;
+  }
+
+  return naviveylin::RouteFailureCause::Unknown;
 }
 
 // --------------------------------------------------------------------------
@@ -6291,11 +6352,16 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
 static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
     osmscout::MultiDBRoutingServiceRef &routingService,
+    osmscout::RouteEndpoint endpoint,
     double lat, double lon,
     long long objFileOffset,
-    const std::string &objType)
+    const std::string &objType,
+    double &nearestRoadDistanceMeters)
 {
   osmscout::GeoCoord coord(lat, lon);
+
+  // "Unknown" until a probe below finds a road the router could use at this end.
+  nearestRoadDistanceMeters=std::numeric_limits<double>::quiet_NaN();
 
   // Try object-based lookup first (e.g. building → its street)
   if (objFileOffset > 0 && !objType.empty()) {
@@ -6321,9 +6387,11 @@ static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
     }
   }
 
-  // Fall back to coordinate-based lookup
+  // Fall back to coordinate-based lookup. The endpoint is named because the two ends attach to
+  // their way along opposite halves of it: a way this end cannot be attached to is skipped in
+  // favour of the next one within the radius, instead of failing the whole calculation.
   auto result = routingService->GetClosestRoutableNode(coord,
-      osmscout::Distance::Of<osmscout::Kilometer>(1));
+      osmscout::Distance::Of<osmscout::Kilometer>(1), endpoint);
   if (result.IsValid()) {
     osmscout::log.Debug() << "ResolveRoutePosition: found via coord "
                           << coord.GetDisplayText();
@@ -6332,11 +6400,23 @@ static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
 
   // Try with larger radius
   result = routingService->GetClosestRoutableNode(coord,
-      osmscout::Distance::Of<osmscout::Kilometer>(5));
+      osmscout::Distance::Of<osmscout::Kilometer>(5), endpoint);
   if (result.IsValid()) {
     osmscout::log.Debug() << "ResolveRoutePosition: found via coord (5km) "
                           << coord.GetDisplayText();
     return result.GetRoutePosition();
+  }
+
+  // Nothing the router could use within the search radius. How far away is the nearest road it
+  // could use? A bounded probe, twice the radius above, so a report can say "the nearest road is
+  // about 7 km away" instead of only "no connection here": a distance that large is what tells the
+  // user the installed map does not cover this point. One index query, on the failure path only,
+  // and the position it finds is NOT used as the route's position -- the search radius above is the
+  // routing policy, this probe only measures.
+  result = routingService->GetClosestRoutableNode(coord,
+      osmscout::Distance::Of<osmscout::Kilometer>(10), endpoint);
+  if (result.IsValid()) {
+    nearestRoadDistanceMeters=result.GetDistance().AsMeter();
   }
 
   return std::nullopt;
@@ -6478,9 +6558,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
   ClientData *data = getClientData(env, self);
   if (data == nullptr || data->dbThread == nullptr) {
     osmscout::log.Error() << "calculateRouteAsync: client not initialised";
-    jclass cbCls = env->GetObjectClass(callback);
-    jmethodID onError = env->GetMethodID(cbCls, "onError", "(Ljava/lang/String;)V");
-    env->CallVoidMethod(callback, onError, env->NewStringUTF("Client not initialised"));
+    CallOnRouteError(env, callback, GetRouteCallbackMethods(env, callback),
+                     naviveylin::kRouteFailureEngineFailure, "Client not initialised");
     return;
   }
 
@@ -6488,9 +6567,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
   osmscout::GeoCoord dest(destLat, destLon);
   if (!start.IsValid() || !dest.IsValid()) {
     osmscout::log.Error() << "calculateRouteAsync: invalid coordinates";
-    jclass cbCls = env->GetObjectClass(callback);
-    jmethodID onError = env->GetMethodID(cbCls, "onError", "(Ljava/lang/String;)V");
-    env->CallVoidMethod(callback, onError, env->NewStringUTF("Invalid coordinates"));
+    CallOnRouteError(env, callback, GetRouteCallbackMethods(env, callback),
+                     naviveylin::kRouteFailureEngineFailure, "Invalid coordinates");
     return;
   }
 
@@ -6579,6 +6657,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       auto progress = std::make_shared<JavaRoutingProgress>(jvm, callbackGlobal, cbMethods);
 
       bool success = false;
+      int errorKind = naviveylin::kRouteFailureUnknown;
+      double errorDistanceMeters = std::numeric_limits<double>::quiet_NaN();
       std::string errorMsg;
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
@@ -6597,6 +6677,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
           if (databases.empty()) {
             osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
             errorMsg = "No databases loaded";
+            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
             return;
           }
 
@@ -6621,25 +6702,32 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
           if (!routingService->Open(profileBuilder)) {
             osmscout::log.Error() << "calculateRouteAsync: FAILED to open routing service";
             errorMsg = "Failed to open routing service";
+            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
             return;
           }
 
           // Resolve start position
           auto startPosOpt = ResolveRoutePosition(
-              routingService, start.GetLat(), start.GetLon(),
-              static_cast<long long>(startObjOffset), startObjTypeStr);
+              routingService, osmscout::RouteEndpoint::Start,
+              start.GetLat(), start.GetLon(),
+              static_cast<long long>(startObjOffset), startObjTypeStr,
+              errorDistanceMeters);
           if (!startPosOpt) {
             errorMsg = "No routable node near start position";
+            errorKind = naviveylin::kRouteFailureStartUnroutable;
             routingService->Close();
             return;
           }
 
           // Resolve destination position
           auto destPosOpt = ResolveRoutePosition(
-              routingService, dest.GetLat(), dest.GetLon(),
-              static_cast<long long>(destObjOffset), destObjTypeStr);
+              routingService, osmscout::RouteEndpoint::Target,
+              dest.GetLat(), dest.GetLon(),
+              static_cast<long long>(destObjOffset), destObjTypeStr,
+              errorDistanceMeters);
           if (!destPosOpt) {
             errorMsg = "No routable node near destination";
+            errorKind = naviveylin::kRouteFailureTargetUnroutable;
             routingService->Close();
             return;
           }
@@ -6661,6 +6749,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
               return;
             }
             errorMsg = "Route calculation failed";
+            errorKind = naviveylin::RouteFailureKind(RouteFailureCauseOf(result));
             routingService->Close();
             return;
           }
@@ -6934,8 +7023,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
 
       if (!success) {
-        threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                  threadEnv->NewStringUTF(errorMsg.c_str()));
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods, errorKind, errorMsg.c_str(),
+                         errorDistanceMeters);
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
         return;
@@ -6979,8 +7068,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       );
 
       if (!pointsResult.Success() || !pointsResult.GetPoints()) {
-        threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                  threadEnv->NewStringUTF("Failed to transform route data"));
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods,
+                         naviveylin::kRouteFailureRoutingDataFailure, "Failed to transform route data");
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
         return;
@@ -7108,18 +7197,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jvm->DetachCurrentThread();
       } catch (const std::exception &e) {
         osmscout::log.Error() << "routing thread exception: " << e.what();
-        if (cbMethods.onError) {
-          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                    threadEnv->NewStringUTF(e.what()));
-        }
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods,
+                         naviveylin::kRouteFailureEngineFailure, e.what());
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
       } catch (...) {
         osmscout::log.Error() << "routing thread unknown exception";
-        if (cbMethods.onError) {
-          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                    threadEnv->NewStringUTF("Unknown route calculation error"));
-        }
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods,
+                         naviveylin::kRouteFailureEngineFailure, "Unknown route calculation error");
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
       }
@@ -7163,9 +7248,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
   ClientData *data = getClientData(env, self);
   if (data == nullptr || data->dbThread == nullptr) {
     osmscout::log.Error() << "calculateRouteAsync: client not initialised";
-    jclass cbCls = env->GetObjectClass(callback);
-    jmethodID onError = env->GetMethodID(cbCls, "onError", "(Ljava/lang/String;)V");
-    env->CallVoidMethod(callback, onError, env->NewStringUTF("Client not initialised"));
+    CallOnRouteError(env, callback, GetRouteCallbackMethods(env, callback),
+                     naviveylin::kRouteFailureEngineFailure, "Client not initialised");
     return;
   }
 
@@ -7173,9 +7257,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
   osmscout::GeoCoord dest(destLat, destLon);
   if (!start.IsValid() || !dest.IsValid()) {
     osmscout::log.Error() << "calculateRouteAsync: invalid coordinates";
-    jclass cbCls = env->GetObjectClass(callback);
-    jmethodID onError = env->GetMethodID(cbCls, "onError", "(Ljava/lang/String;)V");
-    env->CallVoidMethod(callback, onError, env->NewStringUTF("Invalid coordinates"));
+    CallOnRouteError(env, callback, GetRouteCallbackMethods(env, callback),
+                     naviveylin::kRouteFailureEngineFailure, "Invalid coordinates");
     return;
   }
 
@@ -7231,6 +7314,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       auto progress = std::make_shared<JavaRoutingProgress>(jvm, callbackGlobal, cbMethods);
 
       bool success = false;
+      int errorKind = naviveylin::kRouteFailureUnknown;
+      double errorDistanceMeters = std::numeric_limits<double>::quiet_NaN();
       std::string errorMsg;
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
@@ -7249,6 +7334,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           if (databases.empty()) {
             osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
             errorMsg = "No databases loaded";
+            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
             return;
           }
 
@@ -7309,6 +7395,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           if (!routingService->Open(profileBuilder)) {
             osmscout::log.Error() << "calculateRouteAsync: FAILED to open routing service";
             errorMsg = "Failed to open routing service";
+            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
             return;
           }
           osmscout::log.Warn() << "calculateRouteAsync: routing service opened OK";
@@ -7325,12 +7412,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           osmscout::log.Warn() << "calculateRouteAsync: resolving start at "
                                << start.GetDisplayText();
           auto startPosOpt = ResolveRoutePosition(
-              routingService, start.GetLat(), start.GetLon(),
-              static_cast<long long>(startObjOffset), startObjTypeStr);
+              routingService, osmscout::RouteEndpoint::Start,
+              start.GetLat(), start.GetLon(),
+              static_cast<long long>(startObjOffset), startObjTypeStr,
+              errorDistanceMeters);
           if (!startPosOpt) {
             osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near start "
                                  << start.GetDisplayText();
             errorMsg = "No routable node near start position";
+            errorKind = naviveylin::kRouteFailureStartUnroutable;
             routingService->Close();
             return;
           }
@@ -7340,12 +7430,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           osmscout::log.Warn() << "calculateRouteAsync: resolving dest at "
                                << dest.GetDisplayText();
           auto destPosOpt = ResolveRoutePosition(
-              routingService, dest.GetLat(), dest.GetLon(),
-              static_cast<long long>(destObjOffset), destObjTypeStr);
+              routingService, osmscout::RouteEndpoint::Target,
+              dest.GetLat(), dest.GetLon(),
+              static_cast<long long>(destObjOffset), destObjTypeStr,
+              errorDistanceMeters);
           if (!destPosOpt) {
             osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near dest "
                                  << dest.GetDisplayText();
             errorMsg = "No routable node near destination";
+            errorKind = naviveylin::kRouteFailureTargetUnroutable;
             routingService->Close();
             return;
           }
@@ -7371,6 +7464,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             }
             osmscout::log.Error() << "calculateRouteAsync: CalculateRoute returned no route";
             errorMsg = "Route calculation failed";
+            errorKind = naviveylin::RouteFailureKind(RouteFailureCauseOf(result));
             routingService->Close();
             return;
           }
@@ -7674,8 +7768,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       }
 
       if (!success) {
-        threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                  threadEnv->NewStringUTF(errorMsg.c_str()));
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods, errorKind, errorMsg.c_str(),
+                         errorDistanceMeters);
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
         return;
@@ -7720,8 +7814,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       if (!pointsResult.Success() || !pointsResult.GetPoints()) {
         osmscout::log.Error() << "calculateRouteAsync: failed to transform route data to points";
-        threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                  threadEnv->NewStringUTF("Failed to transform route data"));
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods,
+                         naviveylin::kRouteFailureRoutingDataFailure, "Failed to transform route data");
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
         return;
@@ -7843,18 +7937,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jvm->DetachCurrentThread();
       } catch (const std::exception &e) {
         osmscout::log.Error() << "routing thread exception: " << e.what();
-        if (cbMethods.onError) {
-          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                    threadEnv->NewStringUTF(e.what()));
-        }
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods,
+                         naviveylin::kRouteFailureEngineFailure, e.what());
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
       } catch (...) {
         osmscout::log.Error() << "routing thread unknown exception";
-        if (cbMethods.onError) {
-          threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onError,
-                                    threadEnv->NewStringUTF("Unknown route calculation error"));
-        }
+        CallOnRouteError(threadEnv, callbackGlobal, cbMethods,
+                         naviveylin::kRouteFailureEngineFailure, "Unknown route calculation error");
         threadEnv->DeleteGlobalRef(callbackGlobal);
         jvm->DetachCurrentThread();
       }

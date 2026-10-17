@@ -902,6 +902,15 @@ RouteStepTimeTest = executable('RouteStepTimeTest',
 
 test('Check route step time', RouteStepTimeTest)
 
+RouteFailureKindTest = executable('RouteFailureKindTest',
+             'src/RouteFailureKindTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route failure kind', RouteFailureKindTest)
+
 RouteLengthTest = executable('RouteLengthTest',
              'src/RouteLengthTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],

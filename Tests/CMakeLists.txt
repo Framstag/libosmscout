@@ -289,6 +289,12 @@ osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest
 #---- RouteStepTime
 osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RouteFailureKind
+# The kind a failed route calculation is reported with is decided by one dependency-free function;
+# it is checked here rather than only through a route that needs a routing database, and the numbers
+# this test pins are the ones RouteCallback.java declares.
+osmscout_test_project(NAME RouteFailureKindTest SOURCES src/RouteFailureKindTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- RouteLength
 osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
