@@ -508,9 +508,111 @@ namespace osmscout {
     return position;
   }
 
+  /**
+   * Whether a position at `nodeIndex` of `way` can be attached to the routing network for `endpoint`.
+   *
+   * `GetWayStartNodes` and `GetWayTargetNodes` attach a position by looking for a route node on the
+   * position's way: the attach index itself first, then along the way in the direction(s) the profile
+   * permits **for that end**. The two ends search opposite halves of the way -- the start forward from
+   * the attach index, the target backward from it -- so a position can attach as one end of a route
+   * and not as the other on a direction-restricted way (a one-way street, a slip road). A way the
+   * position cannot be attached to cannot carry it: taking it as the closest routable way makes the
+   * whole calculation fail in `GetWayStartNodes` / `GetWayTargetNodes`, although a way a little
+   * further away can carry the position.
+   *
+   * The gates and the index ranges are the ones of the four search functions in
+   * `AbstractRoutingService` (`GetStartForwardRouteNode`, `GetStartBackwardRouteNode`,
+   * `GetTargetForwardRouteNode`, `GetTargetBackwardRouteNode`). Those are not `const` and this
+   * selection is, so the route node is read through `RoutingDatabase::GetRouteNode` rather than
+   * through the service's own lookup. **Keep the ranges in step with those four functions.**
+   */
+  bool SimpleRoutingService::IsEndpointAttachable(const RoutingProfile& profile,
+                                                  const WayRef& way,
+                                                  size_t nodeIndex,
+                                                  RouteEndpoint endpoint) const
+  {
+    if (!way ||
+        nodeIndex>=way->nodes.size()) {
+      return false;
+    }
+
+    if (endpoint==RouteEndpoint::Unspecified) {
+      // No end is named: no end-specific restriction, which is what a caller that predates this
+      // parameter gets.
+      return true;
+    }
+
+    auto isRouteNode=[this,&way](size_t index) {
+      RouteNodeRef node;
+
+      return routingDatabase.GetRouteNode(way->GetId(index),node) &&
+             node!=nullptr;
+    };
+
+    // The attach index itself, which both search functions try first.
+    if (isRouteNode(nodeIndex)) {
+      return true;
+    }
+
+    bool forward=profile.CanUseForward(*way);
+    bool backward=profile.CanUseBackward(*way);
+
+    if (endpoint==RouteEndpoint::Start) {
+      if (forward) {
+        for (size_t i=nodeIndex+1; i<way->nodes.size(); i++) {
+          if (isRouteNode(i)) {
+            return true;
+          }
+        }
+      }
+
+      if (backward) {
+        for (size_t i=0; i<nodeIndex; i++) {
+          if (isRouteNode(i)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    // RouteEndpoint::Target
+    if (forward) {
+      for (size_t i=0; i<nodeIndex; i++) {
+        if (isRouteNode(i)) {
+          return true;
+        }
+      }
+    }
+
+    if (backward) {
+      for (size_t i=nodeIndex+1; i<way->nodes.size(); i++) {
+        if (isRouteNode(i)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   RoutePositionResult SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                                    const RoutingProfile& profile,
                                                                    const Distance &radius) const
+  {
+    // Kept for the callers this signature already has: no end is named, so no end-specific
+    // restriction applies -- exactly what this call selected before the endpoint overload existed.
+    return GetClosestRoutableNode(coord,
+                                  profile,
+                                  radius,
+                                  RouteEndpoint::Unspecified);
+  }
+
+  RoutePositionResult SimpleRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
+                                                                   const RoutingProfile& profile,
+                                                                   const Distance &radius,
+                                                                   RouteEndpoint endpoint) const
   {
     TypeConfigRef       typeConfig=database->GetTypeConfig();
     AreaAreaIndexRef    areaAreaIndex=database->GetAreaAreaIndex();
@@ -621,21 +723,42 @@ namespace osmscout {
       }
 
 
+      // The closest segment of this way first, then one decision for the way as a whole: a way the
+      // position cannot be attached to for this end is skipped entirely, so the next way within the
+      // given radius gets its chance instead of the whole calculation failing (IsEndpointAttachable).
+      // The attachability is asked only here, where the way could actually become the result, and
+      // only for a way that improves on what is already found, so the route node lookups stay rare.
+      double wayDistance=std::numeric_limits<double>::max();
+      size_t wayIndex=0;
+      double wayLat=0.0;
+      double wayLon=0.0;
+
       for (size_t i=0;  i<way->nodes.size()-1; i++) {
         double r, intersectLon, intersectLat;
         double distance=DistanceToSegment(coord.GetLon(),coord.GetLat(),way->nodes[i].GetLon(),way->nodes[i].GetLat(),
                                           way->nodes[i+1].GetLon(),way->nodes[i+1].GetLat(), r, intersectLon, intersectLat);
-        if (distance<minDistance) {
-          minDistance=distance;
-          if(r<0.5){
-            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i,/*db*/0),
-                                         GetEllipsoidalDistance(coord, GeoCoord(intersectLat, intersectLon)));
-          } else {
-            position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),i+1,/*db*/0),
-                                         GetEllipsoidalDistance(coord, GeoCoord(intersectLat, intersectLon)));
-          }
+        if (distance<wayDistance) {
+          wayDistance=distance;
+          wayIndex=(r<0.5) ? i : i+1;
+          wayLat=intersectLat;
+          wayLon=intersectLon;
         }
       }
+
+      if (wayDistance>=minDistance) {
+        continue;
+      }
+
+      if (!IsEndpointAttachable(profile,
+                                way,
+                                wayIndex,
+                                endpoint)) {
+        continue;
+      }
+
+      minDistance=wayDistance;
+      position=RoutePositionResult(RoutePosition(way->GetObjectFileRef(),wayIndex,/*db*/0),
+                                   GetEllipsoidalDistance(coord, GeoCoord(wayLat, wayLon)));
     }
 
     return position;

@@ -167,6 +167,11 @@ namespace osmscout {
                               DatabaseId database,
                               double cost) const override;
 
+    bool IsEndpointAttachable(const RoutingProfile& profile,
+                              const WayRef& way,
+                              size_t nodeIndex,
+                              RouteEndpoint endpoint) const;
+
     bool GetRouteNodes(const std::set<DBId> &routeNodeIds,
                        std::unordered_map<DBId,RouteNodeRef> &routeNodeMap) override;
 
@@ -246,6 +251,19 @@ namespace osmscout {
     RoutePositionResult GetClosestRoutableNode(const GeoCoord& coord,
                                                const RoutingProfile& profile,
                                                const Distance &radius) const;
+
+    /**
+     * The closest routable way the position can be attached to **for the given end of a route**.
+     *
+     * A way is only taken when `IsEndpointAttachable` holds for it, so a way the position cannot be
+     * attached to is skipped in favour of the next one within the same radius instead of failing the
+     * whole calculation (see that function). `RouteEndpoint::Unspecified` applies no end-specific
+     * restriction and therefore selects exactly what the overload above selects.
+     */
+    RoutePositionResult GetClosestRoutableNode(const GeoCoord& coord,
+                                               const RoutingProfile& profile,
+                                               const Distance &radius,
+                                               RouteEndpoint endpoint) const;
 
     ClosestRoutableObjectResult GetClosestRoutableObject(const GeoCoord& location,
                                                          Vehicle vehicle,

@@ -137,12 +137,24 @@ namespace osmscout {
   RoutePositionResult MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
                                                                     const Distance &radius) const
   {
+    // Kept for the callers this signature already has: no end is named, so no end-specific
+    // restriction applies -- exactly what this call selected before the endpoint overload existed.
+    return GetClosestRoutableNode(coord,
+                                  radius,
+                                  RouteEndpoint::Unspecified);
+  }
+
+  RoutePositionResult MultiDBRoutingService::GetClosestRoutableNode(const GeoCoord& coord,
+                                                                    const Distance &radius,
+                                                                    RouteEndpoint endpoint) const
+  {
     RoutePositionResult position, closestPosition;
 
     for (const auto& handle : handles) {
       position=handle.router->GetClosestRoutableNode(coord,
                                                      *handle.profile,
-                                                     radius);
+                                                     radius,
+                                                     endpoint);
       if (position.IsValid() && position.GetDistance() < closestPosition.GetDistance()) {
         closestPosition=RoutePositionResult(RoutePosition(position.GetRoutePosition().GetObjectFileRef(),
                                                           position.GetRoutePosition().GetNodeIndex(),
