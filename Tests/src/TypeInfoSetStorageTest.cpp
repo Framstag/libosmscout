@@ -42,7 +42,9 @@
  * The tests build their own type configuration, so they need no database and no type
  * definition file. The allocation counter replaces the global operator new/delete (the same
  * approach as Tests/src/MapPainterAreaPreparationTest.cpp); it is disabled in sanitizer
- * builds, whose runtimes provide their own operators.
+ * builds, whose runtimes provide their own operators, and a platform whose shared libraries
+ * allocate through an allocator of their own (a DLL on Windows) keeps the allocations of the
+ * library away from it, so the cases that measure against the counter skip there.
  */
 
 #if defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__)
@@ -180,6 +182,30 @@ namespace {
     return typeConfig;
   }
 
+#if TYPE_SET_HAVE_ALLOCATION_COUNTER
+
+  /**
+   * Skips the calling case unless the allocations of the library pass through the operators this test
+   * replaces. The replacement covers the executable that defines the operators; a shared library that
+   * carries its own allocator (a DLL on Windows) allocates without reaching them, so a case that
+   * measures the bytes of a set against the counter cannot measure them there. A set of the library is
+   * asked to allocate, and the case is skipped if the counter did not see it.
+   */
+  void SkipUnlessLibraryAllocationsAreCounted(const osmscout::TypeConfig& typeConfig)
+  {
+    osmscout::TypeInfoSet probe;
+
+    size_t                before=GetAllocatedBytes();
+
+    probe.Set(typeConfig.GetTypeInfo(0));
+
+    if (GetAllocatedBytes()==before) {
+      SKIP("the allocations of the library do not pass through the operators this test replaces on this platform");
+    }
+  }
+
+#endif
+
   /**
    * The types of the model of a set, in ascending index order
    */
@@ -240,6 +266,8 @@ TEST_CASE("An empty set of a 1527-type configuration allocates a bit per defined
   REQUIRE(set.Empty());
   REQUIRE(set.Size()==0);
 #if TYPE_SET_HAVE_ALLOCATION_COUNTER
+  SkipUnlessLibraryAllocationsAreCounted(*typeConfig);
+
   REQUIRE(bytes<=BitmapBytes(definedTypeCount));
 #else
   SUCCEED("allocation counter is disabled in sanitizer builds");
@@ -267,6 +295,8 @@ TEST_CASE("A set of a 1527-type configuration allocates per contained type, not 
   REQUIRE(set.IsSet(containedTypes[1]));
   REQUIRE(set.IsSet(containedTypes[2]));
 #if TYPE_SET_HAVE_ALLOCATION_COUNTER
+  SkipUnlessLibraryAllocationsAreCounted(*typeConfig);
+
   // The bitmap, plus one slot per contained type, with room for the growth of the bitmap while the
   // set is filled by its type indices and for the growth of the container that holds the slots
   REQUIRE(bytes<=2*BitmapBytes(definedTypeCount)+2*containedTypes.size()*sizeof(osmscout::TypeInfoRef));
@@ -287,6 +317,8 @@ TEST_CASE("A set reports the bytes it allocates","[TypeInfoSet]")
 
   INFO("reported bytes of an empty set: "<<set.AllocatedBytes()<<", allocated: "<<bytes);
 #if TYPE_SET_HAVE_ALLOCATION_COUNTER
+  SkipUnlessLibraryAllocationsAreCounted(*typeConfig);
+
   REQUIRE(set.AllocatedBytes()==bytes);
 #else
   SUCCEED("allocation counter is disabled in sanitizer builds");

@@ -902,6 +902,16 @@ RouteStepTimeTest = executable('RouteStepTimeTest',
 
 test('Check route step time', RouteStepTimeTest)
 
+RenderLabelBoundsTest = executable('RenderLabelBoundsTest',
+             'src/RenderLabelBoundsTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src'), osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check render label bounds', RenderLabelBoundsTest)
+
 RouteFailureKindTest = executable('RouteFailureKindTest',
              'src/RouteFailureKindTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
