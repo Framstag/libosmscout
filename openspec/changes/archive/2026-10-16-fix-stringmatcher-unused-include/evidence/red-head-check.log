@@ -1,0 +1,31 @@
+# red case on HEAD: StringMatcher.cpp at the revision before this change, the check at the delivered revision
+# command: SOURCE_ROOT=$PWD ./build/Tests/HeaderCheckTest "Check include order of util/StringMatcher.cpp"
+# run at 2026-10-16T11:42:06Z (UTC), exit code 42
+# pins:
+75ea9a02a7c9b3bc6637fb8f798b8e07e94044805ae1bee39b9cb10ea101fd0b  libosmscout/src/osmscout/util/StringMatcher.cpp
+17bc7e0d3b927124e8b166e23d035a08b43554203d7ff20c3b7444eb6075a1e9  Tests/src/HeaderCheckTest.cpp
+
+Filters: "Check include order of util/StringMatcher.cpp"
+Randomness seeded to: 2986247513
+File '/home/tim/projects/libosmscout/libosmscout/src/osmscout/util/StringMatcher.cpp' includes a standard library header after its project includes: '#include <algorithm>'!
+SOURCE=/home/tim/projects/libosmscout/libosmscout/src/osmscout/util/StringMatcher.cpp STD_INCLUDES_AFTER_PROJECT=1
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HeaderCheckTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Check include order of util/StringMatcher.cpp
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/HeaderCheckTest.cpp:510
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/HeaderCheckTest.cpp:531: FAILED:
+  REQUIRE( violations.size()==0 )
+with expansion:
+  1 == 0
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 3 | 2 passed | 1 failed
+
