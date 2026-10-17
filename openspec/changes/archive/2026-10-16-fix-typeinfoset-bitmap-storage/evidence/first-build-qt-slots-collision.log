@@ -1,0 +1,130 @@
+# cmake full build at 2026-10-16T04:55:50Z
+# command: cmake --build build -j 16
+[1/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/LabelLayouter.cpp.o
+[2/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/StyleProcessor.cpp.o
+[3/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/MapPainterNoOp.cpp.o
+[4/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/MapParameter.cpp.o
+[5/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/MapData.cpp.o
+[6/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/MapPainterStatistics.cpp.o
+[7/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/LabelLayouterHelper.cpp.o
+[8/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/LabelProvider.cpp.o
+[9/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/DBJob.cpp.o
+[10/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/AreaIndexGenerator.cpp.o
+[11/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/DBInstance.cpp.o
+[12/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/DataTileCache.cpp.o
+[13/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenAreaNodeIndex.cpp.o
+[14/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/DBThread.cpp.o
+[15/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenIntersectionIndex.cpp.o
+[16/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/MapManager.cpp.o
+[17/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenAreaWayIndex.cpp.o
+[18/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenCoverageIndex.cpp.o
+[19/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenAreaAreaIndex.cpp.o
+[20/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/oss/Parser.cpp.o
+[21/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenNumericIndex.cpp.o
+[22/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/MapService.cpp.o
+[23/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenNodeDat.cpp.o
+[24/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/POILookupModule.cpp.o
+[25/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/MapPainter.cpp.o
+[26/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenRawNodeIndex.cpp.o
+[27/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/Settings.cpp.o
+[28/561] Building CXX object libosmscout-client/CMakeFiles/OSMScoutClient.dir/src/osmscoutclient/MapDownloadService.cpp.o
+[29/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenRawRelIndex.cpp.o
+[30/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenCoordDat.cpp.o
+[31/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenOptimizeAreaWayIds.cpp.o
+[32/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenOptimizeWaysLowZoom.cpp.o
+[33/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenRawWayIndex.cpp.o
+[34/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenMergeAreas.cpp.o
+[35/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenTypeDat.cpp.o
+[36/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenAreaRouteIndex.cpp.o
+[37/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenOptimizeAreasLowZoom.cpp.o
+[38/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/ImportModule.cpp.o
+[39/561] Building CXX object libosmscout-map/CMakeFiles/OSMScoutMap.dir/src/osmscoutmap/StyleConfig.cpp.o
+[40/561] Linking CXX shared library libosmscout-map/libosmscout_map.so.1.1.1
+[41/561] Creating library symlink libosmscout-map/libosmscout_map.so.1 libosmscout-map/libosmscout_map.so
+[42/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenRoute2Dat.cpp.o
+[43/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/ImportParameter.cpp.o
+[44/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenLocationIndex.cpp.o
+[45/561] Linking CXX shared library libosmscout-client/libosmscout_client.so.1.1.1
+[46/561] Creating library symlink libosmscout-client/libosmscout_client.so.1 libosmscout-client/libosmscout_client.so
+[47/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenWayAreaDat.cpp.o
+[48/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenPTRouteDat.cpp.o
+[49/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/ImportErrorReporter.cpp.o
+[50/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/MergeAreaData.cpp.o
+[51/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/Preprocessor.cpp.o
+[52/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenWaterIndex.cpp.o
+[53/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/ImportProgress.cpp.o
+[54/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/RawCoord.cpp.o
+[55/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/RawNode.cpp.o
+[56/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/RawRelation.cpp.o
+[57/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenRelAreaDat.cpp.o
+[58/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/RawRelIndexedDataFile.cpp.o
+[59/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/RawWay.cpp.o
+[60/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenRouteDat.cpp.o
+[61/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/SortDat.cpp.o
+[62/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/RawWayIndexedDataFile.cpp.o
+[63/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/PreprocessPoly.cpp.o
+[64/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenWayWayDat.cpp.o
+[65/561] Linking CXX shared library libosmscout-gpx/libosmscout_gpx.so.1.1.1
+[66/561] Creating library symlink libosmscout-gpx/libosmscout_gpx.so.1 libosmscout-gpx/libosmscout_gpx.so
+[67/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/GenTextIndex.cpp.o
+/home/tim/projects/libosmscout/libosmscout-import/src/osmscoutimport/GenTextIndex.cpp: In member function »virtual bool osmscout::TextIndexGenerator::Import(const osmscout::TypeConfigRef&, const osmscout::ImportParameter&, osmscout::Progress&)«:
+/home/tim/projects/libosmscout/libosmscout-import/src/osmscoutimport/GenTextIndex.cpp:188:45: warning: bitweise Operation zwischen den unterschiedlichen Aufzählungstypen »marisa_num_tries« und »marisa_tail_mode« ist veraltet [-Wdeprecated-enum-enum-conversion]
+  188 |                    MARISA_DEFAULT_NUM_TRIES |
+      |                    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+  189 |                    MARISA_BINARY_TAIL |
+      |                    ~~~~~~~~~~~~~~~~~~        
+[68/561] Building CXX object libosmscout-map-qt/CMakeFiles/OSMScoutMapQt.dir/src/osmscoutmapqt/MapPainterQt.cpp.o
+FAILED: [code=1] libosmscout-map-qt/CMakeFiles/OSMScoutMapQt.dir/src/osmscoutmapqt/MapPainterQt.cpp.o 
+/usr/bin/c++ -DOSMScoutMapQt_EXPORTS -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SVG_LIB -D_USE_MATH_DEFINES -I/home/tim/projects/libosmscout/build/libosmscout-map-qt/OSMScoutMapQt_autogen/include -I/home/tim/projects/libosmscout/libosmscout-map-qt/include -I/home/tim/projects/libosmscout/include -I/home/tim/projects/libosmscout/build/libosmscout-map-qt/include -I/home/tim/projects/libosmscout/build/libosmscout-map-qt/privateinclude -I/home/tim/projects/libosmscout/libosmscout/include -I/home/tim/projects/libosmscout/build/libosmscout/include -I/home/tim/projects/libosmscout/libosmscout-map/include -I/home/tim/projects/libosmscout/build/libosmscout-map/include -isystem /usr/include/freetype2 -isystem /usr/include/qt6/QtGui -isystem /usr/include/qt6 -isystem /usr/include/qt6/QtCore -isystem /usr/lib/qt6/mkspecs/linux-g++ -isystem /usr/include/qt6/QtSvg -fvisibility=hidden -fopenmp -O3 -DNDEBUG -std=c++20 -fPIC -Wall -pedantic -Winit-self -Wno-overloaded-virtual -Wcast-qual -Wwrite-strings -Wextra -Wno-long-long -Wno-unused-but-set-parameter -ldl -lm -lpthread -fPIC -mno-direct-extern-access -MD -MT libosmscout-map-qt/CMakeFiles/OSMScoutMapQt.dir/src/osmscoutmapqt/MapPainterQt.cpp.o -MF libosmscout-map-qt/CMakeFiles/OSMScoutMapQt.dir/src/osmscoutmapqt/MapPainterQt.cpp.o.d -o libosmscout-map-qt/CMakeFiles/OSMScoutMapQt.dir/src/osmscoutmapqt/MapPainterQt.cpp.o -c /home/tim/projects/libosmscout/libosmscout-map-qt/src/osmscoutmapqt/MapPainterQt.cpp
+In file included from /home/tim/projects/libosmscout/libosmscout-map/include/osmscoutmap/StyleConfig.h:36,
+                 from /home/tim/projects/libosmscout/libosmscout-map/include/osmscoutmap/MapPainter.h:45,
+                 from /home/tim/projects/libosmscout/libosmscout-map-qt/include/osmscoutmapqt/MapPainterQt.h:31,
+                 from /home/tim/projects/libosmscout/libosmscout-map-qt/src/osmscoutmapqt/MapPainterQt.cpp:20:
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:117:10: error: Deklaration deklariert nichts [-fpermissive]
+  117 |     std::vector<TypeInfoRef> slots;
+      |          ^~~~~~~~~~~~~~~~~~~
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h: In member function »void osmscout::TypeInfoSet::Clear()«:
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:147:12: error: expected primary-expression before ».« token
+  147 |       slots.clear();
+      |            ^
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h: In member function »osmscout::TypeInfoSetConstIterator osmscout::TypeInfoSet::begin() const«:
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:184:38: error: expected primary-expression before »(« token
+  184 |       return TypeInfoSetConstIterator(slots.begin(),
+      |                                      ^
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:184:44: error: expected primary-expression before ».« token
+  184 |       return TypeInfoSetConstIterator(slots.begin(),
+      |                                            ^
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:185:44: error: expected primary-expression before ».« token
+  185 |                                       slots.end());
+      |                                            ^
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h: In member function »osmscout::TypeInfoSetConstIterator osmscout::TypeInfoSet::end() const«:
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:190:38: error: expected primary-expression before »(« token
+  190 |       return TypeInfoSetConstIterator(slots.end(),
+      |                                      ^
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:190:44: error: expected primary-expression before ».« token
+  190 |       return TypeInfoSetConstIterator(slots.end(),
+      |                                            ^
+/home/tim/projects/libosmscout/libosmscout/include/osmscout/TypeInfoSet.h:191:44: error: expected primary-expression before ».« token
+  191 |                                       slots.end());
+      |                                            ^
+[69/561] Building CXX object libosmscout-map-opengl/CMakeFiles/OSMScoutMapOpenGL.dir/src/osmscoutmapopengl/PNGLoaderOpenGL.cpp.o
+[70/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/Import.cpp.o
+[71/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/PreprocessOSM.cpp.o
+[72/561] Building CXX object libosmscout-map-opengl/CMakeFiles/OSMScoutMapOpenGL.dir/src/osmscoutmapopengl/Triangulate.cpp.o
+[73/561] Building CXX object libosmscout-map-opengl/CMakeFiles/OSMScoutMapOpenGL.dir/src/osmscoutmapopengl/TextLoader.cpp.o
+[74/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/SortNodeDat.cpp.o
+[75/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/SortWayDat.cpp.o
+[76/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/Preprocess.cpp.o
+[77/561] Compiling Java sources and generating JNI headers
+[78/561] Building CXX object libosmscout-import/CMakeFiles/OSMScoutImport.dir/src/osmscoutimport/PreprocessPBF.cpp.o
+[79/561] Building CXX object libosmscout-test/CMakeFiles/OSMScoutTest.dir/src/osmscout-test/PreprocessOLT.cpp.o
+[80/561] Building CXX object libosmscout-map-svg/CMakeFiles/OSMScoutMapSVG.dir/src/osmscoutmapsvg/MapPainterSVG.cpp.o
+[81/561] Building CXX object libosmscout-map-cairo/CMakeFiles/OSMScoutMapCairo.dir/src/osmscoutmapcairo/MapPainterCairo.cpp.o
+[82/561] Building CXX object libosmscout-map-opengl/CMakeFiles/OSMScoutMapOpenGL.dir/src/osmscoutmapopengl/MapPainterOpenGL.cpp.o
+/home/tim/projects/libosmscout/libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp: In member function »void osmscout::MapPainterOpenGL::ProcessWay(const osmscout::WayRef&, const osmscout::Projection&, const osmscout::StyleConfigRef&, const osmscout::WidthFeatureValueReader&)«:
+/home/tim/projects/libosmscout/libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp:457:14: warning: Variable »lineOffset« gesetzt, aber nicht verwendet [-Wunused-but-set-variable=]
+  457 |       double lineOffset = 0.0;
+      |              ^~~~~~~~~~
+[83/561] Building CXX object libosmscout-map-skia/CMakeFiles/OSMScoutMapSkia.dir/src/osmscoutmapskia/MapPainterSkia.cpp.o
+ninja: build stopped: subcommand failed.
+# exit: 1

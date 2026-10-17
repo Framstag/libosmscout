@@ -410,8 +410,9 @@ TEST_CASE("Defined but unreferenced types add no build work","[StyleConfigLookup
   REQUIRE(smallDiagnostics.typeConditionEvaluations==largeDiagnostics.typeConditionEvaluations);
   REQUIRE(smallDiagnostics.tableBytes==largeDiagnostics.tableBytes);
 
-  // The per-level type sets stay sized by the defined type count until the set representation is
-  // changed (a separate change), so their size is reported, not asserted here
+  // The per-level type sets hold a bit per defined type plus a slot per contained type since the set
+  // representation changed, while `typeSetBytes` still estimates a type reference per defined type and is
+  // therefore an upper bound; the size is reported, not asserted here
   INFO("type set bytes: " << smallDiagnostics.typeSetBytes << " vs " << largeDiagnostics.typeSetBytes);
 }
 

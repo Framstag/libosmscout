@@ -104,6 +104,16 @@ TypeResolutionTest =  executable('TypeResolutionTest',
 test('Check type resolution', TypeResolutionTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
+TypeInfoSetStorageTest =  executable('TypeInfoSetStorageTest',
+             'src/TypeInfoSetStorageTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check type set storage', TypeInfoSetStorageTest)
+
 TypeDescriptionCoverageTest =  executable('TypeDescriptionCoverageTest',
              'src/TypeDescriptionCoverageTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],

@@ -48,6 +48,9 @@ osmscout_test_project(NAME TypeResolutionPerformanceTest SOURCES src/TypeResolut
 osmscout_test_project(NAME TypeResolutionTest SOURCES src/TypeResolutionTest.cpp)
 set_tests_properties(TypeResolutionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
+#---- TypeInfoSetStorage
+osmscout_test_project(NAME TypeInfoSetStorageTest SOURCES src/TypeInfoSetStorageTest.cpp)
+
 #---- TypeDescriptionCoverage
 osmscout_test_project(NAME TypeDescriptionCoverageTest SOURCES src/TypeDescriptionCoverageTest.cpp)
 set_tests_properties(TypeDescriptionCoverageTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")

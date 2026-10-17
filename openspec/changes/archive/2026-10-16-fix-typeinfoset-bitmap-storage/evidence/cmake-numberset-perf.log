@@ -1,0 +1,19 @@
+# cmake ctest, the test the gate command excludes, alone, for the cost the exclusion names
+# command: cd build && QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=$PWD/../Tests TESTS_TMP_DIR=$PWD/Tests ctest -R NumberSetPerformanceTest --output-on-failure
+# run at 2026-10-16T05:42:33Z
+# exit: 0
+
+# sha256 libosmscout/include/osmscout/TypeInfoSet.h 889ee70a02090436c304a9d053d9448bf25651374c0605e6305957f657c0526a
+# sha256 libosmscout/src/osmscout/TypeInfoSet.cpp c1ef5d81939e2de1a91f04626ac77d9ad603b1654ad73eadffe6a815980d5070
+# sha256 Tests/src/TypeInfoSetStorageTest.cpp f36a85c48d6a907c7b874f0e75e48d307375a54fa916e8d2366a825740e529e1
+# sha256 Tests/src/StyleConfigLookupCostTest.cpp a9edb36256bd8dd3a3cc2ceee8ae688a1e8c42e182e16dabd1420c26de1225fd
+# source mtimes (UTC): TypeInfoSet.cpp 2026-10-16T05:28:20Z, TypeInfoSet.h 2026-10-16T05:28:20Z,
+#   TypeInfoSetStorageTest.cpp 2026-10-16T05:28:20Z, StyleConfigLookupCostTest.cpp 2026-10-16T05:19:40Z,
+#   all before this run
+Test project /home/tim/projects/libosmscout/build
+    Start 29: NumberSetPerformanceTest
+1/1 Test #29: NumberSetPerformanceTest .........   Passed   15.70 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =  15.71 sec

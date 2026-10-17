@@ -1,0 +1,47 @@
+# Probe: TypeInfoSet::Set(const TypeInfoRef&) appends the slot instead of inserting it in index
+# order (marked TEMP-REVERT-PROBE in libosmscout/src/osmscout/TypeInfoSet.cpp)
+# command: cmake --build build --target TypeInfoSetStorageTest -j 16 && ./build/Tests/TypeInfoSetStorageTest
+# run at 2026-10-16T05:19:54Z
+# exit: 42
+Randomness seeded to: 2287297722
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeInfoSetStorageTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+The operations of a set agree with a reference model
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:316
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:205: FAILED:
+  REQUIRE( iterated==Order(model) )
+with expansion:
+  { 24, 60, 49 } == { 24, 49, 60 }
+with messages:
+  step := 6
+  operation := 4
+  set.Size() := 3
+  model.size() := 3
+
+-------------------------------------------------------------------------------
+Iteration of a set yields the contained types in type index order
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:274
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:307: FAILED:
+  REQUIRE( iterated==expected )
+with expansion:
+  { 0x55b118da3710, 0x55b118da97e0, 0x55b118dac9b0, 0x55b118daa1e0 }
+  ==
+  { 0x55b118da97e0, 0x55b118daa1e0, 0x55b118da3710, 0x55b118dac9b0 }
+with message:
+  iterated 4 types of 4 contained ones
+
+===============================================================================
+test cases:   5 |   3 passed | 2 failed
+assertions: 922 | 920 passed | 2 failed
+
+# the mutation was reverted; grep -c TEMP-REVERT-PROBE libosmscout/src/osmscout/TypeInfoSet.cpp is 0
