@@ -289,6 +289,17 @@ osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest
 #---- RouteStepTime
 osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RenderLabelBounds
+# The Java render states the label line-wrapping bounds instead of inheriting them, so a long
+# multi-word label is wrapped instead of running across the map. The four values come from a
+# dependency-free helper (render_label_bounds.h) the test reads as well, and the difference from the
+# library's non-binding default fit-to-width is pinned here, on a host with no map database.
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME RenderLabelBoundsTest SOURCES src/RenderLabelBoundsTest.cpp TARGET OSMScout::Map INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+else()
+  message("Skip RenderLabelBounds test, libosmscout-map is missing.")
+endif()
+
 #---- RouteLength
 osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 

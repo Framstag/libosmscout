@@ -79,7 +79,10 @@ namespace osmscout {
 #else
     using CairoFont = cairo_scaled_font_t*;
     struct CairoNativeLabel {
-      std::wstring          wstr;
+      std::wstring                       wstr;        //!< The full text of the label
+      std::vector<std::wstring>          lines;       //!< The lines the text was wrapped into (one line when wrapping is off)
+      std::vector<cairo_text_extents_t>  lineExtents; //!< Ink extents of every line, relative to its baseline start
+      double                             lineAdvance{0}; //!< Distance of the baselines of two consecutive lines
       CairoFont             font;
       cairo_text_extents_t  textExtents;
       cairo_font_extents_t  fontExtents;
@@ -319,6 +322,19 @@ namespace osmscout {
                             const MapParameter& parameter,
                             const std::string& text,
                             double fontSize) override;
+
+    /**
+     * Measure a label as the renderer lays it out, including the line wrapping the map parameter
+     * configures (the character and pixel bounds GetProposedLabelWidth reads). `objectWidth` is the
+     * width of the object the label belongs to, 0 for a point label; the text is wrapped only when
+     * `enableWrapping` is true.
+     */
+    TextMetrics MeasureText(const Projection& projection,
+                            const MapParameter& parameter,
+                            const std::string& text,
+                            double fontSize,
+                            double objectWidth,
+                            bool enableWrapping);
 
     bool DrawMap(const Projection& projection,
                  const MapParameter& parameter,
