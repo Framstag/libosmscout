@@ -43,6 +43,14 @@ public class SearchOverlay extends StackPane {
     private static final int DEBOUNCE_MS = 400;
 
     private final OSMScoutClient client;
+
+    /**
+     * The place slot's running search request. Beginning a request supersedes the
+     * previous one, and the Cancel button cancels exactly this generation, so a
+     * cancellation arriving after a newer query started is a no-op (spec:
+     * `search-request-lifecycle`). Written before the search task starts.
+     */
+    private volatile long searchGeneration;
     private final UIScale uiScale;
     private final OverlayLayout overlayLayout;
     private final Runnable onNavigate;
@@ -178,7 +186,7 @@ public class SearchOverlay extends StackPane {
         cancelButton.setMaxHeight(controlHeight);
         cancelButton.setStyle("-fx-font-size: " + uiScale.baseFontSize() + "px;");
         cancelButton.setOnAction(e -> {
-            client.cancelSearch();
+            client.cancelSearch(searchGeneration);
             collapse();
         });
 
@@ -554,13 +562,17 @@ public class SearchOverlay extends StackPane {
             return;
         }
 
+        // Begin this query's request: beginning it supersedes the predecessor (which then
+        // stops at its next abort check), and the Cancel button cancels this generation.
+        searchGeneration = client.beginSearch(OSMScoutClient.SEARCH_SLOT_PLACES);
+
         Task<List<LocationEntry>> searchTask = new Task<>() {
             @Override
             protected List<LocationEntry> call() {
                 // Scope the search to the current map region (OSMScout2 parity);
                 // falls back to the whole database when no region is resolvable.
                 String defaultRegion = client.getRegion(mapCenterLat, mapCenterLon);
-                LocationEntry[] results = client.searchLocations(query, DEFAULT_LIMIT, defaultRegion, false);
+                LocationEntry[] results = client.searchLocations(query, DEFAULT_LIMIT, defaultRegion, searchGeneration);
                 if (results == null) {
                     return List.of();
                 }
