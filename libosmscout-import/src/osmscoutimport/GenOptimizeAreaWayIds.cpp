@@ -27,7 +27,6 @@
 #endif
 
 #include <algorithm>
-#include <numeric>
 
 #include <osmscout/io/DataFile.h>
 #include <osmscout/io/FileScanner.h>
@@ -437,7 +436,10 @@ namespace osmscout {
                                           progress,
                                           rule)};
 
-    std::vector<bool> successes(processors.size(),false);
+    // One byte per processor, not std::vector<bool>: the parallel transform below writes the
+    // result of every processor, and the bits of a vector<bool> share one memory location, so
+    // two of them written at the same time race and can drop a success.
+    std::vector<char> successes(processors.size(),0);
 
 #if defined(HAVE_STD_EXECUTION)
     std::transform(std::execution::par_unseq,
@@ -460,10 +462,11 @@ namespace osmscout {
     progress.Info("Optimize ids: scan areas "+scanAreasClock.ResultString()+" s, scan ways "+
                   scanWaysClock.ResultString()+" s, copy phases "+copiesClock.ResultString()+" s");
 
-    return std::accumulate(successes.begin(),
-                           successes.end(),
-                           true,
-                           std::logical_and<bool>());
+    return std::all_of(successes.begin(),
+                       successes.end(),
+                       [](char success) {
+                         return success!=0;
+                       });
   }
 }
 
