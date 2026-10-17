@@ -89,8 +89,8 @@ osmscout_test_project(NAME MapManagerTest SOURCES src/MapManagerTest.cpp TARGET 
 osmscout_test_project(NAME LatchTest SOURCES src/LatchTest.cpp)
 
 #---- LocationLookup
-osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp TARGET OSMScout::Test OSMScout::Import)
-set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationIndexRegionCacheTest.cpp TARGET OSMScout::Test OSMScout::Import)
+set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp src/LocationIndexRegionCacheTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 

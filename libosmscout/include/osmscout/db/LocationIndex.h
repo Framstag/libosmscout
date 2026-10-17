@@ -23,7 +23,9 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <set>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <osmscout/location/Location.h>
@@ -133,6 +135,25 @@ namespace osmscout {
     uint32_t                        maxLocationWords;
     uint32_t                        maxAddressWords;
     FileOffset                      indexOffset;
+    /**
+     * Region entries deserialized from `location.idx`, addressed by their offset in the file, and the
+     * number of entries this index read since it was loaded or last flushed - the diagnostic
+     * `GetRegionReadCount()` reports.
+     *
+     * A lookup walks the region tree of the index, and the search paths of `LocationService` walk the
+     * complete tree on every call, so without these entries the cost of a lookup follows the number of
+     * regions the index holds and grows with every region type the type configuration declares. The
+     * entries are bounded by the region entries of the index and released by `FlushCache()`, which is how
+     * the documented small memory footprint of this class is kept.
+     *
+     * A lookup may run concurrently - `Database::GetLocationIndex()` hands the same index to every caller,
+     * and a lookup borrows its scanner exclusively from `fileScannerPool` - so the entries and the read
+     * counter are guarded by `regionCacheMutex`, taken around the lookup and around the insert, never
+     * across the file read.
+     */
+    mutable std::mutex                                    regionCacheMutex;
+    mutable std::unordered_map<FileOffset,AdminRegionRef> regionCache;
+    mutable size_t                                        regionReadCount=0;
 
   private:
     void Read(FileScanner& scanner,
@@ -140,6 +161,10 @@ namespace osmscout {
 
     bool LoadAdminRegion(FileScanner& scanner,
                          AdminRegion& region) const;
+
+    bool LoadAdminRegion(FileScanner& scanner,
+                         FileOffset offset,
+                         AdminRegionRef& region) const;
 
     AdminRegionVisitor::Action VisitRegionEntries(const AdminRegion& region,
                                                   FileScanner& scanner,
@@ -266,6 +291,13 @@ namespace osmscout {
                                      std::map<FileOffset,AdminRegionRef>& refs) const;
 
     void DumpStatistics() const;
+
+    /**
+     * The number of region entries this index deserialized from `location.idx` since it was
+     * loaded or last flushed. A diagnostic for tests; concurrent lookups make it the count of
+     * every lookup that ran.
+     */
+    size_t GetRegionReadCount() const;
 
     void FlushCache() const;
   };
