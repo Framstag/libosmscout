@@ -72,6 +72,7 @@
 
 #include "admin_region_hierarchy.h"
 #include "frame_pixel_layout.h"
+#include "render_label_bounds.h"
 #include "route_length.h"
 #include "route_step_time.h"
 #include "routing_profile_speed.h"
@@ -1673,6 +1674,21 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
       osmscout::MapParameter params;
       params.SetFontName("sans-serif");
       params.SetFontSize(data->fontSizeMm);
+
+      // Line wrapping of labels: the same character bounds and fit-to-area the Qt
+      // plane renderer configures, with the fit-to-width of this buffer's shorter
+      // side. The buffer carries the pan overrun, so it is larger than the visible
+      // viewport and needs no division by the overrun (render_label_bounds.h). A
+      // label is only broken at a word boundary, so a one-word label stays on one
+      // line and a long multi-word name is wrapped instead of running across the map.
+      const naviveylin::LabelLineBounds labelBounds =
+          naviveylin::LabelLineBoundsForBuffer(static_cast<double>(width),
+                                               static_cast<double>(height));
+      params.SetLabelLineMinCharCount(labelBounds.minCharCount);
+      params.SetLabelLineMaxCharCount(labelBounds.maxCharCount);
+      params.SetLabelLineFitToArea(labelBounds.fitToArea);
+      params.SetLabelLineFitToWidth(labelBounds.fitToWidth);
+
       params.SetRenderSeaLand(true);
       params.SetRenderBackground(true);
       params.SetRenderUnknowns(true);
