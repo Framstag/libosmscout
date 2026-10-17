@@ -11,9 +11,9 @@ operations (union, difference, intersection, comparison).
 
 The bytes a set of types allocates SHALL follow the types it contains and the number of types the type
 configuration defines: at most one bit per defined type, the bitmap rounded up to a whole 64-bit word, plus
-one slot per type the set contains. A set that contains few types of a type configuration with many defined
-types SHALL NOT allocate a slot per
-defined type.
+one slot per element of the allocated capacity of the contained-type vector. A set that contains few types
+of a type configuration with many defined types SHALL NOT allocate a slot per
+defined type. A set SHALL report those bytes.
 
 #### Scenario: An empty set of a large type configuration allocates a bit per defined type
 
@@ -34,6 +34,20 @@ defined type"
 
 Test case: `TypeInfoSetStorageTest` — "A set of a 1527-type configuration allocates per contained type, not
 per defined type"
+
+#### Scenario: An empty set reports the bitmap bytes it allocates
+
+- **GIVEN** an empty set of types, of a type configuration with 1527 defined types, for which a
+  construction allocated storage
+- **WHEN** the set is asked for the bytes it allocates
+- **THEN** the answer is the number of bytes that construction allocated for the set's bitmap, one bit per
+  defined type rounded up to a whole 64-bit word
+
+Test case: `TypeInfoSetStorageTest` — "A set reports the bytes it allocates"
+
+The accessor reports the allocated storage, so the contained-type term counts the vector's `capacity()`,
+not its `size()`. That term is not asserted by a case: the case's set is empty, so it never compares that
+term against the allocation counter.
 
 ### Requirement: Iteration, membership and the operations of a type set are unchanged
 

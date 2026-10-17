@@ -521,13 +521,18 @@ namespace osmscout {
   }
 
   /**
-   * The bytes the per-level type sets of one family retain, as an estimate: one set per level, each
-   * of them holding a pointer per defined type.
+   * The bytes the per-level type sets of one family retain: the set objects themselves plus the
+   * storage each of them allocates for its bitmap over the defined types and its contained types.
    */
-  static size_t TypeSetBytes(const std::vector<TypeInfoSet>& typeSets,
-                             const TypeConfig& typeConfig)
+  static size_t TypeSetBytes(const std::vector<TypeInfoSet>& typeSets)
   {
-    return typeSets.size()*(sizeof(TypeInfoSet)+(typeConfig.GetTypeCount()*sizeof(TypeInfoRef)));
+    size_t bytes=0;
+
+    for (const auto& typeSet : typeSets) {
+      bytes+=sizeof(TypeInfoSet)+typeSet.AllocatedBytes();
+    }
+
+    return bytes;
   }
 
   /**
@@ -775,7 +780,7 @@ namespace osmscout {
                        nodeTypeSets,
                        buildDiagnostics);
 
-    buildDiagnostics.typeSetBytes+=TypeSetBytes(nodeTypeSets,*typeConfig);
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(nodeTypeSets);
 
     nodeTextStyleConditionals.clear();
     nodeIconStyleConditionals.clear();
@@ -879,7 +884,7 @@ namespace osmscout {
                        wayTypeSets,
                        buildDiagnostics);
 
-    buildDiagnostics.typeSetBytes+=TypeSetBytes(wayTypeSets,*typeConfig);
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(wayTypeSets);
 
     wayLineStyleConditionals.clear();
     wayPathTextStyleConditionals.clear();
@@ -1000,7 +1005,7 @@ namespace osmscout {
                        areaTypeSets,
                        buildDiagnostics);
 
-    buildDiagnostics.typeSetBytes+=TypeSetBytes(areaTypeSets,*typeConfig);
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(areaTypeSets);
 
     areaFillStyleConditionals.clear();
     areaBorderStyleConditionals.clear();
@@ -1049,7 +1054,7 @@ namespace osmscout {
                        routeTypeSets,
                        buildDiagnostics);
 
-    buildDiagnostics.typeSetBytes+=TypeSetBytes(routeTypeSets,*typeConfig);
+    buildDiagnostics.typeSetBytes+=TypeSetBytes(routeTypeSets);
 
     SortInConditionalsBySlot("routeLine",
                              routeLineStyleConditionals,

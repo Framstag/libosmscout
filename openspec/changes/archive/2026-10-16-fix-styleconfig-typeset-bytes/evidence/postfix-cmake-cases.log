@@ -1,0 +1,12 @@
+# command: (cd build && QT_QPA_PLATFORM=offscreen ctest -R 'StyleConfigLookupCost|TypeInfoSetStorage' --output-on-failure)
+# utc: 2026-10-16T11:08:59Z
+Test project /home/tim/projects/libosmscout/build
+    Start  16: TypeInfoSetStorageTest
+1/2 Test  #16: TypeInfoSetStorageTest ...........   Passed    0.01 sec
+    Start 132: StyleConfigLookupCostTest
+2/2 Test #132: StyleConfigLookupCostTest ........   Passed    0.05 sec
+
+100% tests passed out of 2
+
+Total Test time (real) =   0.06 sec
+# exit=0

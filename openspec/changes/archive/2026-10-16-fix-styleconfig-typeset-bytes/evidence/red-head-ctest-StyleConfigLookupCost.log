@@ -1,0 +1,47 @@
+# command: (cd build && QT_QPA_PLATFORM=offscreen ctest -R StyleConfigLookupCost --output-on-failure)
+# utc: 2026-10-16T11:06:43Z
+Test project /home/tim/projects/libosmscout/build
+    Start 132: StyleConfigLookupCostTest
+1/1 Test #132: StyleConfigLookupCostTest ........***Failed    0.05 sec
+Randomness seeded to: 1628204065
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in '/home/tim/projects/libosmscout/Tests/../stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in '/home/tim/projects/libosmscout/build/Tests/StyleConfigLookupCostUndefinedType.oss': 1 (test_does_not_exist)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+StyleConfigLookupCostTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Defined but unreferenced types add no build work
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:384
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:416: FAILED:
+  REQUIRE( smallDiagnostics.typeSetBytes==largeDiagnostics.typeSetBytes )
+with expansion:
+  3024 (0xbd0) == 14224 (0x3790)
+with messages:
+  small type set: slots 30, evaluations 4, table bytes 792, type set bytes 3024
+  large type set: slots 30, evaluations 4, table bytes 792, type set bytes
+  14224
+
+===============================================================================
+test cases: 11 | 10 passed | 1 failed
+assertions: 73 | 72 passed | 1 failed
+
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.06 sec
+
+The following tests FAILED:
+	132 - StyleConfigLookupCostTest (Failed)
+Errors while running CTest
+# exit=8

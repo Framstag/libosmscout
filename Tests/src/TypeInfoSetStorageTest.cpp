@@ -275,6 +275,24 @@ TEST_CASE("A set of a 1527-type configuration allocates per contained type, not 
 #endif
 }
 
+TEST_CASE("A set reports the bytes it allocates","[TypeInfoSet]")
+{
+  osmscout::TypeConfigRef typeConfig=BuildTypeConfig(definedTypeCount);
+
+  REQUIRE(typeConfig->GetTypeCount()==definedTypeCount);
+
+  size_t                before=GetAllocatedBytes();
+  osmscout::TypeInfoSet set(*typeConfig);
+  size_t                bytes=GetAllocatedBytes()-before;
+
+  INFO("reported bytes of an empty set: "<<set.AllocatedBytes()<<", allocated: "<<bytes);
+#if TYPE_SET_HAVE_ALLOCATION_COUNTER
+  REQUIRE(set.AllocatedBytes()==bytes);
+#else
+  SUCCEED("allocation counter is disabled in sanitizer builds");
+#endif
+}
+
 TEST_CASE("Iteration of a set yields the contained types in type index order","[TypeInfoSet]")
 {
   const size_t typeCount=64;
