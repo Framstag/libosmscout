@@ -143,6 +143,19 @@ namespace osmscout {
     RoutePositionResult GetClosestRoutableNode(const GeoCoord &coord,
                                                const Distance &radius=Kilometers(1)) const;
 
+    /**
+     * The closest routable way the position can be attached to **for the given end of a route**.
+     *
+     * Each loaded database is asked for a way its position can be attached to, and the closest of
+     * those candidates wins -- a way that cannot carry the position for this end cannot win, so the
+     * calculation is not failed by the database whose nearest way happens to be unusable (see
+     * SimpleRoutingService::GetClosestRoutableNode). `RouteEndpoint::Unspecified` applies no
+     * end-specific restriction and selects exactly what the overload above selects.
+     */
+    RoutePositionResult GetClosestRoutableNode(const GeoCoord &coord,
+                                               const Distance &radius,
+                                               RouteEndpoint endpoint) const;
+
     RoutingResult CalculateRoute(const RoutePosition &start,
                                  const RoutePosition &target,
                                  const std::optional<osmscout::Bearing> &bearing,

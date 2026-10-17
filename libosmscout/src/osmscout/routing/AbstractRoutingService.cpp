@@ -1028,6 +1028,7 @@ namespace osmscout {
                         targetCoord,
                         targetForwardRouteNode,
                         targetBackwardRouteNode)) {
+      result.SetError(RoutingError::NoTargetNode);
       return result;
     }
 
@@ -1039,6 +1040,7 @@ namespace osmscout {
                        startBackwardRouteNode,
                        startForwardNode,
                        startBackwardNode)) {
+      result.SetError(RoutingError::NoStartNode);
       return result;
     }
 
@@ -1063,11 +1065,13 @@ namespace osmscout {
 
     if (parameter.GetBreaker() &&
         parameter.GetBreaker()->IsAborted()) {
+      result.SetError(RoutingError::Aborted);
       return result;
     }
 
     if (bearing) {
       if (!RestrictInitialUTurn(state, *bearing, start, startForwardNode, startBackwardNode)) {
+        result.SetError(RoutingError::NoStartNode);
         return result;
       }
     }
@@ -1110,6 +1114,7 @@ namespace osmscout {
 
       if (parameter.GetBreaker() &&
           parameter.GetBreaker()->IsAborted()) {
+        result.SetError(RoutingError::Aborted);
         return result;
       }
 
@@ -1147,6 +1152,7 @@ namespace osmscout {
                      costLimit)){
 
         log.Error() << "Failed to walk paths from " << dbId << " / " << currentRouteNode->GetId();
+        result.SetError(RoutingError::DataFailure);
         return result;
       }
 
@@ -1162,6 +1168,7 @@ namespace osmscout {
                                 openMap,
                                 closedSet)) {
         log.Error() << "Failed to walk to other databases from " << dbId << " / " << currentRouteNode->GetFileOffset();
+        result.SetError(RoutingError::DataFailure);
         return result;
       }
 
@@ -1303,6 +1310,7 @@ namespace osmscout {
     if (!targetFinalNode) {
       log.Warn() << "No route found!";
 
+      result.SetError(RoutingError::NoRouteFound);
       return result;
     }
 
@@ -1310,6 +1318,7 @@ namespace osmscout {
 
     if (parameter.GetBreaker() &&
       parameter.GetBreaker()->IsAborted()) {
+      result.SetError(RoutingError::Aborted);
       return result;
     }
 
@@ -1326,6 +1335,7 @@ namespace osmscout {
 
     if (parameter.GetBreaker() &&
       parameter.GetBreaker()->IsAborted()) {
+      result.SetError(RoutingError::Aborted);
       return result;
     }
 
@@ -1335,6 +1345,7 @@ namespace osmscout {
                                   target,
                                   result.GetRoute())) {
       //std::cerr << "Cannot convert routing result to route data" << std::endl;
+      result.SetError(RoutingError::DataFailure);
       return result;
     }
 
