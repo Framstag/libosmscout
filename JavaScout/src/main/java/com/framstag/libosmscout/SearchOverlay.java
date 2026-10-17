@@ -48,7 +48,7 @@ public class SearchOverlay extends StackPane {
      * The place slot's running search request. Beginning a request supersedes the
      * previous one, and the Cancel button cancels exactly this generation, so a
      * cancellation arriving after a newer query started is a no-op (spec:
-     * `search-request-lifecycle`). Written before the search task starts.
+     * `search-cancellation`). Written before the search task starts.
      */
     private volatile long searchGeneration;
     private final UIScale uiScale;

@@ -156,7 +156,7 @@ namespace {
    * The abort poll every search parameter and visitor already performs therefore
    * answers the generation question as well: a request reads as aborted once a
    * newer request of its slot began, once it was cancelled, or once it ended
-   * (spec: `search-request-lifecycle` — the abort predicate covers supersede and
+   * (spec: `search-cancellation` — the abort predicate covers supersede and
    * cancel).
    *
    * Reset() is deliberately a no-op: a generation is never revived. A repeated
@@ -4252,7 +4252,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
       // The form pass is abortable too: the parameter polls this breaker inside the
       // lookup, and the loop checks it between databases, so a superseded address pass
-      // stops instead of walking every installed map (spec: `osmscout-jni` — the
+      // stops instead of walking every installed map (spec: `search-cancellation` — the
       // structured form search is abortable).
       osmscout::BreakerRef breaker =
         std::make_shared<SearchBreakerAdapter>(data->searchBreakers, request);
@@ -4340,7 +4340,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // The caller's request, from beginSearch(). Every abort check below asks this
   // generation, so a request superseded or cancelled anywhere else stops this walk
-  // at its next check (search_breaker.h, spec: `search-request-lifecycle`).
+  // at its next check (search_breaker.h, spec: `search-cancellation`).
   const naviveylin::SearchBreakerRegistry::Generation request =
     static_cast<naviveylin::SearchBreakerRegistry::Generation>(generation);
 
@@ -4522,7 +4522,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
         // The text index takes no breaker, so this pass is bounded per database: check
         // before and after it, and the walk stops at the next database (spec:
-        // `osmscout-jni` — the free-text pass is abortable).
+        // `search-cancellation` — the free-text pass is abortable).
         if (breaker && breaker->IsAborted()) {
           break;
         }
@@ -4642,7 +4642,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #endif
 
   // An aborted search publishes nothing: a caller that did not check the generation must
-  // not be able to display a partial or stale list (spec: `search-request-lifecycle` — an
+  // not be able to display a partial or stale list (spec: `search-cancellation` — an
   // aborted search publishes no result). Read before ending the request, because an ended
   // generation reads as aborted as well.
   const bool aborted = data->searchBreakers.IsAborted(request);
@@ -4658,7 +4658,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // One line per search request, at Info so `adb logcat -s NaviVeylin` shows it without
   // enabling native debug. Identity only — slot, generation, abort state, duration, never
-  // a coordinate (guidelines/Logging.md §2, spec: `search-request-lifecycle` — search abort
+  // a coordinate (spec: `search-cancellation` — search abort
   // is diagnosable).
   osmscout::log.Info() << "search: slot=" << (slot.empty() ? "none" : slot)
                        << " gen=" << request
@@ -4976,7 +4976,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionScopeName(JNIE
 // Cancels one request by its generation and reports whether that request was live.
 // A generation a newer request already replaced is not live, so this aborts nothing
 // and says so — the property that makes a cancellation arriving late harmless
-// (search_breaker.h, spec: `osmscout-jni` — a search request carries a generation).
+// (search_breaker.h, spec: `search-cancellation` — a search request carries a generation).
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_cancelSearch__J(JNIEnv *env, jobject self,
@@ -9443,7 +9443,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
 
   // The POI slot carries the caller's request: beginning it (beginSearch) superseded
   // the previous POI request, and a places or car search cannot stop this one
-  // (search_breaker.h, spec: `search-request-lifecycle` — one search slot per surface).
+  // (search_breaker.h, spec: `search-cancellation` — one search slot per surface).
 
   std::vector<PoiEntry> entries;
   const osmscout::GeoCoord center(lat, lon);
@@ -9541,7 +9541,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
       }
     });
 
-  // An aborted POI search publishes nothing either (spec: `search-request-lifecycle` — an
+  // An aborted POI search publishes nothing either (spec: `search-cancellation` — an
   // aborted search publishes no result); read before ending the request.
   const bool aborted = data->searchBreakers.IsAborted(request);
 
@@ -9553,7 +9553,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
   data->searchBreakers.End(request);
 
   // One line per POI request, same fields and level as the places search
-  // (guidelines/Logging.md §2).
   osmscout::log.Info() << "search: slot=" << (poiSlot.empty() ? "none" : poiSlot)
                        << " gen=" << request
                        << " aborted=" << (aborted ? "true" : "false")

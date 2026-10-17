@@ -271,7 +271,7 @@ public class OSMScoutClient {
     /**
      * Search slots: one per search surface, so a supersede or a cancel stops exactly the
      * request it names and nothing another surface is running. The same names are the
-     * registry's slot keys (search_breaker.h, NaviVeylin spec `search-request-lifecycle`).
+     * registry's slot keys (search_breaker.h, spec `search-cancellation`).
      */
     public static final String SEARCH_SLOT_PLACES = "places";
     public static final String SEARCH_SLOT_POI = "poi";
