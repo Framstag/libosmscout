@@ -108,6 +108,10 @@ namespace osmscout {
    * operations are independent of the number of types the type configuration defines; the
    * bytes the set allocates follow the contained types and not the number of types the type
    * configuration defines.
+   *
+   * \note Any modification of the set (Set(), Remove(), Clear(), Intersection(), Adapt(),
+   * assignment) invalidates all iterators of the set. Do not modify a set while iterating it;
+   * iterate over a copy instead.
    */
   class OSMSCOUT_API TypeInfoSet CLASS_FINAL
   {
