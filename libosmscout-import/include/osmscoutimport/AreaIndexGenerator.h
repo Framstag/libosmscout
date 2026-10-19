@@ -569,7 +569,10 @@ namespace osmscout {
         }
 
         // Check if cell fill for current type is in defined limits
-        for (const auto &type : currentObjectTypes) {
+        // Iterate over a snapshot, the set must not be modified while iterating it
+        const TypeInfoSet checkedObjectTypes(currentObjectTypes);
+
+        for (const auto &type : checkedObjectTypes) {
           size_t typeIndex=type->GetIndex();
 
           if (!FitsIndexCriteria(progress,
