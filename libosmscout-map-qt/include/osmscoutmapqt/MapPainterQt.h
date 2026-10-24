@@ -60,10 +60,16 @@ namespace osmscout {
       size_t nVertex;
       size_t direction;
     };
+    /**
+     * Identity a cached resolved font is selected by: the requested font name, the font size
+     * quantized to the pixel grid of the drawing (see GetFont), the font weight and whether the
+     * font is italic. Two labels whose resolved font sizes differ by less than a device pixel
+     * therefore select one cached font.
+     */
     struct FontDescriptor
     {
-      QString       fontName;
-      size_t        fontSize;
+      QString       fontName;   //!< Requested font name
+      size_t        fontSize;   //!< Font size in whole device pixels
       QFont::Weight weight;
       bool          italic;
 
@@ -82,7 +88,8 @@ namespace osmscout {
                                                 //! - it should be independent on the specific style configuration
     std::vector<QImage>          patternImages; //! vector of QImage for fill patterns, index is patter id
     std::vector<QBrush>          patterns;      //! vector of QBrush for fill patterns
-    QMap<FontDescriptor,QFont>   fonts;         //! Cached fonts
+    QMap<FontDescriptor,QFont>   fonts;         //!< Resolved fonts, selected by FontDescriptor
+    size_t                       resolvedFontCount{0}; //!< Fonts resolved rather than served from the cache since construction (diagnostic for tests)
     std::vector<double>          sin;           //! Lookup table for sin calculation
 
     std::mutex                   mutex;         //! Mutex for locking concurrent calls
@@ -91,6 +98,12 @@ namespace osmscout {
     QFont GetFont(const Projection& projection,
                   const MapParameter& parameter,
                   double fontSize);
+
+    /**
+     * Drop every resolved font the painter retains. Callers run under the painter's mutex, or
+     * outside a frame (the destructor); ReleaseFonts() is the entry for a caller.
+     */
+    void ClearFonts();
 
     void SetFill(const Projection& projection,
                  const MapParameter& parameter,
@@ -232,6 +245,24 @@ namespace osmscout {
   public:
     MapPainterQt();
     ~MapPainterQt() override;
+
+    /**
+     * Number of fonts this painter resolved rather than served from its cache, since construction.
+     * Serving a font from the cache does not change the value. Diagnostic for tests.
+     */
+    size_t GetResolvedFontCount() const;
+
+    /**
+     * Number of resolved fonts the painter currently retains.
+     */
+    size_t GetRetainedFontCount() const;
+
+    /**
+     * Release every resolved font the painter retains; a later frame resolves its fonts again.
+     * The painter releases them by itself when a stylesheet reload replaces the stylesheet they
+     * were resolved for, and when it is destroyed.
+     */
+    void ReleaseFonts();
 
     TextMetrics MeasureText(const Projection& projection,
                             const MapParameter& parameter,
