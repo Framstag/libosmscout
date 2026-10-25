@@ -88,7 +88,11 @@ macro(osmscout_library_project)
 		if(NOT _feature)
 			get_filename_component(_template_name ${_template} NAME_WE)
 			cmake_path(RELATIVE_PATH _template BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ OUTPUT_VARIABLE _template_dir)
-			cmake_path(GET _template_dir PARENT_PATH _template_dir)
+			# `cmake_path(GET <var> PARENT_PATH <var>)` is a no-op on the CMake 3.22 that the Android Gradle plugin
+			# ships: the file name stayed in the directory and the feature header was written to
+			# `…/<Name>Features.h.cmake/<Name>Features.h`, where no include and no install ever looks for it.
+			# `get_filename_component` drops it on every CMake version.
+			get_filename_component(_template_dir "${_template_dir}" DIRECTORY)
 			message("Template dir: " ${_template_dir})
 			set(_feature ${CMAKE_CURRENT_BINARY_DIR}/include/${_template_dir}/${_template_name}.h)
 		endif()
