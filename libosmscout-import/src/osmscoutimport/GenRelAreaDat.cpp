@@ -35,6 +35,8 @@
 #include <osmscoutimport/GenRawWayIndex.h>
 #include <osmscoutimport/GenRawRelIndex.h>
 
+#include <osmscoutimport/private/BoundaryTypes.h>
+
 namespace osmscout {
 
   const char* const RelAreaDataGenerator::RELAREA_TMP="relarea.tmp";
@@ -637,8 +639,8 @@ namespace osmscout {
                                                         const RawRelation& rawRelation,
                                                         std::list<MultipolygonPart>& parts)
   {
-    TypeInfoSet                    boundaryTypes(typeConfig);
-    TypeInfoRef                    boundaryType;
+    TypeInfoSet                    boundaryTypes=ResolveBoundaryTypes(typeConfig,
+                                                                      progress);
     std::set<OSMId>                nodeIds;
     std::set<OSMId>                wayIds;
     std::set<OSMId>                pendingRelationIds;
@@ -647,22 +649,6 @@ namespace osmscout {
     CoordDataFile::ResultMap       coordMap;
     IdRawWayMap                    wayMap;
     std::map<OSMId,RawRelationRef> relationMap;
-
-    boundaryType=typeConfig.GetTypeInfo("boundary_country");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
-
-    boundaryType=typeConfig.GetTypeInfo("boundary_state");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
-
-    boundaryType=typeConfig.GetTypeInfo("boundary_county");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
-
-    boundaryType=typeConfig.GetTypeInfo("boundary_administrative");
-    assert(boundaryType);
-    boundaryTypes.Set(boundaryType);
 
     visitedRelationIds.insert(rawRelation.GetId());
 

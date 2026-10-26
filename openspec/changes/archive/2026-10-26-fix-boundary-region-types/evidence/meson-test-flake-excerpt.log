@@ -1,0 +1,36 @@
+# Evidence: the flaky allocation-count case of OptimizeAreaWayIdsTest
+
+Excerpt of `meson test -C debug --timeout-multiplier 2 --print-errorlogs`, run 2026-10-26T22:28:31Z
+(directory `debug/`, branch `fix-boundary-region-types`). The full log of that run was overwritten by
+the two green runs that followed; the lines below are kept verbatim, including the run's own tallies.
+Recorded in `TODO.md` §110.
+
+```
+139/165 libosmscout:Check the area and way id optimization              FAIL             0.20s   exit status 42
+>>> MALLOC_PERTURB_=101 ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 MESON_TEST_ITERATION=1 LD_LIBRARY_PATH=/home/tim/projects/libosmscout/debug/libosmscout-import:/home/tim/projects/libosmscout/debug/libosmscout /home/tim/projects/libosmscout/debug/Tests/OptimizeAreaWayIdsTest
+...
+Randomness seeded to: 3917514017
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OptimizeAreaWayIdsTest is a Catch2 v3.16.1 host application.
+...
+Deciding the same ids for many objects allocates a constant amount
+...
+../Tests/src/OptimizeAreaWayIdsTest.cpp:383: FAILED:
+  REQUIRE( forTenThousand<=forThousand )
+with expansion:
+  13 <= 11
+with message:
+  allocations for 1000 objects: 11, for 10000 objects: 13
+
+===============================================================================
+test cases: 12 | 11 passed | 1 failed
+assertions: 76 | 75 passed | 1 failed
+...
+Ok:                164
+Fail:              1
+```
+
+Three runs of that single test, and the two full runs after it (2026-10-26T22:29:30Z and
+2026-10-26T22:30:03Z), reported no failure. The change of this directory touches neither the rule the
+case measures nor the case itself.

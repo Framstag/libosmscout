@@ -45,6 +45,10 @@ OLT
       }
 
       COUNTY BOUNDARY 6 "Kreis Unna" {
+        OBJECT BOUNDARY 8 "Lünen" {
+          OBJECT BOUNDARY 10 "Gahmen"
+        }
+
         CITY "Kamen" {
 
         }

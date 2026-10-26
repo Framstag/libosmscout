@@ -89,8 +89,8 @@ osmscout_test_project(NAME MapManagerTest SOURCES src/MapManagerTest.cpp TARGET 
 osmscout_test_project(NAME LatchTest SOURCES src/LatchTest.cpp)
 
 #---- LocationLookup
-osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationIndexRegionCacheTest.cpp TARGET OSMScout::Test OSMScout::Import)
-set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp src/LocationIndexRegionCacheTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationIndexRegionCacheTest.cpp src/LocationBoundaryRegionTest.cpp TARGET OSMScout::Test OSMScout::Import)
+set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp src/LocationIndexRegionCacheTest.cpp src/LocationBoundaryRegionTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 
@@ -187,6 +187,9 @@ if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
 	osmscout_test_project(NAME OptimizeAreaWayIdsTest SOURCES src/OptimizeAreaWayIdsTest.cpp TARGET OSMScout::Import)
+
+	osmscout_test_project(NAME BoundaryTypesTest SOURCES src/BoundaryTypesTest.cpp TARGET OSMScout::Import)
+	set_tests_properties(BoundaryTypesTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
 
