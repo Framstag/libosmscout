@@ -1,0 +1,13 @@
+ninja: Entering directory `/home/tim/projects/libosmscout/debug'
+[1/18] Generating libosmscout-client-java/java/com.framstag.libosmscout.client-native-headers with a custom command
+[2/18] Compiling C++ object Tests/BoundaryTypesTest.p/src_BoundaryTypesTest.cpp.o
+[3/18] Compiling C++ object Tests/LocationServiceTest.p/src_LocationBoundaryRegionTest.cpp.o
+[4/18] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_BoundaryTypes.cpp.o
+[5/18] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenRelAreaDat.cpp.o
+[6/18] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenLocationIndex.cpp.o
+[7/18] Linking target libosmscout-import/libosmscout_import.so.1.1.1
+[8/18] Generating symbol file libosmscout-import/libosmscout_import.so.1.1.1.p/libosmscout_import.so.1.1.1.symbols
+[9/10] Linking target Tests/BoundaryTypesTest
+[10/10] Linking target Tests/LocationServiceTest
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /home/tim/projects/libosmscout/debug -j 16

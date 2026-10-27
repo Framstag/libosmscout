@@ -1,6 +1,7 @@
 osmscoutimportSrc = [
             'src/osmscoutimport/AreaIndexGenerator.cpp',
             'src/osmscoutimport/AreaWayIdReferenceRule.cpp',
+            'src/osmscoutimport/BoundaryTypes.cpp',
             'src/osmscoutimport/RawCoastline.cpp',
             'src/osmscoutimport/RawCoord.cpp',
             'src/osmscoutimport/RawNode.cpp',

@@ -473,7 +473,8 @@ if buildImport
                    'src/SearchForLocationByStringTest.cpp',
                    'src/SearchForLocationByFormTest.cpp',
                    'src/SearchForPOIByFormTest.cpp',
-                   'src/LocationIndexRegionCacheTest.cpp'
+                   'src/LocationIndexRegionCacheTest.cpp',
+                   'src/LocationBoundaryRegionTest.cpp'
                  ],
                  include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
                  dependencies: [mathDep, openmpDep, catch2Dep],
@@ -1312,6 +1313,19 @@ if buildImport
                install_dir: testInstallDir)
 
   test('Check the area and way id optimization', OptimizeAreaWayIdsTest)
+
+  BoundaryTypesTest = executable('BoundaryTypesTest',
+               'src/BoundaryTypesTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout, osmscoutimport],
+               install: true,
+               install_dir: testInstallDir)
+
+  boundaryTypesEnv = environment()
+  boundaryTypesEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+
+  test('Check the boundary types', BoundaryTypesTest, env: boundaryTypesEnv)
 
   JsonWriterTest = executable('JsonWriterTest',
                ['src/JsonWriterTest.cpp'],

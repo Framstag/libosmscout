@@ -57,6 +57,8 @@
 #include <osmscoutimport/SortNodeDat.h>
 #include <osmscoutimport/GenAreaAreaIndex.h>
 
+#include <osmscoutimport/private/BoundaryTypes.h>
+
 //#define REGION_DEBUG
 
 #if defined(REGION_DEBUG)
@@ -2730,7 +2732,6 @@ namespace osmscout {
   {
     FileWriter                                 writer;
     locidx::RegionRef                          rootRegion;
-    TypeInfoRef                                boundaryType;
     std::vector<std::list<locidx::RegionRef>>  boundaryAreas;
 
     errorReporter=parameter.GetErrorReporter();
@@ -2744,7 +2745,8 @@ namespace osmscout {
       std::list<std::string>                    regionIgnoreTokens;
       std::list<std::string>                    poiIgnoreTokens;
       std::list<std::string>                    locationIgnoreTokens;
-      TypeInfoSet                               boundaryTypes(*typeConfig);
+      TypeInfoSet                               boundaryTypes=ResolveBoundaryTypes(*typeConfig,
+                                                                                   progress);
 
       bytesForNodeFileOffset=BytesNeededToAddressFileData(AppendFileToDir(parameter.GetDestinationDirectory(),
                                                         "nodes.dat"));
@@ -2757,22 +2759,6 @@ namespace osmscout {
       rootRegion->name="<root>";
       rootRegion->indexOffset=0;
       rootRegion->dataOffset=0;
-
-      boundaryType=typeConfig->GetTypeInfo("boundary_country");
-      assert(boundaryType);
-      boundaryTypes.Set(boundaryType);
-
-      boundaryType=typeConfig->GetTypeInfo("boundary_state");
-      assert(boundaryType);
-      boundaryTypes.Set(boundaryType);
-
-      boundaryType=typeConfig->GetTypeInfo("boundary_county");
-      assert(boundaryType);
-      boundaryTypes.Set(boundaryType);
-
-      boundaryType=typeConfig->GetTypeInfo("boundary_administrative");
-      assert(boundaryType);
-      boundaryTypes.Set(boundaryType);
 
       //
       // Getting all areas of type 'administrative boundary'.

@@ -1,0 +1,333 @@
+Test project /home/tim/projects/libosmscout/build
+        Start   8: AsyncProcessingTest
+        Start  51: VectorSelfAppendTest
+        Start  35: ThreadedDatabaseTest
+        Start  49: BasemapCheckTest
+        Start  57: FileScannerWriterTest
+        Start  27: LatchTest
+        Start 138: RoadStyleColorsTest
+        Start  52: WorkQueueTest
+  1/164 Test  #52: WorkQueueTest .................................   Passed    1.03 sec
+        Start   9: AsyncWorkerTest
+  2/164 Test  #27: LatchTest .....................................   Passed    1.75 sec
+        Start 141: RouteStyleColorsTest
+  3/164 Test #138: RoadStyleColorsTest ...........................   Passed    2.36 sec
+        Start  90: TileDataConversionTest
+  4/164 Test   #9: AsyncWorkerTest ...............................   Passed    1.46 sec
+        Start 149: OpenGLAreaVisibilityTest
+  5/164 Test #141: RouteStyleColorsTest ..........................   Passed    0.81 sec
+        Start  48: ClientUpdateCheckTest
+  6/164 Test  #48: ClientUpdateCheckTest .........................   Passed    1.08 sec
+        Start  26: MapManagerTest
+  7/164 Test  #90: TileDataConversionTest ........................   Passed    1.39 sec
+        Start  25: MapDownloadServiceTest
+  8/164 Test  #26: MapManagerTest ................................   Passed    0.32 sec
+        Start   2: FavoriteStoreTest
+  9/164 Test #149: OpenGLAreaVisibilityTest ......................   Passed    1.48 sec
+        Start  50: JniSignatureParityTest
+ 10/164 Test  #25: MapDownloadServiceTest ........................   Passed    0.52 sec
+        Start 126: PerformanceTest-opengl-cycle.oss
+ 11/164 Test   #2: FavoriteStoreTest .............................   Passed    0.82 sec
+        Start  91: TileDataConversionPerformanceTest
+ 12/164 Test  #50: JniSignatureParityTest ........................   Passed    1.27 sec
+        Start 121: PerformanceTest-opengl-winter-sports.oss
+ 13/164 Test  #91: TileDataConversionPerformanceTest .............   Passed    0.70 sec
+        Start 120: PerformanceTest-opengl-standard.oss
+ 14/164 Test #126: PerformanceTest-opengl-cycle.oss ..............   Passed    1.93 sec
+        Start   4: StyleLoadResilienceTest
+ 15/164 Test   #4: StyleLoadResilienceTest .......................   Passed    0.56 sec
+        Start  14: TypeResolutionPerformanceTest
+ 16/164 Test #121: PerformanceTest-opengl-winter-sports.oss ......   Passed    1.89 sec
+        Start 125: PerformanceTest-opengl-public-transport.oss
+ 17/164 Test #120: PerformanceTest-opengl-standard.oss ...........   Passed    1.80 sec
+        Start 123: PerformanceTest-opengl-railways.oss
+ 18/164 Test  #14: TypeResolutionPerformanceTest .................   Passed    0.85 sec
+        Start 122: PerformanceTest-opengl-boundaries.oss
+ 19/164 Test #125: PerformanceTest-opengl-public-transport.oss ...   Passed    1.03 sec
+        Start 124: PerformanceTest-opengl-motorways.oss
+ 20/164 Test #123: PerformanceTest-opengl-railways.oss ...........   Passed    1.11 sec
+        Start 119: PerformanceTest-Qt-cycle.oss
+ 21/164 Test #122: PerformanceTest-opengl-boundaries.oss .........   Passed    0.98 sec
+        Start 114: PerformanceTest-Qt-winter-sports.oss
+ 22/164 Test #119: PerformanceTest-Qt-cycle.oss ..................   Passed    0.85 sec
+        Start 113: PerformanceTest-Qt-standard.oss
+ 23/164 Test #124: PerformanceTest-opengl-motorways.oss ..........   Passed    1.11 sec
+        Start   3: DatabaseOpenTest
+ 24/164 Test #114: PerformanceTest-Qt-winter-sports.oss ..........   Passed    0.85 sec
+        Start 137: StyleConfigLookupCostTest
+ 25/164 Test #137: StyleConfigLookupCostTest .....................   Passed    0.40 sec
+        Start   5: StyleReportCondensationTest
+ 26/164 Test   #3: DatabaseOpenTest ..............................   Passed    0.64 sec
+        Start 107: PerformanceTest-cairo-winter-sports.oss
+ 27/164 Test   #5: StyleReportCondensationTest ...................   Passed    0.14 sec
+        Start 133: PolygonCenterTest
+ 28/164 Test #133: PolygonCenterTest .............................   Passed    0.11 sec
+        Start 112: PerformanceTest-cairo-cycle.oss
+ 29/164 Test #113: PerformanceTest-Qt-standard.oss ...............   Passed    0.89 sec
+        Start 106: PerformanceTest-cairo-standard.oss
+ 30/164 Test  #57: FileScannerWriterTest .........................   Passed   10.16 sec
+        Start 136: StyleConfigSymbolsTest
+ 31/164 Test  #49: BasemapCheckTest ..............................   Passed   10.35 sec
+        Start 118: PerformanceTest-Qt-public-transport.oss
+ 32/164 Test #107: PerformanceTest-cairo-winter-sports.oss .......   Passed    0.61 sec
+        Start  98: PerformanceTest-noop-cycle.oss
+ 33/164 Test #112: PerformanceTest-cairo-cycle.oss ...............   Passed    0.51 sec
+        Start 116: PerformanceTest-Qt-railways.oss
+ 34/164 Test #118: PerformanceTest-Qt-public-transport.oss .......   Passed    0.30 sec
+        Start  92: PerformanceTest-noop-standard.oss
+ 35/164 Test #106: PerformanceTest-cairo-standard.oss ............   Passed    0.62 sec
+        Start 115: PerformanceTest-Qt-boundaries.oss
+ 36/164 Test #136: StyleConfigSymbolsTest ........................   Passed    0.70 sec
+        Start 105: PerformanceTest-none-cycle.oss
+ 37/164 Test #116: PerformanceTest-Qt-railways.oss ...............   Passed    0.42 sec
+        Start  93: PerformanceTest-noop-winter-sports.oss
+ 38/164 Test  #98: PerformanceTest-noop-cycle.oss ................   Passed    0.49 sec
+        Start 117: PerformanceTest-Qt-motorways.oss
+ 39/164 Test  #92: PerformanceTest-noop-standard.oss .............   Passed    0.49 sec
+        Start 100: PerformanceTest-none-winter-sports.oss
+ 40/164 Test #115: PerformanceTest-Qt-boundaries.oss .............   Passed    0.41 sec
+        Start  99: PerformanceTest-none-standard.oss
+ 41/164 Test #105: PerformanceTest-none-cycle.oss ................   Passed    0.35 sec
+        Start 135: MapPainterAreaBorderRenderTest
+ 42/164 Test #135: MapPainterAreaBorderRenderTest ................   Passed    0.09 sec
+        Start  18: TypeConfigDescriptionTest
+ 43/164 Test  #93: PerformanceTest-noop-winter-sports.oss ........   Passed    0.33 sec
+        Start 162: SVGIconSkiaTest
+ 44/164 Test #117: PerformanceTest-Qt-motorways.oss ..............   Passed    0.34 sec
+        Start 111: PerformanceTest-cairo-public-transport.oss
+ 45/164 Test  #18: TypeConfigDescriptionTest .....................   Passed    0.11 sec
+        Start 154: MapPainterIconSymbolPreferenceTest
+ 46/164 Test #154: MapPainterIconSymbolPreferenceTest ............   Passed    0.04 sec
+        Start  45: DbJsonWriterTest
+ 47/164 Test #100: PerformanceTest-none-winter-sports.oss ........   Passed    0.34 sec
+        Start  44: JsonWriterTest
+ 48/164 Test #162: SVGIconSkiaTest ...............................   Passed    0.12 sec
+        Start 163: MapPainterCairoPatternTest
+ 49/164 Test  #45: DbJsonWriterTest ..............................   Passed    0.04 sec
+        Start  81: TransPolygonTest
+ 50/164 Test  #44: JsonWriterTest ................................   Passed    0.04 sec
+        Start  97: PerformanceTest-noop-public-transport.oss
+ 51/164 Test  #81: TransPolygonTest ..............................   Passed    0.03 sec
+        Start 104: PerformanceTest-none-public-transport.oss
+ 52/164 Test  #99: PerformanceTest-none-standard.oss .............   Passed    0.40 sec
+        Start 109: PerformanceTest-cairo-railways.oss
+ 53/164 Test #163: MapPainterCairoPatternTest ....................   Passed    0.10 sec
+        Start  28: LocationLookupTest
+ 54/164 Test #104: PerformanceTest-none-public-transport.oss .....   Passed    0.23 sec
+        Start 110: PerformanceTest-cairo-motorways.oss
+ 55/164 Test #111: PerformanceTest-cairo-public-transport.oss ....   Passed    0.44 sec
+        Start 139: PatternLookupTest
+ 56/164 Test #139: PatternLookupTest .............................   Passed    0.04 sec
+        Start  17: TypeDescriptionCoverageTest
+ 57/164 Test  #97: PerformanceTest-noop-public-transport.oss .....   Passed    0.41 sec
+        Start 108: PerformanceTest-cairo-boundaries.oss
+ 58/164 Test #109: PerformanceTest-cairo-railways.oss ............   Passed    0.38 sec
+        Start  96: PerformanceTest-noop-motorways.oss
+ 59/164 Test  #17: TypeDescriptionCoverageTest ...................   Passed    0.13 sec
+        Start  95: PerformanceTest-noop-railways.oss
+ 60/164 Test #110: PerformanceTest-cairo-motorways.oss ...........   Passed    0.35 sec
+        Start 102: PerformanceTest-none-railways.oss
+ 61/164 Test #108: PerformanceTest-cairo-boundaries.oss ..........   Passed    0.26 sec
+        Start 150: PolygonTriangulationTest
+ 62/164 Test  #96: PerformanceTest-noop-motorways.oss ............   Passed    0.24 sec
+        Start  94: PerformanceTest-noop-boundaries.oss
+ 63/164 Test #150: PolygonTriangulationTest ......................   Passed    0.05 sec
+        Start 103: PerformanceTest-none-motorways.oss
+ 64/164 Test  #95: PerformanceTest-noop-railways.oss .............   Passed    0.27 sec
+        Start 101: PerformanceTest-none-boundaries.oss
+ 65/164 Test #102: PerformanceTest-none-railways.oss .............   Passed    0.22 sec
+        Start  60: SpeedAgentTest
+ 66/164 Test  #60: SpeedAgentTest ................................   Passed    0.03 sec
+        Start  23: CoordinateEncodingTest
+ 67/164 Test #103: PerformanceTest-none-motorways.oss ............   Passed    0.16 sec
+        Start  42: HighwayMilestoneFeatureTest
+ 68/164 Test  #94: PerformanceTest-noop-boundaries.oss ...........   Passed    0.21 sec
+        Start  34: NavigationAgentTest
+ 69/164 Test  #23: CoordinateEncodingTest ........................   Passed    0.06 sec
+        Start  59: NumberSetTest
+ 70/164 Test  #34: NavigationAgentTest ...........................   Passed    0.03 sec
+        Start  36: TextLookupTest-vysoka
+ 71/164 Test #101: PerformanceTest-none-boundaries.oss ...........   Passed    0.18 sec
+        Start 143: MapPainterSkiaTest
+ 72/164 Test  #42: HighwayMilestoneFeatureTest ...................   Passed    0.05 sec
+        Start 130: CoordBufferTest
+ 73/164 Test  #59: NumberSetTest .................................   Passed    0.03 sec
+        Start  65: StringMatcherTest
+ 74/164 Test  #36: TextLookupTest-vysoka .........................   Passed    0.03 sec
+        Start  47: BoundaryTypesTest
+ 75/164 Test #130: CoordBufferTest ...............................   Passed    0.04 sec
+ 76/164 Test  #65: StringMatcherTest .............................   Passed    0.03 sec
+        Start  16: TypeInfoSetStorageTest
+        Start 142: MercatorProjectionTest
+ 77/164 Test #142: MercatorProjectionTest ........................   Passed    0.03 sec
+        Start  40: GeometryTest
+ 78/164 Test   #8: AsyncProcessingTest ...........................   Passed   12.55 sec
+        Start   6: AccessParseTest
+ 79/164 Test  #16: TypeInfoSetStorageTest ........................   Passed    0.06 sec
+        Start  58: GeoCoordParseTest
+ 80/164 Test #143: MapPainterSkiaTest ............................   Passed    0.11 sec
+        Start 140: FontNameResolutionTest
+ 81/164 Test  #40: GeometryTest ..................................   Passed    0.04 sec
+        Start  21: CmdLineParsingTest
+ 82/164 Test   #6: AccessParseTest ...............................   Passed    0.04 sec
+        Start 152: MapPainterWayCullingTest
+ 83/164 Test  #58: GeoCoordParseTest .............................   Passed    0.03 sec
+        Start  10: BearingTest
+ 84/164 Test  #47: BoundaryTypesTest .............................   Passed    0.11 sec
+        Start 147: MapPainterAreaPreparationTest
+ 85/164 Test  #21: CmdLineParsingTest ............................   Passed    0.04 sec
+        Start  78: TilingTest
+ 86/164 Test #140: FontNameResolutionTest ........................   Passed    0.06 sec
+        Start  82: GeoBoxTest
+ 87/164 Test  #10: BearingTest ...................................   Passed    0.04 sec
+        Start 129: Base64Test
+ 88/164 Test #152: MapPainterWayCullingTest ......................   Passed    0.07 sec
+        Start 132: SunriseSunsetTest
+ 89/164 Test  #78: TilingTest ....................................   Passed    0.03 sec
+        Start  37: TextLookupTest-Vysoká
+ 90/164 Test  #82: GeoBoxTest ....................................   Passed    0.03 sec
+        Start  77: SignalTest
+ 91/164 Test #147: MapPainterAreaPreparationTest .................   Passed    0.07 sec
+        Start  11: BitsAndBytesNeededTest
+ 92/164 Test #132: SunriseSunsetTest .............................   Passed    0.03 sec
+ 93/164 Test  #37: TextLookupTest-Vysoká ........................   Passed    0.03 sec
+        Start  76: StdByteTest
+        Start  80: WStringStringConversionTest
+ 94/164 Test #129: Base64Test ....................................   Passed    0.06 sec
+        Start  38: TextLookupTest-bosyne
+ 95/164 Test  #11: BitsAndBytesNeededTest ........................   Passed    0.03 sec
+ 96/164 Test  #77: SignalTest ....................................   Passed    0.05 sec
+        Start  79: TimeParseTest
+        Start  20: CancelableFutureTest
+ 97/164 Test  #80: WStringStringConversionTest ...................   Passed    0.03 sec
+        Start  67: SearchBreakerTest
+ 98/164 Test  #76: StdByteTest ...................................   Passed    0.04 sec
+        Start  62: ScanConversionTest
+ 99/164 Test  #38: TextLookupTest-bosyne .........................   Passed    0.03 sec
+        Start  31: OpeningHoursTest
+100/164 Test  #20: CancelableFutureTest ..........................   Passed    0.02 sec
+        Start 131: ScreenBoxTest
+101/164 Test  #67: SearchBreakerTest .............................   Passed    0.02 sec
+        Start  71: RenderLabelBoundsTest
+102/164 Test  #79: TimeParseTest .................................   Passed    0.04 sec
+        Start  12: ByteTest
+103/164 Test  #62: ScanConversionTest ............................   Passed    0.02 sec
+        Start  39: ThreadTest
+104/164 Test  #31: OpeningHoursTest ..............................   Passed    0.03 sec
+105/164 Test #131: ScreenBoxTest .................................   Passed    0.02 sec
+        Start  30: DescriptionServiceTest
+        Start  56: FileTest
+106/164 Test  #71: RenderLabelBoundsTest .........................   Passed    0.04 sec
+        Start   1: FavoriteLocationServiceTest
+107/164 Test  #39: ThreadTest ....................................   Passed    0.03 sec
+108/164 Test  #30: DescriptionServiceTest ........................   Passed    0.02 sec
+        Start  22: ColorParseTest
+        Start  54: EncodeNumberTest
+109/164 Test  #12: ByteTest ......................................   Passed    0.04 sec
+        Start  69: FramePixelLayoutTest
+110/164 Test  #56: FileTest ......................................   Passed    0.03 sec
+        Start  15: TypeResolutionTest
+111/164 Test  #22: ColorParseTest ................................   Passed    0.02 sec
+        Start  72: RouteFailureKindTest
+112/164 Test  #54: EncodeNumberTest ..............................   Passed    0.03 sec
+        Start  75: TypeIconPixelsTest
+113/164 Test   #1: FavoriteLocationServiceTest ...................   Passed    0.04 sec
+        Start  19: CalculateResolutionTest
+114/164 Test  #69: FramePixelLayoutTest ..........................   Passed    0.04 sec
+        Start 144: MapPainterRouteTest
+115/164 Test  #75: TypeIconPixelsTest ............................   Passed    0.02 sec
+        Start 146: MapPainterFrameBuffersTest
+116/164 Test  #72: RouteFailureKindTest ..........................   Passed    0.03 sec
+        Start 164: SymbolRendererCairoTest
+117/164 Test  #19: CalculateResolutionTest .......................   Passed    0.03 sec
+        Start  41: HeaderCheckTest
+118/164 Test #164: SymbolRendererCairoTest .......................   Passed    0.03 sec
+        Start  53: MapRotateTest
+119/164 Test #144: MapPainterRouteTest ...........................   Passed    0.06 sec
+        Start 153: MapPainterPointObjectCullingTest
+120/164 Test #146: MapPainterFrameBuffersTest ....................   Passed    0.05 sec
+        Start  24: FileFormatVersionTest
+121/164 Test  #53: MapRotateTest .................................   Passed    0.02 sec
+        Start  84: CheckStyleSheet-winter-sports.oss
+122/164 Test  #24: FileFormatVersionTest .........................   Passed    0.03 sec
+        Start  83: CheckStyleSheet-standard.oss
+123/164 Test #153: MapPainterPointObjectCullingTest ..............   Passed    0.05 sec
+        Start 145: MapPainterShieldTest
+124/164 Test #145: MapPainterShieldTest ..........................   Passed    0.13 sec
+        Start  89: CheckStyleSheet-cycle.oss
+125/164 Test  #15: TypeResolutionTest ............................   Passed    0.27 sec
+        Start 134: SymbolRendererSVGTest
+126/164 Test  #84: CheckStyleSheet-winter-sports.oss .............   Passed    0.19 sec
+127/164 Test  #83: CheckStyleSheet-standard.oss ..................   Passed    0.16 sec
+        Start  63: ScreenMaskTest
+        Start  64: StringUtilsTest
+128/164 Test  #63: ScreenMaskTest ................................   Passed    0.03 sec
+        Start  46: OptimizeAreaWayIdsTest
+129/164 Test #134: SymbolRendererSVGTest .........................   Passed    0.04 sec
+        Start 161: SymbolRendererSkiaTest
+130/164 Test  #64: StringUtilsTest ...............................   Passed    0.03 sec
+        Start 148: MapPainterAreaVisibilityCullTest
+131/164 Test #161: SymbolRendererSkiaTest ........................   Passed    0.05 sec
+        Start  66: SearchScopeTest
+132/164 Test  #46: OptimizeAreaWayIdsTest ........................   Passed    0.06 sec
+        Start 157: TextMetricsTest
+133/164 Test #148: MapPainterAreaVisibilityCullTest ..............   Passed    0.06 sec
+        Start  88: CheckStyleSheet-public-transport.oss
+134/164 Test  #66: SearchScopeTest ...............................   Passed    0.03 sec
+        Start 151: StyleConfigVisibilityBoundsTest
+135/164 Test  #89: CheckStyleSheet-cycle.oss .....................   Passed    0.17 sec
+        Start  32: ReaderScannerPerformanceTest
+136/164 Test #151: StyleConfigVisibilityBoundsTest ...............   Passed    0.04 sec
+        Start  86: CheckStyleSheet-railways.oss
+137/164 Test  #88: CheckStyleSheet-public-transport.oss ..........   Passed    0.07 sec
+        Start 158: TextMetricsCairoTest
+138/164 Test  #32: ReaderScannerPerformanceTest ..................   Passed    0.04 sec
+        Start 159: TextMetricsSVGTest
+139/164 Test  #86: CheckStyleSheet-railways.oss ..................   Passed    0.05 sec
+        Start  85: CheckStyleSheet-boundaries.oss
+140/164 Test  #85: CheckStyleSheet-boundaries.oss ................   Passed    0.05 sec
+        Start  13: CachePerformanceTest
+141/164 Test  #13: CachePerformanceTest ..........................   Passed    0.02 sec
+        Start  87: CheckStyleSheet-motorways.oss
+142/164 Test  #87: CheckStyleSheet-motorways.oss .................   Passed    0.07 sec
+        Start  74: RoutingProfileSpeedTest
+143/164 Test  #74: RoutingProfileSpeedTest .......................   Passed    0.04 sec
+        Start   7: AreaIndexLookupTest
+144/164 Test #157: TextMetricsTest ...............................   Passed    0.34 sec
+        Start  70: RouteStepTimeTest
+145/164 Test #159: TextMetricsSVGTest ............................   Passed    0.25 sec
+        Start  73: RouteLengthTest
+146/164 Test #158: TextMetricsCairoTest ..........................   Passed    0.29 sec
+        Start  68: RoutingProgressThrottleTest
+147/164 Test  #70: RouteStepTimeTest .............................   Passed    0.04 sec
+        Start  43: WaterIndexTest
+148/164 Test  #73: RouteLengthTest ...............................   Passed    0.04 sec
+        Start 127: LabelLayouterTest
+149/164 Test   #7: AreaIndexLookupTest ...........................   Passed    0.10 sec
+        Start 156: MapPainterLabelReuseTest
+150/164 Test  #68: RoutingProgressThrottleTest ...................   Passed    0.05 sec
+        Start  33: MultiDBRoutingTest
+151/164 Test  #43: WaterIndexTest ................................   Passed    0.07 sec
+        Start 155: MapPainterLabelCullingTest
+152/164 Test #127: LabelLayouterTest .............................   Passed    0.07 sec
+        Start  61: RoutePostprocessorTest
+153/164 Test #156: MapPainterLabelReuseTest ......................   Passed    0.07 sec
+        Start 160: TextMetricsReferenceTest
+154/164 Test #155: MapPainterLabelCullingTest ....................   Passed    0.04 sec
+        Start  29: LocationDescriptionServiceTest
+155/164 Test  #33: MultiDBRoutingTest ............................   Passed    0.10 sec
+        Start 128: LabelPathTest
+156/164 Test #160: TextMetricsReferenceTest ......................   Passed    0.06 sec
+        Start  55: FeatureLabelTest
+157/164 Test  #61: RoutePostprocessorTest ........................   Passed    0.08 sec
+158/164 Test #128: LabelPathTest .................................   Passed    0.05 sec
+159/164 Test  #29: LocationDescriptionServiceTest ................   Passed    0.06 sec
+160/164 Test  #55: FeatureLabelTest ..............................   Passed    0.05 sec
+161/164 Test  #28: LocationLookupTest ............................   Passed    3.51 sec
+162/164 Test  #41: HeaderCheckTest ...............................   Passed    2.28 sec
+163/164 Test  #51: VectorSelfAppendTest ..........................   Passed   18.87 sec
+164/164 Test  #35: ThreadedDatabaseTest ..........................   Passed   29.64 sec
+
+100% tests passed out of 164
+
+Total Test time (real) =  29.67 sec
