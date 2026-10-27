@@ -18,6 +18,9 @@ set(HEADER_FILES
   include/osmscoutclient/ClientImportExport.h
   include/osmscoutclient/OnlineTileProvider.h
   include/osmscoutclient/POILookupModule.h
+  include/osmscoutclient/routing/RouteStep.h
+  include/osmscoutclient/routing/RouteStepBuilder.h
+  include/osmscoutclient/routing/RouteStepCollector.h
   include/osmscoutclient/Settings.h
   include/osmscoutclient/VoiceProvider.h
 )
@@ -36,6 +39,8 @@ set(SOURCE_FILES
   src/osmscoutclient/MapProvider.cpp
   src/osmscoutclient/OnlineTileProvider.cpp
   src/osmscoutclient/POILookupModule.cpp
+  src/osmscoutclient/routing/RouteStepBuilder.cpp
+  src/osmscoutclient/routing/RouteStepCollector.cpp
   src/osmscoutclient/Settings.cpp
   src/osmscoutclient/VoiceProvider.cpp
 )

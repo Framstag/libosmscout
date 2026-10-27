@@ -299,6 +299,21 @@ osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest
 #---- RouteStepTime
 osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RouteStepModel
+# The route step model and its producers: one step per described node, leg values, the completeness
+# guard against the description kinds of core, and the live-guidance progress facts.
+osmscout_test_project(NAME RouteStepModelTest SOURCES src/RouteStepModelTest.cpp TARGET OSMScout::Client)
+set_tests_properties(RouteStepModelTest PROPERTIES ENVIRONMENT "SOURCE_ROOT=${CMAKE_SOURCE_DIR}")
+
+#---- RouteStepCollision
+# The new model must not shadow the Qt client's exported route step: a translation unit that
+# includes both headers has to name the one it means.
+if(${OSMSCOUT_BUILD_CLIENT_QT} AND TARGET OSMScout::ClientQt)
+  osmscout_test_project(NAME RouteStepCollisionTest SOURCES src/RouteStepCollisionTest.cpp TARGET OSMScout::Client OSMScout::ClientQt)
+else()
+  message("Skip RouteStepCollision test, libosmscout-client-qt is missing.")
+endif()
+
 #---- RenderLabelBounds
 # The Java render states the label line-wrapping bounds instead of inheriting them, so a long
 # multi-word label is wrapped instead of running across the map. The four values come from a

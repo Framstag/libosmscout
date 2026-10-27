@@ -12,6 +12,8 @@ osmscoutclientSrc = [
              'src/osmscoutclient/MapProvider.cpp',
              'src/osmscoutclient/OnlineTileProvider.cpp',
              'src/osmscoutclient/POILookupModule.cpp',
+             'src/osmscoutclient/routing/RouteStepBuilder.cpp',
+             'src/osmscoutclient/routing/RouteStepCollector.cpp',
              'src/osmscoutclient/Settings.cpp',
              'src/osmscoutclient/VoiceProvider.cpp'
           ]

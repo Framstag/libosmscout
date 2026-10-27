@@ -158,6 +158,14 @@ static const std::set<std::string> allowedDependencies{
     "osmscoutclient => osmscout.log",
     "osmscoutclient => osmscoutmap",
 
+    // The route step model is the client library's routing-facing view. It depends on the client's
+    // own export header and on the core types it projects (route descriptions, geometry, distance,
+    // time, lanes).
+    "osmscoutclient.routing => osmscoutclient",
+    "osmscoutclient.routing => osmscout",
+    "osmscoutclient.routing => osmscout.routing",
+    "osmscoutclient.routing => osmscout.util",
+
     "osmscoutclientqt => osmscout.system",
     "osmscoutclientqt => osmscout.async",
     "osmscoutclientqt => osmscout.log",

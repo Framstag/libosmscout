@@ -1338,6 +1338,15 @@ public class MainController implements Initializable {
         }
         nextTurnStreet.setText(text);
 
+        // The exit reference and the destination sign texts, taken from the instruction's fields.
+        // An instruction without them is rendered exactly as before (spec:
+        // turn-by-turn-instructions - the next-turn display shows the exit and the destination as
+        // data).
+        String detail = RouteRowBuilder.nextTurnDetail(instruction);
+        if (!detail.isEmpty()) {
+            nextTurnStreet.setText(text.isEmpty() ? detail : text + "\n" + detail);
+        }
+
         // Row 2: "next next" hint
         if (instruction.hasNextNext()) {
             nextNextDistance.setText(formatDistance(instruction.nextNextDistanceTo));
