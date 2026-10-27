@@ -97,12 +97,12 @@ JavaScout/src/main/java/com/framstag/libosmscout/
   MapInteractionHandler.java  ← Pan, zoom, long-press gestures
   SearchOverlay.java          ← Location search + favorites tab
   RoutePanel.java             ← Route input, calculation, navigation status
+  RouteRowBuilder.java        ← Rows of the route description list and the next-turn detail line
   DescriptionOverlay.java     ← Object description popup
   FavLocationDialog.java      ← Favorites CRUD dialog
   FavoritePickerDialog.java   ← Favorites picker for route input
   TrackPlayer.java            ← GPX track playback as simulated GPS
   CurrentRoadInfo.java        ← Road info data class
-  RouteInstruction.java       ← Parsed route instruction for card rendering
   Config.java                 ← Config file read/write
   UIScale.java                ← DPI-aware scaling
   OverlayLayout.java          ← Shared overlay positioning logic
@@ -207,7 +207,8 @@ MainController (orchestrator)
 |------|---------|-------------|
 | `OSMScoutClient` | `client` | Central JNI client, created via builder |
 | `NavigationController` | `client` | Live navigation session handle |
-| `RouteEntry` | `client` | Route calculation result with geometry + metadata |
+| `RouteEntry` | `client` | Route calculation result with geometry + metadata + structured steps |
+| `RouteStep` | `client` | One manoeuvre with every description of its route node; values are untranslated |
 | `LocationEntry` | `client` | Location search result |
 | `ObjectDescription` / `DescriptionEntry` | `client` | Structured object info |
 | `TrackPoint` | `client` | GPX track point |
@@ -236,9 +237,8 @@ MainController (orchestrator)
 - Async operations use `javafx.concurrent.Task` on daemon threads
 - UI updates marshalled via `Platform.runLater()`
 - JNI methods return `null` or empty arrays on error
-- Synthetic POI types (`_route_start`, `_route_end`, `_favorite`, `_search_selected`, `_track`) registered via `OSMScoutClientBuilder.withCustomPoiType()`
-- Map rotation angle: radians, counter-clockwise (math convention), 0 = north-up
-- Bearing: degrees, clockwise (navigation convention)
+- Synthetic POI types (`_route_start`, `_route_end`, `_favorite`, `_search_selected`, `_track`) registered via `OSMScoutClientBuilder.withCustomPoiType()`- Map rotation angle: radians, counter-clockwise (math convention), 0 = north-up
+- Route description list: rows come from `RouteEntry.steps` through `RouteRowBuilder` (one row per manoeuvre step, plus a row for a POI on the route); a result without steps falls back to its description lines and drops the header structurally, never by its text. The next-turn overlay appends the exit reference, junction name and destination signs from the instruction's fields via `RouteRowBuilder.nextTurnDetail`.- Bearing: degrees, clockwise (navigation convention)
 
 ### Pitfalls
 - Native library (`libosmscout_client_java`) must be built separately via Meson

@@ -698,10 +698,14 @@ public class RoutePanel extends StackPane {
 
     private void showDescription(RouteEntry route) {
         instructionBox.getChildren().clear();
-        if (route.descriptions != null && route.descriptions.length > 0) {
-            for (String d : route.descriptions) {
-                if (d == null || d.startsWith("---")) continue;
-                instructionBox.getChildren().add(createInstructionCard(d, ""));
+
+        // One row per published route step, taken from the route result's own steps. A result
+        // without steps falls back to its description lines inside the builder.
+        java.util.List<RouteRowBuilder.Row> rows = RouteRowBuilder.buildRows(route);
+
+        if (!rows.isEmpty()) {
+            for (RouteRowBuilder.Row row : rows) {
+                instructionBox.getChildren().add(createInstructionCard(row.primary, row.secondary));
             }
         } else {
             // Fallback: show distance/duration

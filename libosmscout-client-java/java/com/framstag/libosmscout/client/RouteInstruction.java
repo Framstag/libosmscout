@@ -45,6 +45,31 @@ public class RouteInstruction {
     /** Short description, e.g. "Turn left". */
     public final String shortDescription;
 
+    // -- Manoeuvre facts of the instruction's route node --
+
+    /**
+     * Exit reference of the motorway junction at this manoeuvre (for example {@code "12"}), or
+     * {@code null} when the node carries no junction. Read as data, never parsed out of
+     * {@link #description}.
+     */
+    public final String junctionRef;
+
+    /** Name of the motorway junction at this manoeuvre, or {@code null} when absent. */
+    public final String junctionName;
+
+    /**
+     * The destination sign text of this manoeuvre as the raw tag, semicolon separated, or
+     * {@code null} when the node carries no destination description. Splitting it is the client's
+     * job.
+     */
+    public final String destinations;
+
+    /** Type name of the way (for example {@code highway_secondary}), or {@code null} when absent. */
+    public final String wayType;
+
+    /** Maximum speed of the way in km/h, or {@code null} when unknown. */
+    public final Integer maxSpeed;
+
     // -- Roundabout manoeuvre fields --
 
     /**
@@ -106,7 +131,6 @@ public class RouteInstruction {
         this(distanceTo, 0.0, 0.0, turnType, streetName, description, shortDescription,
              0.0, TurnType.STRAIGHT_ON, "", "", 0, true, 0);
     }
-
     /**
      * Full constructor including per-step values and optional "next next" hint.
      *
@@ -139,20 +163,10 @@ public class RouteInstruction {
                             int roundaboutExitNumber,
                             boolean roundaboutClockwise,
                             int nextNextRoundaboutExitNumber) {
-        this.distanceTo = distanceTo;
-        this.timeTo = timeTo;
-        this.legDistance = legDistance;
-        this.turnType = turnType;
-        this.streetName = streetName != null ? streetName : "";
-        this.description = description != null ? description : "";
-        this.shortDescription = shortDescription != null ? shortDescription : "";
-        this.nextNextDistanceTo = nextNextDistanceTo;
-        this.nextNextTurnType = nextNextTurnType != null ? nextNextTurnType : TurnType.STRAIGHT_ON;
-        this.nextNextDescription = nextNextDescription != null ? nextNextDescription : "";
-        this.nextNextShortDescription = nextNextShortDescription != null ? nextNextShortDescription : "";
-        this.roundaboutExitNumber = roundaboutExitNumber;
-        this.roundaboutClockwise = roundaboutClockwise;
-        this.nextNextRoundaboutExitNumber = nextNextRoundaboutExitNumber;
+        this(distanceTo, timeTo, legDistance, turnType, streetName, description, shortDescription,
+             nextNextDistanceTo, nextNextTurnType, nextNextDescription, nextNextShortDescription,
+             roundaboutExitNumber, roundaboutClockwise, nextNextRoundaboutExitNumber,
+             null, null, null, null, null);
     }
 
     /**
@@ -192,6 +206,59 @@ public class RouteInstruction {
     }
 
     /**
+     * Full constructor including the manoeuvre facts of the route node.
+     *<p>
+     * The five trailing values are the "absent"-capable facts: {@code null} means the node
+     * carries none of them, which is distinguishable from an empty or zero value. {@code null}
+     * for all five is what every constructor that predates them produces.
+     *
+     * @param junctionRef     exit reference of the motorway junction, or {@code null}
+     * @param junctionName    name of the motorway junction, or {@code null}
+     * @param destinations    raw semicolon separated destination tag, or {@code null}
+     * @param wayType         type name of the way, or {@code null}
+     * @param maxSpeed        maximum speed in km/h, or {@code null}
+     */
+    public RouteInstruction(double distanceTo,
+                            double timeTo,
+                            double legDistance,
+                            TurnType turnType,
+                            String streetName,
+                            String description,
+                            String shortDescription,
+                            double nextNextDistanceTo,
+                            TurnType nextNextTurnType,
+                            String nextNextDescription,
+                            String nextNextShortDescription,
+                            int roundaboutExitNumber,
+                            boolean roundaboutClockwise,
+                            int nextNextRoundaboutExitNumber,
+                            String junctionRef,
+                            String junctionName,
+                            String destinations,
+                            String wayType,
+                            Integer maxSpeed) {
+        this.distanceTo = distanceTo;
+        this.timeTo = timeTo;
+        this.legDistance = legDistance;
+        this.turnType = turnType;
+        this.streetName = streetName != null ? streetName : "";
+        this.description = description != null ? description : "";
+        this.shortDescription = shortDescription != null ? shortDescription : "";
+        this.nextNextDistanceTo = nextNextDistanceTo;
+        this.nextNextTurnType = nextNextTurnType != null ? nextNextTurnType : TurnType.STRAIGHT_ON;
+        this.nextNextDescription = nextNextDescription != null ? nextNextDescription : "";
+        this.nextNextShortDescription = nextNextShortDescription != null ? nextNextShortDescription : "";
+        this.roundaboutExitNumber = roundaboutExitNumber;
+        this.roundaboutClockwise = roundaboutClockwise;
+        this.nextNextRoundaboutExitNumber = nextNextRoundaboutExitNumber;
+        this.junctionRef = junctionRef;
+        this.junctionName = junctionName;
+        this.destinations = destinations;
+        this.wayType = wayType;
+        this.maxSpeed = maxSpeed;
+    }
+
+    /**
      * Constructor without the roundabout fields, kept so an existing caller (this library's own
      * tests included) compiles unchanged. The roundabout fields take their "no roundabout"
      * defaults, which is the behaviour such a caller observed before those fields existed.
@@ -223,7 +290,6 @@ public class RouteInstruction {
              nextNextDistanceTo, nextNextTurnType, nextNextDescription, nextNextShortDescription,
              0, true, 0);
     }
-
     /**
      * Whether a "next next" hint is present.
      *

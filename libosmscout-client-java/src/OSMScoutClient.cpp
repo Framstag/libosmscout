@@ -45,6 +45,8 @@
 #include <osmscoutclient/FavoriteStore.h>
 #include <osmscoutclient/DatabasePathRegistry.h>
 #include <osmscoutclient/Settings.h>
+#include <osmscoutclient/routing/RouteStep.h>
+#include <osmscoutclient/routing/RouteStepCollector.h>
 
 #include <osmscout/db/Database.h>
 
@@ -461,6 +463,1003 @@ using JavaNavigationControllerRef = std::shared_ptr<JavaNavigationController>;
 static jclass g_RouteEntryClass = nullptr;
 
 // --------------------------------------------------------------------------
+// RouteStep projection: cached classes, constructors and field ids
+//
+// The route step model crosses the boundary as nested DTO objects, so every sub-record has its
+// own Java class. All of them are resolved and cached here, on the main thread with the correct
+// classloader - FindClass does not work on the background routing thread.
+// --------------------------------------------------------------------------
+
+namespace {
+
+struct RouteStepJni
+{
+  jclass    stepCls=nullptr;
+  jmethodID stepCtor=nullptr;
+
+  jfieldID  fKind=nullptr;
+  jfieldID  fDatabaseId=nullptr;
+  jfieldID  fCurrentNodeIndex=nullptr;
+  jfieldID  fPathObjectOffset=nullptr;
+  jfieldID  fPathObjectType=nullptr;
+  jfieldID  fTargetNodeIndex=nullptr;
+  jfieldID  fLat=nullptr;
+  jfieldID  fLon=nullptr;
+  jfieldID  fDistanceFromStart=nullptr;
+  jfieldID  fTimeFromStart=nullptr;
+  jfieldID  fObjectOffsets=nullptr;
+  jfieldID  fObjectTypes=nullptr;
+  jfieldID  fLegDistance=nullptr;
+  jfieldID  fLegTime=nullptr;
+  jfieldID  fName=nullptr;
+  jfieldID  fNameChanged=nullptr;
+  jfieldID  fTypeName=nullptr;
+  jfieldID  fCrossingWays=nullptr;
+  jfieldID  fDirection=nullptr;
+  jfieldID  fTurn=nullptr;
+  jfieldID  fRoundaboutEnter=nullptr;
+  jfieldID  fRoundaboutLeave=nullptr;
+  jfieldID  fMotorwayEnter=nullptr;
+  jfieldID  fMotorwayChange=nullptr;
+  jfieldID  fMotorwayLeave=nullptr;
+  jfieldID  fJunction=nullptr;
+  jfieldID  fDestination=nullptr;
+  jfieldID  fMaxSpeed=nullptr;
+  jfieldID  fLanes=nullptr;
+  jfieldID  fSuggestedLanes=nullptr;
+  jfieldID  fPoi=nullptr;
+  jfieldID  fVia=nullptr;
+  jfieldID  fStart=nullptr;
+  jfieldID  fTarget=nullptr;
+  jfieldID  fRemainingDistance=nullptr;
+  jfieldID  fRemainingTime=nullptr;
+  jfieldID  fNextNext=nullptr;
+
+  jclass    nameCls=nullptr;
+  jmethodID nameCtor=nullptr;
+  jfieldID  fNameName=nullptr;
+  jfieldID  fNameRef=nullptr;
+
+  jclass    nameChangedCls=nullptr;
+  jmethodID nameChangedCtor=nullptr;
+  jfieldID  fNameChangedFrom=nullptr;
+  jfieldID  fNameChangedTo=nullptr;
+
+  jclass    crossingWaysCls=nullptr;
+  jmethodID crossingWaysCtor=nullptr;
+  jfieldID  fCrossingWaysExitCount=nullptr;
+  jfieldID  fCrossingWaysOrigin=nullptr;
+  jfieldID  fCrossingWaysTarget=nullptr;
+  jfieldID  fCrossingWaysOthers=nullptr;
+
+  jclass    directionCls=nullptr;
+  jmethodID directionCtor=nullptr;
+  jfieldID  fDirectionTurnAngle=nullptr;
+  jfieldID  fDirectionCurveAngle=nullptr;
+  jfieldID  fDirectionTurn=nullptr;
+  jfieldID  fDirectionCurve=nullptr;
+
+  jclass    roundaboutEnterCls=nullptr;
+  jmethodID roundaboutEnterCtor=nullptr;
+  jfieldID  fRoundaboutEnterClockwise=nullptr;
+
+  jclass    roundaboutLeaveCls=nullptr;
+  jmethodID roundaboutLeaveCtor=nullptr;
+  jfieldID  fRoundaboutLeaveExitCount=nullptr;
+  jfieldID  fRoundaboutLeaveClockwise=nullptr;
+
+  jclass    motorwayEnterCls=nullptr;
+  jmethodID motorwayEnterCtor=nullptr;
+  jfieldID  fMotorwayEnterTo=nullptr;
+
+  jclass    motorwayChangeCls=nullptr;
+  jmethodID motorwayChangeCtor=nullptr;
+  jfieldID  fMotorwayChangeFrom=nullptr;
+  jfieldID  fMotorwayChangeTo=nullptr;
+  jfieldID  fMotorwayChangeMove=nullptr;
+
+  jclass    motorwayLeaveCls=nullptr;
+  jmethodID motorwayLeaveCtor=nullptr;
+  jfieldID  fMotorwayLeaveFrom=nullptr;
+  jfieldID  fMotorwayLeaveMove=nullptr;
+
+  jclass    laneCls=nullptr;
+  jmethodID laneCtor=nullptr;
+  jfieldID  fLaneOneway=nullptr;
+  jfieldID  fLaneCount=nullptr;
+  jfieldID  fLaneTurns=nullptr;
+
+  jclass    suggestedLaneCls=nullptr;
+  jmethodID suggestedLaneCtor=nullptr;
+  jfieldID  fSuggestedLaneFrom=nullptr;
+  jfieldID  fSuggestedLaneTo=nullptr;
+  jfieldID  fSuggestedLaneTurn=nullptr;
+
+  jclass    poiCls=nullptr;
+  jmethodID poiCtor=nullptr;
+  jfieldID  fPoiDatabaseId=nullptr;
+  jfieldID  fPoiObjectOffset=nullptr;
+  jfieldID  fPoiObjectType=nullptr;
+  jfieldID  fPoiName=nullptr;
+  jfieldID  fPoiDistance=nullptr;
+
+  jclass    viaCls=nullptr;
+  jmethodID viaCtor=nullptr;
+  jfieldID  fViaSectionNumber=nullptr;
+  jfieldID  fViaNodeCount=nullptr;
+
+  jclass    kindCls=nullptr;
+  jmethodID kindValueOf=nullptr;
+
+  jclass    turnTypeCls=nullptr;
+  jmethodID turnTypeFromString=nullptr;
+
+  jclass    laneTurnCls=nullptr;
+  jmethodID laneTurnFromId=nullptr;
+
+  jclass    integerCls=nullptr;
+  jmethodID integerValueOf=nullptr;
+
+  jclass    doubleCls=nullptr;
+  jmethodID doubleValueOf=nullptr;
+
+  jclass    mapCls=nullptr;
+  jmethodID mapCtor=nullptr;
+  jmethodID mapPut=nullptr;
+  jclass    longCls=nullptr;
+  jmethodID longValueOf=nullptr;
+};
+
+RouteStepJni g_RouteStepJni;
+
+jclass CacheGlobalClass(JNIEnv *env, const char *name)
+{
+  jclass local=env->FindClass(name);
+
+  if (local==nullptr) {
+    env->ExceptionClear();
+    return nullptr;
+  }
+
+  auto global=static_cast<jclass>(env->NewGlobalRef(local));
+
+  env->DeleteLocalRef(local);
+
+  return global;
+}
+
+jmethodID CacheConstructor(JNIEnv *env, jclass cls)
+{
+  return env->GetMethodID(cls, "<init>", "()V");
+}
+
+/**
+ * Resolve every class, constructor and field the projection writes. Returns false when the Java
+ * side does not carry the matching member, so a stale JAR is reported at load time instead of
+ * producing silently empty steps.
+ */
+bool InitRouteStepJni(JNIEnv *env)
+{
+  auto &jni=g_RouteStepJni;
+
+  jni.stepCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep");
+  jni.nameCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$Name");
+  jni.nameChangedCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$NameChanged");
+  jni.crossingWaysCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$CrossingWays");
+  jni.directionCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$Direction");
+  jni.roundaboutEnterCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$RoundaboutEnter");
+  jni.roundaboutLeaveCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$RoundaboutLeave");
+  jni.motorwayEnterCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$MotorwayEnter");
+  jni.motorwayChangeCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$MotorwayChange");
+  jni.motorwayLeaveCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$MotorwayLeave");
+  jni.laneCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$Lane");
+  jni.suggestedLaneCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$SuggestedLane");
+  jni.poiCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$Poi");
+  jni.viaCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$Via");
+  jni.kindCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/RouteStep$Kind");
+  jni.turnTypeCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/TurnType");
+  jni.laneTurnCls=CacheGlobalClass(env, "com/framstag/libosmscout/client/LaneTurn");
+  jni.integerCls=CacheGlobalClass(env, "java/lang/Integer");
+  jni.doubleCls=CacheGlobalClass(env, "java/lang/Double");
+  jni.mapCls=CacheGlobalClass(env, "java/util/HashMap");
+  jni.longCls=CacheGlobalClass(env, "java/lang/Long");
+
+  if (jni.stepCls==nullptr || jni.nameCls==nullptr || jni.nameChangedCls==nullptr ||
+      jni.crossingWaysCls==nullptr || jni.directionCls==nullptr ||
+      jni.roundaboutEnterCls==nullptr || jni.roundaboutLeaveCls==nullptr ||
+      jni.motorwayEnterCls==nullptr || jni.motorwayChangeCls==nullptr ||
+      jni.motorwayLeaveCls==nullptr || jni.laneCls==nullptr ||
+      jni.suggestedLaneCls==nullptr || jni.poiCls==nullptr || jni.viaCls==nullptr ||
+      jni.kindCls==nullptr || jni.turnTypeCls==nullptr || jni.laneTurnCls==nullptr ||
+      jni.integerCls==nullptr || jni.doubleCls==nullptr || jni.mapCls==nullptr || jni.longCls==nullptr) {
+    return false;
+  }
+
+  jni.stepCtor=CacheConstructor(env, jni.stepCls);
+  jni.nameCtor=CacheConstructor(env, jni.nameCls);
+  jni.nameChangedCtor=CacheConstructor(env, jni.nameChangedCls);
+  jni.crossingWaysCtor=CacheConstructor(env, jni.crossingWaysCls);
+  jni.directionCtor=CacheConstructor(env, jni.directionCls);
+  jni.roundaboutEnterCtor=CacheConstructor(env, jni.roundaboutEnterCls);
+  jni.roundaboutLeaveCtor=CacheConstructor(env, jni.roundaboutLeaveCls);
+  jni.motorwayEnterCtor=CacheConstructor(env, jni.motorwayEnterCls);
+  jni.motorwayChangeCtor=CacheConstructor(env, jni.motorwayChangeCls);
+  jni.motorwayLeaveCtor=CacheConstructor(env, jni.motorwayLeaveCls);
+  jni.laneCtor=CacheConstructor(env, jni.laneCls);
+  jni.suggestedLaneCtor=CacheConstructor(env, jni.suggestedLaneCls);
+  jni.poiCtor=CacheConstructor(env, jni.poiCls);
+  jni.viaCtor=CacheConstructor(env, jni.viaCls);
+  jni.mapCtor=CacheConstructor(env, jni.mapCls);
+
+  jni.kindValueOf=env->GetStaticMethodID(
+      jni.kindCls, "valueOf",
+      "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/RouteStep$Kind;");
+  jni.turnTypeFromString=env->GetStaticMethodID(
+      jni.turnTypeCls, "fromString",
+      "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/TurnType;");
+  jni.laneTurnFromId=env->GetStaticMethodID(
+      jni.laneTurnCls, "fromId", "(I)Lcom/framstag/libosmscout/client/LaneTurn;");
+  jni.integerValueOf=env->GetStaticMethodID(
+      jni.integerCls, "valueOf", "(I)Ljava/lang/Integer;");
+  jni.doubleValueOf=env->GetStaticMethodID(
+      jni.doubleCls, "valueOf", "(D)Ljava/lang/Double;");
+  jni.longValueOf=env->GetStaticMethodID(
+      jni.longCls, "valueOf", "(J)Ljava/lang/Long;");
+  jni.mapPut=env->GetMethodID(
+      jni.mapCls, "put",
+      "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+
+  if (jni.stepCtor==nullptr || jni.nameCtor==nullptr || jni.nameChangedCtor==nullptr ||
+      jni.crossingWaysCtor==nullptr || jni.directionCtor==nullptr ||
+      jni.roundaboutEnterCtor==nullptr || jni.roundaboutLeaveCtor==nullptr ||
+      jni.motorwayEnterCtor==nullptr || jni.motorwayChangeCtor==nullptr ||
+      jni.motorwayLeaveCtor==nullptr || jni.laneCtor==nullptr ||
+      jni.suggestedLaneCtor==nullptr || jni.poiCtor==nullptr || jni.viaCtor==nullptr ||
+      jni.mapCtor==nullptr || jni.kindValueOf==nullptr ||
+      jni.turnTypeFromString==nullptr || jni.laneTurnFromId==nullptr ||
+      jni.integerValueOf==nullptr || jni.doubleValueOf==nullptr ||
+      jni.longValueOf==nullptr || jni.mapPut==nullptr) {
+    return false;
+  }
+
+  const char *stepClass="Lcom/framstag/libosmscout/client/RouteStep;";
+  const char *nameClass="Lcom/framstag/libosmscout/client/RouteStep$Name;";
+  const char *nameChangedClass="Lcom/framstag/libosmscout/client/RouteStep$NameChanged;";
+  const char *crossingWaysClass="Lcom/framstag/libosmscout/client/RouteStep$CrossingWays;";
+  const char *directionClass="Lcom/framstag/libosmscout/client/RouteStep$Direction;";
+  const char *roundaboutEnterClass="Lcom/framstag/libosmscout/client/RouteStep$RoundaboutEnter;";
+  const char *roundaboutLeaveClass="Lcom/framstag/libosmscout/client/RouteStep$RoundaboutLeave;";
+  const char *motorwayEnterClass="Lcom/framstag/libosmscout/client/RouteStep$MotorwayEnter;";
+  const char *motorwayChangeClass="Lcom/framstag/libosmscout/client/RouteStep$MotorwayChange;";
+  const char *motorwayLeaveClass="Lcom/framstag/libosmscout/client/RouteStep$MotorwayLeave;";
+  const char *laneClass="Lcom/framstag/libosmscout/client/RouteStep$Lane;";
+  const char *suggestedLaneClass="Lcom/framstag/libosmscout/client/RouteStep$SuggestedLane;";
+  const char *poiClass="Lcom/framstag/libosmscout/client/RouteStep$Poi;";
+  const char *viaClass="Lcom/framstag/libosmscout/client/RouteStep$Via;";
+  const char *kindClass="Lcom/framstag/libosmscout/client/RouteStep$Kind;";
+  const char *turnTypeClass="Lcom/framstag/libosmscout/client/TurnType;";
+  const char *laneTurnClass="Lcom/framstag/libosmscout/client/LaneTurn;";
+
+  struct FieldId {
+    jfieldID *field;
+    const char *name;
+    const char *signature;
+  };
+
+  const FieldId stepFields[]{
+    {&jni.fKind, "kind", kindClass},
+    {&jni.fDatabaseId, "databaseId", "J"},
+    {&jni.fCurrentNodeIndex, "currentNodeIndex", "J"},
+    {&jni.fPathObjectOffset, "pathObjectOffset", "J"},
+    {&jni.fPathObjectType, "pathObjectType", "I"},
+    {&jni.fTargetNodeIndex, "targetNodeIndex", "J"},
+    {&jni.fLat, "lat", "D"},
+    {&jni.fLon, "lon", "D"},
+    {&jni.fDistanceFromStart, "distanceFromStart", "D"},
+    {&jni.fTimeFromStart, "timeFromStart", "D"},
+    {&jni.fObjectOffsets, "objectOffsets", "[J"},
+    {&jni.fObjectTypes, "objectTypes", "[I"},
+    {&jni.fLegDistance, "legDistance", "D"},
+    {&jni.fLegTime, "legTime", "D"},
+    {&jni.fName, "name", nameClass},
+    {&jni.fNameChanged, "nameChanged", nameChangedClass},
+    {&jni.fTypeName, "typeName", "Ljava/lang/String;"},
+    {&jni.fCrossingWays, "crossingWays", crossingWaysClass},
+    {&jni.fDirection, "direction", directionClass},
+    {&jni.fTurn, "turn", turnTypeClass},
+    {&jni.fRoundaboutEnter, "roundaboutEnter", roundaboutEnterClass},
+    {&jni.fRoundaboutLeave, "roundaboutLeave", roundaboutLeaveClass},
+    {&jni.fMotorwayEnter, "motorwayEnter", motorwayEnterClass},
+    {&jni.fMotorwayChange, "motorwayChange", motorwayChangeClass},
+    {&jni.fMotorwayLeave, "motorwayLeave", motorwayLeaveClass},
+    {&jni.fJunction, "junction", nameClass},
+    {&jni.fDestination, "destination", "Ljava/lang/String;"},
+    {&jni.fMaxSpeed, "maxSpeed", "Ljava/lang/Integer;"},
+    {&jni.fLanes, "lanes", laneClass},
+    {&jni.fSuggestedLanes, "suggestedLanes", suggestedLaneClass},
+    {&jni.fPoi, "poi", poiClass},
+    {&jni.fVia, "via", viaClass},
+    {&jni.fStart, "start", "Ljava/lang/String;"},
+    {&jni.fTarget, "target", "Ljava/lang/String;"},
+    {&jni.fRemainingDistance, "remainingDistance", "Ljava/lang/Double;"},
+    {&jni.fRemainingTime, "remainingTime", "Ljava/lang/Double;"},
+    {&jni.fNextNext, "nextNext", stepClass},
+  };
+
+  for (const auto &entry : stepFields) {
+    *entry.field=env->GetFieldID(jni.stepCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId nameFields[]{
+    {&jni.fNameName, "name", "Ljava/lang/String;"},
+    {&jni.fNameRef, "ref", "Ljava/lang/String;"},
+  };
+
+  for (const auto &entry : nameFields) {
+    *entry.field=env->GetFieldID(jni.nameCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId nameChangedFields[]{
+    {&jni.fNameChangedFrom, "from", nameClass},
+    {&jni.fNameChangedTo, "to", nameClass},
+  };
+
+  for (const auto &entry : nameChangedFields) {
+    *entry.field=env->GetFieldID(jni.nameChangedCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId crossingWaysFields[]{
+    {&jni.fCrossingWaysExitCount, "exitCount", "J"},
+    {&jni.fCrossingWaysOrigin, "origin", nameClass},
+    {&jni.fCrossingWaysTarget, "target", nameClass},
+    {&jni.fCrossingWaysOthers, "others", "[Lcom/framstag/libosmscout/client/RouteStep$Name;"},
+  };
+
+  for (const auto &entry : crossingWaysFields) {
+    *entry.field=env->GetFieldID(jni.crossingWaysCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId directionFields[]{
+    {&jni.fDirectionTurnAngle, "turnAngle", "D"},
+    {&jni.fDirectionCurveAngle, "curveAngle", "D"},
+    {&jni.fDirectionTurn, "turn", turnTypeClass},
+    {&jni.fDirectionCurve, "curve", turnTypeClass},
+  };
+
+  for (const auto &entry : directionFields) {
+    *entry.field=env->GetFieldID(jni.directionCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  jni.fRoundaboutEnterClockwise=env->GetFieldID(jni.roundaboutEnterCls, "clockwise", "Z");
+  if (jni.fRoundaboutEnterClockwise==nullptr) {
+    env->ExceptionClear();
+    return false;
+  }
+
+  const FieldId roundaboutLeaveFields[]{
+    {&jni.fRoundaboutLeaveExitCount, "exitCountTaken", "J"},
+    {&jni.fRoundaboutLeaveClockwise, "clockwise", "Z"},
+  };
+
+  for (const auto &entry : roundaboutLeaveFields) {
+    *entry.field=env->GetFieldID(jni.roundaboutLeaveCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  jni.fMotorwayEnterTo=env->GetFieldID(jni.motorwayEnterCls, "to", nameClass);
+  if (jni.fMotorwayEnterTo==nullptr) {
+    env->ExceptionClear();
+    return false;
+  }
+
+  const FieldId motorwayChangeFields[]{
+    {&jni.fMotorwayChangeFrom, "from", nameClass},
+    {&jni.fMotorwayChangeTo, "to", nameClass},
+    {&jni.fMotorwayChangeMove, "move", turnTypeClass},
+  };
+
+  for (const auto &entry : motorwayChangeFields) {
+    *entry.field=env->GetFieldID(jni.motorwayChangeCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId motorwayLeaveFields[]{
+    {&jni.fMotorwayLeaveFrom, "from", nameClass},
+    {&jni.fMotorwayLeaveMove, "move", turnTypeClass},
+  };
+
+  for (const auto &entry : motorwayLeaveFields) {
+    *entry.field=env->GetFieldID(jni.motorwayLeaveCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId laneFields[]{
+    {&jni.fLaneOneway, "oneway", "Z"},
+    {&jni.fLaneCount, "count", "I"},
+    {&jni.fLaneTurns, "turns", "[Lcom/framstag/libosmscout/client/LaneTurn;"},
+  };
+
+  for (const auto &entry : laneFields) {
+    *entry.field=env->GetFieldID(jni.laneCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId suggestedLaneFields[]{
+    {&jni.fSuggestedLaneFrom, "from", "I"},
+    {&jni.fSuggestedLaneTo, "to", "I"},
+    {&jni.fSuggestedLaneTurn, "turn", laneTurnClass},
+  };
+
+  for (const auto &entry : suggestedLaneFields) {
+    *entry.field=env->GetFieldID(jni.suggestedLaneCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId poiFields[]{
+    {&jni.fPoiDatabaseId, "databaseId", "J"},
+    {&jni.fPoiObjectOffset, "objectOffset", "J"},
+    {&jni.fPoiObjectType, "objectType", "I"},
+    {&jni.fPoiName, "name", nameClass},
+    {&jni.fPoiDistance, "distance", "D"},
+  };
+
+  for (const auto &entry : poiFields) {
+    *entry.field=env->GetFieldID(jni.poiCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  const FieldId viaFields[]{
+    {&jni.fViaSectionNumber, "sectionNumber", "I"},
+    {&jni.fViaNodeCount, "nodeCount", "I"},
+  };
+
+  for (const auto &entry : viaFields) {
+    *entry.field=env->GetFieldID(jni.viaCls, entry.name, entry.signature);
+
+    if (*entry.field==nullptr) {
+      env->ExceptionClear();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/** The Java enum name of a step kind. */
+const char* StepKindName(osmscout::client::RouteStep::Kind kind)
+{
+  using Kind=osmscout::client::RouteStep::Kind;
+
+  switch (kind) {
+    case Kind::start: return "START";
+    case Kind::target: return "TARGET";
+    case Kind::turn: return "TURN";
+    case Kind::roundaboutEnter: return "ROUNDABOUT_ENTER";
+    case Kind::roundaboutLeave: return "ROUNDABOUT_LEAVE";
+    case Kind::motorwayEnter: return "MOTORWAY_ENTER";
+    case Kind::motorwayChange: return "MOTORWAY_CHANGE";
+    case Kind::motorwayLeave: return "MOTORWAY_LEAVE";
+    case Kind::nameChange: return "NAME_CHANGE";
+    case Kind::informative: return "INFORMATIVE";
+    case Kind::unknown: break;
+  }
+
+  return "UNKNOWN";
+}
+
+/** The camelCase name `TurnType.fromString` resolves. */
+const char* MoveName(osmscout::RouteDescription::DirectionDescription::Move move)
+{
+  switch (move) {
+    case osmscout::RouteDescription::DirectionDescription::sharpLeft: return "sharpLeft";
+    case osmscout::RouteDescription::DirectionDescription::left: return "left";
+    case osmscout::RouteDescription::DirectionDescription::slightlyLeft: return "slightlyLeft";
+    case osmscout::RouteDescription::DirectionDescription::straightOn: return "straightOn";
+    case osmscout::RouteDescription::DirectionDescription::slightlyRight: return "slightlyRight";
+    case osmscout::RouteDescription::DirectionDescription::right: return "right";
+    case osmscout::RouteDescription::DirectionDescription::sharpRight: return "sharpRight";
+  }
+
+  return "straightOn";
+}
+
+jobject CreateJavaTurnType(JNIEnv *env, osmscout::RouteDescription::DirectionDescription::Move move)
+{
+  jstring name=env->NewStringUTF(MoveName(move));
+  jobject result=env->CallStaticObjectMethod(g_RouteStepJni.turnTypeCls,
+                                             g_RouteStepJni.turnTypeFromString,
+                                             name);
+
+  env->DeleteLocalRef(name);
+
+  return result;
+}
+
+jobject CreateJavaLaneTurn(JNIEnv *env, osmscout::LaneTurn turn)
+{
+  return env->CallStaticObjectMethod(g_RouteStepJni.laneTurnCls,
+                                     g_RouteStepJni.laneTurnFromId,
+                                     static_cast<jint>(turn));
+}
+
+jobject CreateJavaName(JNIEnv *env, const osmscout::client::RouteStep::Name& name)
+{
+  auto &jni=g_RouteStepJni;
+
+  jobject result=env->NewObject(jni.nameCls, jni.nameCtor);
+  jstring nameText=env->NewStringUTF(name.name.c_str());
+  jstring refText=env->NewStringUTF(name.ref.c_str());
+
+  env->SetObjectField(result, jni.fNameName, nameText);
+  env->SetObjectField(result, jni.fNameRef, refText);
+
+  env->DeleteLocalRef(nameText);
+  env->DeleteLocalRef(refText);
+
+  return result;
+}
+
+jobject CreateJavaBoxedDouble(JNIEnv *env, double value)
+{
+  return env->CallStaticObjectMethod(g_RouteStepJni.doubleCls,
+                                     g_RouteStepJni.doubleValueOf,
+                                     static_cast<jdouble>(value));
+}
+
+jobject CreateJavaRouteStep(JNIEnv *env, const osmscout::client::RouteStep& step);
+
+jobject CreateJavaNames(JNIEnv *env, const std::vector<osmscout::client::RouteStep::Name>& names)
+{
+  auto &jni=g_RouteStepJni;
+
+  jobjectArray result=env->NewObjectArray(static_cast<jsize>(names.size()),
+                                          jni.nameCls,
+                                          nullptr);
+
+  if (result==nullptr) {
+    return nullptr;
+  }
+
+  for (size_t i=0; i<names.size(); ++i) {
+    jobject name=CreateJavaName(env, names[i]);
+
+    env->SetObjectArrayElement(result, static_cast<jsize>(i), name);
+    env->DeleteLocalRef(name);
+  }
+
+  return result;
+}
+
+jobject CreateJavaRouteStep(JNIEnv *env, const osmscout::client::RouteStep& step)
+{
+  auto &jni=g_RouteStepJni;
+
+  jobject result=env->NewObject(jni.stepCls, jni.stepCtor);
+
+  if (result==nullptr) {
+    return nullptr;
+  }
+
+  jstring kindName=env->NewStringUTF(StepKindName(step.kind));
+  jobject kind=env->CallStaticObjectMethod(jni.kindCls, jni.kindValueOf, kindName);
+
+  env->DeleteLocalRef(kindName);
+  env->SetObjectField(result, jni.fKind, kind);
+  env->DeleteLocalRef(kind);
+
+  env->SetLongField(result, jni.fDatabaseId, static_cast<jlong>(step.databaseId));
+  env->SetLongField(result, jni.fCurrentNodeIndex, static_cast<jlong>(step.currentNodeIndex));
+  env->SetLongField(result, jni.fPathObjectOffset,
+                    static_cast<jlong>(step.pathObject.GetFileOffset()));
+  env->SetIntField(result, jni.fPathObjectType,
+                   static_cast<jint>(step.pathObject.GetType()));
+  env->SetLongField(result, jni.fTargetNodeIndex, static_cast<jlong>(step.targetNodeIndex));
+  env->SetDoubleField(result, jni.fLat, step.coord.GetLat());
+  env->SetDoubleField(result, jni.fLon, step.coord.GetLon());
+  env->SetDoubleField(result, jni.fDistanceFromStart, step.distanceFromStart.AsMeter());
+  env->SetDoubleField(result, jni.fTimeFromStart,
+                      osmscout::DurationAsSeconds(step.timeFromStart));
+  env->SetDoubleField(result, jni.fLegDistance, step.legDistance.AsMeter());
+  env->SetDoubleField(result, jni.fLegTime, osmscout::DurationAsSeconds(step.legTime));
+
+  {
+    jsize count=static_cast<jsize>(step.objects.size());
+    jlongArray offsets=env->NewLongArray(count);
+    jintArray types=env->NewIntArray(count);
+    std::vector<jlong> offsetValues(step.objects.size());
+    std::vector<jint> typeValues(step.objects.size());
+
+    for (size_t i=0; i<step.objects.size(); ++i) {
+      offsetValues[i]=static_cast<jlong>(step.objects[i].GetFileOffset());
+      typeValues[i]=static_cast<jint>(step.objects[i].GetType());
+    }
+
+    if (count>0) {
+      env->SetLongArrayRegion(offsets, 0, count, offsetValues.data());
+      env->SetIntArrayRegion(types, 0, count, typeValues.data());
+    }
+
+    env->SetObjectField(result, jni.fObjectOffsets, offsets);
+    env->SetObjectField(result, jni.fObjectTypes, types);
+
+    env->DeleteLocalRef(offsets);
+    env->DeleteLocalRef(types);
+  }
+
+  if (step.name) {
+    jobject name=CreateJavaName(env, *step.name);
+    env->SetObjectField(result, jni.fName, name);
+    env->DeleteLocalRef(name);
+  }
+
+  if (step.nameChanged) {
+    jobject nameChanged=env->NewObject(jni.nameChangedCls, jni.nameChangedCtor);
+    jobject from=CreateJavaName(env, step.nameChanged->from);
+    jobject to=CreateJavaName(env, step.nameChanged->to);
+
+    env->SetObjectField(nameChanged, jni.fNameChangedFrom, from);
+    env->SetObjectField(nameChanged, jni.fNameChangedTo, to);
+    env->SetObjectField(result, jni.fNameChanged, nameChanged);
+
+    env->DeleteLocalRef(from);
+    env->DeleteLocalRef(to);
+    env->DeleteLocalRef(nameChanged);
+  }
+
+  if (step.typeName) {
+    jstring value=env->NewStringUTF(step.typeName->c_str());
+    env->SetObjectField(result, jni.fTypeName, value);
+    env->DeleteLocalRef(value);
+  }
+
+  if (step.crossingWays) {
+    jobject crossingWays=env->NewObject(jni.crossingWaysCls, jni.crossingWaysCtor);
+
+    env->SetLongField(crossingWays, jni.fCrossingWaysExitCount,
+                      static_cast<jlong>(step.crossingWays->exitCount));
+
+    if (step.crossingWays->origin) {
+      jobject origin=CreateJavaName(env, *step.crossingWays->origin);
+      env->SetObjectField(crossingWays, jni.fCrossingWaysOrigin, origin);
+      env->DeleteLocalRef(origin);
+    }
+
+    if (step.crossingWays->target) {
+      jobject target=CreateJavaName(env, *step.crossingWays->target);
+      env->SetObjectField(crossingWays, jni.fCrossingWaysTarget, target);
+      env->DeleteLocalRef(target);
+    }
+
+    jobject others=CreateJavaNames(env, step.crossingWays->others);
+    env->SetObjectField(crossingWays, jni.fCrossingWaysOthers, others);
+    env->DeleteLocalRef(others);
+
+    env->SetObjectField(result, jni.fCrossingWays, crossingWays);
+    env->DeleteLocalRef(crossingWays);
+  }
+
+  if (step.direction) {
+    jobject direction=env->NewObject(jni.directionCls, jni.directionCtor);
+    jobject turn=CreateJavaTurnType(env, step.direction->turn);
+    jobject curve=CreateJavaTurnType(env, step.direction->curve);
+
+    env->SetDoubleField(direction, jni.fDirectionTurnAngle, step.direction->turnAngle);
+    env->SetDoubleField(direction, jni.fDirectionCurveAngle, step.direction->curveAngle);
+    env->SetObjectField(direction, jni.fDirectionTurn, turn);
+    env->SetObjectField(direction, jni.fDirectionCurve, curve);
+    env->SetObjectField(result, jni.fDirection, direction);
+
+    env->DeleteLocalRef(turn);
+    env->DeleteLocalRef(curve);
+    env->DeleteLocalRef(direction);
+  }
+
+  if (step.turn) {
+    jobject turn=CreateJavaTurnType(env, *step.turn);
+    env->SetObjectField(result, jni.fTurn, turn);
+    env->DeleteLocalRef(turn);
+  }
+
+  if (step.roundaboutEnter) {
+    jobject roundaboutEnter=env->NewObject(jni.roundaboutEnterCls, jni.roundaboutEnterCtor);
+
+    env->SetBooleanField(roundaboutEnter, jni.fRoundaboutEnterClockwise,
+                         step.roundaboutEnter->clockwise ? JNI_TRUE : JNI_FALSE);
+    env->SetObjectField(result, jni.fRoundaboutEnter, roundaboutEnter);
+    env->DeleteLocalRef(roundaboutEnter);
+  }
+
+  if (step.roundaboutLeave) {
+    jobject roundaboutLeave=env->NewObject(jni.roundaboutLeaveCls, jni.roundaboutLeaveCtor);
+
+    env->SetLongField(roundaboutLeave, jni.fRoundaboutLeaveExitCount,
+                      static_cast<jlong>(step.roundaboutLeave->exitCountTaken));
+    env->SetBooleanField(roundaboutLeave, jni.fRoundaboutLeaveClockwise,
+                         step.roundaboutLeave->clockwise ? JNI_TRUE : JNI_FALSE);
+    env->SetObjectField(result, jni.fRoundaboutLeave, roundaboutLeave);
+    env->DeleteLocalRef(roundaboutLeave);
+  }
+
+  if (step.motorwayEnter) {
+    jobject motorwayEnter=env->NewObject(jni.motorwayEnterCls, jni.motorwayEnterCtor);
+    jobject to=CreateJavaName(env, step.motorwayEnter->to);
+
+    env->SetObjectField(motorwayEnter, jni.fMotorwayEnterTo, to);
+    env->SetObjectField(result, jni.fMotorwayEnter, motorwayEnter);
+
+    env->DeleteLocalRef(to);
+    env->DeleteLocalRef(motorwayEnter);
+  }
+
+  if (step.motorwayChange) {
+    jobject motorwayChange=env->NewObject(jni.motorwayChangeCls, jni.motorwayChangeCtor);
+    jobject from=CreateJavaName(env, step.motorwayChange->from);
+    jobject to=CreateJavaName(env, step.motorwayChange->to);
+    jobject move=CreateJavaTurnType(env, step.motorwayChange->move);
+
+    env->SetObjectField(motorwayChange, jni.fMotorwayChangeFrom, from);
+    env->SetObjectField(motorwayChange, jni.fMotorwayChangeTo, to);
+    env->SetObjectField(motorwayChange, jni.fMotorwayChangeMove, move);
+    env->SetObjectField(result, jni.fMotorwayChange, motorwayChange);
+
+    env->DeleteLocalRef(from);
+    env->DeleteLocalRef(to);
+    env->DeleteLocalRef(move);
+    env->DeleteLocalRef(motorwayChange);
+  }
+
+  if (step.motorwayLeave) {
+    jobject motorwayLeave=env->NewObject(jni.motorwayLeaveCls, jni.motorwayLeaveCtor);
+    jobject from=CreateJavaName(env, step.motorwayLeave->from);
+    jobject move=CreateJavaTurnType(env, step.motorwayLeave->move);
+
+    env->SetObjectField(motorwayLeave, jni.fMotorwayLeaveFrom, from);
+    env->SetObjectField(motorwayLeave, jni.fMotorwayLeaveMove, move);
+    env->SetObjectField(result, jni.fMotorwayLeave, motorwayLeave);
+
+    env->DeleteLocalRef(from);
+    env->DeleteLocalRef(move);
+    env->DeleteLocalRef(motorwayLeave);
+  }
+
+  if (step.junction) {
+    jobject junction=CreateJavaName(env, *step.junction);
+    env->SetObjectField(result, jni.fJunction, junction);
+    env->DeleteLocalRef(junction);
+  }
+
+  if (step.destination) {
+    jstring value=env->NewStringUTF(step.destination->c_str());
+    env->SetObjectField(result, jni.fDestination, value);
+    env->DeleteLocalRef(value);
+  }
+
+  if (step.maxSpeed) {
+    jobject value=env->CallStaticObjectMethod(jni.integerCls,
+                                              jni.integerValueOf,
+                                              static_cast<jint>(*step.maxSpeed));
+    env->SetObjectField(result, jni.fMaxSpeed, value);
+    env->DeleteLocalRef(value);
+  }
+
+  if (step.lanes) {
+    jobject lanes=env->NewObject(jni.laneCls, jni.laneCtor);
+    jsize count=static_cast<jsize>(step.lanes->turns.size());
+    jobjectArray turns=env->NewObjectArray(count, jni.laneTurnCls, nullptr);
+
+    for (size_t i=0; i<step.lanes->turns.size(); ++i) {
+      jobject turn=CreateJavaLaneTurn(env, step.lanes->turns[i]);
+
+      env->SetObjectArrayElement(turns, static_cast<jsize>(i), turn);
+      env->DeleteLocalRef(turn);
+    }
+
+    env->SetBooleanField(lanes, jni.fLaneOneway, step.lanes->oneway ? JNI_TRUE : JNI_FALSE);
+    env->SetIntField(lanes, jni.fLaneCount, static_cast<jint>(step.lanes->count));
+    env->SetObjectField(lanes, jni.fLaneTurns, turns);
+    env->SetObjectField(result, jni.fLanes, lanes);
+
+    env->DeleteLocalRef(turns);
+    env->DeleteLocalRef(lanes);
+  }
+
+  if (step.suggestedLanes) {
+    jobject suggestedLanes=env->NewObject(jni.suggestedLaneCls, jni.suggestedLaneCtor);
+    jobject turn=CreateJavaLaneTurn(env, step.suggestedLanes->turn);
+
+    env->SetIntField(suggestedLanes, jni.fSuggestedLaneFrom,
+                     static_cast<jint>(step.suggestedLanes->from));
+    env->SetIntField(suggestedLanes, jni.fSuggestedLaneTo,
+                     static_cast<jint>(step.suggestedLanes->to));
+    env->SetObjectField(suggestedLanes, jni.fSuggestedLaneTurn, turn);
+    env->SetObjectField(result, jni.fSuggestedLanes, suggestedLanes);
+
+    env->DeleteLocalRef(turn);
+    env->DeleteLocalRef(suggestedLanes);
+  }
+
+  if (step.poi) {
+    jobject poi=env->NewObject(jni.poiCls, jni.poiCtor);
+
+    env->SetLongField(poi, jni.fPoiDatabaseId, static_cast<jlong>(step.poi->databaseId));
+    env->SetLongField(poi, jni.fPoiObjectOffset,
+                      static_cast<jlong>(step.poi->object.GetFileOffset()));
+    env->SetIntField(poi, jni.fPoiObjectType,
+                     static_cast<jint>(step.poi->object.GetType()));
+    env->SetDoubleField(poi, jni.fPoiDistance, step.poi->distance.AsMeter());
+
+    if (step.poi->name) {
+      jobject name=CreateJavaName(env, *step.poi->name);
+      env->SetObjectField(poi, jni.fPoiName, name);
+      env->DeleteLocalRef(name);
+    }
+
+    env->SetObjectField(result, jni.fPoi, poi);
+    env->DeleteLocalRef(poi);
+  }
+
+  if (step.via) {
+    jobject via=env->NewObject(jni.viaCls, jni.viaCtor);
+
+    env->SetIntField(via, jni.fViaSectionNumber, static_cast<jint>(step.via->sectionNumber));
+    env->SetIntField(via, jni.fViaNodeCount, static_cast<jint>(step.via->nodeCount));
+    env->SetObjectField(result, jni.fVia, via);
+    env->DeleteLocalRef(via);
+  }
+
+  if (step.start) {
+    jstring value=env->NewStringUTF(step.start->c_str());
+    env->SetObjectField(result, jni.fStart, value);
+    env->DeleteLocalRef(value);
+  }
+
+  if (step.target) {
+    jstring value=env->NewStringUTF(step.target->c_str());
+    env->SetObjectField(result, jni.fTarget, value);
+    env->DeleteLocalRef(value);
+  }
+
+  if (step.remainingDistance) {
+    jobject value=CreateJavaBoxedDouble(env, step.remainingDistance->AsMeter());
+
+    if (value!=nullptr) {
+      env->SetObjectField(result, jni.fRemainingDistance, value);
+      env->DeleteLocalRef(value);
+    }
+  }
+
+  if (step.remainingTime) {
+    jobject value=CreateJavaBoxedDouble(env, osmscout::DurationAsSeconds(*step.remainingTime));
+
+    if (value!=nullptr) {
+      env->SetObjectField(result, jni.fRemainingTime, value);
+      env->DeleteLocalRef(value);
+    }
+  }
+
+  if (step.nextNext) {
+    jobject nextNext=CreateJavaRouteStep(env, *step.nextNext);
+
+    if (nextNext!=nullptr) {
+      env->SetObjectField(result, jni.fNextNext, nextNext);
+      env->DeleteLocalRef(nextNext);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * The published steps of a route as a Java array; a null array only when there is no step.
+ */
+jobjectArray CreateJavaRouteSteps(JNIEnv *env, const std::vector<osmscout::client::RouteStep>& steps)
+{
+  if (steps.empty()) {
+    return nullptr;
+  }
+
+  jobjectArray result=env->NewObjectArray(static_cast<jsize>(steps.size()),
+                                          g_RouteStepJni.stepCls,
+                                          nullptr);
+
+  if (result==nullptr) {
+    return nullptr;
+  }
+
+  for (size_t i=0; i<steps.size(); ++i) {
+    jobject step=CreateJavaRouteStep(env, steps[i]);
+
+    if (step==nullptr) {
+      continue;
+    }
+
+    env->SetObjectArrayElement(result, static_cast<jsize>(i), step);
+    env->DeleteLocalRef(step);
+  }
+
+  return result;
+}
+
+/**
+ * The database-to-map-directory mapping of a route as a Java map.
+ */
+jobject CreateJavaDatabaseMapping(JNIEnv *env, const std::map<osmscout::DatabaseId, std::string>& mapping)
+{
+  auto &jni=g_RouteStepJni;
+
+  jobject result=env->NewObject(jni.mapCls, jni.mapCtor);
+
+  if (result==nullptr) {
+    return nullptr;
+  }
+
+  for (const auto &[databaseId, directory] : mapping) {
+    jobject key=env->CallStaticObjectMethod(jni.longCls, jni.longValueOf,
+                                            static_cast<jlong>(databaseId));
+    jstring value=env->NewStringUTF(directory.c_str());
+
+    env->CallObjectMethod(result, jni.mapPut, key, value);
+
+    env->DeleteLocalRef(key);
+    env->DeleteLocalRef(value);
+  }
+
+  return result;
+}
+
+}
+
+
+// --------------------------------------------------------------------------
 // JNI_OnLoad — called when native library is loaded
 // Caches class references on the main thread (correct classloader).
 // --------------------------------------------------------------------------
@@ -480,6 +1479,11 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * /*reserved*/)
   }
   g_RouteEntryClass = static_cast<jclass>(env->NewGlobalRef(routeEntryLocal));
   env->DeleteLocalRef(routeEntryLocal);
+
+  // Cache the route step projection (needed on background routing threads)
+  if (!InitRouteStepJni(env)) {
+    return JNI_ERR;
+  }
 
   return JNI_VERSION_1_6;
 }
@@ -2433,7 +3437,7 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
     // pending, the exception aborts the process on the next JNI call, before any of this.
     methods.instructionCtor = GetMethodOrClear(
         env, instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZI)V");
+        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V");
   }
 
   jclass turnTypeCls = FindClassOrClear(env, "com/framstag/libosmscout/client/TurnType");
@@ -2496,6 +3500,15 @@ struct JavaRouteInstruction
   // is absent. It is its own field because the hint can be a different roundabout from the
   // one roundaboutExitNumber describes.
   int nextNextRoundaboutExitNumber{0};
+
+  // The manoeuvre facts of the instruction's route node, read from the route step model of that
+  // node. An empty value (and maxSpeedKmh < 0) means "absent": the step carries these as
+  // optional values, so an absent fact is distinguishable from a known empty or zero one.
+  std::string junctionRef;   // exit reference of the motorway junction
+  std::string junctionName;  // name of the motorway junction
+  std::string destinations;  // raw semicolon separated destination tag
+  std::string wayType;       // type name of the way
+  int maxSpeedKmh{-1};       // maximum speed in km/h, < 0 when unknown
 
   static constexpr double CloseHintDistance = 200.0; // meters
 
@@ -2677,6 +3690,11 @@ private:
     bool legStartKnown{true};
     bool firstNode{true};
     std::string currentStreet;
+    // The step of the node whose hook is running: the manoeuvre facts of the instruction come
+    // from it, so the instruction and the published steps cannot describe one manoeuvre
+    // differently.
+    osmscout::client::RouteStep currentStep;
+    bool currentStepValid{false};
 
   public:
     CollectCallback(std::list<JavaRouteInstruction> &result,
@@ -2698,6 +3716,11 @@ private:
       time = node.GetTime();
       distance = node.GetDistance();
       coord = node.GetLocation();
+
+      auto nodeStep=osmscout::client::RouteStepCollector::BuildNodeStep(node);
+
+      currentStepValid=nodeStep.has_value();
+      currentStep=nodeStep.value_or(osmscout::client::RouteStep());
     }
 
     /**
@@ -2717,6 +3740,28 @@ private:
 
       instr.nodeTimeSeconds = static_cast<double>(
           std::chrono::duration_cast<std::chrono::seconds>(time).count());
+
+      // The manoeuvre facts of this node, from its step (spec: turn-by-turn-instructions - Java
+      // RouteInstruction data class). They are values, not prose: the description text below stays
+      // byte-identical.
+      if (currentStepValid) {
+        if (currentStep.junction) {
+          instr.junctionRef=currentStep.junction->ref;
+          instr.junctionName=currentStep.junction->name;
+        }
+
+        if (currentStep.destination) {
+          instr.destinations=*currentStep.destination;
+        }
+
+        if (currentStep.typeName) {
+          instr.wayType=*currentStep.typeName;
+        }
+
+        if (currentStep.maxSpeed) {
+          instr.maxSpeedKmh=static_cast<int>(*currentStep.maxSpeed);
+        }
+      }
 
       if (legStartKnown) {
         instr.legDistance = static_cast<double>(legDistance.AsMeter());
@@ -3335,6 +4380,22 @@ private:
     jstring nnDescJ = env->NewStringUTF(instr.nextNextDescription.c_str());
     jstring nnShortDescJ = env->NewStringUTF(instr.nextNextShortDescription.c_str());
 
+    // The manoeuvre facts of the node: absent is null, never an empty or zero placeholder.
+    jstring junctionRefJ = instr.junctionRef.empty()
+        ? nullptr : env->NewStringUTF(instr.junctionRef.c_str());
+    jstring junctionNameJ = instr.junctionName.empty()
+        ? nullptr : env->NewStringUTF(instr.junctionName.c_str());
+    jstring destinationsJ = instr.destinations.empty()
+        ? nullptr : env->NewStringUTF(instr.destinations.c_str());
+    jstring wayTypeJ = instr.wayType.empty()
+        ? nullptr : env->NewStringUTF(instr.wayType.c_str());
+    jobject maxSpeedJ = nullptr;
+    if (instr.maxSpeedKmh >= 0) {
+      maxSpeedJ = env->CallStaticObjectMethod(g_RouteStepJni.integerCls,
+                                              g_RouteStepJni.integerValueOf,
+                                              static_cast<jint>(instr.maxSpeedKmh));
+    }
+
     jobject instrObj = env->NewObject(
         static_cast<jclass>(methods.instructionClsGlobal), methods.instructionCtor,
         instr.distanceTo,
@@ -3350,7 +4411,12 @@ private:
         nnShortDescJ,
         instr.roundaboutExitNumber,
         instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE,
-        instr.nextNextRoundaboutExitNumber);
+        instr.nextNextRoundaboutExitNumber,
+        junctionRefJ,
+        junctionNameJ,
+        destinationsJ,
+        wayTypeJ,
+        maxSpeedJ);
 
     env->DeleteLocalRef(turnTypeObj);
     env->DeleteLocalRef(streetNameJ);
@@ -3359,6 +4425,11 @@ private:
     env->DeleteLocalRef(nnTurnTypeObj);
     env->DeleteLocalRef(nnDescJ);
     env->DeleteLocalRef(nnShortDescJ);
+    if (junctionRefJ != nullptr) env->DeleteLocalRef(junctionRefJ);
+    if (junctionNameJ != nullptr) env->DeleteLocalRef(junctionNameJ);
+    if (destinationsJ != nullptr) env->DeleteLocalRef(destinationsJ);
+    if (wayTypeJ != nullptr) env->DeleteLocalRef(wayTypeJ);
+    if (maxSpeedJ != nullptr) env->DeleteLocalRef(maxSpeedJ);
 
     return instrObj;
   }
@@ -6848,6 +7919,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       std::vector<double> routeInstructionLons;
       std::vector<double> routeInstructionDistances;
       std::vector<double> routeInstructionTimes;
+      // The route's manoeuvres as structured steps, next to the description lines (spec:
+      // route-calculation - a calculated route publishes structured steps). The collection does
+      // not depend on the description lines, so a mismatch in the lines never discards the steps.
+      osmscout::client::RouteSteps routeSteps;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -7157,6 +8232,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             routeInstructionLons = std::move(descCb.instructionLons);
             routeInstructionDistances = std::move(descCb.instructionDistances);
             routeInstructionTimes = std::move(descCb.instructionTimes);
+
+            // One step per described route node, carrying that node's manoeuvre data without a
+            // client having to read a description line (spec: route-calculation - a calculated
+            // route publishes structured steps).
+            osmscout::client::RouteStepCollector routeStepCollector;
+            routeSteps=routeStepCollector.Collect(*descResult.GetDescription());
             // Every array must have one entry per instruction line; a mismatch would shift every
             // later step, so the per-step values and the positions are dropped together instead
             // (spec: route-calculation - the arrays are dropped as a set when they cannot be
@@ -7334,6 +8415,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
+      jfieldID stepsField = threadEnv->GetFieldID(routeEntryCls, "steps",
+          "[Lcom/framstag/libosmscout/client/RouteStep;");
+      jfieldID mappingField = threadEnv->GetFieldID(routeEntryCls, "databaseMapping",
+          "Ljava/util/Map;");
       jfieldID handleField = threadEnv->GetFieldID(routeEntryCls, "routeHandle", "J");
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
@@ -7344,6 +8429,19 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
+
+      // The structured steps and the mapping from database identity to map directory.
+      jobjectArray stepsArray = CreateJavaRouteSteps(threadEnv, routeSteps.steps);
+      threadEnv->SetObjectField(routeEntry, stepsField, stepsArray);
+      if (stepsArray != nullptr) {
+        threadEnv->DeleteLocalRef(stepsArray);
+      }
+
+      jobject mappingObject = CreateJavaDatabaseMapping(threadEnv, routeSteps.databaseMapping);
+      if (mappingObject != nullptr) {
+        threadEnv->SetObjectField(routeEntry, mappingField, mappingObject);
+        threadEnv->DeleteLocalRef(mappingObject);
+      }
 
       // Estimate duration based on vehicle type
       double avgSpeedKmH = 50.0; // car default
@@ -7505,6 +8603,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       std::vector<double> routeInstructionLons;
       std::vector<double> routeInstructionDistances;
       std::vector<double> routeInstructionTimes;
+      // The route's manoeuvres as structured steps, next to the description lines (spec:
+      // route-calculation - a calculated route publishes structured steps). The collection does
+      // not depend on the description lines, so a mismatch in the lines never discards the steps.
+      osmscout::client::RouteSteps routeSteps;
 
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -7898,6 +9000,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
             routeInstructionLons = std::move(descCb.instructionLons);
             routeInstructionDistances = std::move(descCb.instructionDistances);
             routeInstructionTimes = std::move(descCb.instructionTimes);
+
+            // One step per described route node, carrying that node's manoeuvre data without a
+            // client having to read a description line (spec: route-calculation - a calculated
+            // route publishes structured steps).
+            osmscout::client::RouteStepCollector routeStepCollector;
+            routeSteps=routeStepCollector.Collect(*descResult.GetDescription());
             // Every array must have one entry per instruction line; a mismatch would shift every
             // later step, so the per-step values and the positions are dropped together instead
             // (spec: route-calculation - the arrays are dropped as a set when they cannot be
@@ -8080,6 +9188,10 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
       jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
+      jfieldID stepsField = threadEnv->GetFieldID(routeEntryCls, "steps",
+          "[Lcom/framstag/libosmscout/client/RouteStep;");
+      jfieldID mappingField = threadEnv->GetFieldID(routeEntryCls, "databaseMapping",
+          "Ljava/util/Map;");
       jfieldID handleField = threadEnv->GetFieldID(routeEntryCls, "routeHandle", "J");
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
@@ -8090,6 +9202,19 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
+
+      // The structured steps and the mapping from database identity to map directory.
+      jobjectArray stepsArray = CreateJavaRouteSteps(threadEnv, routeSteps.steps);
+      threadEnv->SetObjectField(routeEntry, stepsField, stepsArray);
+      if (stepsArray != nullptr) {
+        threadEnv->DeleteLocalRef(stepsArray);
+      }
+
+      jobject mappingObject = CreateJavaDatabaseMapping(threadEnv, routeSteps.databaseMapping);
+      if (mappingObject != nullptr) {
+        threadEnv->SetObjectField(routeEntry, mappingField, mappingObject);
+        threadEnv->DeleteLocalRef(mappingObject);
+      }
 
       // Estimate duration: 50 km/h average speed (default car)
       double durationSec = (totalDistance / 1000.0) / 50.0 * 3600.0;

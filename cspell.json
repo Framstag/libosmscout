@@ -3,7 +3,7 @@
     "ignorePaths": [],
     "dictionaryDefinitions": [],
     "dictionaries": ["en-gb"],
-    "words": ["Teulings", "framstag", "libosmscout", "osmscout"],
+    "words": ["Teulings", "framstag", "libosmscout", "osmscout", "Desccription", "ROUTESTEPBUILDER", "undescribed", "Hauptstrasse", "Ringstrasse", "Kreuz", "Kreuzung", "Tankstelle", "Nach", "Von"],
     "ignoreWords": [],
     "import": []
 }
