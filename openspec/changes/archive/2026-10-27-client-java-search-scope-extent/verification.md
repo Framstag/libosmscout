@@ -162,3 +162,53 @@ behaviour); the task is not ticked. No code was changed.
 
 Log: `evidence/search-scope-probe-nrw-2026-10-16.log` (command, UTC timestamp, exit 0, revision
 `06b197a35`). Probe source: `evidence/SearchScopeProbe.java`.
+
+## Host verification 2026-10-27 (task 4.4, after the free-text merge was repaired)
+
+**Superseding result: the task is satisfied, and the 2026-10-16 reading above was misattributed.**
+
+What that earlier probe actually measured, established on 2026-10-27 with a temporarily instrumented bridge
+(log lines reverted; see `openspec/changes/archive/2026-10-27-client-java-free-text-hits-survive`):
+
+- Every free-text hit was erased by the bridge's structured-dedup pass before it reached Java
+  (`resultsTxt=6`, `refs=3076`, `beforeDedup=50`, `freeText=0`). The extent filter therefore ran over an
+  empty list, and the "50 scoped hits spanning the state" in the 2026-10-16 table were **structured**
+  results, not text-index hits. The `objectType=boundary_administrative` on street labels already hinted at
+  it.
+- The 2026-10-16 probe also used `searchLocations(String,int,long)`, an overload that
+  `client-java-search-request-lifecycle` removed; `evidence/SearchScopeProbe.java` now uses
+  `beginSearch`/`cancelSearch` and compiles against the current jar.
+
+With `2026-10-27-client-java-free-text-hits-survive` archived (two per-database offset sets: the free-text
+loop no longer fills the set the dedup pass reads), the same probe on the same database returns
+(`evidence/search-scope-probe-nrw-2026-10-27-postfix.log`):
+
+| query | unscoped | scoped | unscoped span | scoped span | unscoped text-index hits outside the scoped span |
+|---|---|---|---|---|---|
+| `Bahnhof` | 61 | 64 | 50.37..52.24 / 6.46..9.15 | 50.75..51.67 / 7.14..8.51 | 36 of 50 |
+| `Hauptstraße` | 50 | 53 | 50.38..52.27 / 6.25..8.77 | 50.88..51.69 / 7.16..8.45 | 47 of 50 |
+| `Kirchstraße` | 50 | 51 | 50.39..52.15 / 6.24..8.62 | 50.79..51.67 / 7.15..8.85 | 49 of 50 |
+
+- The extent is established: no `search scope: no extent` warning appears, and an instrumented run reports
+  `scopeExtentSet=true` for the scoped calls and `false` for the unscoped ones.
+- The scoped sets stay inside the region's extent (lat `50.75 .. 51.69`, lon `7.14 .. 8.51`) while the
+  unscoped sets span the whole database (lat `50.37 .. 52.27`, lon `6.24 .. 9.15`), and every scoped hit
+  reports `inSearchScope=true` — 0 out of scope, which now means "none was admitted from outside" because
+  the filter actually runs.
+- Unscoped text-index hits that lie outside the scoped set's span (36, 47 and 49 of 50 per query) are not
+  part of the scoped result: the clause "a hit outside the extent is rejected" is observed.
+
+Two limits of the measurement are recorded rather than papered over:
+
+- The derived extent box itself is not exposed to Java, so "outside" is measured against the scoped set's
+  own span. That span is necessarily inside the extent (the filter only admits inside hits), so it is a
+  conservative proxy: a hit outside the span is outside the extent, a hit inside it is not necessarily.
+- The free-text candidate page is capped at the requested limit **before** the extent filter runs
+  (`OSMScoutClient.cpp`, the free-text loop breaks at `freeTextEntries.size() >= limit`), so a scoped search
+  returns the text hits of that first page that lie inside the extent, not a full page of inside hits. That
+  ordering is neither required nor forbidden by this change's delta and is left as it is.
+
+Also unchanged by the re-probe: the shipped `OSMScoutClientAdminRegionScopeTest` documents the scope as a
+"preference for ranking" and still passes; the ADDED requirement of this change (a filter with a fail-open
+unset case and a per-result verdict) does not contradict that test — the ranking preference it describes is
+what the structured path does, and the verdict field is what lets a caller rank below the scope's own hits.

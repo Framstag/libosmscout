@@ -78,18 +78,19 @@
 - [x] 4.6 Run the C++ suite from `build/`. Verify: `ctest --test-dir build -j 8 -E Performance
   --output-on-failure` reports `100% tests passed out of 116` (the count of this base; no failure to
   report).
-- [ ] 4.7 NOT RUN: a device or emulator check of the defect itself (mutate the `instructionCtor`
-  descriptor so it matches no constructor, run a navigation session, observe no instruction list instead
-  of a process abort). Reason: the helpers wrap `JNIEnv`, and only a live JVM aborts on a pending
-  exception, so no host test can exercise it; there is no device or emulator here, and `maps/` holds
-  format v26 while the library expects v27, so no navigation session can be started locally either.
-  RE-CHECKED 2026-10-16: a routable v27 database now exists (`maps/nordrhein-westfalen`) and a navigation
-  session can be started, so that half of the reason no longer applies — but the defect itself stays not
-  host-runnable, because the helpers wrap `JNIEnv` and only a live JVM aborts on a pending exception, and
-  mutating the descriptor means changing compiled source. The task stays open; see `verification.md`. The
-  evidence that this is a real defect is the branch's own 2026-10-14 emulator measurement (recorded in
-  `verification.md`), labelled as not taken here. What is covered instead: the build (4.1, 4.2), the
-  unchanged JNI signature check (4.4) and the full C++ suite (4.6).
+- [x] 4.7 CLOSED ON THE REFERENCE MEASUREMENT, NOT RUN HERE: a device or emulator check of the defect
+  itself (mutate the `instructionCtor` descriptor so it matches no constructor, run a navigation session,
+  observe no instruction list instead of a process abort). The check is not runnable on a host: the
+  helpers wrap `JNIEnv`, and only a live JVM aborts on a pending exception, so no host test can exercise
+  it (a fake `JNIEnv` would test the fake); there is no device or emulator here; and mutating the
+  descriptor means changing compiled source. The v27 half of the earlier reason no longer applies
+  (`maps/nordrhein-westfalen` is routable, RE-CHECKED 2026-10-16), but that does not make the defect
+  reachable with an unmutated descriptor.
+  Closure decision (2026-10-27, user): the defect is taken as evidenced by the reference branch's own
+  2026-10-14 `emulator-5554` measurement — recorded in `verification.md` section 7 and in the comment
+  above the wrappers — and the coverage taken in this change is the build (4.1, 4.2), the unchanged JNI
+  signature check (4.4) and the full C++ suite (4.6). The residual risk (a lookup that used to succeed
+  now returning null) stays stated in the PR body (5.3), not reproduced here.
 
 ## 5. Change hygiene
 

@@ -87,9 +87,34 @@ and fit-to-area and divides its projection canvas side by `canvasOverrun`, which
   harness is part of this change's Impact section — one would need a new render binary or test target outside
   the changed files — and the change is confined to the four values a `MapParameter` receives, which the host
   test pins. The database was not imported (not needed).
-- **No JavaScout suite run** (see command 10 above): the suite does not compile on this machine before any
-  test starts. `OSMScoutClientBasemapConfigTest.testClearingBasemapLookupDirectoryUnloads`, the known
-  intermittent flake, was therefore not observed either; it is neither fixed nor blocking here.
+- **No JavaScout suite run** in the original pass (see command 10 above): the suite did not compile on this
+  machine before any test starts, because the locally installed JAR in `~/.m2` was of class version 71
+  (newer JDK) while the toolchain runs Java 17. **Run 2026-10-27 (item 4.4), after installing the freshly
+  built jar over it:**
+
+  ```
+  cmake --build build --target osmscout_client_java java_jar          # ninja: no work to do (up to date)
+  cd JavaScout && mvn -o -q install:install-file \
+    -Dfile=../build/libosmscout-client-java/libosmscoutclientjava.jar \
+    -DgroupId=net.sf.libosmscout -DartifactId=libosmscout-client-java \
+    -Dversion=1.0-SNAPSHOT -Dpackaging=jar
+  xvfb-run -a mvn -o test -Dnative.lib.dir=/home/tim/projects/libosmscout/build/libosmscout-client-java \
+    -Dsearch.test.db.dir=/home/tim/projects/libosmscout/maps/nordrhein-westfalen
+  ```
+
+  | run | result |
+  |-----|--------|
+  | full suite, 1 | `Tests run: 267, Failures: 1, Errors: 0, Skipped: 18` — `OSMScoutClientStyleTest.testLoadStyleSheetUnloadableKeepsPreviousStyle:193` |
+  | full suite, 2 | same `267 / 1 / 0 / 18`, same single failure |
+  | `-Dtest=OSMScoutClientStyleTest` in isolation | `Tests run: 8, Failures: 0, Errors: 0, Skipped: 0`, `BUILD SUCCESS` |
+
+  That single failure is the full-suite-only flake TODO.md §91 already files ("`OSMScoutClientStyleTest`
+  passes alone and fails in a full-suite run after another class left the process-wide client open"), not a
+  result of this change: the diff adds no Java source, no JNI export and no native declaration, and the four
+  label values it applies are pinned by `RenderLabelBoundsTest`. The known intermittent
+  `OSMScoutClientBasemapConfigTest.testClearingBasemapLookupDirectoryUnloads` did not fire in either run; it
+  is neither fixed nor blocking here, as the task says. No `master` baseline count was taken and no
+  regression is claimed.
 - **No Meson reconfiguration of the tree.** The existing `build-meson-check` directory was used, with its
   build files regenerated automatically by `ninja`; no new Meson setup was created.
 - **No `scripts/format-check.sh`**: it is red repo-wide on this machine, including pristine `master` files.

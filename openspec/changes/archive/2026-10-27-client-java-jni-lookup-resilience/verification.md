@@ -174,3 +174,21 @@ longer applies.
 
 The defect and the emulator measurement therefore stay as the change records them, taken on the reference
 branch on 2026-10-14, not reproduced here. No code was changed.
+
+## 10. Closure of item 4.7 (2026-10-27)
+
+Task 4.7 is closed on the reference measurement instead of a run here (user decision, 2026-10-27):
+
+- It is not runnable on this machine, for the two reasons section 7 gives: a pending exception only aborts
+  a live JVM, so no host test can reach the abort (a fake `JNIEnv` would test the fake), and the defect
+  needs a mutated compiled descriptor. The v27 database on hand does not change either reason.
+- The evidence for the defect itself is the reference branch's `emulator-5554` measurement of 2026-10-14
+  (section 7): with the `instructionCtor` descriptor mutated, the abort landed on the next lookup and the
+  instrumentation reported "Process crashed"; with the clear in place, the same mutation delivers no
+  instruction list. That measurement is accepted as the evidence for the fix, labelled as not taken here.
+- The coverage taken here stays: the CMake and Meson builds (sections 2, 3), the unchanged JNI signature
+  check (section 4, 57 declarations) and the full C++ suite (section 6, 116/116).
+- The residual risk of the success path (section 8) remains stated in the PR body (task 5.3); it is
+  structural and was not measurable here either.
+
+No file, declaration or descriptor of this change was altered by the closure.

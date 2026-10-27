@@ -35,15 +35,17 @@
 - [x] 4.2 Build the same targets in the Meson build directory if one is configured (`build-meson-check`);
   if the Java client is not configured there, say so instead of reconfiguring the tree.
 - [x] 4.3 Rebuild and run the new test through both build systems and verify every case passes.
-- [ ] 4.4 Run the JavaScout suite or the client-java-related tests the build allows and compare the failure
-  count against `master` before claiming a regression. `OSMScoutClientBasemapConfigTest.testClearingBasemapLookupDirectoryUnloads`
-  is a known intermittent flake (passes in isolation): document it, do not fix and do not block on it.
-  NOT RUN: the suite does not compile on this machine before any test starts. `mvn -o test` fails reading
-  the locally installed `libosmscout-client-java-1.0-SNAPSHOT.jar` from `~/.m2` — `class file has wrong
-  version 71.0, should be 61.0` (the jar was built by a newer JDK than the toolchain's Java 17), 100
-  compiler errors, no test executed. The jar and the JavaScout sources are not part of this change and the
-  working tree does not touch them, so this is an environment precondition, identical on `master`. No
-  failure count to compare.
+- [x] 4.4 RUN 2026-10-27: the JavaScout suite ran against this tree with a jar built from it. The earlier
+  blocker (a `~/.m2` jar of class version 71 against the Java 17 toolchain) is gone once the freshly built
+  jar is installed. Two full-suite runs: `Tests run: 267, Failures: 1, Errors: 0, Skipped: 18` each, the one
+  failure being `OSMScoutClientStyleTest.testLoadStyleSheetUnloadableKeepsPreviousStyle:193` — the
+  documented full-suite-only flake of TODO.md §91 ("`OSMScoutClientStyleTest` passes alone and fails in a
+  full-suite run after another class left the process-wide client open"); in isolation the same class is
+  `Tests run: 8, Failures: 0, Errors: 0, Skipped: 0`, `BUILD SUCCESS`. No failure is attributed to this
+  change (it adds no Java source, no JNI export and no native declaration; the four label values are pinned
+  by `RenderLabelBoundsTest`). The known intermittent
+  `OSMScoutClientBasemapConfigTest.testClearingBasemapLookupDirectoryUnloads` did not fire in either run and
+  is neither fixed nor blocking. No `master` baseline count was taken, and no regression is claimed.
 - [x] 4.5 State in `verification.md` what could not be verified: the wrapped line count inside a rendered
   frame is not asserted by a test here. `maps/nordrhein-westfalen` carries a v27 database
   (`db.json` `typeConfigVersion` 27), so a render probe is possible; if one is not run, say so and why.

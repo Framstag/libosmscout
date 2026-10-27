@@ -27,11 +27,12 @@ A new Java class `RouteEntry` SHALL be added to `libosmscout-client-java/java/co
 - **THEN** `instructionLats` and `instructionLons` SHALL carry the position of each instruction line's manoeuvre
 - **AND** they SHALL be index-aligned with the instruction lines of `descriptions`, the description's header not being an instruction and not counted
 
-#### Scenario: Per-step leg values sum to the route's totals
+#### Scenario: Per-step leg values are the legs of the route
 - **WHEN** a route is calculated with a description
 - **THEN** `instructionDistances` SHALL carry the leg that ends at each instruction line's manoeuvre, measured from the instruction preceding it
-- **AND** `instructionTimes` SHALL carry that leg's estimated travel time
-- **AND** their entries SHALL add up to `distance` and `duration`
+- **AND** `instructionTimes` SHALL carry that leg's own estimated travel time, as the description reports it
+- **AND** the entries of `instructionDistances` SHALL add up to `distance`
+- **AND** the entries of `instructionTimes` SHALL NOT be required to add up to `duration`: the description's per-leg times follow the road speeds of the route, while `duration` stays the length-derived estimate of `client-java-route-length` at one average speed
 
 #### Scenario: The arrays are dropped as a set when they cannot be aligned
 - **WHEN** the per-instruction values cannot be aligned one-to-one with the instruction lines

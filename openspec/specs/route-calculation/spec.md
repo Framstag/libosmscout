@@ -56,7 +56,7 @@ The JNI implementation SHALL use `MultiDBRoutingService::GetClosestRoutableNode(
 
 ### Requirement: RouteEntry Java data class
 
-A new Java class `RouteEntry` SHALL be added to `libosmscout-client-java/java/com/framstag/libosmscout/client/` with public fields: `double[] latitudes`, `double[] longitudes`, `double distance` (meters), `double duration` (seconds), `String[] descriptions` (turn-by-turn description lines).
+A new Java class `RouteEntry` SHALL be added to `libosmscout-client-java/java/com/framstag/libosmscout/client/` with public fields: `double[] latitudes`, `double[] longitudes`, `double distance` (meters), `double duration` (seconds), `String[] descriptions` (turn-by-turn description lines), and the per-instruction arrays `double[] instructionLats`, `double[] instructionLons`, `double[] instructionDistances` (meters) and `double[] instructionTimes` (seconds).
 
 #### Scenario: RouteEntry holds route geometry
 - **WHEN** a route is calculated
@@ -70,13 +70,58 @@ A new Java class `RouteEntry` SHALL be added to `libosmscout-client-java/java/co
 - **WHEN** a route is calculated
 - **THEN** `descriptions` array contains columnar text lines with distance, time, and turn instructions
 
+#### Scenario: Per-instruction positions are index-aligned with the instruction lines
+- **WHEN** a route is calculated with a description
+- **THEN** `instructionLats` and `instructionLons` SHALL carry the position of each instruction line's manoeuvre
+- **AND** they SHALL be index-aligned with the instruction lines of `descriptions`, the description's header not being an instruction and not counted
+
+#### Scenario: Per-step leg values are the legs of the route
+- **WHEN** a route is calculated with a description
+- **THEN** `instructionDistances` SHALL carry the leg that ends at each instruction line's manoeuvre, measured from the instruction preceding it
+- **AND** `instructionTimes` SHALL carry that leg's own estimated travel time, as the description reports it
+- **AND** the entries of `instructionDistances` SHALL add up to `distance`
+- **AND** the entries of `instructionTimes` SHALL NOT be required to add up to `duration`: the description's per-leg times follow the road speeds of the route, while `duration` stays the length-derived estimate of `client-java-route-length` at one average speed
+
+#### Scenario: The arrays are dropped as a set when they cannot be aligned
+- **WHEN** the per-instruction values cannot be aligned one-to-one with the instruction lines
+- **THEN** all four arrays SHALL be null
+- **AND** `descriptions`, `distance` and `duration` SHALL be reported as before
+
 ### Requirement: RouteCallback Java interface
 
-A new Java interface `RouteCallback` SHALL be added with methods: `onProgress(int percent)`, `onSuccess(RouteEntry route)`, `onError(String message)`, `onCancel()`. This SHALL be passed to `calculateRouteAsync()` and invoked from JNI.
+The Java interface `RouteCallback` SHALL carry the failure kinds as integer constants — `KIND_UNKNOWN`,
+`KIND_ROUTING_DATA_UNAVAILABLE`, `KIND_START_UNROUTABLE`, `KIND_TARGET_UNROUTABLE`, `KIND_NO_ROUTE_FOUND`,
+`KIND_ROUTING_DATA_FAILURE`, `KIND_ENGINE_FAILURE` — and the methods `onProgress(int percent)`,
+`onSuccess(RouteEntry route)`, `onError(String message)`, `onErrorDetail(int kind, String detail, double
+nearestRoadDistanceMeters)` and `onCancel()`. `onErrorDetail` SHALL be a default method that delegates to
+`onError(detail)`, and the kind numbering SHALL be identical on the Java and the native side, because the
+integer is what crosses the boundary. It SHALL be passed to the route calculation and invoked from JNI.
 
 #### Scenario: Callback methods invoked from JNI
+
 - **WHEN** route calculation progresses, completes, fails, or is cancelled
 - **THEN** the corresponding callback method is called on the Java thread
+
+#### Scenario: A failure reports a kind a caller can act on
+
+- **GIVEN** a calculation that fails because an end cannot be attached to the road network
+- **WHEN** the failure reaches Java
+- **THEN** `onErrorDetail` SHALL be called with `KIND_START_UNROUTABLE` or `KIND_TARGET_UNROUTABLE`
+- **AND** the detail SHALL be an English description for a log, not display text
+
+#### Scenario: An implementation written before the method existed keeps working
+
+- **GIVEN** a `RouteCallback` implementation that overrides only `onError(String)`
+- **WHEN** a calculation fails with a kind
+- **THEN** the default `onErrorDetail` SHALL call `onError` with the detail
+- **AND** no error SHALL be raised for the missing override
+
+#### Scenario: An unknown kind is the unknown kind
+
+- **GIVEN** a failure whose kind this interface does not define
+- **WHEN** the kind reaches Java
+- **THEN** it SHALL be reported as one of the interface's kinds or as `KIND_UNKNOWN`
+- **AND** a caller that does not know it SHALL be able to treat it as `KIND_UNKNOWN`
 
 ### Requirement: Progress reports to Java are throttled and moved-driven
 

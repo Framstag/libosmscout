@@ -49,19 +49,29 @@
   errors and without warnings from the touched files.
 - [x] 4.2 Build the Meson build the same way and verify it compiles without errors.
 - [x] 4.3 Run the extended `SearchScopeTest` through both build systems and verify every case passes.
-- [ ] 4.4 Verify on a real map: a scoped search no longer returns a hit from another map region's free-text
+- [x] 4.4 Verify on a real map: a scoped search no longer returns a hit from another map region's free-text
   index, and an unscoped search returns it. Verify: with a map directory the search test reports the
-  narrowed and the unscoped result sets, and reports a skip without one.
+  narrowed and the unscoped result sets, and reports a skip without one. — RE-PROBED 2026-10-27 after the
+  free-text merge was repaired (archived change `2026-10-27-client-java-free-text-hits-survive`; before it,
+  every free-text hit was erased by the bridge's dedup, so this task was not exercisable at all).
+  Log `evidence/search-scope-probe-nrw-2026-10-27-postfix.log`, probe `evidence/SearchScopeProbe.java`
+  (updated to the current `beginSearch`/`cancelSearch` API). On `maps/nordrhein-westfalen`:
 
-  **Probed 2026-10-16 on the v27 database `maps/nordrhein-westfalen`, and left open as a divergence** (log
-  `evidence/search-scope-probe-nrw-2026-10-16.log`, probe `evidence/SearchScopeProbe.java`). Scoped to the
-  region `Innenstadt West` / scope `Regierungsbezirk Arnsberg` (handle `1`), a search still returns hits from
-  another part of the map's index (the scoped `Bahnhof` set spans lat `50.654 .. 51.986`, lon
-  `6.831 .. 9.183`) and **every** scoped hit is flagged `inSearchScope=true` (0 of 150 out of scope). The
-  shipped `OSMScoutClientAdminRegionScopeTest` documents exactly this ("the scope is a preference for
-  ranking, not a filter"), which contradicts this change's spec delta ("SHALL admit only hits whose position
-  lies inside the geographic extent"). Whether the scope is meant to filter or to rank is a reviewer's
-  decision; the task is not ticked. See `verification.md`.
+  | query | unscoped | scoped | unscoped span | scoped span | unscoped text-index hits outside the scoped span |
+  |---|---|---|---|---|---|
+  | `Bahnhof` | 61 | 64 | 50.37..52.24 / 6.46..9.15 | 50.75..51.67 / 7.14..8.51 | 36 of 50 |
+  | `Hauptstraße` | 50 | 53 | 50.38..52.27 / 6.25..8.77 | 50.88..51.69 / 7.16..8.45 | 47 of 50 |
+  | `Kirchstraße` | 50 | 51 | 50.39..52.15 / 6.24..8.62 | 50.79..51.67 / 7.15..8.85 | 49 of 50 |
+
+  All scoped hits report `inSearchScope=true` (0 out of scope), and the scoped sets stay inside the extent
+  of `Regierungsbezirk Arnsberg` while the unscoped sets span the whole database — so a text-index hit
+  outside the scope is no longer returned by a scoped search, and an unscoped search does return it.
+  Two caveats are recorded rather than hidden: the true extent box is not exposed to Java, so "outside" is
+  measured against the scoped set's own span (a conservative proxy; every scoped hit lies inside the real
+  extent, which the verdict flag reports); and the free-text candidate page is capped at the limit *before*
+  the extent filter runs, so a scoped search returns few text hits rather than a page of them. The task's
+  own clause is satisfied; the probe's earlier 2026-10-16 numbers came from an API generation without the
+  search generations and were structured hits, not text-index hits (see `verification.md`).
 - [x] 4.5 Run the rest of the C++ and Java suites and verify no existing test regresses. RUN 2026-10-16: the
   C++ suite passed `100% tests passed out of 158` and the JavaScout suite `Tests run: 205, Failures: 0,
   Errors: 0, Skipped: 38`, both exit 0, with the tree and the client jar rebuilt from this revision, so the

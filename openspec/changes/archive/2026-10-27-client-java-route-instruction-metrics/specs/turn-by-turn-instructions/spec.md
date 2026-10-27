@@ -32,7 +32,9 @@ the instruction SHALL carry 0.0 and no error SHALL be raised, so that a client c
 - **GIVEN** a route whose description provides a time for every node
 - **WHEN** the full instruction list is delivered to Java
 - **THEN** each instruction SHALL carry the time between the preceding instruction and its own manoeuvre
-- **AND** the entries SHALL add up to the route's duration
+- **AND** the entries SHALL NOT be required to add up to the route's published `duration`, which is the
+  length-derived estimate of `client-java-route-length` at one average speed, while these are the
+  description's own per-leg times
 - **AND** its distance SHALL be the distance from the start of the route, as before
 
 #### Scenario: The next instruction carries the time of its own step

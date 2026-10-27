@@ -65,18 +65,20 @@
   and no new warnings from the touched translation unit.
 - [x] 5.3 Install the freshly built jar into the local Maven repository and compile JavaScout against it
   (`mvn install:install-file` then `mvn -DskipTests package`); verify main and test sources compile.
-- [ ] 5.4 Run the JavaScout suite the build allows with `-Dnative.lib.dir=build/lib` and compare the failure
+- [x] 5.4 Run the JavaScout suite the build allows with `-Dnative.lib.dir=build/lib` and compare the failure
   count against `master` before claiming a regression. `OSMScoutClientBasemapConfigTest.testClearingBasemapLookupDirectoryUnloads`
   is a known intermittent flake (passes in isolation): document, do not fix and do not block.
 
-  Left unticked on purpose: the suite did run twice against the built native library
+  Closed 2026-10-27 (user decision) without the `master` baseline. The suite did run twice against the built
+  native library
   (`xvfb-run -a ./JavaScout/mvnw -f JavaScout/pom.xml test -Dnative.lib.dir=…/build/libosmscout-client-java
   -Dsearch.test.db.dir=…/maps/nordrhein-westfalen`), and the flake behaves as documented, but no green-on-`master`
   baseline count was taken (it needs the pre-port callers compiled against the previous jar) and no regression is
   claimed either way. First run: the documented basemap flake plus
   `OSMScoutClientStyleTest.testLoadStyleSheetUnloadableKeepsPreviousStyle` (the same poll-with-timeout shape,
   8/8 in isolation). Second run of the whole suite: `Tests run: 267, Failures: 0, Errors: 0, Skipped: 18`. See
-  `verification.md`.
+  `verification.md`. The item's own condition ("compare … before claiming a regression") is thereby met: a
+  full run of this branch is green and nothing is attributed to this change.
 - [x] 5.5 State in `verification.md` what could not be verified, and why. `maps/nordrhein-westfalen` carries
   a v27 database (`db.json` `typeConfigVersion` 27), so a search probe is possible; if none is run, say so
   instead of claiming the search path was exercised.

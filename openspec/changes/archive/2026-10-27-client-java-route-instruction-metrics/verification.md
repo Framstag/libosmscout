@@ -203,3 +203,37 @@ equals the number of description lines that are not the `--- Route ---` header (
   total, which is the property the alignment check above pins, but the clause as written was not observed.
 
 Nothing here is a code change; both tasks stay open.
+
+## Resolution 2026-10-27 (tasks 3.2 and 3.3)
+
+Decision (user): the two open items are closed by amending the requirement text, not the code.
+
+**The time clause was wrong.** `duration` is the length-derived estimate at one average speed
+(`client-java-route-length`: "The estimated duration SHALL be derived from the published length"), while
+`instructionTimes` are the description's own per-leg times at the route's road speeds. Requiring the two to
+be equal demands that one of the two merged requirements be violated on real data, so the metrics delta's
+scenario "Per-step leg values sum to the route's totals" is replaced by "Per-step leg values are the legs of
+the route":
+
+- `instructionDistances` keeps the sum requirement — measured to hold exactly on all four routes.
+- `instructionTimes` carries each leg's own travel time and SHALL NOT be required to add up to `duration`,
+  with the reason stated in the scenario.
+
+The same correction is applied to the `turn-by-turn-instructions` delta of this change and to the copy of the
+requirement in `openspec/changes/client-route-step-model/specs/route-calculation/spec.md` (that change
+re-states the text as a MODIFIED requirement and would otherwise carry the unsatisfiable clause forward).
+
+**The null-array half is closed where it is reachable.** It is held by the alignment check and the
+marshalling re-check (section 4.2) — both drop all four arrays as a set — and it cannot be produced from a
+Java route, because a route that produces a description always produces its lines. No test was invented for
+an unreachable branch; the clause stays in the spec as the contract the bridge keeps.
+
+**Task 3.3's check is withdrawn.** "Smallest reported leg > largest single geometry edge" is unsound as
+written: a long straight edge can exceed the shortest leg between two manoeuvres on any route, so the check
+fails by construction (four for four) and pins nothing. The property it meant — a step's value is the leg
+from the preceding manoeuvre, not an edge length — is already pinned by the distance clause of 3.2 (the legs
+telescope to the route total, measured from the preceding instruction) and by `CollectCallback::FillLeg`.
+Nothing from 3.3 is carried into the spec; the spec set contains no requirement about geometry edges.
+
+No source, test or evidence file of the implementation was changed by this closure; the amendments are to
+spec text and the task list only.

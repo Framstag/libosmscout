@@ -188,6 +188,10 @@ are not in this branch. `setDescriptionLanguage` and the method-lookup resilienc
 - **No `master` baseline of the JavaScout suite.** The ported branch was run twice (2 flakes, then
   267/0/0); a `master` run would need the old JavaScout sources compiled against an old jar, i.e. a
   separate checkout. The branch run is green, so no regression is claimed either way.
+  **Decided 2026-10-27 (user):** task 5.4 is closed on that basis. The item asks for the comparison only
+  "before claiming a regression", and none is claimed; the full run of this branch is green
+  (267/0/0, 18 skipped) and the two flakes are the documented ones, both green in isolation. The baseline
+  run is not carried out and stays unnecessary unless a regression is ever asserted.
 - **No device/projection session.** The per-slot independence (car vs phone) is covered by the host
   test `SearchBreakerTest` and by the registry's design, not by an on-device run.
 - **`scripts/format-check.sh`** was not used as a gate: it is red repo-wide on this machine,
