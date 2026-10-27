@@ -25,7 +25,7 @@ Each directory is a standalone CMake/Meson subproject:
 | `libosmscout-map-iosx/` | iOS renderer |
 | `libosmscout-map-binding/` | Map binding layer |
 | `libosmscout-import/` | OSM → native binary format import pipeline |
-| `libosmscout-client/` | Client query libraries |
+| `libosmscout-client/` | Client query libraries — `include/osmscoutclient/routing/RouteStep.h` is the public route step model (with `RouteStepCollector` and `RouteStepBuilder` next to it) |
 | `libosmscout-client-qt/` | Qt client |
 | `libosmscout-gpx/` | GPX data support |
 | `libosmscout-binding/` | Java JNI bindings |

@@ -17,6 +17,9 @@ osmscoutclientHeader = [
             'osmscoutclient/MapProvider.h',
             'osmscoutclient/OnlineTileProvider.h',
             'osmscoutclient/POILookupModule.h',
+            'osmscoutclient/routing/RouteStep.h',
+            'osmscoutclient/routing/RouteStepBuilder.h',
+            'osmscoutclient/routing/RouteStepCollector.h',
             'osmscoutclient/Settings.h',
             'osmscoutclient/VoiceProvider.h'
           ]

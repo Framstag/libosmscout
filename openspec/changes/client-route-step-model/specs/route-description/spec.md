@@ -4,9 +4,24 @@
 
 ### Requirement: The route description list renders from structured steps
 
-The JavaScout route description list SHALL render one row per published route step, taken from the route
-result's structured steps, so that every manoeuvre the route description holds appears as a row. All existing
-rows SHALL keep their content, order and per-row distance and time.
+The JavaScout route description list SHALL render one row per published route step that describes a
+manoeuvre, and one row for a route step that carries a point of interest, taken from the route
+result's structured steps. A published step that carries only segment facts SHALL NOT produce a row.
+All existing rows SHALL keep their content, order and per-row distance and time.
+
+#### Scenario: A step with only segment facts is not a row
+
+- **GIVEN** a calculated route whose nodes carry max-speed and lane descriptions along the way
+- **WHEN** the route description list is shown
+- **THEN** it SHALL NOT contain a row for those nodes
+- **AND** the steps SHALL still publish those facts
+
+#### Scenario: A point of interest on the route appears as a row
+
+- **GIVEN** a calculated route with a point of interest on it
+- **WHEN** the route description list is shown
+- **THEN** it SHALL contain a row for that point of interest
+- **AND** the row SHALL name the point of interest
 
 #### Scenario: Every manoeuvre of a motorway route appears
 

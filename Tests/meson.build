@@ -912,6 +912,32 @@ RouteStepTimeTest = executable('RouteStepTimeTest',
 
 test('Check route step time', RouteStepTimeTest)
 
+routeStepModelEnv = environment()
+routeStepModelEnv.set('SOURCE_ROOT', meson.project_source_root())
+
+RouteStepModelTest = executable('RouteStepModelTest',
+             'src/RouteStepModelTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir],
+             dependencies: [mathDep, catch2MainDep],
+             link_with: [osmscoutclient, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route step model', RouteStepModelTest, env: routeStepModelEnv)
+
+if buildClientQt
+  RouteStepCollisionTest = executable('RouteStepCollisionTest',
+               'src/RouteStepCollisionTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutclientIncDir,
+                                     osmscoutclientqtIncDir, osmscoutmapqtIncDir],
+               dependencies: [mathDep, catch2MainDep, qtClientDep],
+               link_with: [osmscoutclient, osmscout, osmscoutclientqt],
+               install: true,
+               install_dir: testInstallDir)
+
+  test('Check route step model does not shadow the Qt route step', RouteStepCollisionTest)
+endif
+
 RenderLabelBoundsTest = executable('RenderLabelBoundsTest',
              'src/RenderLabelBoundsTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src'), osmscoutmapIncDir, osmscoutIncDir],
