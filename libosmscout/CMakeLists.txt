@@ -22,7 +22,7 @@ set(HEADER_FILES_ROOT
         include/osmscout/Way.h)
 
 set(HEADER_FILES_LIB
-        include/osmscout/lib/CoreFeatures.h
+        ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/lib/CoreFeatures.h
         include/osmscout/lib/CoreImportExport.h)
 
 set(HEADER_FILES_LOG
@@ -413,6 +413,7 @@ osmscout_library_project(
     SOURCE ${SOURCE_FILES}
     HEADER ${HEADER_FILES}
     TEMPLATE  ${CMAKE_CURRENT_SOURCE_DIR}/include/osmscout/lib/CoreFeatures.h.cmake
+    FEATURE ${CMAKE_CURRENT_BINARY_DIR}/include/osmscout/lib/CoreFeatures.h
     EXCLUDE ${EXCLUDE_HEADER}
 )
 
