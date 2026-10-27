@@ -4399,9 +4399,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   std::vector<ResultWithDb> results;
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
   std::vector<FreeTextEntry> freeTextEntries;
-  // Free-text dedup is per database: the same raw file offset in two
-  // different databases denotes two different objects.
+  // Two per-database offset sets with two different jobs: seenTextOffsets collapses the
+  // duplicates one database's text index reports for the same object (it names an object
+  // once per matched name), seenOffsets holds the offsets the structured results reported
+  // and is what the dedup pass below compares free-text hits against. Sharing one set made
+  // that pass erase every free-text hit, because the loop below had just inserted each of
+  // them (openspec change client-java-free-text-hits-survive).
   std::map<osmscout::DBInstanceRef, std::set<osmscout::FileOffset>> seenOffsets;
+  std::map<osmscout::DBInstanceRef, std::set<osmscout::FileOffset>> seenTextOffsets;
 #endif
   bool limitReached = false;
 
@@ -4575,10 +4580,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
               if (freeTextLimitReached()) {
                 break;
               }
-              if (seenOffsets[db].count(fref.GetFileOffset()) != 0) {
+              // The text index reports one object under every matched name; the same
+              // raw file offset in two different databases denotes two different
+              // objects, hence the per-database key.
+              if (seenTextOffsets[db].count(fref.GetFileOffset()) != 0) {
                 continue;
               }
-              seenOffsets[db].insert(fref.GetFileOffset());
+              seenTextOffsets[db].insert(fref.GetFileOffset());
               FreeTextEntry entry;
               if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry)) {
                 freeTextEntries.push_back(entry);
