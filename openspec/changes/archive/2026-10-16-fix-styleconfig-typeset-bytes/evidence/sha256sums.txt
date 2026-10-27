@@ -1,0 +1,23 @@
+# sha256sum of every evidence artifact, 2026-10-16T11:30:43Z
+7a259a94bf80f3b4d2e63e5d1f37c5502d234da3ddf780f885ac3a220e8f06d7  openspec/changes/fix-styleconfig-typeset-bytes/evidence/gate-cmake-build.log
+aebd7ecd6c3884375eee867017170338fa60d9441e5242ddd3fb25483b0dc74a  openspec/changes/fix-styleconfig-typeset-bytes/evidence/gate-cmake-ctest.log
+438094465a0382a0a9e8c41c248eb37fcf969d97b594ac25ba5aceebbb1044bd  openspec/changes/fix-styleconfig-typeset-bytes/evidence/gate-meson-build.log
+90bb522a4171ace1d5f05b155a2f6b84990fc70372bd21750d571accc6f84f7a  openspec/changes/fix-styleconfig-typeset-bytes/evidence/gate-meson-test.log
+ab5a8d5fb3cf2ede5e7f5b3747f24ffc5952e8ba9f49699ac1814a69528df3e6  openspec/changes/fix-styleconfig-typeset-bytes/evidence/postfix-accessor-case.log
+922d5c66da7d5ea4a79791d0881ef9880b48f94249ece19208e3fb8ba818abe3  openspec/changes/fix-styleconfig-typeset-bytes/evidence/postfix-cmake-cases.log
+20cfbebee9d77925061b6a00c7bc172371c6ecf9100be2689348fdc37889c71d  openspec/changes/fix-styleconfig-typeset-bytes/evidence/postfix-scaling-figures.log
+7408bd110982a61c617674c0806c942dc4c0d9b8aad3a05bdcf044f404e39177  openspec/changes/fix-styleconfig-typeset-bytes/evidence/postfix-shipped-figures.log
+# the line above re-hashes that log after the review round dropped its stale pointer to gate-cmake-ctest.log
+7499899ccd9a469284e20c67745183779531abfb58bae7538feea5043a947da9  openspec/changes/fix-styleconfig-typeset-bytes/evidence/probe-typesetbytes.log
+164c4ddb7c2223d80d988d780a0826be5320746901a02edafd4a8d4859e4bb17  openspec/changes/fix-styleconfig-typeset-bytes/evidence/red-head-ctest-StyleConfigLookupCost.log
+963d165da5ded16f7f2287557f2e540d5b4e23c98a112d9053281e530a9e2d5d  openspec/changes/fix-styleconfig-typeset-bytes/evidence/uncrustify.log
+
+# sha256 of the five live sources the gate built; each file's mtime is at or before the gate build start
+# (2026-10-16T11:20:53Z, evidence/gate-cmake-build.log), so each pin names the revision the gate compiled
+# and no pin names a later edit. mtime (checked with stat, local +0200 = UTC-2h): 11:08:31Z, 11:09:28Z,
+# 11:08:33Z, 11:06:37Z, 11:20:40Z from the first to the fifth line below, all at or before the gate start.
+65ea89523d76446e17c07763adb1ec572cd9f4be08ada667e6df2cf34b4786c7  libosmscout/include/osmscout/TypeInfoSet.h
+5295613d00fbd415b93d392f4ad7c51272d18ae4d85a6eb13ebef3864a6fc563  libosmscout-map/src/osmscoutmap/StyleConfig.cpp
+bae460da711f545a1ae3fd546aa7f652bf7edb9cd307530fa5ccc6c009e609da  libosmscout-map/include/osmscoutmap/StyleConfig.h
+a89491b61070980a3f48c73e5d907a4fbddff6177778b627ba43c87e827e4a4b  Tests/src/StyleConfigLookupCostTest.cpp
+1b7ad898e3944055a19f4d17752690b73bc6c7c02bc0f5900d3175cc53410fe2  Tests/src/TypeInfoSetStorageTest.cpp

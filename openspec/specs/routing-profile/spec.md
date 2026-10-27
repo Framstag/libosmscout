@@ -10,11 +10,7 @@ Provide a `RoutingProfile` configuration object that specifies vehicle type (car
 
 ### Requirement: RoutingProfile Java data class
 
-A new Java class `RoutingProfile` SHALL be added to `libosmscout-client-java/java/com/framstag/libosmscout/client/` with fields: `Vehicle vehicle` (default `CAR`), `boolean avoidTolls` (default false), `boolean avoidFerries` (default false), `boolean avoidUnpaved` (default false), `double maxSpeedKmh` (default `0`, meaning the vehicle's built-in profile).
-
-#### Scenario: The constructor set is complete
-- **WHEN** the constructors of `RoutingProfile` are inspected
-- **THEN** it offers a no-arg one, a vehicle-only one, a vehicle-plus-speed one, a vehicle-plus-avoid-flags one, and a vehicle-plus-avoid-flags-plus-speed one
+A new Java class `RoutingProfile` SHALL be added to `libosmscout-client-java/java/com/framstag/libosmscout/client/` with fields: `Vehicle vehicle` (default `CAR`), `boolean avoidTolls` (default false), `boolean avoidFerries` (default false), `boolean avoidUnpaved` (default false), `double maxSpeedKmh` (default `0`, meaning the vehicle's built-in profile). Multiple constructors SHALL be provided: no-arg (defaults), vehicle-only, vehicle-plus-speed, vehicle-plus-avoid-flags, and vehicle-plus-avoid-flags-plus-speed.
 
 #### Scenario: Create default profile
 - **WHEN** `new RoutingProfile()` is constructed
@@ -28,6 +24,10 @@ A new Java class `RoutingProfile` SHALL be added to `libosmscout-client-java/jav
 - **WHEN** `new RoutingProfile(Vehicle.PEDESTRIAN, true, false, true)` is constructed
 - **THEN** `vehicle` is `PEDESTRIAN`, `avoidTolls` is true, `avoidFerries` is false, `avoidUnpaved` is true
 
+#### Scenario: The constructor set is complete
+- **WHEN** the constructors of `RoutingProfile` are inspected
+- **THEN** it offers a no-arg one, a vehicle-only one, a vehicle-plus-speed one, a vehicle-plus-avoid-flags one, and a vehicle-plus-avoid-flags-plus-speed one
+
 ### Requirement: Vehicle Java enum
 
 A new Java enum `Vehicle` SHALL be added to `libosmscout-client-java/java/com/framstag/libosmscout/client/` with values `CAR`, `BICYCLE`, `PEDESTRIAN`.
@@ -35,31 +35,6 @@ A new Java enum `Vehicle` SHALL be added to `libosmscout-client-java/java/com/fr
 #### Scenario: Enum values exist
 - **WHEN** `Vehicle.valueOf("CAR")`, `Vehicle.valueOf("BICYCLE")`, `Vehicle.valueOf("PEDESTRIAN")` are called
 - **THEN** each returns the corresponding enum value
-
-### Requirement: Routing profile maximum speed
-
-`RoutingProfile` SHALL carry the vehicle's usual maximum speed in km/h as `double maxSpeedKmh`. The value `0` SHALL mean "use the routing engine's built-in profile for the vehicle" (car 120, bicycle 30, pedestrian 10 km/h), and every constructor that does not name a speed SHALL set the field to `0`.
-
-#### Scenario: Default profile requests the built-in speed
-- **WHEN** `new RoutingProfile()` is constructed
-- **THEN** `maxSpeedKmh` is `0`
-
-#### Scenario: Vehicle-only profile requests the built-in speed
-- **WHEN** `new RoutingProfile(Vehicle.BICYCLE)` is constructed
-- **THEN** `maxSpeedKmh` is `0`
-- **AND** the vehicle is `BICYCLE`
-
-#### Scenario: Vehicle and speed constructor carries the speed
-- **WHEN** `new RoutingProfile(Vehicle.BICYCLE, 20.0)` is constructed
-- **THEN** the vehicle is `BICYCLE`, `maxSpeedKmh` is `20.0` and all avoid flags are false
-
-#### Scenario: Full constructor carries the speed
-- **WHEN** `new RoutingProfile(Vehicle.PEDESTRIAN, true, false, true, 4.0)` is constructed
-- **THEN** `maxSpeedKmh` is `4.0` and the avoid flags are `true`, `false`, `true`
-
-#### Scenario: The avoid-flag constructor without a speed keeps meaning the built-in profile
-- **WHEN** `new RoutingProfile(Vehicle.CAR, true, true, true)` is constructed
-- **THEN** `maxSpeedKmh` is `0`
 
 ### Requirement: RoutingProfile bridged through JNI
 
@@ -136,3 +111,28 @@ The existing `calculateRouteAsync(double, double, double, double, RouteCallback)
 #### Scenario: Existing startNavigation still works
 - **WHEN** `startNavigation(routeHandle, listener)` is called without a vehicle
 - **THEN** the navigation engine is initialized with `vehicleCar`
+
+### Requirement: Routing profile maximum speed
+
+`RoutingProfile` SHALL carry the vehicle's usual maximum speed in km/h as `double maxSpeedKmh`. The value `0` SHALL mean "use the routing engine's built-in profile for the vehicle" (car 120, bicycle 30, pedestrian 10 km/h), and every constructor that does not name a speed SHALL set the field to `0`.
+
+#### Scenario: Default profile requests the built-in speed
+- **WHEN** `new RoutingProfile()` is constructed
+- **THEN** `maxSpeedKmh` is `0`
+
+#### Scenario: Vehicle-only profile requests the built-in speed
+- **WHEN** `new RoutingProfile(Vehicle.BICYCLE)` is constructed
+- **THEN** `maxSpeedKmh` is `0`
+- **AND** the vehicle is `BICYCLE`
+
+#### Scenario: Vehicle and speed constructor carries the speed
+- **WHEN** `new RoutingProfile(Vehicle.BICYCLE, 20.0)` is constructed
+- **THEN** the vehicle is `BICYCLE`, `maxSpeedKmh` is `20.0` and all avoid flags are false
+
+#### Scenario: Full constructor carries the speed
+- **WHEN** `new RoutingProfile(Vehicle.PEDESTRIAN, true, false, true, 4.0)` is constructed
+- **THEN** `maxSpeedKmh` is `4.0` and the avoid flags are `true`, `false`, `true`
+
+#### Scenario: The avoid-flag constructor without a speed keeps meaning the built-in profile
+- **WHEN** `new RoutingProfile(Vehicle.CAR, true, true, true)` is constructed
+- **THEN** `maxSpeedKmh` is `0`

@@ -1,0 +1,375 @@
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+search: slot=places gen=1 aborted=false nativeMs=107
+PROBE: db=maps/nordrhein-westfalen city=51.514/7.465 handle=1 regionName=Innenstadt West scopeName=Regierungsbezirk Arnsberg
+search: slot=places gen=2 aborted=false nativeMs=17
+search: slot=places gen=3 aborted=false nativeMs=8
+search: slot=places gen=4 aborted=false nativeMs=7
+search: slot=places gen=5 aborted=false nativeMs=151
+search: slot=places gen=6 aborted=false nativeMs=137
+search: slot=places gen=7 aborted=false nativeMs=5
+PROBE: query='Bahnhof' unscoped=61 (repeat 61) scoped=64 (repeat 64) handle0=61
+PROBE:   scopedOutOfScopeFlags=0 scopedFarFromCity=10
+PROBE:   scopedSpan lat=50.74873135051676..51.66862042001351 lon=7.138394915598582..8.509989444240844
+PROBE:   unscopedSpan lat=50.36942474819291..52.23997788310035 lon=6.460876960015867..9.149880030377801
+PROBE:   unscopedMaxDistanceDeg=1.733577120716262
+PROBE:   scopedNotInUnscoped=50
+PROBE:   unscopedFreeText=50 outsideScopedSpan=36
+PROBE:   unscoped label='Innenstadtring' refType=area objectType=boundary_administrative matchQuality=match lat=51.961372136781904 lon=7.624688801353329 inScope=true
+PROBE:   unscoped label='Ahlen' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.7657271159122 lon=7.889904289617405 inScope=true
+PROBE:   unscoped label='Bornholte' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.86853618821901 lon=8.518615428497014 inScope=true
+PROBE:   unscoped label='Erndtebrück' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.989200107672815 lon=8.26767733892558 inScope=true
+PROBE:   unscoped label='Heiden' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.820918260670595 lon=6.957029305078308 inScope=true
+PROBE:   unscoped label='Himmighausen' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.810929043672445 lon=9.019489802565346 inScope=true
+PROBE:   unscoped label='Kierspe' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.145137035437955 lon=7.5833264558265085 inScope=true
+PROBE:   unscoped label='Lüftelberg' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.65414727221538 lon=7.009792380107882 inScope=true
+PROBE:   unscoped label='Reken' refType=area objectType=boundary_administrative matchQuality=candidate lat=51.83259190494263 lon=7.075820319919444 inScope=true
+PROBE:   unscoped label='Werthenbach' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.881554341923845 lon=8.231553347643853 inScope=true
+PROBE:   unscoped label='Windeck' refType=area objectType=boundary_administrative matchQuality=candidate lat=50.79039678566454 lon=7.575562801775064 inScope=true
+PROBE:   unscoped label='Bahnhofswerkstatt' refType=area objectType=building matchQuality=candidate lat=51.80261956008239 lon=7.048594557110917 inScope=true
+PROBE:   unscoped label='Bahnhofswand' refType=way objectType=natural_cliff matchQuality=candidate lat=51.35118433349716 lon=8.410240772442819 inScope=true
+PROBE:   unscoped label='Bahnhofstraße Schule' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.1015853367864 lon=6.461284655789171 inScope=true
+PROBE:   unscoped label='Bahnhofstraße Schule' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.10230148659872 lon=6.460876960015867 inScope=true
+PROBE:   unscoped label='Bahnhofstraße Schule' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.102364518511024 lon=6.460952061868852 inScope=true
+PROBE:   unscoped label='Bahnhofstraße Schule' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.102329649793575 lon=6.460997659422446 inScope=true
+PROBE:   unscoped label='Bahnhofstraße Schule' refType=way objectType=public_transport_platform matchQuality=candidate lat=51.10225655959738 lon=6.460887688851997 inScope=true
+PROBE:   unscoped label='Bahnhofstraße Schule' refType=way objectType=public_transport_platform matchQuality=candidate lat=51.10237323569039 lon=6.460988271690823 inScope=true
+PROBE:   unscoped label='Bahnhofstr./ Siendorfer Str.' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.23986657142541 lon=8.514137480513284 inScope=true
+PROBE:   unscoped label='Bahnhofstr./ Siendorfer Str.' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.23991082787447 lon=8.51416966702169 inScope=true
+PROBE:   unscoped label='Bahnhofstr./ Siendorfer Str.' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.23997788310035 lon=8.514193806903023 inScope=true
+PROBE:   unscoped label='Bahnhofsplatz, Bürgerbüro' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.15132690333817 lon=7.342653180231537 inScope=true
+PROBE:   unscoped label='Bahnhofsmall' refType=area objectType=building matchQuality=candidate lat=51.25501238744715 lon=7.149974012002147 inScope=true
+PROBE:   unscoped label='Bahnhofshügel I' refType=area objectType=landuse_residential matchQuality=candidate lat=52.0487290028388 lon=7.481513824176147 inScope=true
+PROBE:   unscoped label='Bahnhofshinterfahrung Hagen' refType=node objectType=tourism_viewpoint matchQuality=candidate lat=51.357962946280566 lon=7.452739085649995 inScope=true
+PROBE:   unscoped label='Bahnhofsgebäude aus Walporzheim' refType=area objectType=building matchQuality=candidate lat=50.608534295920535 lon=6.630486448336285 inScope=true
+PROBE:   unscoped label='Bahnhof/SchiederSee' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.92200602532927 lon=9.149880030377801 inScope=true
+PROBE:   unscoped label='Bahnhof/SchiederSee' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.9220918560184 lon=9.149729826671859 inScope=true
+PROBE:   unscoped label='Bahnhofssiedlung' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.069228455940106 lon=7.319371605808811 inScope=true
+PROBE:   unscoped label='Bahnhofssiedlung' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.06930087558405 lon=7.3194440254527535 inScope=true
+PROBE:   unscoped label='Bahnhofssiedlung' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.069613352936614 lon=7.318633998324231 inScope=true
+PROBE:   unscoped label='Bahnhofssiedlung' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.06969784252121 lon=7.3187171468043175 inScope=true
+PROBE:   unscoped label='Bahnhof Heumar' refType=way objectType=highway_service matchQuality=candidate lat=50.916844166195716 lon=7.074126504913906 inScope=true
+PROBE:   unscoped label='Bahnhof Dahlbruch' refType=area objectType=building matchQuality=candidate lat=50.97069822975023 lon=8.053657174510178 inScope=true
+PROBE:   unscoped label='Bahnhof Eintracht' refType=way objectType=highway_service matchQuality=candidate lat=50.86750426044691 lon=8.005309015552015 inScope=true
+PROBE:   unscoped label='Bahnhof Eintracht' refType=way objectType=highway_track matchQuality=candidate lat=50.868443704161365 lon=8.00404301288755 inScope=true
+PROBE:   unscoped label='Bahnhof Krummenerl' refType=area objectType=landuse_railway matchQuality=candidate lat=51.08090617567976 lon=7.7555001359842635 inScope=true
+PROBE:   unscoped label='Bahnhof Blankenstein' refType=area objectType=building matchQuality=candidate lat=51.40866742587586 lon=7.230424189794249 inScope=true
+PROBE:   unscoped label='Bahnhof Ahrdorf' refType=way objectType=highway_residential matchQuality=candidate lat=50.36942474819291 lon=6.786045184627511 inScope=true
+PROBE:   unscoped label='Bahnhof Ahrdorf' refType=way objectType=highway_residential matchQuality=candidate lat=50.36986127771334 lon=6.787706813124615 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=area objectType=amenity_parking matchQuality=candidate lat=50.65544412028375 lon=7.049937002732875 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=50.62196009324461 lon=6.709505667608269 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=50.622236360775204 lon=6.7098382615285885 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_track matchQuality=candidate lat=50.72878912634245 lon=6.662794997265891 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=50.728186970414114 lon=6.6638987262837475 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=50.728419652047904 lon=6.663575520095037 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=50.74873135051676 lon=8.077133209087947 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=51.08902790463736 lon=8.081051916487894 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=51.08908020771355 lon=8.081251741060996 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=51.08809382534096 lon=8.085328698794015 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_residential matchQuality=candidate lat=51.08677149628677 lon=8.08936944670505 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.26963109723948 lon=6.624885995871466 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.27038077466473 lon=6.624293227674755 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.270399550127976 lon=6.624341507437379 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.272438028994486 lon=6.622075040802912 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.27132491224501 lon=6.6235583023992035 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.271941820323036 lon=6.622980286352188 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary_link matchQuality=candidate lat=51.27199546450373 lon=6.6231211023265075 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.26812838962769 lon=6.626103718773294 inScope=true
+PROBE:   unscoped label='Bahnhofsweg' refType=way objectType=highway_secondary matchQuality=candidate lat=51.26827993443817 lon=6.626060803428743 inScope=true
+PROBE:   scoped label='Bahnhof' type=object refType=area objectType=boundary_administrative lat=51.64504849646276 lon=8.509989444240844 inScope=true
+PROBE:   scoped label='Bahnhofsplatz' type=object refType=way objectType=boundary_administrative lat=51.544281255783744 lon=7.216003292918231 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.54529177803764 lon=7.2180779816067115 inScope=true
+PROBE:   scoped label='Bahnhofsplatz' type=object refType=way objectType=boundary_administrative lat=51.544281255783744 lon=7.216003292918231 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.54529177803764 lon=7.2180779816067115 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.610718903025386 lon=7.571577039149233 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5970315903204 lon=7.742189673648696 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.59770817754945 lon=7.757667360884454 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5970315903204 lon=7.742189673648696 inScope=true
+PROBE:   scoped label='Zum alten Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.57627196294271 lon=7.788756845807711 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.27749667523426 lon=7.528268750967584 inScope=true
+PROBE:   scoped label='Am Zechenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.54186257378653 lon=7.466580625374462 inScope=true
+PROBE:   scoped label='Bahnhofsallee' type=object refType=way objectType=boundary_administrative lat=51.4762014260605 lon=7.705357579181765 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.471128698223296 lon=7.763526646521143 inScope=true
+PROBE:   scoped label='Am Hasper Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.35175564402161 lon=7.422581668366348 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.55411959852367 lon=7.803981064289658 inScope=true
+PROBE:   scoped label='Hemmerder Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5535831567167 lon=7.803769169775904 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5368066097558 lon=7.225411141108054 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5368066097558 lon=7.225411141108054 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5368066097558 lon=7.225411141108054 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.50435858595638 lon=7.618110683695306 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.50306710230609 lon=7.618055698410089 inScope=true
+PROBE:   scoped label='Am Preußenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.5892981111206 lon=7.539548781063772 inScope=true
+PROBE:   scoped label='Am Hafenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.53432690750306 lon=7.424254025699597 inScope=true
+PROBE:   scoped label='Bahnhof Märkische Straße' type=object refType=area objectType=boundary_administrative lat=51.50068865344441 lon=7.483241166794599 inScope=true
+PROBE:   scoped label='Am Alten Ostbahnhof' type=object refType=way objectType=boundary_administrative lat=51.51408896978266 lon=7.482192423061974 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.5164466315243 lon=7.455123569481984 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.58609085966714 lon=7.6624918554908845 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.58477925944909 lon=7.658355889159111 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.58609085966714 lon=7.6624918554908845 inScope=true
+PROBE:   scoped label='Alte Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47061103187957 lon=7.314585203786081 inScope=true
+PROBE:   scoped label='Alte Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.4705634226692 lon=7.314624095817095 inScope=true
+PROBE:   scoped label='Am Preußenbahnhof' type=object refType=way objectType=boundary_administrative lat=51.58934370867419 lon=7.538796421429495 inScope=true
+PROBE:   scoped label='Am Güterbahnhof' type=object refType=way objectType=boundary_administrative lat=51.49934352561341 lon=7.367746586857336 inScope=true
+PROBE:   scoped label='Am Hauptbahnhof' type=object refType=way objectType=boundary_administrative lat=51.36332870545483 lon=7.462496962118877 inScope=true
+PROBE:   scoped label='Am Hauptbahnhof' type=object refType=way objectType=boundary_administrative lat=51.36332870545483 lon=7.462496962118877 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.36030116200671 lon=7.466864939532158 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.44188457311603 lon=7.563521024312976 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.66653097917535 lon=7.459944840222192 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.53490492355007 lon=7.690280882196731 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.53490492355007 lon=7.690280882196731 inScope=true
+PROBE:   scoped label='Lünerner Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.545700144363195 lon=7.755455879535191 inScope=true
+PROBE:   scoped label='Massener Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.539082464121904 lon=7.64684787129498 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47866972892484 lon=7.138394915598582 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47866972892484 lon=7.138394915598582 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.66862042001351 lon=7.62438839394143 inScope=true
+PROBE:   scoped label='Am Bahnhof' type=object refType=way objectType=boundary_administrative lat=51.66862042001351 lon=7.62438839394143 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.66550905753306 lon=7.632700559740513 inScope=true
+PROBE:   scoped label='Bahnhofstraße' type=object refType=way objectType=boundary_administrative lat=51.47385248149821 lon=7.140984588421759 inScope=true
+PROBE:   scoped label='Bahnhofswand' type=object refType=way objectType=natural_cliff lat=51.35118433349716 lon=8.410240772442819 inScope=true
+PROBE:   scoped label='Bahnhofsplatz, Bürgerbüro' type=object refType=node objectType=highway_bus_stop lat=51.15132690333817 lon=7.342653180231537 inScope=true
+PROBE:   scoped label='Bahnhofsmall' type=object refType=area objectType=building lat=51.25501238744715 lon=7.149974012002147 inScope=true
+PROBE:   scoped label='Bahnhofshinterfahrung Hagen' type=object refType=node objectType=tourism_viewpoint lat=51.357962946280566 lon=7.452739085649995 inScope=true
+PROBE:   scoped label='Bahnhof Dahlbruch' type=object refType=area objectType=building lat=50.97069822975023 lon=8.053657174510178 inScope=true
+PROBE:   scoped label='Bahnhof Eintracht' type=object refType=way objectType=highway_service lat=50.86750426044691 lon=8.005309015552015 inScope=true
+PROBE:   scoped label='Bahnhof Eintracht' type=object refType=way objectType=highway_track lat=50.868443704161365 lon=8.00404301288755 inScope=true
+PROBE:   scoped label='Bahnhof Krummenerl' type=object refType=area objectType=landuse_railway lat=51.08090617567976 lon=7.7555001359842635 inScope=true
+PROBE:   scoped label='Bahnhof Blankenstein' type=object refType=area objectType=building lat=51.40866742587586 lon=7.230424189794249 inScope=true
+PROBE:   scoped label='Bahnhofsweg' type=object refType=way objectType=highway_residential lat=50.74873135051676 lon=8.077133209087947 inScope=true
+PROBE:   scoped label='Bahnhofsweg' type=object refType=way objectType=highway_residential lat=51.08902790463736 lon=8.081051916487894 inScope=true
+PROBE:   scoped label='Bahnhofsweg' type=object refType=way objectType=highway_residential lat=51.08908020771355 lon=8.081251741060996 inScope=true
+PROBE:   scoped label='Bahnhofsweg' type=object refType=way objectType=highway_residential lat=51.08809382534096 lon=8.085328698794015 inScope=true
+PROBE:   scoped label='Bahnhofsweg' type=object refType=way objectType=highway_residential lat=51.08677149628677 lon=8.08936944670505 inScope=true
+search: slot=places gen=8 aborted=false nativeMs=13
+search: slot=places gen=9 aborted=false nativeMs=8
+search: slot=places gen=10 aborted=false nativeMs=6
+search: slot=places gen=11 aborted=false nativeMs=131
+search: slot=places gen=12 aborted=false nativeMs=145
+search: slot=places gen=13 aborted=false nativeMs=4
+PROBE: query='Hauptstraße' unscoped=50 (repeat 50) scoped=53 (repeat 53) handle0=50
+PROBE:   scopedOutOfScopeFlags=0 scopedFarFromCity=18
+PROBE:   scopedSpan lat=50.87634213921683..51.69457883905305 lon=7.158522212196303..8.454967949203905
+PROBE:   unscopedSpan lat=50.38330585050065..52.27445231582561 lon=6.252390192839428..8.774891114047847
+PROBE:   unscopedMaxDistanceDeg=1.5580581728785154
+PROBE:   scopedNotInUnscoped=50
+PROBE:   unscopedFreeText=50 outsideScopedSpan=47
+PROBE:   unscoped label='Hauptstraße 48' refType=area objectType=building matchQuality=candidate lat=52.01600538206105 lon=7.206329906033943 inScope=true
+PROBE:   unscoped label='Hauptstraße / Bahnhofstraße' refType=node objectType=tourism_information_guidepost matchQuality=candidate lat=51.25545428138565 lon=6.390514570403951 inScope=true
+PROBE:   unscoped label='Hauptstraße Kirche' refType=node objectType=highway_bus_stop matchQuality=candidate lat=50.90996698223029 lon=6.813751062853271 inScope=true
+PROBE:   unscoped label='Hauptstraße 25' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.03394399608629 lon=8.756949817813563 inScope=true
+PROBE:   unscoped label='Hauptstraße 25' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.034016415730235 lon=8.757212674298984 inScope=true
+PROBE:   unscoped label='Hauptstraße / Heidestraße' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.27441610600363 lon=8.77474359255092 inScope=true
+PROBE:   unscoped label='Hauptstraße / Heidestraße' refType=node objectType=highway_bus_stop matchQuality=candidate lat=52.27445231582561 lon=8.774891114047847 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=area objectType=highway_pedestrian matchQuality=match lat=51.3293880323275 lon=6.6118424133348555 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=area objectType=highway_pedestrian matchQuality=match lat=51.38369941252246 lon=7.766432820010422 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=area objectType=highway_pedestrian matchQuality=match lat=51.13991745665608 lon=6.276371823820256 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=area objectType=highway_pedestrian matchQuality=match lat=50.909208587625685 lon=6.809938302710179 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=area objectType=highway_pedestrian matchQuality=match lat=51.32758089399026 lon=8.004104703695361 inScope=true
+PROBE:   unscoped label='hauptstrasse' refType=area objectType=leisure_garden matchQuality=match lat=50.87634213921683 lon=8.045760751111501 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.38330585050065 lon=6.649618645382063 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.384290891768714 lon=6.652502020094559 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.38539059747302 lon=6.654918690434982 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.38576744784241 lon=6.655637522456331 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.38752965917833 lon=6.660791387116845 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.416897836453444 lon=6.558892924777368 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41703395856197 lon=6.558689076890715 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41717209232726 lon=6.558526803244106 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.417672324312264 lon=6.558458406913715 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41942246570753 lon=6.55781333564083 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41873313798557 lon=6.558127154097903 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41965782955033 lon=6.557773102505308 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.4198858173183 lon=6.557743598205917 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41998841181389 lon=6.557724822742671 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.4201164872953 lon=6.557657767516801 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.420660975729376 lon=6.557122666814337 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.4165706069512 lon=6.559969831704862 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.416560548667306 lon=6.5601468575011666 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41663028610222 lon=6.5596077334851515 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41676573765848 lon=6.559166510098919 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.41385218809435 lon=6.5614772331824724 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.416441860917516 lon=6.5603654575375145 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.42159036115996 lon=6.556355555030365 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.47262676412333 lon=6.8391944977581005 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.524980802275095 lon=6.657148947247478 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.52988857425666 lon=6.260734545146931 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.532131571562076 lon=6.255848901389896 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.53558290403771 lon=6.252585994098965 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.53467698793618 lon=6.253194855549879 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.53531200092519 lon=6.2527388800139505 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.535779375849515 lon=6.2524907756782255 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.53578138750629 lon=6.252513574455023 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.5358900169722 lon=6.252457248065298 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.53589202862898 lon=6.252482729051124 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.536193106593146 lon=6.252390192839428 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.52995428837802 lon=6.263579027828413 inScope=true
+PROBE:   unscoped label='Hauptstraße' refType=way objectType=highway_primary matchQuality=match lat=50.52998245157289 lon=6.263802992282834 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.55469426180939 lon=8.328369023862237 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.35563277718151 lon=8.419812235383773 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.69457883905305 lon=7.7328542451028 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.274255225615605 lon=7.4507850963680795 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.50247433410938 lon=7.958428024935927 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.03471719499467 lon=7.756700424527381 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.65433028082796 lon=8.454967949203905 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.514506053287576 lon=7.177868985964864 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.514506053287576 lon=7.177868985964864 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.155042433403736 lon=7.952580809239905 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.47997730582935 lon=7.683936116724723 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.47997730582935 lon=7.683936116724723 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.40786946868799 lon=7.2196028174430324 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.40786946868799 lon=7.2196028174430324 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.39726669637312 lon=7.431294824416142 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.39726669637312 lon=7.431294824416142 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.490771185537966 lon=7.6211201222324405 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.08456403825106 lon=8.169847787692007 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.49582111459837 lon=8.130438090342565 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.456965293414626 lon=7.31872921674497 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.456965293414626 lon=7.31872921674497 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.665336055050304 lon=8.036682814632968 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.37469456624012 lon=8.172115595430995 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=50.97217411527167 lon=7.862392871546689 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.45126828142456 lon=7.963917165725803 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.362991417668695 lon=7.246782982697951 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.362991417668695 lon=7.246782982697951 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.56417654129994 lon=8.424374672952112 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.63308450306269 lon=8.195445449616358 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.63308450306269 lon=8.195445449616358 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.4958854876152 lon=7.964542120430934 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.282477537412035 lon=7.28682970469319 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.282477537412035 lon=7.28682970469319 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.66567066062741 lon=7.4634598751624 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.619814273862644 lon=8.307682486680761 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.31921240180145 lon=8.006993442825916 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.517756890637855 lon=7.7991450413997825 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.542028870746705 lon=7.158522212196303 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.37152687736993 lon=7.384826893991416 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.37177833446695 lon=7.388214524002478 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.526924681119056 lon=7.1612258789034655 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.526924681119056 lon=7.1612258789034655 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.526924681119056 lon=7.1612258789034655 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.523853551774124 lon=7.163795435158875 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.523853551774124 lon=7.163795435158875 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.4361184942433 lon=8.34826699158748 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=50.970293216185965 lon=7.866967379055666 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.57858402713079 lon=8.417553815376408 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.48846448576796 lon=7.862088440821225 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=way objectType=boundary_administrative lat=51.44021154523054 lon=7.336230630697543 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=area objectType=highway_pedestrian lat=51.38369941252246 lon=7.766432820010422 inScope=true
+PROBE:   scoped label='Hauptstraße' type=object refType=area objectType=highway_pedestrian lat=51.32758089399026 lon=8.004104703695361 inScope=true
+PROBE:   scoped label='hauptstrasse' type=object refType=area objectType=leisure_garden lat=50.87634213921683 lon=8.045760751111501 inScope=true
+search: slot=places gen=14 aborted=false nativeMs=9
+search: slot=places gen=15 aborted=false nativeMs=5
+search: slot=places gen=16 aborted=false nativeMs=5
+search: slot=places gen=17 aborted=false nativeMs=116
+search: slot=places gen=18 aborted=false nativeMs=111
+search: slot=places gen=19 aborted=false nativeMs=5
+PROBE: query='Kirchstraße' unscoped=50 (repeat 50) scoped=51 (repeat 51) handle0=50
+PROBE:   scopedOutOfScopeFlags=0 scopedFarFromCity=21
+PROBE:   scopedSpan lat=50.78961358062635..51.67099216335261 lon=7.149385267119001..8.85437033216931
+PROBE:   unscopedSpan lat=50.385284650216136..52.14811959973066 lon=6.240416811707732..8.616785620278009
+PROBE:   unscopedMaxDistanceDeg=1.5559292923624601
+PROBE:   scopedNotInUnscoped=50
+PROBE:   unscopedFreeText=50 outsideScopedSpan=49
+PROBE:   unscoped label='Kirchstraße/Im Dorffeld' refType=node objectType=highway_bus_stop matchQuality=candidate lat=51.108127244622466 lon=7.020181916804461 inScope=true
+PROBE:   unscoped label='Kirchstraße 24' refType=area objectType=building matchQuality=candidate lat=52.14811959973066 lon=8.616785620278009 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=node objectType=tourism_information matchQuality=match lat=51.39780179707557 lon=7.185553514849801 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=area objectType=amenity_parking matchQuality=match lat=52.04962351955193 lon=8.032615244631586 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=area objectType=amenity_parking matchQuality=match lat=51.66527972866058 lon=6.8761285161683645 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.385284650216136 lon=6.6561887164129985 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.455954152762544 lon=6.404842931068259 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.51141217731991 lon=6.657725622189986 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.512263108136224 lon=6.656651397471521 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_living_street matchQuality=match lat=50.51057801031007 lon=6.658640255470871 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_service matchQuality=match lat=50.51063299559529 lon=6.658954073927944 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.545618389141694 lon=6.409564960074164 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.54593824256911 lon=6.41176034816921 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_secondary matchQuality=match lat=50.54626614262361 lon=6.414835500827692 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_living_street matchQuality=match lat=50.55438451881993 lon=6.240416811707732 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_living_street matchQuality=match lat=50.55300988668955 lon=6.2413113284208634 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_living_street matchQuality=match lat=50.553726707054125 lon=6.240811096435863 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_living_street matchQuality=match lat=50.553966094210494 lon=6.240698443656399 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.57759166194194 lon=6.9470514874685705 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.57734355760621 lon=6.9481525342773836 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.57734355760621 lon=6.947555742767122 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.57688557041351 lon=6.949380986015356 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.59098393165307 lon=7.012257330210929 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.592039380908304 lon=7.010725788852028 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.61273999968722 lon=7.061868809624528 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.61364122192295 lon=7.062021695539514 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.61435737173527 lon=7.062177263663543 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_primary matchQuality=match lat=50.630219955967505 lon=6.276323544057632 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_primary matchQuality=match lat=50.63077986710354 lon=6.274755792876746 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_primary matchQuality=match lat=50.63078120820806 lon=6.277712928337692 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_primary matchQuality=match lat=50.63136995309122 lon=6.2789722254795635 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_service matchQuality=match lat=50.63143499666032 lon=6.279326277072187 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_primary matchQuality=match lat=50.631477241452615 lon=6.281156884738479 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_primary matchQuality=match lat=50.63166298442829 lon=6.2804112306267825 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_service matchQuality=match lat=50.632149805368115 lon=6.281003998823479 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.64167701186 lon=7.226615452964708 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.642519896049194 lon=7.227383905853202 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.64321391763697 lon=7.227599823680521 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.643705432442616 lon=7.227838540284623 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_pedestrian matchQuality=match lat=50.64404406133326 lon=7.22799947282671 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_pedestrian matchQuality=match lat=50.64453490558665 lon=7.228011542767376 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.65851122631513 lon=6.647368272001799 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.65900140001625 lon=6.647751827893799 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.659504314210295 lon=6.647498359140002 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.65909661843699 lon=6.648128678263191 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.65944329395475 lon=6.64763515180077 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.65946408107477 lon=6.6476083297104225 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_residential matchQuality=match lat=50.6618190606074 lon=6.784490844491799 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.66627219815754 lon=6.5106051155224804 inScope=true
+PROBE:   unscoped label='Kirchstraße' refType=way objectType=highway_tertiary matchQuality=match lat=50.67457430567275 lon=6.514338750499022 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.294529373157985 lon=7.672995386071463 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.294529373157985 lon=7.672995386071463 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.13620259714277 lon=7.975649148044354 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.01986245080725 lon=8.50512928146965 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=50.92510201726185 lon=8.445774677736864 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.31801814822866 lon=7.830065547153836 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.369120265313384 lon=8.418618652363264 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.394629414339576 lon=7.471185978287352 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.59874283968465 lon=7.766039876386813 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.54532932896413 lon=7.260719740843172 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.54532932896413 lon=7.260719740843172 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.61616646957522 lon=8.26494685012807 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.299510905888 lon=7.343866879819828 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.25306778589686 lon=8.1661101294019 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.1703853396355 lon=7.965998559936864 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.494786452463174 lon=7.149385267119001 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.11047350697572 lon=8.621698086125392 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.397764246149094 lon=7.185304069409554 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.393227289566596 lon=7.761429159055865 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.41652965110934 lon=7.277707511765556 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.49961778148723 lon=7.617127654084015 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.3707409901227 lon=7.631088552110555 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.3707409901227 lon=7.631088552110555 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.45216011592865 lon=8.423300448233633 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.59160414033833 lon=7.663548645850625 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.613854405387144 lon=7.523755934266418 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.19734355209279 lon=8.705153679141048 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.539670538452796 lon=8.060201764555288 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.43839367805714 lon=7.794860212466574 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.35359161610596 lon=8.193925978198095 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=50.98729573925806 lon=8.042878717503527 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.33597285550813 lon=7.637099382557722 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=50.78961358062635 lon=7.998223960386397 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.460364993366326 lon=8.85437033216931 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.39374964977614 lon=8.135546357449485 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.35536723848705 lon=8.491275671804516 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.63413190569081 lon=8.19667658356336 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.18326933073453 lon=8.338843050143439 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.28359400692278 lon=7.293718958599257 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.41324193338485 lon=7.567018624894459 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.34801865628374 lon=7.334365154313787 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.5403866882651 lon=7.259074205600271 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.638168630288305 lon=8.468153688819356 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.53546483468611 lon=7.691347060288081 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.043112509273826 lon=8.001899927868692 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.40074619204361 lon=7.341886068447579 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.40074619204361 lon=7.341886068447579 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.67099216335261 lon=7.697383371721074 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.49483674388257 lon=7.864684819166996 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=way objectType=boundary_administrative lat=51.50131830201535 lon=7.858109383717988 inScope=true
+PROBE:   scoped label='Kirchstraße' type=object refType=node objectType=tourism_information lat=51.39780179707557 lon=7.185553514849801 inScope=true

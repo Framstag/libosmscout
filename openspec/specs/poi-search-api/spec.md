@@ -108,15 +108,16 @@ The POI search API SHALL support a fixed set of categories, each mapped to a fix
 
 New Java class `com.framstag.libosmscout.client.PoiEntry` SHALL represent a single POI search result.
 Alongside the label, the object type, the coordinate and the distance, a result SHALL expose the
-operator and the brand of the found object when the object carries them.
+operator and the brand of the found object when the object carries them, and the description of the
+object type in the language the caller asked for.
 
 #### Scenario: PoiEntry structure
 
 - **WHEN** a `PoiEntry` is returned from `searchPOIs`
 - **THEN** it SHALL expose fields: `label` (String), `operator` (String, empty when the found object
   carries no operator), `brand` (String, empty when the found object carries no brand),
-  `objectType` (String), `lat` (double), `lon` (double), `distance` (double, meters from search
-  center)
+  `objectType` (String), `objectTypeDescription` (String, empty when no description is available),
+  `lat` (double), `lon` (double), `distance` (double, meters from search center)
 
 #### Scenario: PoiEntry fields populated
 
@@ -125,6 +126,18 @@ operator and the brand of the found object when the object carries them.
 - **AND** `operator` and `brand` SHALL be non-null, and empty when the found object carries no such
   information
 - **AND** `distance` SHALL be the distance in meters from the search center
+
+#### Scenario: The object type description is reported
+
+- **WHEN** a `PoiEntry` is returned for an object whose type carries a description in the requested language
+- **THEN** `objectTypeDescription` SHALL carry that description
+- **AND** `objectType` SHALL still carry the technical type name
+
+#### Scenario: An undescribed object type reports an empty description
+
+- **WHEN** a `PoiEntry` is returned for an object whose type carries no description in the requested language
+- **THEN** `objectTypeDescription` SHALL be empty and non-null
+- **AND** no error SHALL be raised
 
 ### Requirement: JNI bridge for POI search
 
@@ -258,3 +271,29 @@ many it returns, or the order it returns them in.
 - **THEN** every object that matches the category and the radius SHALL be returned regardless of
   whether it carries these attributes
 - **AND** the returned results SHALL be ordered by distance ascending as before
+
+### Requirement: The POI search entry point carries the request's generation
+
+`searchPOIsByTypes` SHALL carry the request's generation as its last parameter, so a POI search can be
+superseded or cancelled without touching another surface's search. The category entry point SHALL begin the
+poi slot's request, run the search with its generation and end it, so a caller that manages nothing still
+supersedes its predecessor. An aborted POI search SHALL return an empty array.
+
+#### Scenario: The generation reaches the native search
+
+- **GIVEN** a caller that began a poi request
+- **WHEN** it calls `searchPOIsByTypes` with that generation
+- **THEN** the native search SHALL ask that generation at its abort checks
+
+#### Scenario: The category entry point manages its own request
+
+- **GIVEN** a caller that uses the category entry point
+- **WHEN** it searches twice in a row
+- **THEN** each call SHALL begin and end the poi slot's request itself
+- **AND** the second call SHALL not be blocked by the first
+
+#### Scenario: A cancelled POI search returns an empty array
+
+- **GIVEN** a POI search whose generation is cancelled
+- **WHEN** the entry point returns
+- **THEN** it SHALL return an empty array

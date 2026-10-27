@@ -1,0 +1,50 @@
+# RoundaboutProbe: end-to-end navigation on a real roundabout of maps/nordrhein-westfalen (v27)
+# roundabout found with:
+#   osmconvert maps/nordrhein-westfalen.osm.pbf -b=7.30,51.40,7.60,51.60 --add-bbox-tags --out-csv --csv='@otype @id highway junction bBox' | grep roundabout
+# way 4236678 (highway=secondary, junction=roundabout) bbox 7.3965235,51.5689384 .. 7.3968155,51.5691420; list in roundabout-ways-dortmund-2026-10-16.csv
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:17:11Z
+# command: java -Djava.library.path=build/libosmscout-client-java -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 RoundaboutProbe route 51.5690402 7.3966695 0.003
+# source: openspec/changes/client-java-roundabout-instruction-data/evidence/RoundaboutProbe.java
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+PROBE: roundabout candidate 51.5690402/7.3966695 radius=0.003
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+calculateRouteAsync: 1 databases available for routing
+  db path=maps/nordrhein-westfalen hasRouterDir=yes
+  created car routing profile
+calculateRouteAsync: routing service opened OK
+calculateRouteAsync: 1 databases in routing mapping
+  dbId=0 path=maps/nordrhein-westfalen
+calculateRouteAsync: resolving start at 51.56904 N 7.39367 E
+calculateRouteAsync: start resolved OK
+calculateRouteAsync: resolving dest at 51.56904 N 7.39967 E
+calculateRouteAsync: dest resolved OK
+calculateRouteAsync: calling CalculateRoute...
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+calculateRouteAsync: route OK, air-line estimate=418.89933m
+Loading path data: 0.000
+Scanning locations: 0.004
+Loading candidates: 0.004
+Analysing candidates: 0.000
+calculateRouteAsync: generated 6 description lines
+PROBE: route distance=641.5530701144821m duration=46.191821048242716s waypoints=46
+PROBE: descriptions=6 instructionLats=5
+PROBE: instructions=7
+PROBE:   turn=START distanceTo=0.0 legDistance=0.0 timeTo=0.0 exitNumber=0 clockwise=true nextNextExit=0 short='Start'
+PROBE:   turn=RIGHT distanceTo=10.20746238912328 legDistance=10.20746238912328 timeTo=1.0 exitNumber=0 clockwise=true nextNextExit=0 short='Turn right'
+PROBE:   turn=LEFT distanceTo=43.656999667765525 legDistance=33.44953727864225 timeTo=4.0 exitNumber=0 clockwise=true nextNextExit=0 short='Turn left'
+PROBE:   turn=RIGHT distanceTo=155.46639489050136 legDistance=111.80939522273584 timeTo=13.0 exitNumber=0 clockwise=true nextNextExit=0 short='Turn right'
+PROBE:   turn=ROUNDABOUT_ENTER distanceTo=396.7030324964741 legDistance=241.23663760597276 timeTo=28.0 exitNumber=0 clockwise=false nextNextExit=0 short='Roundabout'
+PROBE:   turn=ROUNDABOUT_LEAVE distanceTo=450.8310550574006 legDistance=54.12802256092647 timeTo=3.0 exitNumber=3 clockwise=false nextNextExit=0 short='Exit 3'
+PROBE:   turn=TARGET_REACHED distanceTo=641.5530701144821 legDistance=190.72201505708153 timeTo=34.0 exitNumber=0 clockwise=true nextNextExit=0 short='Arrive'
+PROBE: SAW_ROUNDABOUT_INSTRUCTIONS=true
+# exit: 0

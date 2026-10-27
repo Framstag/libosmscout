@@ -1,0 +1,37 @@
+# RoutingSpeedProbe: applied speed observed on a real route (JNI bridge, v27 database)
+# database maps/nordrhein-westfalen; the bridge logs the applied speed at WARN level to stderr
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:06:26Z
+# command: java -Djava.library.path=build/libosmscout-client-java -cp build/libosmscout-client-java/libosmscoutclientjava.jar:build/loop-probes-2026-10-16 RoutingSpeedProbe maps/nordrhein-westfalen stylesheets
+# source: openspec/changes/client-java-routing-profile-max-speed/evidence/RoutingSpeedProbe.java
+Lookup databases
+Scanning maps lookup directory: maps/nordrhein-westfalen
+  found valid map 'nordrhein-westfalen' at maps/nordrhein-westfalen (no metadata)
+Lookup directory maps/nordrhein-westfalen scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+PROBE: db=maps/nordrhein-westfalen route 51.514227/7.465279 -> 51.52/7.48
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+Unknown types in 'stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'stylesheets/include/natural.oss': 1 (natural_waterfall)
+  created car routing profile (max speed 77.00000 km/h)
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+  created car routing profile (max speed 77.00000 km/h)
+Loading path data: 0.000
+Scanning locations: 0.005
+Loading candidates: 0.005
+Analysing candidates: 0.000
+  created car routing profile (max speed 77.00000 km/h)
+PROBE: requested-77 vehicle=CAR maxSpeedKmh=77.0 -> route distance=1699.3774322313407m duration=122.35517512065651s waypoints=113
+  created car routing profile (max speed 120.00000 km/h)
+Warning: Index intersections.idx has cache size 10000, but requires cache size 14123 to load index completely into cache!
+  created car routing profile (max speed 120.00000 km/h)
+Loading path data: 0.000
+Scanning locations: 0.001
+Loading candidates: 0.001
+Analysing candidates: 0.000
+  created car routing profile (max speed 120.00000 km/h)
+PROBE: built-in vehicle=CAR maxSpeedKmh=0.0 -> route distance=1699.3774322313407m duration=122.35517512065651s waypoints=113
+# exit: 0

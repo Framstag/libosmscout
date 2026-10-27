@@ -48,6 +48,17 @@ osmscout_test_project(NAME TypeResolutionPerformanceTest SOURCES src/TypeResolut
 osmscout_test_project(NAME TypeResolutionTest SOURCES src/TypeResolutionTest.cpp)
 set_tests_properties(TypeResolutionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
+#---- TypeInfoSetStorage
+osmscout_test_project(NAME TypeInfoSetStorageTest SOURCES src/TypeInfoSetStorageTest.cpp)
+
+#---- TypeDescriptionCoverage
+osmscout_test_project(NAME TypeDescriptionCoverageTest SOURCES src/TypeDescriptionCoverageTest.cpp)
+set_tests_properties(TypeDescriptionCoverageTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+
+#---- TypeConfigDescription
+osmscout_test_project(NAME TypeConfigDescriptionTest SOURCES src/TypeConfigDescriptionTest.cpp)
+set_tests_properties(TypeConfigDescriptionTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+
 #---- CalculateResolution
 osmscout_test_project(NAME CalculateResolutionTest SOURCES src/CalculateResolutionTest.cpp)
 
@@ -78,8 +89,8 @@ osmscout_test_project(NAME MapManagerTest SOURCES src/MapManagerTest.cpp TARGET 
 osmscout_test_project(NAME LatchTest SOURCES src/LatchTest.cpp)
 
 #---- LocationLookup
-osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp TARGET OSMScout::Test OSMScout::Import)
-set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+osmscout_test_project(NAME LocationLookupTest SOURCES src/LocationServiceTest.cpp src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationIndexRegionCacheTest.cpp src/LocationBoundaryRegionTest.cpp TARGET OSMScout::Test OSMScout::Import)
+set_source_files_properties(src/SearchForLocationByStringTest.cpp src/SearchForLocationByFormTest.cpp src/SearchForPOIByFormTest.cpp src/LocationServiceTest.cpp src/LocationIndexRegionCacheTest.cpp src/LocationBoundaryRegionTest.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 set_tests_properties(LocationLookupTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 set_tests_properties(LocationLookupTest PROPERTIES UNITY_BUILD FALSE)
 
@@ -176,6 +187,9 @@ if(${OSMSCOUT_BUILD_IMPORT} AND TARGET OSMScout::Import)
 	set_tests_properties(DbJsonWriterTest PROPERTIES ENVIRONMENT "TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
 
 	osmscout_test_project(NAME OptimizeAreaWayIdsTest SOURCES src/OptimizeAreaWayIdsTest.cpp TARGET OSMScout::Import)
+
+	osmscout_test_project(NAME BoundaryTypesTest SOURCES src/BoundaryTypesTest.cpp TARGET OSMScout::Import)
+	set_tests_properties(BoundaryTypesTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 
 	add_test(NAME ClientUpdateCheckTest COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/mapgen/client-check-test.sh)
 
@@ -284,6 +298,23 @@ osmscout_test_project(NAME FramePixelLayoutTest SOURCES src/FramePixelLayoutTest
 
 #---- RouteStepTime
 osmscout_test_project(NAME RouteStepTimeTest SOURCES src/RouteStepTimeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
+#---- RenderLabelBounds
+# The Java render states the label line-wrapping bounds instead of inheriting them, so a long
+# multi-word label is wrapped instead of running across the map. The four values come from a
+# dependency-free helper (render_label_bounds.h) the test reads as well, and the difference from the
+# library's non-binding default fit-to-width is pinned here, on a host with no map database.
+if(${OSMSCOUT_BUILD_MAP} AND TARGET OSMScout::Map)
+  osmscout_test_project(NAME RenderLabelBoundsTest SOURCES src/RenderLabelBoundsTest.cpp TARGET OSMScout::Map INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+else()
+  message("Skip RenderLabelBounds test, libosmscout-map is missing.")
+endif()
+
+#---- RouteFailureKind
+# The kind a failed route calculation is reported with is decided by one dependency-free function;
+# it is checked here rather than only through a route that needs a routing database, and the numbers
+# this test pins are the ones RouteCallback.java declares.
+osmscout_test_project(NAME RouteFailureKindTest SOURCES src/RouteFailureKindTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
 #---- RouteLength
 osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)

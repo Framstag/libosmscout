@@ -1,0 +1,15 @@
+# uncrustify drift of the two touched files (uncrustify 0.83.0)
+# command: uncrustify -q -c .uncrustify -l CPP -f <file> | diff -u <file> - | grep -E '^@@'  (hunk headers of the drift)
+# run at 2026-10-16T11:43:23Z (UTC)
+== libosmscout/src/osmscout/util/StringMatcher.cpp  drift diff lines: 58
+   hunk headers:
+@@ -24,7 +24,7 @@
+@@ -32,7 +32,7 @@
+@@ -51,18 +51,17 @@
+@@ -72,6 +71,7 @@
+@@ -216,5 +216,4 @@
+== Tests/src/HeaderCheckTest.cpp  drift diff lines: 801
+   hunk headers:
+@@ -10,25 +10,25 @@
+@@ -53,413 +53,422 @@
+# exit code: 0

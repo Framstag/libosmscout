@@ -1,0 +1,61 @@
+# The build diagnostic of a loaded style configuration, its type set figure
+# command: ./build/Tests/StyleConfigLookupCostTest -s "The build diagnostic reports what a style configuration prepared"
+# run at 2026-10-16T05:42:16Z
+# exit: 0
+
+# sha256 libosmscout/include/osmscout/TypeInfoSet.h 889ee70a02090436c304a9d053d9448bf25651374c0605e6305957f657c0526a
+# sha256 libosmscout/src/osmscout/TypeInfoSet.cpp c1ef5d81939e2de1a91f04626ac77d9ad603b1654ad73eadffe6a815980d5070
+# sha256 Tests/src/TypeInfoSetStorageTest.cpp f36a85c48d6a907c7b874f0e75e48d307375a54fa916e8d2366a825740e529e1
+# sha256 Tests/src/StyleConfigLookupCostTest.cpp a9edb36256bd8dd3a3cc2ceee8ae688a1e8c42e182e16dabd1420c26de1225fd
+# source mtimes (UTC): TypeInfoSet.cpp 2026-10-16T05:28:20Z, TypeInfoSet.h 2026-10-16T05:28:20Z,
+#   TypeInfoSetStorageTest.cpp 2026-10-16T05:28:20Z, StyleConfigLookupCostTest.cpp 2026-10-16T05:19:40Z,
+#   all before this run
+Filters: "The build diagnostic reports what a style configuration prepared"
+Randomness seeded to: 1566366654
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+StyleConfigLookupCostTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+The build diagnostic reports what a style configuration prepared
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:359
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:139: PASSED:
+  REQUIRE( styleConfig->Load(styleSheet.string()) )
+with expansion:
+  true
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:373: PASSED:
+  REQUIRE( diagnostics.preparedSlots>0 )
+with expansion:
+  30 > 0
+with message:
+  slots 30, evaluations 4, table bytes 792, type set bytes 3024
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:374: PASSED:
+  REQUIRE( diagnostics.typeConditionEvaluations>0 )
+with expansion:
+  4 > 0
+with message:
+  slots 30, evaluations 4, table bytes 792, type set bytes 3024
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:375: PASSED:
+  REQUIRE( diagnostics.tableBytes>0 )
+with expansion:
+  792 (0x318) > 0
+with message:
+  slots 30, evaluations 4, table bytes 792, type set bytes 3024
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:376: PASSED:
+  REQUIRE( diagnostics.typeSetBytes>0 )
+with expansion:
+  3024 (0xbd0) > 0
+with message:
+  slots 30, evaluations 4, table bytes 792, type set bytes 3024
+
+===============================================================================
+All tests passed (5 assertions in 1 test case)
+

@@ -1,0 +1,326 @@
+-- The C compiler identification is GNU 16.2.1
+-- The CXX compiler identification is GNU 16.2.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test HAVE_ALTIVEC
+-- Performing Test HAVE_ALTIVEC - Failed
+-- Performing Test HAVE_AVX
+-- Performing Test HAVE_AVX - Success
+-- Performing Test HAVE_MMX
+-- Performing Test HAVE_MMX - Success
+-- Performing Test HAVE_VISIBILITY
+-- Performing Test HAVE_VISIBILITY - Success
+-- Looking for dlfcn.h
+-- Looking for dlfcn.h - found
+-- Looking for fcntl.h
+-- Looking for fcntl.h - found
+-- Looking for inttypes.h
+-- Looking for inttypes.h - found
+-- Looking for memory.h
+-- Looking for memory.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stdlib.h
+-- Looking for stdlib.h - found
+-- Looking for strings.h
+-- Looking for strings.h - found
+-- Looking for string.h
+-- Looking for string.h - found
+-- Looking for sys/stat.h
+-- Looking for sys/stat.h - found
+-- Looking for sys/time.h
+-- Looking for sys/time.h - found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for unistd.h
+-- Looking for unistd.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of int16_t
+-- Check size of int16_t - done
+-- Check size of int32_t
+-- Check size of int32_t - done
+-- Check size of int64_t
+-- Check size of int64_t - done
+-- Check size of int8_t
+-- Check size of int8_t - done
+-- Check size of long long
+-- Check size of long long - done
+-- Check size of uint16_t
+-- Check size of uint16_t - done
+-- Check size of uint32_t
+-- Check size of uint32_t - done
+-- Check size of uint64_t
+-- Check size of uint64_t - done
+-- Check size of uint8_t
+-- Check size of uint8_t - done
+-- Check size of unsigned long long
+-- Check size of unsigned long long - done
+-- Check size of wchar_t
+-- Check size of wchar_t - done
+-- Looking for fseeko
+-- Looking for fseeko - found
+-- Looking for mmap
+-- Looking for mmap - found
+-- Looking for posix_fadvise
+-- Looking for posix_fadvise - found
+-- Looking for posix_madvise
+-- Looking for posix_madvise - found
+-- Looking for mallinfo2
+-- Looking for mallinfo2 - found
+-- Found PkgConfig: /usr/bin/pkg-config (found version "3.0.7")
+-- Found Marisa: /usr/include
+-- Found LibXml2: /usr/lib/libxml2.so (found version "2.15.4")
+-- Found Protobuf: /usr/lib/libprotobuf.so (found version "7.36.1")
+-- Found ZLIB: /usr/lib/libz.so (found version "1.3.2")
+-- Looking for lzma_auto_decoder in /usr/lib/liblzma.so
+-- Looking for lzma_auto_decoder in /usr/lib/liblzma.so - found
+-- Looking for lzma_easy_encoder in /usr/lib/liblzma.so
+-- Looking for lzma_easy_encoder in /usr/lib/liblzma.so - found
+-- Looking for lzma_lzma_preset in /usr/lib/liblzma.so
+-- Looking for lzma_lzma_preset in /usr/lib/liblzma.so - found
+-- Found LibLZMA: /usr/lib/liblzma.so (found version "5.8.4")
+-- Found PNG: /usr/lib/libpng.so (found version "1.6.59")
+-- Checking for module 'cairo'
+--   Found cairo, version 1.18.6
+-- Found Cairo: debug;/usr/lib/libcairo.so;optimized;/usr/lib/libcairo.so
+-- Could NOT find LibAgg (missing: LIBAGG_INCLUDE_DIRS LIBAGG_LIBRARIES) 
+-- Found Freetype: /usr/lib/libfreetype.so (found version "2.14.3")
+-- Performing Test OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT
+-- Performing Test OSMSCOUT_MAP_CAIRO_HAVE_LIB_CAIRO_FT - Success
+-- Found Pango: /usr/include/pango-1.0
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Glib2) does
+  not match the name of the calling package (GLIB2).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindGLIB2.cmake:58 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/FindPango.cmake:57 (FIND_PACKAGE)
+  cmake/features.cmake:257 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Found Glib2: /usr/include/glib-2.0;/usr/lib/glib-2.0/include
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Gobject)
+  does not match the name of the calling package (GObject).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindGObject.cmake:58 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/FindPango.cmake:63 (FIND_PACKAGE)
+  cmake/features.cmake:257 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Found Gobject: /usr/include/glib-2.0;/usr/lib/glib-2.0/include
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Pangocairo)
+  does not match the name of the calling package (Pango).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindPango.cmake:96 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/features.cmake:257 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Found Pangocairo: /usr/include/pango-1.0
+CMake Error at cmake/FindPango.cmake:116 (FIND_PACKAGE):
+  FIND_PACKAGE for module Fontconfig called with REQUIRED, but
+  CMAKE_DISABLE_FIND_PACKAGE_Fontconfig is enabled.  A REQUIRED package
+  cannot be disabled.
+Call Stack (most recent call first):
+  cmake/features.cmake:257 (find_package)
+  CMakeLists.txt:72 (include)
+
+
+CMake Warning (author) at /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/share/cmake-4.4/Modules/FindPackageHandleStandardArgs.cmake:493 (message):
+  The package name passed to find_package_handle_standard_args() (Pangoft2)
+  does not match the name of the calling package (Pango).  This can lead to
+  problems in calling code that expects find_package() result variables
+  (e.g., `_FOUND`) to follow a certain pattern.
+Call Stack (most recent call first):
+  cmake/FindPango.cmake:133 (FIND_PACKAGE_HANDLE_STANDARD_ARGS)
+  cmake/features.cmake:257 (find_package)
+  CMakeLists.txt:72 (include)
+This warning is for project developers.  Use -Wno-author to suppress it.
+
+-- Found Pangoft2: /usr/include/pango-1.0;/usr/include/glib-2.0;/usr/lib/glib-2.0/include;/usr/include/glib-2.0;/usr/lib/glib-2.0/include;/usr/include/pango-1.0;/usr/include/pango-1.0;/usr/include/freetype2
+-- Found OpenGL: /usr/lib/libOpenGL.so
+-- Found GLEW: /usr/include (found version "2.3.1")
+-- Found Threads: TRUE
+-- Checking Qt6 availability (implicitly preferred version)...
+-- Choosing Qt6, since implicitly preferred
+-- Performing Test HAVE_STDATOMIC
+-- Performing Test HAVE_STDATOMIC - Success
+-- Qt version used: 6
+-- Qt6 map dependencies found
+-- Qt6 client dependencies found
+-- Direct2D_INCLUDE_DIRS: Direct2D_INCLUDE_DIRS-NOTFOUND
+-- Direct2D_D2D1_LIBRARY: Direct2D_D2D1_LIBRARY-NOTFOUND
+-- Direct2D_DWRITE_LIBRARY: Direct2D_DWRITE_LIBRARY-NOTFOUND
+-- Could NOT find Direct2D (missing: Direct2D_LIBRARIES Direct2D_INCLUDE_DIRS) 
+-- Checking for module 'skia'
+--   Package 'skia' not found
+-- Performing Test SKIA_RUNTIME_COMPATIBLE
+-- Performing Test SKIA_RUNTIME_COMPATIBLE - Success
+-- Looking for C++ include svg/include/SkSVGDOM.h
+-- Looking for C++ include svg/include/SkSVGDOM.h - not found
+-- Skia SVG headers not found — nanosvg fallback
+-- Performing Test OSMSCOUT_GCC_VISIBILITY
+-- Performing Test OSMSCOUT_GCC_VISIBILITY - Success
+-- Detected g++ 16
+
+-- Enabling GCC visibility flags
+-- Checking for 64-bit off_t
+-- Checking for 64-bit off_t - present
+-- Checking for _fseeki64/_ftelli64
+-- Checking for _fseeki64/_ftelli64 - not found
+-- Checking for fseeko/ftello
+-- Checking for fseeko/ftello - present
+-- Large File support - found
+Template dir: osmscout/lib
+-- Found nlohmann_json: /usr/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.12.0")
+-- Preconditions for building libosmscout-map-agg MISSING
+-- Preconditions for building libosmscout-map-cairo OK
+-- Checking preconditions for libosmscout-map-cairo...
+-- Checking preconditions for libosmscout-map-cairo...OK
+Template dir: osmscoutmapcairo
+Template dir: osmscoutmapopengl
+-- Preconditions for building libosmscout-map-qt OK
+-- Checking preconditions for libosmscout-map-qt...
+-- Checking preconditions for libosmscout-map-qt...OK
+Template dir: osmscoutmapqt
+Template dir: osmscoutmapsvg
+-- Preconditions for building libosmscout-map-skia OK
+-- Checking preconditions for libosmscout-map-skia...
+-- Checking preconditions for libosmscout-map-skia...OK
+-- Performing Test HAVE_SKIA_FONTMGR_DIRECTWRITE
+-- Performing Test HAVE_SKIA_FONTMGR_DIRECTWRITE - Failed
+-- Performing Test HAVE_SKIA_FONTMGR_GDI
+-- Performing Test HAVE_SKIA_FONTMGR_GDI - Failed
+-- Performing Test HAVE_SKIA_FONTMGR_FONTCONFIG
+-- Performing Test HAVE_SKIA_FONTMGR_FONTCONFIG - Success
+Template dir: osmscoutmapskia
+-- Checking for module 'fontconfig'
+--   Found fontconfig, version 2.18.3
+-- Found JNI: /home/tim/.local/share/mise/installs/java/openjdk-17.0.2/include  found components: AWT JVM
+-- Found Java: /home/tim/.local/share/mise/installs/java/openjdk-17.0.2/bin/java (found version "17.0.2") found components: Development
+Template dir: osmscoutclientqt
+Skip Tiler and DrawMapAgg demos, libosmscout-map-agg is missing.
+CMake Warning at Demos/CMakeLists.txt:219 (message):
+  Skip RoutingParameters demo, QML needs to be ported for Qt6 for this demo.
+
+
+Skip DrawMapDirectX demo, libosmscout-map-directx is missing.
+Skip DrawMapGDI demo, libosmscout-map-gdi is missing.
+-- 
+-- libosmscout 1.1.1 build configuration:
+-- Shared libraries:                ON
+-- 
+-- Dependencies:
+-- - Freetype::Freetype             TRUE
+-- - glm::glm                       TRUE
+-- - glfw                           TRUE
+-- - harfbuzz::harfbuzz             TRUE
+-- - LibLZMA::LibLZMA               TRUE
+-- - LibXml2::LibXml2               TRUE
+-- - PNG::PNG                       TRUE
+-- - protobuf::libprotobuf          TRUE
+-- - protobuf:                      TRUE
+-- - ZLIB::ZLIB                     TRUE
+-- - nlohmann_json::nlohmann_json   TRUE
+-- - httplib:                       TRUE
+-- - piper:                         FALSE
+-- 
+-- Qt5 libraries ():
+-- - Core                           FALSE
+-- - Svg                            FALSE
+-- - Gui                            FALSE
+-- - Widgets                        FALSE
+-- - Qml                            FALSE
+-- - Quick                          FALSE
+-- - Network                        FALSE
+-- - Location                       FALSE
+-- - Multimedia                     FALSE
+-- - Positioning                    FALSE
+-- - LinguistTools                  FALSE
+-- 
+-- Qt6 libraries (1):
+-- - Core                           TRUE
+-- - Core5Compat                    TRUE
+-- - Svg                            TRUE
+-- - Gui                            TRUE
+-- - Widgets                        TRUE
+-- - Qml                            TRUE
+-- - Quick                          TRUE
+-- - Network                        TRUE
+-- - Multimedia                     TRUE
+-- - Positioning                    TRUE
+-- - LinguistTools                  TRUE
+-- 
+-- Using Qt in version:             6
+-- Qt map dependencies found:       1
+-- Qt client dependencies found:    1
+-- 
+-- Tests:                           ON
+-- - Catch2::Catch2                TRUE
+-- - Catch2::Catch2WithMain        TRUE
+-- 
+-- core library:                    ON
+--  - marisa support:              TRUE
+-- 
+-- import library:                  ON
+--  - C++17 parallel execution:     1
+-- 
+-- gpx library:                     ON
+-- 
+-- map drawing interface:           ON
+--  - Agg map drawing backend:      OFF
+--  - Cairo map drawing backend:    ON
+--  - OpenGL map drawing backend:   ON
+--  - DirectX map drawing backend:  OFF
+--  - Qt map drawing backend:       ON
+--  - SVG map drawing backend:      ON
+--  - Skia map drawing backend:     ON
+--  - OS X/iOS map drawing backend: OFF
+--  - GDI+ map drawing backend:     OFF
+-- 
+-- client libraries:
+--  - Qt client library:            ON
+--  - Java client library:          ON
+-- 
+-- tools:
+--  - Import/Import:                ON
+--  - Import/BasemapImport:         ON
+--  - DumpData:                     ON
+--  - MCPServer:                    ON
+--  - OSMScout2:                    ON
+--  - OSMScoutOpenGL:               ON
+--  - StyleEditor:                  ON
+--  - JavaScout:                    ON
+-- 
+-- demos:                           ON
+--  - heap profiler (Gperftools)    ON
+-- 
+-- bindings:
+--  - Java binding:                 
+--  - C# binding:                   
+-- 
+-- external interfaces:
+--  - MATLAB mex function:          OFF
+-- 
+-- doxygen:                         YES
+-- documentation:                   ON
+-- webpage:                         ON
+-- Configuring incomplete, errors occurred!

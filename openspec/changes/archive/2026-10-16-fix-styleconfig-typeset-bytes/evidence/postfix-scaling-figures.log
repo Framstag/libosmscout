@@ -1,0 +1,61 @@
+# command: QT_QPA_PLATFORM=offscreen TESTS_TOP_DIR=$PWD/Tests TESTS_TMP_DIR=$PWD/build/Tests ./build/Tests/StyleConfigLookupCostTest -s 'Defined but unreferenced types add no build work'
+# utc: 2026-10-16T11:30:40Z
+# exit=0
+Filters: "Defined but unreferenced types add no build work"
+Randomness seeded to: 645080636
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+StyleConfigLookupCostTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Defined but unreferenced types add no build work
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:384
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:139: PASSED:
+  REQUIRE( styleConfig->Load(styleSheet.string()) )
+with expansion:
+  true
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:139: PASSED:
+  REQUIRE( styleConfig->Load(styleSheet.string()) )
+with expansion:
+  true
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:409: PASSED:
+  REQUIRE( smallDiagnostics.preparedSlots==largeDiagnostics.preparedSlots )
+with expansion:
+  30 == 30
+with messages:
+  small type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+  large type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:410: PASSED:
+  REQUIRE( smallDiagnostics.typeConditionEvaluations==largeDiagnostics.typeConditionEvaluations )
+with expansion:
+  4 == 4
+with messages:
+  small type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+  large type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:411: PASSED:
+  REQUIRE( smallDiagnostics.tableBytes==largeDiagnostics.tableBytes )
+with expansion:
+  792 (0x318) == 792 (0x318)
+with messages:
+  small type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+  large type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+
+/home/tim/projects/libosmscout/Tests/src/StyleConfigLookupCostTest.cpp:416: PASSED:
+  REQUIRE( smallDiagnostics.typeSetBytes==largeDiagnostics.typeSetBytes )
+with expansion:
+  912 (0x390) == 912 (0x390)
+with messages:
+  small type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+  large type set: slots 30, evaluations 4, table bytes 792, type set bytes 912
+
+===============================================================================
+All tests passed (6 assertions in 1 test case)
+

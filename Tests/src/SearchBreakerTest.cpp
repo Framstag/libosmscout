@@ -22,8 +22,8 @@
 #include "search_breaker.h"
 
 /*
- * The search-request lifecycle (NaviVeylin change "fix-search-cancellation",
- * spec `search-request-lifecycle`). The registry is the whole decision: which
+ * The search-request lifecycle (openspec change
+ * `client-java-search-request-lifecycle`). The registry is the whole decision: which
  * request is live, which one a supersede or a cancellation takes out, and that
  * neither reaches across a slot boundary.
  */

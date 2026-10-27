@@ -1,0 +1,114 @@
+# Cases of the change after the fix
+#
+# The two storage cases print the bytes they measure through their INFO messages, which Catch2
+# shows with --success; the numbers are filtered to those two cases because --success prints every
+# one of the 27570 assertions of the model case, 7.8 MB of log. The unfiltered ./build/Tests/TypeInfoSetStorageTest
+# -s run prints that log and ends in the same five-case tally below.
+# command: ./build/Tests/TypeInfoSetStorageTest -s '*1527-type*'
+# run at 2026-10-16T05:41:51Z
+# exit: 0
+
+# sha256 libosmscout/include/osmscout/TypeInfoSet.h 889ee70a02090436c304a9d053d9448bf25651374c0605e6305957f657c0526a
+# sha256 libosmscout/src/osmscout/TypeInfoSet.cpp c1ef5d81939e2de1a91f04626ac77d9ad603b1654ad73eadffe6a815980d5070
+# sha256 Tests/src/TypeInfoSetStorageTest.cpp f36a85c48d6a907c7b874f0e75e48d307375a54fa916e8d2366a825740e529e1
+# source mtimes (UTC): TypeInfoSet.cpp 2026-10-16T05:28:20Z, TypeInfoSet.h 2026-10-16T05:28:20Z,
+#   TypeInfoSetStorageTest.cpp 2026-10-16T05:28:20Z, all before this run
+Filters: "*1527-type*"
+Randomness seeded to: 2137272167
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeInfoSetStorageTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+A set of a 1527-type configuration allocates per contained type, not per
+defined type
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:245
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:249: PASSED:
+  REQUIRE( typeConfig->GetTypeCount()==definedTypeCount )
+with expansion:
+  1527 (0x5f7) == 1527 (0x5f7)
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:261: PASSED:
+  REQUIRE( set.Size()==containedTypes.size() )
+with expansion:
+  3 == 3
+with message:
+  bytes allocated for a set of 3 types in 1527 defined types: 408
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:262: PASSED:
+  REQUIRE( set.IsSet(containedTypes[0]) )
+with expansion:
+  true
+with message:
+  bytes allocated for a set of 3 types in 1527 defined types: 408
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:263: PASSED:
+  REQUIRE( set.IsSet(containedTypes[1]) )
+with expansion:
+  true
+with message:
+  bytes allocated for a set of 3 types in 1527 defined types: 408
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:264: PASSED:
+  REQUIRE( set.IsSet(containedTypes[2]) )
+with expansion:
+  true
+with message:
+  bytes allocated for a set of 3 types in 1527 defined types: 408
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:268: PASSED:
+  REQUIRE( bytes<=2*BitmapBytes(definedTypeCount)+2*containedTypes.size()*sizeof(osmscout::TypeInfoRef) )
+with expansion:
+  408 (0x198) <= 480 (0x1e0)
+with message:
+  bytes allocated for a set of 3 types in 1527 defined types: 408
+
+-------------------------------------------------------------------------------
+An empty set of a 1527-type configuration allocates a bit per defined type
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:225
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:229: PASSED:
+  REQUIRE( typeConfig->GetTypeCount()==definedTypeCount )
+with expansion:
+  1527 (0x5f7) == 1527 (0x5f7)
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:236: PASSED:
+  REQUIRE( set.Empty() )
+with expansion:
+  true
+with message:
+  bytes allocated for an empty set of 1527 defined types: 192
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:237: PASSED:
+  REQUIRE( set.Size()==0 )
+with expansion:
+  0 == 0
+with message:
+  bytes allocated for an empty set of 1527 defined types: 192
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:239: PASSED:
+  REQUIRE( bytes<=BitmapBytes(definedTypeCount) )
+with expansion:
+  192 <= 192
+with message:
+  bytes allocated for an empty set of 1527 defined types: 192
+
+===============================================================================
+All tests passed (10 assertions in 2 test cases)
+
+
+#
+# All five cases of the file, the tally of the run the two numbers above come from.
+# command: ./build/Tests/TypeInfoSetStorageTest
+# run at 2026-10-16T05:41:51Z
+# exit: 0
+Randomness seeded to: 1398933197
+===============================================================================
+All tests passed (27570 assertions in 5 test cases)
+

@@ -1,0 +1,12 @@
+# gate 3: meson compile -C debug
+# run at 2026-10-16T11:42:52Z (UTC)
+ninja: Entering directory `/home/tim/projects/libosmscout/debug'
+[1/176] Generating libosmscout-client-java/java/com.framstag.libosmscout.client-native-headers with a custom command
+[2/176] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_util_StringMatcher.cpp.o
+[3/176] Linking target libosmscout/libosmscout.so.1.1.1
+[4/176] Generating symbol file libosmscout/libosmscout.so.1.1.1.p/libosmscout.so.1.1.1.symbols
+[5/6] Compiling C++ object Tests/HeaderCheckTest.p/src_HeaderCheckTest.cpp.o
+[6/6] Linking target Tests/HeaderCheckTest
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /home/tim/projects/libosmscout/debug
+# exit code: 0

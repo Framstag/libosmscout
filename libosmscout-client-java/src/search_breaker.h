@@ -1,8 +1,8 @@
 /*
  * search_breaker.h — the search-request lifecycle: one slot per search surface,
  * one generation per request, and the abort predicate that unifies "superseded"
- * with "cancelled" (NaviVeylin change "fix-search-cancellation", spec
- * `search-request-lifecycle`).
+ * with "cancelled" (openspec change
+ * `client-java-search-request-lifecycle`).
  *
  * Why a generation and not a cancel flag: the caller (a Kotlin coroutine) can be
  * cancelled, but the JNI frame it is blocked in has no suspension point, so its

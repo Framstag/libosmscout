@@ -71,10 +71,27 @@ Describe the location search API exposed by `OSMScoutClient` for querying map da
 ### Requirement: LocationEntry data class
 
 New Java class `com.framstag.libosmscout.client.LocationEntry` SHALL represent a single search result.
+Alongside the object type, a result SHALL expose the description of that object type in the language
+the caller asked for, and SHALL report it as empty when no description is available.
 
 #### Scenario: LocationEntry structure
+
 - **WHEN** a `LocationEntry` is returned from `searchLocations`
-- **THEN** it SHALL expose fields: `label` (String), `type` (String), `objectType` (String), `lat` (double), `lon` (double), `region` (String[])
+- **THEN** it SHALL expose fields: `label` (String), `type` (String), `objectType` (String),
+  `objectTypeDescription` (String, empty when no description is available), `lat` (double),
+  `lon` (double), `region` (String[])
+
+#### Scenario: The object type description is reported
+
+- **WHEN** a `LocationEntry` is returned for an object whose type carries a description in the requested language
+- **THEN** `objectTypeDescription` SHALL carry that description
+- **AND** `objectType` SHALL still carry the technical type name
+
+#### Scenario: An undescribed object type reports an empty description
+
+- **WHEN** a `LocationEntry` is returned for an object whose type carries no description in the requested language
+- **THEN** `objectTypeDescription` SHALL be empty and non-null
+- **AND** no error SHALL be raised
 
 ### Requirement: JNI bridge for location search
 
@@ -107,3 +124,36 @@ Native C++ code in `libosmscout-client-java/src/` SHALL bridge `LocationService:
 - **GIVEN** a database whose text index returns a named object for a query that is only a prefix of the stored name
 - **WHEN** user calls `searchLocations` with that query
 - **THEN** that entry's match quality SHALL be candidate, as it was before
+
+### Requirement: Location search entry points carry the request's generation
+
+Every location search entry point that a caller can cancel SHALL carry the request's generation: the
+admin-region-handle form, the region-name form and the form search. The convenience overloads SHALL begin
+the place slot's request, run the search with it and end it. The parameterless `cancelSearch()` and the
+boolean-cancel overload SHALL be gone: a caller cancels with `cancelSearch(generation)`.
+
+#### Scenario: A scoped search carries the generation
+
+- **GIVEN** a caller that began a place request and resolved an admin region
+- **WHEN** it calls the generation-carrying search
+- **THEN** every abort check of the search SHALL ask that generation
+- **AND** cancelling it SHALL stop the search
+
+#### Scenario: The convenience overload manages its own request
+
+- **GIVEN** a caller that uses the two-argument overload
+- **WHEN** it searches twice in a row
+- **THEN** each call SHALL begin and end the place slot's request itself
+- **AND** the second call SHALL not be blocked by the first
+
+#### Scenario: A cancelled search returns an empty array
+
+- **GIVEN** a search whose generation is cancelled mid-run
+- **WHEN** the entry point returns
+- **THEN** it SHALL return an empty array, not a partial result list
+
+#### Scenario: The diagnostics line names the request
+
+- **GIVEN** a search run with a generation
+- **WHEN** the search reports its diagnostics
+- **THEN** the line SHALL carry the slot, the generation, the abort state and the duration

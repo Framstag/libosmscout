@@ -1,0 +1,15 @@
+# command: ./build/Tests/TypeInfoSetStorageTest -s 'A set reports the bytes it allocates'
+# utc: 2026-10-16T11:30:37Z
+# exit=0
+  1527 (0x5f7) == 1527 (0x5f7)
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:286: PASSED:
+  REQUIRE( set.AllocatedBytes()==bytes )
+with expansion:
+  192 == 192
+with message:
+  reported bytes of an empty set: 192, allocated: 192
+
+===============================================================================
+All tests passed (2 assertions in 1 test case)
+

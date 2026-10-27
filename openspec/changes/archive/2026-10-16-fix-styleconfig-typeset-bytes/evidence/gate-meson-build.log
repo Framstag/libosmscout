@@ -1,0 +1,903 @@
+# command: meson compile -C debug
+# utc: 2026-10-16T11:24:36Z
+# exit=0 secs=329
+[368/371] Linking target MCPServer/MCPServer
+ninja: Entering directory `/home/tim/projects/libosmscout/debug'
+[0/1] Regenerating build files
+The Meson build system
+Version: 1.12.1
+Source dir: /home/tim/projects/libosmscout
+Build dir: /home/tim/projects/libosmscout/debug
+Build type: native build
+Project name: libosmscout
+Project version: latest
+C++ compiler for the host machine: c++ (gcc 16.2.1 "c++ (GCC) 16.2.1 20260810")
+C++ linker for the host machine: c++ ld.bfd 2.47
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Java compiler for the host machine: javac (unknown 17.0.2)
+Has header "fcntl.h" : YES (cached)
+Has header "sys/stat.h" : YES (cached)
+Header "shared_mutex" has symbol "shared_mutex" : YES (cached)
+Checking for size of "wchar_t" : 4 (cached)
+Checking for function "mmap" : YES (cached)
+Checking for function "posix_fadvise" : YES (cached)
+Checking for function "posix_madvise" : YES (cached)
+Checking for function "_fseeki64" : NO (cached)
+Checking for function "_ftelli64" : NO (cached)
+Checking for function "fseeko" : YES (cached)
+Library m found: YES
+Dependency threads for host machine found: YES unknown (cached)
+Dependency openmp for host machine found: YES 5.2 (cached)
+Has header "execution" : YES (cached)
+Library tbb found: YES
+Dependency catch2 for host machine found: YES 3.16.0 (cached)
+Dependency catch2-with-main for host machine found: YES 3.16.0 (cached)
+Dependency marisa for host machine found: YES 0.3.1 (cached)
+Library piper found: NO
+Library onnxruntime found: YES
+Has header "piper.h" : NO (cached)
+Dependency zlib for host machine found: YES 1.3.2 (cached)
+Dependency liblzma for host machine found: YES 5.8.4 (cached)
+Dependency libxml-2.0 for host machine found: YES 2.15.4 (cached)
+Dependency protobuf for host machine found: YES 36.1.0 (cached)
+Library wsock32 found: NO
+Program protoc found: YES (/usr/bin/protoc)
+Program swig found: NO
+Found pkg-config: YES (/usr/bin/pkg-config) 3.0.7
+Found CMake: /home/tim/.local/share/mise/installs/cmake/latest/cmake-4.4.4-linux-x86_64/bin/cmake (4.4.4)
+Run-time dependency libagg found: NO  (tried pkg-config and cmake)
+Dependency freetype2 for host machine found: YES 26.6.20 (cached)
+Library aggfontfreetype_pic found: NO
+Library aggfontfreetype found: NO
+Dependency cairo for host machine found: YES 1.18.6 (cached)
+Dependency pango for host machine found: YES 1.58.2 (cached)
+Dependency pangocairo for host machine found: YES 1.58.2 (cached)
+Dependency fontconfig for host machine found: YES 2.18.3 (cached)
+Dependency pangoft2 for host machine found: YES 1.58.2 (cached)
+Dependency libpng for host machine found: YES 1.6.58 (cached)
+Dependency gobject-2.0 for host machine found: YES 2.88.3 (cached)
+Run-time dependency skia found: NO  (tried pkg-config and cmake)
+Has header "core/SkCanvas.h" : YES (cached)
+Library skia found: YES
+Has header "core/SkCanvas.h" with dependency -lskia: YES (cached)
+Checking if "Skia runtime check" with dependency -lskia runs: YES
+Library d2d1 found: NO
+Library dwrite found: NO
+Library Windowscodecs found: NO
+Has header "d2d1.h" : NO (cached)
+Library gdiplus found: NO
+Dependency qt5 (modules: Core, Gui, Widgets, Svg) for host machine found: YES 5.15.19 (cached)
+Run-time dependency qt5 (modules: Core, Gui, Location, Multimedia, Network, Qml, Quick, Svg, Widgets) found: YES 5.15.19 (pkg-config)
+Run-time dependency qt6 (modules: Core, Core5Compat, Gui, Svg, Widgets) found: YES 6.12.0 (pkg-config)
+Run-time dependency qt6 (modules: Core, Core5Compat, Gui, Multimedia, Network, Qml, Quick, Svg, Widgets) found: YES 6.12.0 (pkg-config)
+Message: Qt6 version : 6.12.0 (required >= 6.0)
+Dependency gl for host machine found: YES 1.2 (cached)
+Dependency glm for host machine found: YES 1.0.3 (cached)
+Dependency glew for host machine found: YES 2.3.1 (cached)
+Dependency glfw3 for host machine found: YES 3.5.1 (cached)
+Has header "httplib.h" : YES (cached)
+Dependency nlohmann_json for host machine found: YES 3.12.0 (cached)
+Dependency jni for host machine found: YES 17.0.2 (cached)
+../libosmscout/include/meson.build:185: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring CoreFeatures.h using configuration
+Configuring Config.h using configuration
+Found pkg-config: YES (/usr/bin/pkg-config) 3.0.7
+../libosmscout-map/include/meson.build:29: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring MapFeatures.h using configuration
+Configuring Config.h using configuration
+../libosmscout-gpx/include/meson.build:22: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring GPXFeatures.h using configuration
+Configuring Config.h using configuration
+Checking for function "cairo_ft_font_face_create_for_ft_face" with dependencies cairo, freetype2: YES (cached)
+../libosmscout-map-cairo/include/meson.build:13: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring MapCairoFeatures.h using configuration
+Configuring Config.h using configuration
+../libosmscout-map-opengl/include/meson.build:15: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring MapOpenGLFeatures.h using configuration
+Configuring Config.h using configuration
+../libosmscout-map-qt/include/meson.build:9: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring MapQtFeatures.h using configuration
+Configuring Config.h using configuration
+../libosmscout-map-svg/include/meson.build:8: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring MapSVGFeatures.h using configuration
+Configuring Config.h using configuration
+Checking if "SkFontMgr_New_DirectWrite" with dependency -lskia compiles: NO (cached)
+Checking if "SkFontMgr_New_GDI" with dependency -lskia compiles: NO (cached)
+Checking if "SkFontMgr_New_FontConfig" with dependency -lskia compiles: YES (cached)
+../libosmscout-map-skia/include/meson.build:9: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring MapSkiaFeatures.h using configuration
+Configuring Config.h using configuration
+../libosmscout-client/include/meson.build:24: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring ClientFeatures.h using configuration
+Configuring Config.h using configuration
+../libosmscout-client-qt/include/meson.build:68: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring ClientQtFeatures.h using configuration
+Configuring Config.h using configuration
+Detecting Qt6 tools
+Run-time dependency qt6 (modules: Core) found: YES 6.12.0 (pkg-config)
+Program /usr/lib/qt6/bin/rcc found: NO
+Program /usr/lib/qt6/rcc found: YES 6.12.0 6.12.0 (/usr/lib/qt6/rcc)
+Program /usr/lib/qt6/bin/qmltyperegistrar found: NO
+Program /usr/lib/qt6/qmltyperegistrar found: YES 6.12.0 6.12.0 (/usr/lib/qt6/qmltyperegistrar)
+Program /usr/lib/qt6/bin/lrelease found: YES 6.12.0 6.12.0 (/usr/lib/qt6/bin/lrelease)
+Program /usr/lib/qt6/bin/qmlcachegen found: NO
+Program /usr/lib/qt6/qmlcachegen found: YES 6.12.0 6.12.0 (/usr/lib/qt6/qmlcachegen)
+Program /usr/lib/qt6/bin/uic found: NO
+Program /usr/lib/qt6/uic found: YES 6.12.0 6.12.0 (/usr/lib/qt6/uic)
+Program /usr/lib/qt6/bin/moc found: NO
+Program /usr/lib/qt6/moc found: YES 6.12.0 6.12.0 (/usr/lib/qt6/moc)
+../libosmscout-import/include/meson.build:68: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring ImportFeatures.h using configuration
+Configuring Config.h using configuration
+Dependency nlohmann_json for host machine found: YES 3.12.0 (cached)
+../libosmscout-test/include/meson.build:11: WARNING: Conditional on version '>= 0.63.0' always evaluates to true
+Configuring TestFeatures.h using configuration
+Configuring Config.h using configuration
+Configuring config.h using configuration
+Program ../scripts/mapgen/client-check-test.sh found: YES (/home/tim/projects/libosmscout/Tests/../scripts/mapgen/client-check-test.sh)
+Program ../scripts/mapgen/basemap-check-test.sh found: YES (/home/tim/projects/libosmscout/Tests/../scripts/mapgen/basemap-check-test.sh)
+Build targets in project: 178
+
+libosmscout latest
+
+  OS
+    Build OS                   : linux
+    Build CPU                  : x86_64
+    Host OS                    : linux
+    Host CPU                   : x86_64
+    Target OS                  : linux
+    Target CPU                 : x86_64
+    Java support               : true
+
+  C++ Compiler
+    Compiler id                : gcc
+    Compiler arg. syntax       : gcc
+    OpenMP support             : true
+    C++17 execution support    : true
+
+  Optional dependencies
+    Piper TTS (libpiper)       : false
+
+  Build
+    Meson backend              : ninja
+    Is unity                   : false
+
+  Project
+    Meson version              : 1.12.1
+    Project version            : latest
+    Library version            : 1.1.1
+    Project license            : LGPL
+
+  Test dependencies
+    Catch2 dependency          : 3.16.0
+    Catch2 with main dependency: 3.16.0
+
+  Qt dependencies
+    Qt map dependency          : 6.12.0
+    Qt client dependency       : 6.12.0
+
+  Java
+    Compiler id                : unknown
+    Compiler version           : 17.0.2
+    JNI dependency             : YES 17.0.2
+
+  Libraries
+    libosmscout                : true
+    libosmscout-test           : true
+    libosmscout-import         : true
+    libosmscout-map            : true
+    libosmscout-map-agg        : false
+    libosmscout-map-cairo      : true
+    libosmscout-map-directx    : false
+    libosmscout-map-gdi        : false
+    libosmscout-map-iosx       : false
+    libosmscout-map-opengl     : true
+    libosmscout-map-qt         : true
+    libosmscout-map-svg        : true
+    libosmscout-map-skia       : true
+    libosmscout-gpx            : true
+    libosmscout-client         : true
+    libosmscout-client-qt      : true
+    libosmscout-client-java    : true
+    libosmscout-binding        : false
+
+  Apps
+    BasemapImport              : true
+    Import                     : true
+    Demos                      : true
+    DumpData                   : true
+    OSMScout2                  : true
+    StyleEditor                : true
+    Tests                      : true
+
+  User defined options
+    prefix                     : /home/tim/tmp/osmscout-prefix
+
+Found ninja-1.13.2 at /usr/bin/ninja
+Generating targets:   0%|          | 0/178 eta ?Generating targets:  49%|████▉     | 87/178 eta 00:00                                                     Writing build.ninja:   0%|          | 0/900 eta ?                                                 Cleaning... 0 files.
+[1/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_MultiDBRoutingState.cpp.o
+[2/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_RouteInstructionAgent.cpp.o
+[3/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_RoutingService.cpp.o
+[4/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_LaneAgent.cpp.o
+[5/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_Agents.cpp.o
+[6/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_BearingAgent.cpp.o
+[7/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_DataAgent.cpp.o
+[8/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_SpeedAgent.cpp.o
+[9/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_RouteStateAgent.cpp.o
+[10/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_ArrivalEstimateAgent.cpp.o
+[11/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_VoiceInstructionAgent.cpp.o
+[12/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_RoutingProfile.cpp.o
+[13/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_navigation_PositionAgent.cpp.o
+[14/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_AreaIndex.cpp.o
+[15/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_AreaWayIndex.cpp.o
+[16/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_AreaAreaIndex.cpp.o
+[17/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_RoutingDB.cpp.o
+[18/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_AreaRouteIndex.cpp.o
+[19/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_AreaNodeIndex.cpp.o
+[20/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_OptimizeWaysLowZoom.cpp.o
+[21/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_OptimizeAreasLowZoom.cpp.o
+[22/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_TypeInfoSet.cpp.o
+[23/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_LabelLayouter.cpp.o
+[24/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_AbstractRoutingService.cpp.o
+[25/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_LabelLayouterHelper.cpp.o
+[26/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_MapData.cpp.o
+[27/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_MapPainterStatistics.cpp.o
+[28/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_SimpleRoutingService.cpp.o
+[29/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_MapPainterNoOp.cpp.o
+[30/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_MultiDBRoutingService.cpp.o
+[31/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_location_LocationService.cpp.o
+[32/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_poi_POIService.cpp.o
+[33/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_db_Database.cpp.o
+[34/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_AreaIndexGenerator.cpp.o
+[35/435] Compiling C++ object libosmscout-client/libosmscout_client.so.1.1.1.p/src_osmscoutclient_DBJob.cpp.o
+[36/435] Compiling C++ object libosmscout-client/libosmscout_client.so.1.1.1.p/src_osmscoutclient_DBInstance.cpp.o
+[37/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_DataTileCache.cpp.o
+[38/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_location_LocationDescriptionService.cpp.o
+[39/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_oss_Parser.cpp.o
+[40/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenAreaNodeIndex.cpp.o
+[41/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenAreaWayIndex.cpp.o
+[42/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenIntersectionIndex.cpp.o
+[43/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenAreaAreaIndex.cpp.o
+[44/435] Compiling C++ object libosmscout-client/libosmscout_client.so.1.1.1.p/src_osmscoutclient_POILookupModule.cpp.o
+[45/435] Compiling C++ object libosmscout/libosmscout.so.1.1.1.p/src_osmscout_routing_RoutePostprocessor.cpp.o
+[46/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenAreaRouteIndex.cpp.o
+[47/435] Compiling C++ object libosmscout-map-qt/libosmscout_map_qt.so.1.1.1.p/src_osmscoutmapqt_MapPainterQt.cpp.o
+[48/435] Compiling C++ object libosmscout-client/libosmscout_client.so.1.1.1.p/src_osmscoutclient_DBThread.cpp.o
+[49/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_MapPainter.cpp.o
+[50/435] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_MapService.cpp.o
+[51/435] Linking target libosmscout/libosmscout.so.1.1.1
+[52/435] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenOptimizeAreaWayIds.cpp.o
+[53/435] Compiling C++ object libosmscout-client/libosmscout_client.so.1.1.1.p/src_osmscoutclient_Settings.cpp.o
+[54/435] Generating symbol file libosmscout/libosmscout.so.1.1.1.p/libosmscout.so.1.1.1.symbols
+[55/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenMergeAreas.cpp.o
+[56/389] Compiling C++ object libosmscout-client/libosmscout_client.so.1.1.1.p/src_osmscoutclient_MapDownloadService.cpp.o
+[57/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_MergeAreaData.cpp.o
+[58/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenWayAreaDat.cpp.o
+[59/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenOptimizeAreasLowZoom.cpp.o
+[60/389] Compiling C++ object libosmscout-map-opengl/libosmscout_map_opengl.so.1.1.1.p/src_osmscoutmapopengl_Triangulate.cpp.o
+[61/389] Compiling C++ object libosmscout-map-opengl/libosmscout_map_opengl.so.1.1.1.p/src_osmscoutmapopengl_PNGLoaderOpenGL.cpp.o
+[62/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenOptimizeWaysLowZoom.cpp.o
+[63/389] Compiling C++ object libosmscout-map/libosmscout_map.so.1.1.1.p/src_osmscoutmap_StyleConfig.cpp.o
+[64/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenLocationIndex.cpp.o
+[65/389] Compiling C++ object libosmscout-map-opengl/libosmscout_map_opengl.so.1.1.1.p/src_osmscoutmapopengl_TextLoader.cpp.o
+[66/389] Linking target libosmscout-map/libosmscout_map.so.1.1.1
+[67/389] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenWayWayDat.cpp.o
+[68/389] Generating symbol file libosmscout-map/libosmscout_map.so.1.1.1.p/libosmscout_map.so.1.1.1.symbols
+[69/385] Linking target libosmscout-map-qt/libosmscout_map_qt.so.1.1.1
+[70/385] Linking target libosmscout-client/libosmscout_client.so.1.1.1
+[71/385] Generating symbol file libosmscout-map-qt/libosmscout_map_qt.so.1.1.1.p/libosmscout_map_qt.so.1.1.1.symbols
+[72/385] Generating symbol file libosmscout-client/libosmscout_client.so.1.1.1.p/libosmscout_client.so.1.1.1.symbols
+[73/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_QmlSettings.cpp.o
+[74/381] Compiling C++ object libosmscout-map-cairo/libosmscout_map_cairo.so.1.1.1.p/src_osmscoutmapcairo_MapPainterCairo.cpp.o
+[75/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_ElevationModule.cpp.o
+[76/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_QmlRoutingProfile.cpp.o
+[77/381] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenRouteDat.cpp.o
+[78/381] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_GenRelAreaDat.cpp.o
+[79/381] Compiling C++ object libosmscout-map-opengl/libosmscout_map_opengl.so.1.1.1.p/src_osmscoutmapopengl_MapPainterOpenGL.cpp.o
+../libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp: In member function »void osmscout::MapPainterOpenGL::ProcessWay(const osmscout::WayRef&, const osmscout::Projection&, const osmscout::StyleConfigRef&, const osmscout::WidthFeatureValueReader&)«:
+../libosmscout-map-opengl/src/osmscoutmapopengl/MapPainterOpenGL.cpp:457:14: warning: Variable »lineOffset« gesetzt, aber nicht verwendet [-Wunused-but-set-variable=]
+  457 |       double lineOffset = 0.0;
+      |              ^~~~~~~~~~
+[80/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_VehiclePosition.cpp.o
+[81/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_ElevationChartWidget.cpp.o
+[82/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_Router.cpp.o
+[83/381] Compiling C++ object libosmscout-map-svg/libosmscout_map_svg.so.1.1.1.p/src_osmscoutmapsvg_MapPainterSVG.cpp.o
+[84/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_RoutingModel.cpp.o
+[85/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_LocationEntry.cpp.o
+[86/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_InputHandler.cpp.o
+[87/381] Compiling C++ object libosmscout-import/libosmscout_import.so.1.1.1.p/src_osmscoutimport_Import.cpp.o
+[88/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_NavigationModule.cpp.o
+[89/381] Linking target libosmscout-import/libosmscout_import.so.1.1.1
+[90/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_AvailableMapsModel.cpp.o
+[91/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_OsmTileDownloader.cpp.o
+[92/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_SearchLocationModel.cpp.o
+[93/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_NavigationModel.cpp.o
+[94/381] Compiling C++ object libosmscout-map-skia/libosmscout_map_skia.so.1.1.1.p/src_osmscoutmapskia_MapPainterSkia.cpp.o
+[95/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_LocationInfoModel.cpp.o
+[96/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_IconAnimation.cpp.o
+[97/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapDownloader.cpp.o
+[98/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_OnlineTileProviderModel.cpp.o
+[99/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapStyleModel.cpp.o
+[100/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapDownloadsModel.cpp.o
+[101/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_IconLookup.cpp.o
+[102/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapObjectInfoModel.cpp.o
+[103/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapWidget.cpp.o
+[104/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_StyleFlagsModel.cpp.o
+[105/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_OSMScoutQt.cpp.o
+[106/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_OverlayObject.cpp.o
+[107/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_DBLoadJob.cpp.o
+[108/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_StyleModule.cpp.o
+[109/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapOverlay.cpp.o
+[110/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_MapRenderer.cpp.o
+[111/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_PlaneMapRenderer.cpp.o
+[112/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_LookupModule.cpp.o
+[113/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_SearchModule.cpp.o
+[114/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_TiledMapOverlay.cpp.o
+[115/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_TiledMapRenderer.cpp.o
+[116/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_NearPOIModel.cpp.o
+[117/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_InstalledMapsModel.cpp.o
+[118/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_QtSettingsStorage.cpp.o
+[119/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_QmlRoutingProfile.cpp.o
+[120/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/meson-generated_moc_InstalledVoicesModel.cpp.o
+[121/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_VehiclePosition.cpp.o
+[122/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_QmlSettings.cpp.o
+[123/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_InputHandler.cpp.o
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp: In member function »void osmscout::TapRecognizer::touch(const QTouchEvent&)«:
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:61:26: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+   61 |     if (event.touchPoints().size() != 1){
+      |         ~~~~~~~~~~~~~~~~~^~
+In file included from /usr/include/qt6/QtGui/QTouchEvent:1,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/InputHandler.h:25,
+                 from ../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:27:
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:66:55: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+   66 |     QTouchEvent::TouchPoint finger = event.touchPoints()[0];
+      |                                      ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:71:23: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+   71 |     int x = finger.pos().x();
+      |             ~~~~~~~~~~^~
+In file included from /usr/include/qt6/QtGui/qevent.h:21:
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:72:23: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+   72 |     int y = finger.pos().y();
+      |             ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp: In member function »virtual bool osmscout::MoveHandler::touch(const QTouchEvent&)«:
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:263:26: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  263 |     if (event.touchPoints().size() == 1){
+      |         ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:264:59: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  264 |         QTouchEvent::TouchPoint finger = event.touchPoints()[0];
+      |                                          ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp: In member function »virtual bool osmscout::ZoomGestureHandler::touch(const QTouchEvent&)«:
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:503:24: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  503 |   if (event.touchPoints().size() != 1) {
+      |       ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:507:53: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  507 |   QTouchEvent::TouchPoint finger = event.touchPoints()[0];
+      |                                    ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:513:28: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  513 |   double zoom = (finger.pos().y() - double(gestureStart.y())) / zoomDistance;
+      |                  ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp: In member function »virtual bool osmscout::DragHandler::touch(const QTouchEvent&)«:
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:614:26: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  614 |     if (event.touchPoints().size() != 1)
+      |         ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:617:55: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  617 |     QTouchEvent::TouchPoint finger = event.touchPoints()[0];
+      |                                      ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:624:32: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  624 |             startX = finger.pos().x();
+      |                      ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:625:32: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  625 |             startY = finger.pos().y();
+      |                      ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:634:32: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  634 |             startX - finger.pos().x(),
+      |                      ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:635:32: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  635 |             startY - finger.pos().y()
+      |                      ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:638:34: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  638 |     moveAccumulator += finger.pos();
+      |                        ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp: In member function »virtual bool osmscout::MultitouchHandler::touch(const QTouchEvent&)«:
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:695:68: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  695 |         QListIterator<QTouchEvent::TouchPoint> it(event.touchPoints());
+      |                                                   ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:714:68: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  714 |         QListIterator<QTouchEvent::TouchPoint> it(event.touchPoints());
+      |                                                   ~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:731:33: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  731 |                 (startPointA.pos().x() + startPointB.pos().x()) / 2,
+      |                  ~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:731:57: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  731 |                 (startPointA.pos().x() + startPointB.pos().x()) / 2,
+      |                                          ~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:732:33: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  732 |                 (startPointA.pos().y() + startPointB.pos().y()) / 2
+      |                  ~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:732:57: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  732 |                 (startPointA.pos().y() + startPointB.pos().y()) / 2
+      |                                          ~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:735:30: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  735 |                 (currentA.pos().x() + currentB.pos().x()) / 2,
+      |                  ~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:735:51: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  735 |                 (currentA.pos().x() + currentB.pos().x()) / 2,
+      |                                       ~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:736:30: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  736 |                 (currentA.pos().y() + currentB.pos().y()) / 2
+      |                  ~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:736:51: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  736 |                 (currentA.pos().y() + currentB.pos().y()) / 2
+      |                                       ~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:747:50: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  747 |             QVector2D startVector(startPointA.pos() - startPointB.pos());
+      |                                   ~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:747:70: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  747 |             QVector2D startVector(startPointA.pos() - startPointB.pos());
+      |                                                       ~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:748:49: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  748 |             QVector2D currentVector(currentA.pos() - currentB.pos());
+      |                                     ~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/InputHandler.cpp:748:66: warning: »QPointF QEventPoint::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  748 |             QVector2D currentVector(currentA.pos() - currentB.pos());
+      |                                                      ~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qeventpoint.h:88:13: note: hier deklariert
+   88 |     QPointF pos() const { return position(); }
+      |             ^~~
+[124/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_Router.cpp.o
+[125/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_ElevationModule.cpp.o
+[126/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_ElevationChartWidget.cpp.o
+[127/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_RoutingModel.cpp.o
+[128/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_LocationEntry.cpp.o
+[129/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_OnlineTileProviderModel.cpp.o
+[130/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_OsmTileDownloader.cpp.o
+[131/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_NavigationModel.cpp.o
+[132/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_IconAnimation.cpp.o
+[133/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_FileDownloader.cpp.o
+[134/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_LocationInfoModel.cpp.o
+[135/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_NavigationModule.cpp.o
+[136/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapWidget.cpp.o
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp: In member function »void osmscout::MapWidget::translateToTouch(QMouseEvent*, Qt::TouchPointStates)«:
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:140:75: warning: unverwendeter Parameter »states« [-Wunused-parameter]
+  140 | void MapWidget::translateToTouch(QMouseEvent* event, Qt::TouchPointStates states)
+      |                                                      ~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp: In member function »virtual void osmscout::MapWidget::hoverMoveEvent(QHoverEvent*)«:
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:179:42: warning: »QPoint QHoverEvent::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  179 |     getProjection().PixelToGeo(event->pos().x(), event->pos().y(), coord);
+      |                                ~~~~~~~~~~^~
+In file included from /usr/include/qt6/QtQuick/qquickitem.h:15,
+                 from /usr/include/qt6/QtQuick/qquickpainteditem.h:8,
+                 from /usr/include/qt6/QtQuick/QQuickPaintedItem:1,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/MapWidget.h:24,
+                 from ../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:24:
+/usr/include/qt6/QtGui/qevent.h:264:19: note: hier deklariert
+  264 |     inline QPoint pos() const { return position().toPoint(); }
+      |                   ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:179:60: warning: »QPoint QHoverEvent::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  179 |     getProjection().PixelToGeo(event->pos().x(), event->pos().y(), coord);
+      |                                                  ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:264:19: note: hier deklariert
+  264 |     inline QPoint pos() const { return position().toPoint(); }
+      |                   ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:180:30: warning: »QPoint QHoverEvent::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  180 |     emit mouseMove(event->pos().x(), event->pos().y(), coord.GetLat(), coord.GetLon(), event->modifiers());
+      |                    ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:264:19: note: hier deklariert
+  264 |     inline QPoint pos() const { return position().toPoint(); }
+      |                   ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:180:48: warning: »QPoint QHoverEvent::pos() const« ist veraltet: Use position() [-Wdeprecated-declarations]
+  180 |     emit mouseMove(event->pos().x(), event->pos().y(), coord.GetLat(), coord.GetLon(), event->modifiers());
+      |                                      ~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:264:19: note: hier deklariert
+  264 |     inline QPoint pos() const { return position().toPoint(); }
+      |                   ^~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp: In member function »virtual void osmscout::MapWidget::touchEvent(QTouchEvent*)«:
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:259:31: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  259 |         if (event->touchPoints().size() == 1){
+      |             ~~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:268:59: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  268 |        int activePoints = std::count_if(event->touchPoints().begin(), event->touchPoints().end(),
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:268:89: warning: »const QList<QEventPoint>& QTouchEvent::touchPoints() const« ist veraltet: Use points() [-Wdeprecated-declarations]
+  268 |        int activePoints = std::count_if(event->touchPoints().begin(), event->touchPoints().end(),
+      |                                                                       ~~~~~~~~~~~~~~~~~~^~
+/usr/include/qt6/QtGui/qevent.h:955:31: note: hier deklariert
+  955 |     const QList<QEventPoint> &touchPoints() const { return points(); }
+      |                               ^~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp: In instantiation of »osmscout::MapWidget::touchEvent(QTouchEvent*)::<lambda(const auto:61&)> [with auto:61 = QEventPoint]«:
+/usr/include/c++/16/bits/stl_algobase.h:2112:12:   required from »constexpr typename std::iterator_traits<_Iterator>::difference_type std::__count_if(_InputIterator, _InputIterator, _Predicate) [with _InputIterator = QList<QEventPoint>::const_iterator; _Predicate = osmscout::MapWidget::touchEvent(QTouchEvent*)::<lambda(const auto:61&)>; typename iterator_traits<_Iterator>::difference_type = long long int]«
+ 2112 |         if (__pred(*__first))
+      |             ~~~~~~^~~~~~~~~~
+/usr/include/c++/16/bits/stl_algo.h:4078:29:   required from »constexpr typename std::iterator_traits<_Iterator>::difference_type std::count_if(_IIter, _IIter, _Predicate) [with _IIter = QList<QEventPoint>::const_iterator; _Predicate = osmscout::MapWidget::touchEvent(QTouchEvent*)::<lambda(const auto:61&)>; typename iterator_traits<_Iterator>::difference_type = long long int]«
+ 4078 |       return std::__count_if(__first, __last, __pred);
+      |              ~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:268:40:   required from here
+  268 |        int activePoints = std::count_if(event->touchPoints().begin(), event->touchPoints().end(),
+      |                           ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  269 |                                         [](const auto &tp) { return tp.state() != Qt::TouchPointReleased; });
+      |                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../libosmscout-client-qt/src/osmscoutclientqt/MapWidget.cpp:269:80: warning: Vergleich zwischen »enum QEventPoint::State« und »enum Qt::TouchPointState« [-Wenum-compare]
+  269 |                                         [](const auto &tp) { return tp.state() != Qt::TouchPointReleased; });
+      |                                                                     ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+[137/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_AvailableMapsModel.cpp.o
+[138/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_DBLoadJob.cpp.o
+[139/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapDownloadsModel.cpp.o
+[140/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_IconLookup.cpp.o
+[141/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapObjectInfoModel.cpp.o
+[142/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapStyleModel.cpp.o
+[143/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapDownloader.cpp.o
+../libosmscout-client-qt/src/osmscoutclientqt/MapDownloader.cpp: In member function »void osmscout::MapDownloadJob::start()«:
+../libosmscout-client-qt/src/osmscoutclientqt/MapDownloader.cpp:103:20: warning: der Rückgabewert von »virtual bool QFile::open(QIODeviceBase::OpenMode)« (mit »nodiscard«-Attribut markiert) wird ignoriert [-Wunused-result]
+  103 |   metadataFile.open(QFile::OpenModeFlag::WriteOnly);
+      |   ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/qt6/QtCore/qdir.h:11,
+                 from /usr/include/qt6/QtCore/qdiriterator.h:8,
+                 from /usr/include/qt6/QtCore/QDirIterator:1,
+                 from ../libosmscout-client-qt/src/osmscoutclientqt/MapDownloader.cpp:20:
+/usr/include/qt6/QtCore/qfile.h:271:32: note: hier deklariert
+  271 |     QFILE_MAYBE_NODISCARD bool open(OpenMode flags) override;
+      |                                ^~~~
+[144/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_SearchLocationModel.cpp.o
+[145/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_StyleFlagsModel.cpp.o
+[146/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_StyleModule.cpp.o
+[147/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_OverlayObject.cpp.o
+[148/381] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapOverlay.cpp.o
+[149/381] Generating symbol file libosmscout-import/libosmscout_import.so.1.1.1.p/libosmscout_import.so.1.1.1.symbols
+[150/374] Linking target libosmscout-map-cairo/libosmscout_map_cairo.so.1.1.1
+[151/374] Linking target libosmscout-map-svg/libosmscout_map_svg.so.1.1.1
+[152/374] Linking target libosmscout-map-opengl/libosmscout_map_opengl.so.1.1.1
+[153/374] Linking target libosmscout-map-skia/libosmscout_map_skia.so.1.1.1
+[154/374] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_PlaneMapRenderer.cpp.o
+[155/374] Generating symbol file libosmscout-gpx/libosmscout_gpx.so.1.1.1.p/libosmscout_gpx.so.1.1.1.symbols
+[156/373] Generating symbol file libosmscout-map-cairo/libosmscout_map_cairo.so.1.1.1.p/libosmscout_map_cairo.so.1.1.1.symbols
+[157/372] Generating symbol file libosmscout-map-opengl/libosmscout_map_opengl.so.1.1.1.p/libosmscout_map_opengl.so.1.1.1.symbols
+[158/372] Generating symbol file libosmscout-map-svg/libosmscout_map_svg.so.1.1.1.p/libosmscout_map_svg.so.1.1.1.symbols
+[159/371] Generating symbol file libosmscout-map-skia/libosmscout_map_skia.so.1.1.1.p/libosmscout_map_skia.so.1.1.1.symbols
+[160/371] Generating symbol file libosmscout-test/libosmscout_test.so.1.1.1.p/libosmscout_test.so.1.1.1.symbols
+[161/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_SearchModule.cpp.o
+[162/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_TTSMessageGeneratorQt.cpp.o
+[163/371] Generating libosmscout-client-java/java/com.framstag.libosmscout.client-native-headers with a custom command
+[164/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_TiledRenderingHelper.cpp.o
+[165/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_MapRenderer.cpp.o
+[166/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_LookupModule.cpp.o
+[167/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_Voice.cpp.o
+../libosmscout-client-qt/src/osmscoutclientqt/Voice.cpp: In constructor »osmscout::Voice::Voice(QDir)«:
+../libosmscout-client-qt/src/osmscoutclientqt/Voice.cpp:170:18: warning: der Rückgabewert von »virtual bool QFile::open(QIODeviceBase::OpenMode)« (mit »nodiscard«-Attribut markiert) wird ignoriert [-Wunused-result]
+  170 |     jsonFile.open(QFile::OpenModeFlag::ReadOnly);
+      |     ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/qt6/QtCore/QFile:1,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/FileDownloader.h:27,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/VoiceManager.h:25,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/AvailableVoicesModel.h:27,
+                 from ../libosmscout-client-qt/src/osmscoutclientqt/Voice.cpp:20:
+/usr/include/qt6/QtCore/qfile.h:271:32: note: hier deklariert
+  271 |     QFILE_MAYBE_NODISCARD bool open(OpenMode flags) override;
+      |                                ^~~~
+[168/371] Compiling C++ object Demos/DumpOSS.p/src_DumpOSS.cpp.o
+[169/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_NearPOIModel.cpp.o
+[170/371] Compiling C++ object Demos/LookupText.p/src_LookupText.cpp.o
+[171/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_InstalledMapsModel.cpp.o
+[172/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_TiledMapRenderer.cpp.o
+[173/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_AvailableVoicesModel.cpp.o
+[174/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_VoiceManager.cpp.o
+../libosmscout-client-qt/src/osmscoutclientqt/VoiceManager.cpp: In member function »void osmscout::VoiceDownloadJob::start()«:
+../libosmscout-client-qt/src/osmscoutclientqt/VoiceManager.cpp:82:20: warning: der Rückgabewert von »virtual bool QFile::open(QIODeviceBase::OpenMode)« (mit »nodiscard«-Attribut markiert) wird ignoriert [-Wunused-result]
+   82 |   metadataFile.open(QFile::OpenModeFlag::WriteOnly);
+      |   ~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/qt6/QtCore/QFile:1,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/FileDownloader.h:27,
+                 from ../libosmscout-client-qt/include/osmscoutclientqt/VoiceManager.h:25,
+                 from ../libosmscout-client-qt/src/osmscoutclientqt/VoiceManager.cpp:20:
+/usr/include/qt6/QtCore/qfile.h:271:32: note: hier deklariert
+  271 |     QFILE_MAYBE_NODISCARD bool open(OpenMode flags) override;
+      |                                ^~~~
+[175/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_TTSEngine.cpp.o
+[176/371] Compiling C++ object Demos/ReverseLocationLookup.p/src_ReverseLocationLookup.cpp.o
+[177/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_TiledMapOverlay.cpp.o
+[178/371] Compiling C++ object Demos/LocationLookupForm.p/src_LocationLookupForm.cpp.o
+[179/371] Compiling C++ object Demos/POILookupForm.p/src_POILookupForm.cpp.o
+[180/371] Compiling C++ object Demos/LocationDescription.p/src_LocationDescription.cpp.o
+[181/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_InstalledVoicesModel.cpp.o
+[182/371] Compiling C++ object Demos/ResourceConsumption.p/src_ResourceConsumption.cpp.o
+[183/371] Compiling C++ object Demos/Navigation.p/src_Navigation.cpp.o
+[184/371] Compiling C++ object libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/src_osmscoutclientqt_OSMScoutQt.cpp.o
+[185/371] Compiling C++ object Demos/LocationLookup.p/src_LocationLookup.cpp.o
+[186/371] Compiling C++ object Demos/LookupPOI.p/src_LookupPOI.cpp.o
+[187/371] Compiling C++ object Demos/ResourceConsumptionQt.p/src_ResourceConsumptionQt.cpp.o
+[188/371] Compiling C++ object Demos/NavigationSimulator.p/src_NavigationSimulator.cpp.o
+[189/371] Compiling C++ object Demos/SymbolsAll.p/src_SymbolsAll.cpp.o
+[190/371] Linking target libosmscout-client-qt/libosmscout_client_qt.so.1.1.1
+[191/371] Compiling C++ object Demos/ElevationProfileChart.p/src_QtDemoApp.cpp.o
+[192/371] Compiling C++ object Demos/QtWidgetsDemoApp.p/src_QtWidgetsDemoApp.cpp.o
+[193/371] Generating symbol file libosmscout-client-qt/libosmscout_client_qt.so.1.1.1.p/libosmscout_client_qt.so.1.1.1.symbols
+[194/371] Compiling C++ object Demos/NavigationSimulation.p/src_QtDemoApp.cpp.o
+[195/371] Compiling C++ object Demos/Routing.p/src_Routing.cpp.o
+[196/371] Compiling C++ object Demos/RoutingAnimation.p/src_RoutingAnimation.cpp.o
+[197/371] Compiling C++ object Demos/DrawMapCairo.p/src_DrawMapCairo.cpp.o
+[198/371] Compiling C++ object Demos/RoutingParameters.p/src_QtDemoApp.cpp.o
+[199/371] Compiling C++ object Demos/DrawMapSkia.p/src_DrawMapSkia.cpp.o
+[200/371] Compiling C++ object Demos/DrawMapSVG.p/src_DrawMapSVG.cpp.o
+[201/371] Compiling C++ object Demos/TextMetricsAll.p/src_TextMetricsAll.cpp.o
+[202/371] Compiling C++ object OSMScout2/OSMScout2.p/meson-generated_moc_AppSettings.cpp.o
+[203/371] Compiling C++ object Demos/DrawMapOpenGL.p/src_DrawMapOpenGL.cpp.o
+[204/371] Compiling C++ object Demos/ElevationProfile.p/src_ElevationProfile.cpp.o
+[205/371] Compiling C++ object PublicTransportMap/PublicTransportMap.p/src_PublicTransportMap.cpp.o
+[206/371] Compiling C++ object StyleEditor/StyleEditor.p/meson-generated_moc_SettingsDialog.cpp.o
+[207/371] Compiling C++ object Demos/DrawMapAll.p/src_DrawMapAll.cpp.o
+[208/371] Compiling C++ object Demos/DrawMapQt.p/src_DrawMapQt.cpp.o
+[209/371] Compiling C++ object DumpData/DumpData.p/src_DumpData.cpp.o
+[210/371] Compiling C++ object StyleEditor/StyleEditor.p/src_SettingsDialog.cpp.o
+[211/371] Compiling C++ object OSMScout2/OSMScout2.p/src_AppSettings.cpp.o
+[212/371] Compiling C++ object WellScoutedRoute/WellScoutedRoute.p/src_WellScoutedRoute.cpp.o
+../WellScoutedRoute/src/WellScoutedRoute.cpp:253:13: warning: »void DumpPath(const std::vector<Node>&, const std::vector<long unsigned int>&, size_t)« definiert, aber nicht verwendet [-Wunused-function]
+  253 | static void DumpPath(const std::vector<Node>& graph,
+      |             ^~~~~~~~
+../WellScoutedRoute/src/WellScoutedRoute.cpp:230:13: warning: »void DumpPath(const std::vector<Node>&, const std::vector<long unsigned int>&)« definiert, aber nicht verwendet [-Wunused-function]
+  230 | static void DumpPath(const std::vector<Node>& graph,
+      |             ^~~~~~~~
+In copy constructor »Path::Path(const Path&)«,
+    inlined from »constexpr _Tp* std::construct_at(_Tp*, _Args&& ...) [with _Tp = Path; _Args = {const Path&}]« at /usr/include/c++/16/bits/stl_construct.h:110:9,
+    inlined from »static constexpr void std::allocator_traits<std::allocator<_CharT> >::construct(allocator_type&, _Up*, _Args&& ...) [with _Up = Path; _Args = {const Path&}; _Tp = Path]« at /usr/include/c++/16/bits/alloc_traits.h:716:21,
+    inlined from »constexpr void std::vector<_Tp, _Alloc>::push_back(const value_type&) [with _Tp = Path; _Alloc = std::allocator<Path>]« at /usr/include/c++/16/bits/stl_vector.h:1411:30,
+    inlined from »std::vector<Node> BuildGraph.constprop(osmscout::Progress&, const std::vector<osmscout::RouteNode>&, osmscout::Vehicle, const std::vector<osmscout::ObjectVariantData>&)« at ../WellScoutedRoute/src/WellScoutedRoute.cpp:524:27:
+../WellScoutedRoute/src/WellScoutedRoute.cpp:55:8: warning: »path.Path::costs« könnte uninitialisiert verwendet werden [-Wmaybe-uninitialized]
+   55 | struct Path
+      |        ^~~~
+../WellScoutedRoute/src/WellScoutedRoute.cpp: In function »std::vector<Node> BuildGraph.constprop(osmscout::Progress&, const std::vector<osmscout::RouteNode>&, osmscout::Vehicle, const std::vector<osmscout::ObjectVariantData>&)«:
+../WellScoutedRoute/src/WellScoutedRoute.cpp:515:12: note: »path.Path::costs« wurde hier deklariert
+  515 |       Path path;
+      |            ^~~~
+[213/371] Compiling C++ object StyleEditor/StyleEditor.p/src_MainWindow.cpp.o
+[214/371] Compiling C++ object StyleEditor/StyleEditor.p/meson-generated_moc_MainWindow.cpp.o
+[215/371] Compiling C++ object OSMScout2/OSMScout2.p/src_OSMScout.cpp.o
+[216/371] Compiling C++ object Tests/AreaIndexLookupTest.p/src_AreaIndexLookupTest.cpp.o
+[217/371] Compiling C++ object StyleEditor/StyleEditor.p/src_StyleAnalyser.cpp.o
+[218/371] Compiling C++ object OSMScoutOpenGL/OSMScoutOpenGL.p/src_OSMScoutOpenGL.cpp.o
+[219/371] Compiling C++ object Tests/TypeInfoSetStorageTest.p/src_TypeInfoSetStorageTest.cpp.o
+[220/371] Compiling C++ object Tests/StyleLoadResilienceTest.p/src_StyleLoadResilienceTest.cpp.o
+[221/371] Compiling C++ object Tests/StyleReportCondensationTest.p/src_StyleReportCondensationTest.cpp.o
+[222/371] Compiling C++ object StyleEditor/StyleEditor.p/src_StyleEditor.cpp.o
+[223/371] Compiling C++ object Tests/FileFormatVersionTest.p/src_FileFormatVersionTest.cpp.o
+[224/371] Compiling C++ object Tests/ClientQtThreading.p/meson-generated_moc_ClientQtThreading.cpp.o
+[225/371] Compiling C++ object Tests/LocationServiceTest.p/src_LocationIndexRegionCacheTest.cpp.o
+[226/371] Compiling C++ object Tests/LocationServiceTest.p/src_LocationServiceTest.cpp.o
+[227/371] Compiling C++ object Tests/LocationServiceTest.p/src_SearchForLocationByFormTest.cpp.o
+[228/371] Compiling C++ object Tests/LocationServiceTest.p/src_SearchForPOIByFormTest.cpp.o
+[229/371] Compiling C++ object StyleEditor/StyleEditor.p/src_Highlighter.cpp.o
+[230/371] Compiling C++ object Tests/MapRotateTest.p/src_MapRotateTest.cpp.o
+[231/371] Compiling C++ object Tests/TypeResolutionTest.p/src_TypeResolutionTest.cpp.o
+[232/371] Compiling C++ object Tests/DrawTextQt.p/meson-generated_moc_DrawWindow.cpp.o
+[233/371] Compiling C++ object Tests/LabelLayouterTest.p/src_LabelLayouterTest.cpp.o
+[234/371] Compiling C++ object Tests/LocationServiceTest.p/src_SearchForLocationByStringTest.cpp.o
+[235/371] Compiling C++ object Tests/LocationDescriptionServiceTest.p/src_LocationDescriptionServiceTest.cpp.o
+[236/371] Compiling C++ object Tests/DrawTextQt.p/src_DrawTextQt.cpp.o
+[237/371] Compiling C++ object Tests/MultiDBRoutingTest.p/src_MultiDBRoutingTest.cpp.o
+[238/371] Compiling C++ object Tests/SpeedAgentTest.p/src_SpeedAgentTest.cpp.o
+[239/371] Compiling C++ object Tests/ScreenMaskTest.p/src_ScreenMaskTest.cpp.o
+[240/371] Compiling C++ object Tests/OSTAndOSSTest.p/src_OSTAndOSSTest.cpp.o
+[241/371] Compiling C++ object Tests/NavigationAgentTest.p/src_NavigationAgentTest.cpp.o
+[242/371] Compiling C++ object Tests/RouteStyleColorsTest.p/src_RouteStyleColorsTest.cpp.o
+[243/371] Compiling C++ object Tests/RoadStyleColorsTest.p/src_RoadStyleColorsTest.cpp.o
+[244/371] Compiling C++ object Tests/TileDataConversionPerformanceTest.p/src_TileDataConversionPerformanceTest.cpp.o
+[245/371] Compiling C++ object Tests/StyleConfigSymbolsTest.p/src_StyleConfigSymbolsTest.cpp.o
+[246/371] Compiling C++ object Tests/MapPainterAreaBorderRenderTest.p/src_MapPainterAreaBorderRenderTest.cpp.o
+[247/371] Compiling C++ object Tests/StyleConfigLookupCostTest.p/src_StyleConfigLookupCostTest.cpp.o
+[248/371] Compiling C++ object Tests/ClientQtThreading.p/src_ClientQtThreading.cpp.o
+[249/371] Compiling C++ object Tests/MapDownloadServiceTest.p/src_MapDownloadServiceTest.cpp.o
+[250/371] Compiling C++ object Tests/MapPainterCairoPatternTest.p/src_MapPainterCairoPatternTest.cpp.o
+[251/371] Compiling C++ object Tests/TileDataConversionTest.p/src_TileDataConversionTest.cpp.o
+[252/371] Compiling C++ object Tests/StyleConfigVisibilityBoundsTest.p/src_StyleConfigVisibilityBoundsTest.cpp.o
+[253/371] Compiling C++ object Tests/RoutePostprocessorTest.p/src_RoutePostprocessorTest.cpp.o
+[254/371] Compiling C++ object Tests/MapPainterWayCullingTest.p/src_MapPainterWayCullingTest.cpp.o
+[255/371] Compiling C++ object Tests/TextLookupTest.p/src_TextLookupTest.cpp.o
+[256/371] Compiling C++ object Tests/MapPainterFrameBuffersTest.p/src_MapPainterFrameBuffersTest.cpp.o
+[257/371] Compiling C++ object Tests/MapPainterPointObjectCullingTest.p/src_MapPainterPointObjectCullingTest.cpp.o
+[258/371] Compiling C++ object Tests/MapPainterAreaPreparationTest.p/src_MapPainterAreaPreparationTest.cpp.o
+[259/371] Compiling C++ object Tests/MapPainterAreaVisibilityCullTest.p/src_MapPainterAreaVisibilityCullTest.cpp.o
+[260/371] Compiling C++ object Tests/MapPainterIconSymbolPreferenceTest.p/src_MapPainterIconSymbolPreferenceTest.cpp.o
+[261/371] Compiling C++ object Tests/MapPainterShieldTest.p/src_MapPainterShieldTest.cpp.o
+[262/371] Compiling C++ object Tests/QtFileDownloaderTest.p/src_QtFileDownloaderTest.cpp.o
+[263/371] Compiling C++ object Tests/MapPainterLabelCullingTest.p/src_MapPainterLabelCullingTest.cpp.o
+[264/371] Compiling C++ object Tests/PerformanceTest.p/src_PerformanceTest.cpp.o
+[265/371] Compiling C++ object Tests/LaneEvaluation.p/src_LaneEvaluation.cpp.o
+[266/371] Compiling C++ object Tests/PolygonTriangulationTest.p/src_PolygonTriangulationTest.cpp.o
+[267/371] Linking target Demos/DumpOSS
+[268/371] Compiling C++ object Tests/TextMetricsTest.p/src_TextMetricsTest.cpp.o
+[269/371] Linking target Demos/LookupText
+[270/371] Linking target Demos/LocationLookupForm
+[271/371] Linking target Demos/LocationLookup
+[272/371] Compiling C++ object Tests/MapPainterRouteTest.p/src_MapPainterRouteTest.cpp.o
+[273/371] Linking target Demos/NavigationSimulator
+[274/371] Compiling C++ object Tests/MapPainterSkiaTest.p/src_MapPainterSkiaTest.cpp.o
+[275/371] Linking target Demos/Navigation
+[276/371] Linking target Demos/POILookupForm
+[277/371] Linking target Demos/LocationDescription
+[278/371] Linking target Demos/ReverseLocationLookup
+[279/371] Linking target Demos/ResourceConsumption
+[280/371] Compiling C++ object Tests/MapPainterLabelReuseTest.p/src_MapPainterLabelReuseTest.cpp.o
+[281/371] Linking target Demos/ResourceConsumptionQt
+[282/371] Linking target Demos/RoutingAnimation
+[283/371] Linking target Demos/Routing
+[284/371] Compiling C++ object Tests/TextMetricsCairoTest.p/src_TextMetricsCairoTest.cpp.o
+[285/371] Linking target Demos/LookupPOI
+[286/371] Linking target Demos/ElevationProfileChart
+[287/371] Compiling C++ object Tests/MapPainterShieldQtTest.p/src_MapPainterShieldQtTest.cpp.o
+[288/371] Compiling C++ object Tests/ThreadedDatabaseTest.p/src_ThreadedDatabaseTest.cpp.o
+[289/371] Linking target Demos/RoutingParameters
+[290/371] Linking target Demos/DrawMapSVG
+[291/371] Linking target Demos/NavigationSimulation
+[292/371] Compiling C++ object Tests/OpenGLAreaVisibilityTest.p/src_OpenGLAreaVisibilityTest.cpp.o
+[293/371] Linking target Demos/DrawMapCairo
+[294/371] Linking target Demos/SymbolsAll
+[295/371] Compiling C++ object Tests/LaneEvaluation.p/src_LaneEvaluationCompare.cpp.o
+[296/371] Linking target Demos/QtWidgetsDemoApp
+[297/371] Linking target Demos/DrawMapSkia
+[298/371] Linking target Demos/DrawMapOpenGL
+[299/371] Linking target Demos/ElevationProfile
+[300/371] Linking target PublicTransportMap/PublicTransportMap
+[301/371] Linking target DumpData/DumpData
+[302/371] Linking target WellScoutedRoute/WellScoutedRoute
+[303/371] Linking target OSMScoutOpenGL/OSMScoutOpenGL
+[304/371] Linking target Tests/AreaIndexLookupTest
+[305/371] Linking target Tests/StyleLoadResilienceTest
+[306/371] Linking target Tests/TypeInfoSetStorageTest
+[307/371] Linking target Tests/StyleReportCondensationTest
+[308/371] Linking target Tests/TypeResolutionTest
+[309/371] Linking target Demos/TextMetricsAll
+[310/371] Linking target Demos/DrawMapQt
+[311/371] Linking target Tests/LabelLayouterTest
+[312/371] Linking target Tests/FileFormatVersionTest
+[313/371] Linking target Tests/LocationDescriptionServiceTest
+[314/371] Linking target Demos/DrawMapAll
+[315/371] Linking target Tests/MapDownloadServiceTest
+[316/371] Linking target Tests/MapRotateTest
+[317/371] Linking target Tests/NavigationAgentTest
+[318/371] Linking target Tests/MultiDBRoutingTest
+[319/371] Linking target Tests/LocationServiceTest
+[320/371] Linking target Tests/SpeedAgentTest
+[321/371] Linking target Tests/OSTAndOSSTest
+[322/371] Linking target Tests/TileDataConversionTest
+[323/371] Linking target Tests/DrawTextQt
+[324/371] Linking target Tests/TileDataConversionPerformanceTest
+[325/371] Linking target OSMScout2/OSMScout2
+[326/371] Linking target Tests/RoutePostprocessorTest
+[327/371] Linking target Tests/ScreenMaskTest
+[328/371] Linking target Tests/StyleConfigSymbolsTest
+[329/371] Linking target Tests/MapPainterAreaBorderRenderTest
+[330/371] Linking target Tests/StyleConfigLookupCostTest
+[331/371] Linking target StyleEditor/StyleEditor
+[332/371] Linking target Tests/RouteStyleColorsTest
+[333/371] Linking target Tests/MapPainterCairoPatternTest
+[334/371] Compiling C++ object Tests/TextMetricsSVGTest.p/src_TextMetricsSVGTest.cpp.o
+[335/371] Linking target Tests/RoadStyleColorsTest
+[336/371] Linking target Tests/ClientQtThreading
+[337/371] Linking target Tests/MapPainterFrameBuffersTest
+[338/371] Linking target Tests/MapPainterAreaPreparationTest
+[339/371] Linking target Tests/MapPainterAreaVisibilityCullTest
+[340/371] Linking target Tests/MapPainterPointObjectCullingTest
+[341/371] Linking target Tests/MapPainterWayCullingTest
+[342/371] Linking target Tests/StyleConfigVisibilityBoundsTest
+[343/371] Linking target Tests/TextLookupTest
+[344/371] Linking target Tests/ThreadedDatabaseTest
+[345/371] Linking target Tests/MapPainterLabelCullingTest
+[346/371] Linking target Tests/MapPainterIconSymbolPreferenceTest
+[347/371] Linking target Tests/MapPainterLabelReuseTest
+[348/371] Linking target Tests/MapPainterShieldTest
+[349/371] Linking target Tests/MapPainterRouteTest
+[350/371] Linking target Tests/PolygonTriangulationTest
+[351/371] Linking target Tests/OpenGLAreaVisibilityTest
+[352/371] Linking target Tests/QtFileDownloaderTest
+[353/371] Linking target Tests/MapPainterSkiaTest
+[354/371] Linking target Tests/TextMetricsTest
+[355/371] Linking target Tests/TextMetricsCairoTest
+[356/371] Linking target Tests/TextMetricsSVGTest
+[357/371] Linking target Tests/PerformanceTest
+[358/371] Compiling C++ object Tests/TextMetricsQtTest.p/src_TextMetricsQtTest.cpp.o
+[359/371] Linking target Tests/MapPainterShieldQtTest
+[360/371] Compiling C++ object Tests/TextMetricsCrossBackendTest.p/src_TextMetricsCrossBackendTest.cpp.o
+[361/371] Linking target Tests/TextMetricsQtTest
+[362/371] Linking target Tests/TextMetricsCrossBackendTest
+[363/371] Compiling C++ object MCPServer/MCPServer.p/src_LocationDescriptionTool.cpp.o
+[364/371] Compiling C++ object MCPServer/MCPServer.p/src_LocationDescriptionMapper.cpp.o
+[365/371] Compiling C++ object Tests/LaneEvaluation.p/src_LaneEvaluationCommon.cpp.o
+[366/371] Linking target Tests/LaneEvaluation
+[367/371] Compiling C++ object MCPServer/MCPServer.p/src_MCPServer.cpp.o
+[368/371] Linking target MCPServer/MCPServer
+[369/371] Compiling C++ object libosmscout-client-java/src/libosmscout_client_java.so.1.1.1.p/OSMScoutClient.cpp.o
+[370/371] Linking target libosmscout-client-java/src/libosmscout_client_java.so.1.1.1
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /home/tim/projects/libosmscout/debug

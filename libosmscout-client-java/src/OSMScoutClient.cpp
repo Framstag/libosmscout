@@ -72,11 +72,12 @@
 
 #include "admin_region_hierarchy.h"
 #include "frame_pixel_layout.h"
+#include "render_label_bounds.h"
+#include "route_failure_kind.h"
 #include "route_length.h"
 #include "route_step_time.h"
 #include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
-#include "route_failure_kind.h"
 #include "search_breaker.h"
 #include "search_scope.h"
 #include "type_icon_pixels.h"
@@ -115,6 +116,17 @@
 #include <osmscout/navigation/Navigation.h>
 #include <osmscout/navigation/Engine.h>
 
+/**
+ * The description of a type in the given language.
+ *
+ * The library answers with the English description when the type carries none for the requested
+ * language, and with an empty string when the type carries no description at all. A caller shows the
+ * technical type name in that case, so an empty result is a fact about the type configuration and
+ * not a defect.
+ */
+std::string ResolveTypeDescription(const std::string& languageCode,
+                                   const osmscout::TypeInfoRef& type);
+
 // A basemap database may also appear in the regular databases list (e.g. when
 // the basemap directory is located inside the maps lookup directory). In that
 // case IsBasemap() is false, so detect it via its basemap-specific types.
@@ -146,7 +158,7 @@ namespace {
    * The abort poll every search parameter and visitor already performs therefore
    * answers the generation question as well: a request reads as aborted once a
    * newer request of its slot began, once it was cancelled, or once it ended
-   * (spec: `search-request-lifecycle` — the abort predicate covers supersede and
+   * (spec: `search-cancellation` — the abort predicate covers supersede and
    * cancel).
    *
    * Reset() is deliberately a no-op: a generation is never revived. A repeated
@@ -190,6 +202,7 @@ namespace {
     std::string label;
     std::string objectType;
     std::string objectTypeName;
+    std::string             objectTypeDescription; //!< description of the type in the client's language, empty when the database carries none
     double      lat{0.0};
     double      lon{0.0};
     long long   objectFileOffset{0};
@@ -198,7 +211,8 @@ namespace {
 
   // Look up a free-text hit in the database and fill a FreeTextEntry.
   // Returns false if the object cannot be loaded.
-  bool BuildFreeTextEntry(const osmscout::DBInstanceRef& db,
+  bool BuildFreeTextEntry(const std::string& descriptionLanguage,
+                          const osmscout::DBInstanceRef& db,
                           const osmscout::ObjectFileRef& ref,
                           const std::string& searchKey,
                           FreeTextEntry& entry)
@@ -224,6 +238,7 @@ namespace {
       entry.lat = node->GetCoords().GetLat();
       entry.lon = node->GetCoords().GetLon();
       entry.objectType = node->GetType()->GetName();
+      entry.objectTypeDescription = ResolveTypeDescription(descriptionLanguage, node->GetType());
       if (auto val = nameReader.GetValue(node->GetFeatureValueBuffer())) {
         entry.label = val->GetName();
       }
@@ -236,6 +251,7 @@ namespace {
       entry.lat = area->GetBoundingBox().GetCenter().GetLat();
       entry.lon = area->GetBoundingBox().GetCenter().GetLon();
       entry.objectType = area->GetType()->GetName();
+      entry.objectTypeDescription = ResolveTypeDescription(descriptionLanguage, area->GetType());
       if (auto val = nameReader.GetValue(area->GetFeatureValueBuffer())) {
         entry.label = val->GetName();
       }
@@ -248,6 +264,7 @@ namespace {
       entry.lat = way->GetBoundingBox().GetCenter().GetLat();
       entry.lon = way->GetBoundingBox().GetCenter().GetLon();
       entry.objectType = way->GetType()->GetName();
+      entry.objectTypeDescription = ResolveTypeDescription(descriptionLanguage, way->GetType());
       if (auto val = nameReader.GetValue(way->GetFeatureValueBuffer())) {
         entry.label = val->GetName();
       }
@@ -305,8 +322,6 @@ namespace {
 #include <osmscoutmapcairo/LoaderPNG.h>
 #include <osmscoutmapcairo/SymbolRendererCairo.h>
 #endif
-
-#include <osmscoutmap/Styles.h>
 
 #include <jni.h>
 
@@ -492,6 +507,7 @@ struct ClientData
   osmscout::MapDownloadServiceRef mapDownloadService; //!< Map download service
   double fontSizeMm{4.5};                             //!< Base font size in mm
   bool preferSymbolIcons{false};                      //!< Draw the vector symbol of an entry that carries a raster icon, too
+  std::string                     descriptionLanguage{"en"}; //!< Language of the type descriptions this client reports
   std::size_t tileDataCacheSize{0};                   //!< Tile data cache capacity (0 = library default)
   osmscout::DatabasePathRegistry knownPaths;          //!< Registered map database paths, guarded by the registry's own mutex
 
@@ -551,6 +567,32 @@ static void setClientData(JNIEnv *env, jobject obj, ClientData *data)
 {
   jfieldID field = getHandleField(env, obj);
   env->SetLongField(obj, field, static_cast<jlong>(reinterpret_cast<intptr_t>(data)));
+}
+
+/**
+ * The description language of a client, or English when there is no client.
+ */
+std::string DescriptionLanguageOf(const ClientData*clientData)
+{
+  return clientData != nullptr ? clientData->descriptionLanguage : "en";
+}
+
+/**
+ * The description of a type in the given language.
+ *
+ * The library answers with the English description when the type carries none
+ * for the requested language, and with an empty string when the type carries no
+ * description at all. A caller shows the technical type name in that case, so
+ * an empty result is a fact about the type configuration and not a defect.
+ */
+std::string ResolveTypeDescription(const std::string& languageCode,
+                                   const osmscout::TypeInfoRef& type)
+{
+  if (!type) {
+    return "";
+  }
+
+  return type->GetLocalizedDescription(languageCode);
 }
 
 // --------------------------------------------------------------------------
@@ -620,6 +662,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   jfieldID basemapStyleField = env->GetFieldID(builderCls, "basemapStyleSheet", "Ljava/lang/String;");
   jfieldID customPoiField = env->GetFieldID(builderCls, "customPoiTypes", "[Ljava/lang/String;");
   jfieldID mapsDirField = env->GetFieldID(builderCls, "mapsDirectory", "Ljava/lang/String;");
+  jfieldID     descriptionLanguageField = env->GetFieldID(builderCls, "descriptionLanguage", "Ljava/lang/String;");
 
   jstring basemapJStr = (jstring)env->GetObjectField(self, basemapField);
   jstring iconJStr = (jstring)env->GetObjectField(self, iconField);
@@ -679,6 +722,20 @@ Java_com_framstag_libosmscout_client_OSMScoutClientBuilder_build(JNIEnv *env, jo
   // --- Create C++ objects ---
   auto clientData = std::make_unique<ClientData>();
   clientData->fontSizeMm = fontSizeMm;
+
+  // Language of the type descriptions this client reports. An unset or empty
+  // value leaves the default, so a description is answered in English.
+  jstring descriptionLanguageJStr = (jstring)env->GetObjectField(self, descriptionLanguageField);
+  if (descriptionLanguageJStr != nullptr) {
+    const char *descriptionLanguageCStr = env->GetStringUTFChars(descriptionLanguageJStr, nullptr);
+    if (descriptionLanguageCStr != nullptr && strlen(descriptionLanguageCStr) > 0) {
+      clientData->descriptionLanguage = descriptionLanguageCStr;
+    }
+    if (descriptionLanguageCStr != nullptr) {
+      env->ReleaseStringUTFChars(descriptionLanguageJStr, descriptionLanguageCStr);
+    }
+    env->DeleteLocalRef(descriptionLanguageJStr);
+  }
 
   // Settings with in-memory storage
   auto storage = std::make_shared<InMemorySettingsStorage>();
@@ -1092,6 +1149,29 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_wasLastStyleLoadSuccessful(J
 // on the DB thread with the currently enabled style flags. Returns true when
 // the load succeeded and false when the stylesheet does not exist or fails to
 // parse (in which case the previously active style is restored).
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_framstag_libosmscout_client_OSMScoutClient_setDescriptionLanguage(JNIEnv *env, jobject self,
+                                                                            jstring languageCodeJStr)
+{
+  ClientData *data = getClientData(env, self);
+  if (data == nullptr || languageCodeJStr == nullptr) {
+    return;
+  }
+
+  const char *languageCodeCStr = env->GetStringUTFChars(languageCodeJStr, nullptr);
+  if (languageCodeCStr == nullptr) {
+    return;
+  }
+
+  // An empty code leaves the current language in place: descriptions are then
+  // answered in the configured language, and the default is English.
+  if (strlen(languageCodeCStr) > 0) {
+    data->descriptionLanguage = languageCodeCStr;
+  }
+
+  env->ReleaseStringUTFChars(languageCodeJStr, languageCodeCStr);
+}
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_loadStyleSheet(JNIEnv *env, jobject self, jstring nameJStr)
@@ -1596,17 +1676,19 @@ static bool renderMapIntoPixels(JNIEnv *env, jobject self,
       params.SetFontName("sans-serif");
       params.SetFontSize(data->fontSizeMm);
 
-      // Line wrapping of labels: the same bounds the Qt plane renderer configures.
-      // A label is only broken at a word boundary, so a one-word label stays on one
-      // line; the character bounds keep ordinary street and place names on one line
-      // and wrap a long multi-word name into two or three. Fit-to-width spans the
-      // shorter side of the render buffer (which carries the pan overrun), so a label
-      // can never run across the whole map.
-      params.SetLabelLineMinCharCount(5);
-      params.SetLabelLineMaxCharCount(15);
-      params.SetLabelLineFitToArea(true);
-      params.SetLabelLineFitToWidth(std::min(static_cast<double>(width),
-                                             static_cast<double>(height)));
+      // Line wrapping of labels: the same character bounds and fit-to-area the Qt
+      // plane renderer configures, with the fit-to-width of this buffer's shorter
+      // side. The buffer carries the pan overrun, so it is larger than the visible
+      // viewport and needs no division by the overrun (render_label_bounds.h). A
+      // label is only broken at a word boundary, so a one-word label stays on one
+      // line and a long multi-word name is wrapped instead of running across the map.
+      const naviveylin::LabelLineBounds labelBounds =
+          naviveylin::LabelLineBoundsForBuffer(static_cast<double>(width),
+                                               static_cast<double>(height));
+      params.SetLabelLineMinCharCount(labelBounds.minCharCount);
+      params.SetLabelLineMaxCharCount(labelBounds.maxCharCount);
+      params.SetLabelLineFitToArea(labelBounds.fitToArea);
+      params.SetLabelLineFitToWidth(labelBounds.fitToWidth);
 
       params.SetRenderSeaLand(true);
       params.SetRenderBackground(true);
@@ -3741,6 +3823,7 @@ std::vector<jobject> SerializeStructuredEntries(
   jfieldID postalAreaField = env->GetFieldID(entryCls, "postalArea", "Ljava/lang/String;");
   jfieldID adminRegionHierarchyField = env->GetFieldID(entryCls, "adminRegionHierarchy", "Ljava/lang/String;");
   jfieldID objectTypeNameField = env->GetFieldID(entryCls, "objectTypeName", "Ljava/lang/String;");
+  jfieldID objectTypeDescriptionField = env->GetFieldID(entryCls, "objectTypeDescription", "Ljava/lang/String;");
   jfieldID nameField = env->GetFieldID(entryCls, "name", "Ljava/lang/String;");
   jfieldID objectFileOffsetField = env->GetFieldID(entryCls, "objectFileOffset", "J");
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
@@ -3767,6 +3850,7 @@ std::vector<jobject> SerializeStructuredEntries(
     double lat;
     double lon;
     std::string objectTypeName;
+    std::string objectTypeDescription; //!< description of the type in the client's language, empty when the database carries none
     std::string objectName;
     long long objectFileOffset;
     std::string refType;
@@ -3782,6 +3866,7 @@ std::vector<jobject> SerializeStructuredEntries(
     const auto &owningDb = result.db;
     double lat = 0.0, lon = 0.0;
     std::string objectTypeName;
+    std::string objectTypeDescription;
     std::string objectName;
     long long objectFileOffset = 0;
     std::string refType;
@@ -3826,6 +3911,7 @@ std::vector<jobject> SerializeStructuredEntries(
                 lat = node->GetCoords().GetLat();
                 lon = node->GetCoords().GetLon();
                 objectTypeName = node->GetType()->GetName();
+                objectTypeDescription = ResolveTypeDescription(DescriptionLanguageOf(data), node->GetType());
                 // Extract OSM name tag from node's feature value buffer
                 size_t nameIdx;
                 if (node->GetType()->GetFeature(osmscout::NameFeature::NAME, nameIdx) &&
@@ -3843,6 +3929,7 @@ std::vector<jobject> SerializeStructuredEntries(
                 lat = area->GetBoundingBox().GetCenter().GetLat();
                 lon = area->GetBoundingBox().GetCenter().GetLon();
                 objectTypeName = area->GetType()->GetName();
+                objectTypeDescription = ResolveTypeDescription(DescriptionLanguageOf(data), area->GetType());
                 // Extract OSM name tag from area's feature value buffer
                 size_t nameIdx;
                 if (area->GetType()->GetFeature(osmscout::NameFeature::NAME, nameIdx) &&
@@ -3860,6 +3947,7 @@ std::vector<jobject> SerializeStructuredEntries(
                 lat = way->GetBoundingBox().GetCenter().GetLat();
                 lon = way->GetBoundingBox().GetCenter().GetLon();
                 objectTypeName = way->GetType()->GetName();
+                objectTypeDescription = ResolveTypeDescription(DescriptionLanguageOf(data), way->GetType());
                 // Extract OSM name tag from way's feature value buffer
                 size_t nameIdx;
                 if (way->GetType()->GetFeature(osmscout::NameFeature::NAME, nameIdx) &&
@@ -3887,7 +3975,7 @@ std::vector<jobject> SerializeStructuredEntries(
       continue;
     }
 
-    ResolvedEntry resolvedEntry{&entry, owningDb, lat, lon, objectTypeName, objectName, objectFileOffset, refType};
+    ResolvedEntry resolvedEntry{&entry, owningDb, lat, lon, objectTypeName, objectTypeDescription, objectName, objectFileOffset, refType};
     resolvedEntries.push_back(resolvedEntry);
   }
 
@@ -4061,6 +4149,11 @@ std::vector<jobject> SerializeStructuredEntries(
                            ? JNI_TRUE
                            : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(resolvedEntry.objectTypeName.c_str()));
+    // Empty when the database carries no description for the type; the caller
+    // then shows the technical type name.
+    env->SetObjectField(jEntry,
+                        objectTypeDescriptionField,
+                        env->NewStringUTF(resolvedEntry.objectTypeDescription.c_str()));
     env->SetObjectField(jEntry, nameField, env->NewStringUTF(resolvedEntry.objectName.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, resolvedEntry.objectFileOffset);
 
@@ -4176,7 +4269,7 @@ jobjectArray DoSearchLocationByForm(JNIEnv *env, jobject self,
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
       // The form pass is abortable too: the parameter polls this breaker inside the
       // lookup, and the loop checks it between databases, so a superseded address pass
-      // stops instead of walking every installed map (spec: `osmscout-jni` — the
+      // stops instead of walking every installed map (spec: `search-cancellation` — the
       // structured form search is abortable).
       osmscout::BreakerRef breaker =
         std::make_shared<SearchBreakerAdapter>(data->searchBreakers, request);
@@ -4264,7 +4357,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // The caller's request, from beginSearch(). Every abort check below asks this
   // generation, so a request superseded or cancelled anywhere else stops this walk
-  // at its next check (search_breaker.h, spec: `search-request-lifecycle`).
+  // at its next check (search_breaker.h, spec: `search-cancellation`).
   const naviveylin::SearchBreakerRegistry::Generation request =
     static_cast<naviveylin::SearchBreakerRegistry::Generation>(generation);
 
@@ -4306,9 +4399,14 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   std::vector<ResultWithDb> results;
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
   std::vector<FreeTextEntry> freeTextEntries;
-  // Free-text dedup is per database: the same raw file offset in two
-  // different databases denotes two different objects.
+  // Two per-database offset sets with two different jobs: seenTextOffsets collapses the
+  // duplicates one database's text index reports for the same object (it names an object
+  // once per matched name), seenOffsets holds the offsets the structured results reported
+  // and is what the dedup pass below compares free-text hits against. Sharing one set made
+  // that pass erase every free-text hit, because the loop below had just inserted each of
+  // them (openspec change client-java-free-text-hits-survive).
   std::map<osmscout::DBInstanceRef, std::set<osmscout::FileOffset>> seenOffsets;
+  std::map<osmscout::DBInstanceRef, std::set<osmscout::FileOffset>> seenTextOffsets;
 #endif
   bool limitReached = false;
 
@@ -4446,7 +4544,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
         // The text index takes no breaker, so this pass is bounded per database: check
         // before and after it, and the walk stops at the next database (spec:
-        // `osmscout-jni` — the free-text pass is abortable).
+        // `search-cancellation` — the free-text pass is abortable).
         if (breaker && breaker->IsAborted()) {
           break;
         }
@@ -4482,12 +4580,15 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
               if (freeTextLimitReached()) {
                 break;
               }
-              if (seenOffsets[db].count(fref.GetFileOffset()) != 0) {
+              // The text index reports one object under every matched name; the same
+              // raw file offset in two different databases denotes two different
+              // objects, hence the per-database key.
+              if (seenTextOffsets[db].count(fref.GetFileOffset()) != 0) {
                 continue;
               }
-              seenOffsets[db].insert(fref.GetFileOffset());
+              seenTextOffsets[db].insert(fref.GetFileOffset());
               FreeTextEntry entry;
-              if (BuildFreeTextEntry(db, fref, e.first, entry)) {
+              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry)) {
                 freeTextEntries.push_back(entry);
               }
             }
@@ -4566,7 +4667,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 #endif
 
   // An aborted search publishes nothing: a caller that did not check the generation must
-  // not be able to display a partial or stale list (spec: `search-request-lifecycle` — an
+  // not be able to display a partial or stale list (spec: `search-cancellation` — an
   // aborted search publishes no result). Read before ending the request, because an ended
   // generation reads as aborted as well.
   const bool aborted = data->searchBreakers.IsAborted(request);
@@ -4582,7 +4683,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // One line per search request, at Info so `adb logcat -s NaviVeylin` shows it without
   // enabling native debug. Identity only — slot, generation, abort state, duration, never
-  // a coordinate (guidelines/Logging.md §2, spec: `search-request-lifecycle` — search abort
+  // a coordinate (spec: `search-cancellation` — search abort
   // is diagnosable).
   osmscout::log.Info() << "search: slot=" << (slot.empty() ? "none" : slot)
                        << " gen=" << request
@@ -4640,6 +4741,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
   jfieldID latField = env->GetFieldID(entryCls, "lat", "D");
   jfieldID lonField = env->GetFieldID(entryCls, "lon", "D");
   jfieldID objectTypeNameField = env->GetFieldID(entryCls, "objectTypeName", "Ljava/lang/String;");
+  jfieldID objectTypeDescriptionField = env->GetFieldID(entryCls, "objectTypeDescription", "Ljava/lang/String;");
   jfieldID objectFileOffsetField = env->GetFieldID(entryCls, "objectFileOffset", "J");
   jfieldID matchQualityField = env->GetFieldID(entryCls, "matchQuality", "Ljava/lang/String;");
   jfieldID refTypeField = env->GetFieldID(entryCls, "refType", "Ljava/lang/String;");
@@ -4686,6 +4788,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                            ? JNI_TRUE
                            : JNI_FALSE);
     env->SetObjectField(jEntry, objectTypeNameField, env->NewStringUTF(entry.objectTypeName.c_str()));
+    // Empty when the database carries no description for the type; the caller
+    // then shows the technical type name.
+    env->SetObjectField(jEntry,
+                        objectTypeDescriptionField,
+                        env->NewStringUTF(entry.objectTypeDescription.c_str()));
     env->SetLongField(jEntry, objectFileOffsetField, entry.objectFileOffset);
     bool exactNameMatch = freeTextMatcher != nullptr &&
                           freeTextMatcher->Match(entry.label) == osmscout::StringMatcher::match;
@@ -4894,7 +5001,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getAdminRegionScopeName(JNIE
 // Cancels one request by its generation and reports whether that request was live.
 // A generation a newer request already replaced is not live, so this aborts nothing
 // and says so — the property that makes a cancellation arriving late harmless
-// (search_breaker.h, spec: `osmscout-jni` — a search request carries a generation).
+// (search_breaker.h, spec: `search-cancellation` — a search request carries a generation).
 
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_framstag_libosmscout_client_OSMScoutClient_cancelSearch__J(JNIEnv *env, jobject self,
@@ -5617,6 +5724,7 @@ struct RankedDescriptionCandidate {
   osmscout::ObjectDescription description;
   std::string refType;   // "area", "way" or "node"
   std::string typeName;  // e.g. "building", "highway_residential"
+  std::string typeDescription; //!< description of the type in the client's language, empty when the database carries none
   int64_t fileOffset;    // file offset of the object in the database
 };
 
@@ -5644,11 +5752,12 @@ jobject MarshalObjectDescription(JNIEnv *env,
                                  const osmscout::ObjectDescription &description,
                                  const std::string &refType,
                                  const std::string &typeName,
+                                 const std::string &typeDescription,
                                  int64_t fileOffset)
 {
   jclass descCls = env->FindClass("com/framstag/libosmscout/client/ObjectDescription");
   jmethodID descCtor = env->GetMethodID(descCls, "<init>",
-    "(Ljava/util/List;DDLjava/lang/String;Ljava/lang/String;J)V");
+    "(Ljava/util/List;DDLjava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V");
 
   jclass entryCls = env->FindClass("com/framstag/libosmscout/client/DescriptionEntry");
   jmethodID entryCtor = env->GetMethodID(entryCls, "<init>", "()V");
@@ -5697,6 +5806,9 @@ jobject MarshalObjectDescription(JNIEnv *env,
                         static_cast<jdouble>(nan),
                         env->NewStringUTF(refType.c_str()),
                         env->NewStringUTF(typeName.c_str()),
+                        // Empty when the database carries no description; the
+                        // caller then shows the technical type name.
+                        env->NewStringUTF(typeDescription.c_str()),
                         static_cast<jlong>(fileOffset));
 }
 
@@ -5767,6 +5879,7 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
           bool visible;             // object large enough to be visible at the zoom
           std::string refType;      // "area", "way" or "node"
           std::string typeName;     // OSM type name of the object
+          std::string typeDescription; //!< description of the type in the client's language, empty when the database carries none
           int64_t fileOffset;       // file offset of the object in the database
         };
         std::vector<Candidate> candidates;
@@ -5789,6 +5902,8 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
                                   osmscout::ObjectDescription(), false, false, false, false,
                                   "area",
                                   area->GetFeatureValueBuffer().GetType()->GetName(),
+                                  ResolveTypeDescription(data->descriptionLanguage,
+                                                         area->GetFeatureValueBuffer().GetType()),
                                   static_cast<int64_t>(area->GetFileOffset())});
           }
         } catch (const std::exception &e) {
@@ -5805,6 +5920,8 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
                                   osmscout::ObjectDescription(), false, false, false, false,
                                   "way",
                                   way->GetFeatureValueBuffer().GetType()->GetName(),
+                                  ResolveTypeDescription(data->descriptionLanguage,
+                                                         way->GetFeatureValueBuffer().GetType()),
                                   static_cast<int64_t>(way->GetFileOffset())});
           }
         } catch (const std::exception &e) {
@@ -5821,6 +5938,8 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
                                   osmscout::ObjectDescription(), false, false, false, false,
                                   "node",
                                   node->GetFeatureValueBuffer().GetType()->GetName(),
+                                  ResolveTypeDescription(data->descriptionLanguage,
+                                                         node->GetFeatureValueBuffer().GetType()),
                                   static_cast<int64_t>(node->GetFileOffset())});
           }
         } catch (const std::exception &e) {
@@ -5917,7 +6036,7 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
           if (hasLocal && c.typeRank == 0 && c.areaSize > MAX_BACKGROUND_AREA_SIZE) {
             continue;
           }
-          items.push_back({c.description, c.refType, c.typeName, c.fileOffset});
+          items.push_back({c.description, c.refType, c.typeName, c.typeDescription, c.fileOffset});
         }
 
         if (!items.empty()) {
@@ -5984,7 +6103,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription(JNIEnv *env, 
                         << best.description.GetEntries().size() << " entries";
 
   return MarshalObjectDescription(env, best.description, best.refType,
-                                  best.typeName, best.fileOffset);
+                                  best.typeName,
+                                  best.typeDescription,
+                                  best.fileOffset);
 }
 
 extern "C" JNIEXPORT jobject JNICALL
@@ -6014,7 +6135,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDescription__DDI(JNIEnv *
                         << best.description.GetEntries().size() << " entries";
 
   return MarshalObjectDescription(env, best.description, best.refType,
-                                  best.typeName, best.fileOffset);
+                                  best.typeName,
+                                  best.typeDescription,
+                                  best.fileOffset);
 }
 
 extern "C" JNIEXPORT jobject JNICALL
@@ -6045,7 +6168,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_getDescriptionCandidates(JNI
 
   for (const auto &c : candidates) {
     jobject jDesc = MarshalObjectDescription(env, c.description, c.refType,
-                                             c.typeName, c.fileOffset);
+                                             c.typeName,
+                                             c.typeDescription,
+                                             c.fileOffset);
     env->CallBooleanMethod(list, arrayListAdd, jDesc);
     env->DeleteLocalRef(jDesc);
   }
@@ -9253,6 +9378,7 @@ namespace {
     std::string operatorName;
     std::string brand;
     std::string objectType;
+    std::string objectTypeDescription; //!< description of the type in the client's language, empty when the database carries none
     double      lat{0.0};
     double      lon{0.0};
     double      distance{0.0};
@@ -9267,13 +9393,17 @@ namespace {
   // the name feature to the operator and ref features (same as POILookupModule).
   // The operator and the brand are filled independently of the label.
   template<class T>
-  bool BuildPoiEntry(const T& obj, const osmscout::GeoCoord& center, PoiEntry& entry)
+  bool BuildPoiEntry(const ClientData *clientData,
+                     const T& obj,
+                     const osmscout::GeoCoord& center,
+                     PoiEntry& entry)
   {
     if (!obj) {
       return false;
     }
 
     entry.objectType = obj->GetType()->GetName();
+    entry.objectTypeDescription = ResolveTypeDescription(DescriptionLanguageOf(clientData), obj->GetType());
 
     const osmscout::FeatureValueBuffer& features = obj->GetFeatureValueBuffer();
     if (const auto* name = features.findValue<osmscout::NameFeatureValue>(); name != nullptr) {
@@ -9427,7 +9557,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
 
   // The POI slot carries the caller's request: beginning it (beginSearch) superseded
   // the previous POI request, and a places or car search cannot stop this one
-  // (search_breaker.h, spec: `search-request-lifecycle` — one search slot per surface).
+  // (search_breaker.h, spec: `search-cancellation` — one search slot per surface).
 
   std::vector<PoiEntry> entries;
   const osmscout::GeoCoord center(lat, lon);
@@ -9502,19 +9632,19 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
 
         for (const auto& area : areas) {
           PoiEntry entry;
-          if (BuildPoiEntry(area, center, entry)) {
+          if (BuildPoiEntry(data, area, center, entry)) {
             entries.push_back(std::move(entry));
           }
         }
         for (const auto& way : ways) {
           PoiEntry entry;
-          if (BuildPoiEntry(way, center, entry)) {
+          if (BuildPoiEntry(data, way, center, entry)) {
             entries.push_back(std::move(entry));
           }
         }
         for (const auto& node : nodes) {
           PoiEntry entry;
-          if (BuildPoiEntry(node, center, entry)) {
+          if (BuildPoiEntry(data, node, center, entry)) {
             entries.push_back(std::move(entry));
           }
         }
@@ -9525,7 +9655,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
       }
     });
 
-  // An aborted POI search publishes nothing either (spec: `search-request-lifecycle` — an
+  // An aborted POI search publishes nothing either (spec: `search-cancellation` — an
   // aborted search publishes no result); read before ending the request.
   const bool aborted = data->searchBreakers.IsAborted(request);
 
@@ -9537,7 +9667,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
   data->searchBreakers.End(request);
 
   // One line per POI request, same fields and level as the places search
-  // (guidelines/Logging.md §2).
   osmscout::log.Info() << "search: slot=" << (poiSlot.empty() ? "none" : poiSlot)
                        << " gen=" << request
                        << " aborted=" << (aborted ? "true" : "false")
@@ -9563,6 +9692,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
   jfieldID operatorField = env->GetFieldID(entryCls, "operator", "Ljava/lang/String;");
   jfieldID brandField = env->GetFieldID(entryCls, "brand", "Ljava/lang/String;");
   jfieldID objectTypeField = env->GetFieldID(entryCls, "objectType", "Ljava/lang/String;");
+  jfieldID     objectTypeDescriptionField = env->GetFieldID(entryCls, "objectTypeDescription", "Ljava/lang/String;");
   jfieldID latField = env->GetFieldID(entryCls, "lat", "D");
   jfieldID lonField = env->GetFieldID(entryCls, "lon", "D");
   jfieldID distanceField = env->GetFieldID(entryCls, "distance", "D");
@@ -9579,6 +9709,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_searchPOIsByTypes(JNIEnv *en
     env->SetObjectField(jEntry, operatorField, env->NewStringUTF(entry.operatorName.c_str()));
     env->SetObjectField(jEntry, brandField, env->NewStringUTF(entry.brand.c_str()));
     env->SetObjectField(jEntry, objectTypeField, env->NewStringUTF(entry.objectType.c_str()));
+    // Empty when the database carries no description for the type; the caller
+    // then shows the technical type name.
+    env->SetObjectField(jEntry,
+                        objectTypeDescriptionField,
+                        env->NewStringUTF(entry.objectTypeDescription.c_str()));
     env->SetDoubleField(jEntry, latField, entry.lat);
     env->SetDoubleField(jEntry, lonField, entry.lon);
     env->SetDoubleField(jEntry, distanceField, entry.distance);

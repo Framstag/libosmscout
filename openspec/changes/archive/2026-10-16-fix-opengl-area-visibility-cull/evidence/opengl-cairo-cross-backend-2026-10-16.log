@@ -1,0 +1,21 @@
+# Cross-backend render: Cairo vs OpenGL on the v27 database maps/nordrhein-westfalen (task 4.2)
+# revision 06b197a35 on openspec-host-verification-2026-10-16
+# UTC 2026-10-16T15:27:17Z
+# GL context: headless via xvfb-run (the OpenGLAreaVisibilityTest GLFW case runs, 8/8 cases pass)
+
+# command 1: (from build/loop-evidence-2026-10-16/drawmapall)
+#   xvfb-run -a /home/tim/projects/libosmscout/build/Demos/DrawMapAll-1.1.1 \
+#     --database /home/tim/projects/libosmscout/maps/nordrhein-westfalen \
+#     --shaders /home/tim/projects/libosmscout/libosmscout-map-opengl/data/shaders \
+#     --fontName /home/tim/projects/libosmscout/libosmscout-map-opengl/data/fonts/LiberationSans-Regular.ttf \
+#     --iconPath /home/tim/projects/libosmscout/libosmscout/data/icons/14x14/standard \
+#     --width 400 --height 400 /home/tim/projects/libosmscout/stylesheets/standard.oss 51.515 7.465 32768 z15
+#   output: z15/DrawMapCairo.png, z15/DrawMapOpenGL.png (400x400)
+# NOTE: the third positional is a magnification factor, not a level (32768 = level 15); a level '15' renders the whole world.
+
+# command 2: compare -metric AE DrawMapCairo.png DrawMapOpenGL.png null:
+12838.4 (0.0802399)
+# command 3: magick ... -shave 8x8, then compare -metric AE (the 384x384 inner region)
+11787.3 (0.0799375)
+# colors: cairo=18578 opengl=19248
+# exit: 0

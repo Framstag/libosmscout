@@ -36,15 +36,26 @@ Expanded search area SHALL contain a text field for entering search queries.
 Search results SHALL be displayed in a list below the search text field.
 
 #### Scenario: Results shown sorted
+
 - **WHEN** search results are returned
 - **THEN** they SHALL be displayed in the result list sorted by relevance (highest first)
-- **AND** each entry SHALL show the location label and type
+- **AND** each entry SHALL show the location label and, in place of the technical type name, the
+  description of the object type in the language the application displays
+
+#### Scenario: An entry without a type description falls back
+
+- **WHEN** a result is displayed for an object whose type carries no description in the language the
+  application displays
+- **THEN** the entry SHALL show the technical type name in place of the description
+- **AND** the entry SHALL be displayed without an error
 
 #### Scenario: Full-width on small screens
+
 - **WHEN** the window width is less than 600px
 - **THEN** the result list SHALL span the full width of the window
 
 #### Scenario: Popup on large screens
+
 - **WHEN** the window width is 600px or more
 - **THEN** the result list SHALL appear as a popup/dropdown anchored to the search bar
 - **AND** SHALL NOT span the full window width
@@ -93,3 +104,24 @@ smaller font than the entry's primary text.
 - **THEN** the distance SHALL be shown with a precision that distinguishes
   sub-kilometer results (e.g. one decimal place)
 - **AND** the unit "km" SHALL be included in the displayed value
+
+### Requirement: The search overlay cancels the request it started
+
+The overlay's place search SHALL begin a request for the place slot, SHALL remember its generation and pass
+it into the search, and the Cancel button SHALL cancel exactly that generation. A cancellation that arrives
+after a newer query began SHALL therefore be a no-op instead of stopping the newer search, and the overlay
+SHALL stay usable.
+
+#### Scenario: Cancel stops the running search
+
+- **GIVEN** a running place search started by the overlay
+- **WHEN** the user presses Cancel
+- **THEN** that request's generation SHALL be cancelled
+- **AND** its search SHALL stop at its next abort check
+
+#### Scenario: A late cancel does not stop the newer search
+
+- **GIVEN** a query that superseded an earlier one
+- **WHEN** the earlier request's generation is cancelled
+- **THEN** the newer search SHALL keep running
+- **AND** its results SHALL still be shown

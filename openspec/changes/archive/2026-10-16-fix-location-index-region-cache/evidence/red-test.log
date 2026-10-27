@@ -1,0 +1,1468 @@
+# LocationLookupTest, region-cache counter present, no cache (red run)
+# command: ctest -R LocationLookupTest --output-on-failure
+# run at 2026-10-16T05:52:40Z
+Test project /home/tim/projects/libosmscout/build
+    Start 26: LocationLookupTest
+1/1 Test #26: LocationLookupTest ...............***Failed    4.99 sec
+Global setup...
++ Loading type config...
+   Number of types: 673
+   Number of node types: 337 2 byte(s)
+   Number of way types: 93 1 byte(s)
+   Number of area types: 445 2 byte(s)
+   Parsed language(s) :
+     default
+   Parsed alt language(s) :
++ Step #1 - TypeDataGenerator...
+   Module description: Dump *.ost information into data file
+   Module provides file 'types.dat'
+ - Generate types.dat...
+   Number of types: 673
++ Step #2 - Preprocess...
+   Module description: Initial parsing of import file(s)
+   Module provides file 'bounding.dat'
+   Module provides temporary file 'distribution.dat'
+   Module provides temporary file 'rawcoords.dat'
+   Module provides temporary file 'rawnodes.dat'
+   Module provides temporary file 'rawways.dat'
+   Module provides temporary file 'rawrels.dat'
+   Module provides temporary file 'rawcoastline.dat'
+   Module provides temporary file 'rawdatapolygon.dat'
+   Module provides temporary file 'rawturnrestr.dat'
+   Module provides temporary file 'rawroutemaster.dat'
+   Module provides temporary file 'rawroute.dat'
+   Using 16 block worker threads with queue size of 16
+ - Parsing *.olt file '/home/tim/projects/libosmscout/Tests/LocationTest.olt'...
+ - Generating ways and nodes...
+   Generating area region 'Nordrhein-Westfalen' 1...
+   Generating area region 'Regierungsbezirk Düsseldorf' 2...
+   Generating area region 'Düsseldorf' 3...
+   Generating area region 'Essen' 4...
+   Generating area region 'Regierungsbezirk Köln' 5...
+   Generating area region 'Bonn' 6...
+   Generating area region 'Köln' 7...
+   Generating area region 'Regierungsbezirk Arnsberg' 8...
+   Generating area region 'Dortmund' 9...
+   Generating node region 'Brechten' 13...
+   Generating way 'Am Birkenbaum' 10...
+   Generating building '1' 11...
+   Generating building '2' 12...
+   Generating way 'In den Hüchten' 13...
+   Generating building '1' 14...
+   Generating building '2' 15...
+   Generating node region 'Eving' 30...
+   Generating way 'Bahnhofstraße' 16...
+   Generating building '50a' 17...
+   Generating building '50b' 18...
+   Generating way 'August-Warkner-Platz' 19...
+   Generating building '2-4' 20...
+   Generating way 'Kurt-Schumacher-Straße' 21...
+   Generating building '1' 22...
+   Generating area region 'Kreis Unna' 23...
+   Generating area region 'Kamen' 24...
+   Generating area region 'Bergkamen' 25...
+   Generating node region 'Heil' 53...
+   Generating node region 'Oberaden' 54...
+   Generating node region 'Overberge' 55...
+   Start reading nodes
+   Start reading ways
+   Waiting for block processor...
+   Waiting for block processor done.
+   Waiting for write processor...
+   Waiting for write processor done.
+ - Dump statistics...
+   Coords:           55
+   Nodes:            5
+   Ways/Areas/Sum:   5 20 25
+   Relations:        0
+   Coastlines:       0
+   Turnrestrictions: 0
+   Multipolygons:    0
+   Min. node id:     1
+   Max. node id:     55
+   Min. way id:      1
+   Max. way id:      25
+   Type : 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _route: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _tile_land: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _tile_sea: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _tile_coast: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _tile_unknown: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _tile_coastline: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _osm_tile_border: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type _osm_subtile_border: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type elevation_contour_major: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type elevation_contour_medium: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type elevation_contour_minor: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type highway_area_residential: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type highway_area_pedestrian: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type highway_area_path: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type highway_area_cycleway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type highway_area_footway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_motorway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_motorway_trunk: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_motorway_primary: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_motorway_link: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_trunk: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_trunk_link: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_primary: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_primary_link: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_secondary: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_secondary_link: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_tertiary: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_tertiary_link: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_unclassified: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_road: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_residential: 0 node(s), 0 area(s), 5 ways(s), 0 rel(s)
+   WW Type highway_living_street: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_service: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_milestone: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_track: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_pedestrian: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_path: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_cycleway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_footway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_via_ferrata_easy: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_via_ferrata_moderate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_via_ferrata_difficult: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_via_ferrata_extreme: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_bridleway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_steps: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_services: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_bus_guideway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_mini_roundabout: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_turning_cycle: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_construction: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_roundabout: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_motorway_junction: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_street_lamp: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type speed_camera: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type highway_traffic_signals: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_stream: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_river: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_riverbank: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_canal: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_ditch: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_drain: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_dock: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_lock_gate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_turning_point: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_boatyard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_weir: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_waterfall: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type waterway_dam: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_rail: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_tram: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_light_rail: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_subway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_preserved: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_disused: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_abandoned: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_narrow_gauge: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_monorail: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_funicular: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_halt: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_tram_stop: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_crossing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_level_crossing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_subway_entrance: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type railway_turntable: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type highway_bus_stop: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type public_transport_platform: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aerialway_gondola: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aerialway_chair_lift: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aerialway_drag_lift: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type piste_downhill_easy: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type piste_downhill_intermediate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type piste_downhill_advanced: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_ferry: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_aerodrome: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_terminal: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_helipad: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_runway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_taxiway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_apron: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type aeroway_gate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_allotments: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_basin: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_brownfield: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_cemetery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_cemetery_sea: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_commercial: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_construction: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_farmland: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_farmyard_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_farmyard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type wood: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_garages: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_grass: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_greenfield: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_greenhouse_horticulture: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_industrial: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_landfill: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_meadow: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_military: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_orchard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_piste: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_quarry: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_railway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_recreation_ground: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_reservoir: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_residential: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_retail: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_salt_pond: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_village_green: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type landuse_vineyard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_bay: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_beach: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_bare_rock: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_cave_entrance: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_cliff: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_fell: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_glacier: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_grassland: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_heath: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_land: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_mud: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_peak: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_sand: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_scree: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_scrub: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_spring: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_tree: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_volcano: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_water: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_wetland_marsh: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_wetland_tidalflat: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_wetland: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_tree_row: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_shrub: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_shrubbery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_tree_group: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_tree_stump: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_moor: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_tundra: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_reef: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_shoal: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_strait: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_isthmus: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_peninsula: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_cape: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_blowhole: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_hot_spring: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_geyser: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_arch: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_arete: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_blockfield: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_crevasse: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_dune: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_earth_bank: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_fumarole: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_gorge: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_gully: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_hill: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_ridge: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_rock: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_saddle: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_sinkhole: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_stone: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type natural_valley: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type man_made_bridge: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type man_made_pier: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type man_made_wastewater_plant: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_sports_centre: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_stadium: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_track: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_pitch: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_fitness_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_golf_course: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_water_park: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_swimming_pool: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_marina: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_slipway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_fishing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_nature_reserve: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_protected_area: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_park: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_playground: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_garden: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_common: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type leisure_ice_rink: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_atm: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bank_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bank: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bicycle_parking_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bicycle_parking: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bench: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_brothel: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bus_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_cafe_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_cafe: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_charging_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_clock: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_drinking_water: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_doctors: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_ev_charging: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fast_food_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fast_food: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fuel_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fuel: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_grave_yard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_grit_bin: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_hospital_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_hospital: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_kindergarten_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_kindergarten: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_library_building: 0 node(s), 1 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_library: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_parking_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_parking_entrance: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_parking_space: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_parking: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_pharmacy: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_police: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_photo_booth: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_post_office_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_post_office: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_post_box: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_restaurant_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_restaurant: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_pub_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_pub: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bar_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bar: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_recycling: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_school_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_school: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_taxi: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_toilets: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_vending_machine: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_waste_disposal: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_waste_basket: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_watering_place: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_water_point: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_ferry_terminal: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_shelter: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_biergarten: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_food_court: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_ice_cream: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_college_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_college: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_university_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_university: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_childcare_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_childcare: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_music_school_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_music_school: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_language_school_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_language_school: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_prep_school_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_prep_school: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_dancing_school: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_driving_school_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_driving_school: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_training: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_research_institute_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_research_institute: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_dojo_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_dojo: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bicycle_rental: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bicycle_repair_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_motorcycle_parking: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_car_rental_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_car_rental: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_car_sharing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_car_wash: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_compressed_air: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_vacuum_cleaner: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_vehicle_inspection: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_weighbridge: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_loading_dock: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_trolley_bay: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_ticket_validator: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_parcel_locker: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_boat_rental: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_boat_storage: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_public_bookcase: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bbq: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bureau_de_change_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_bureau_de_change: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_money_transfer: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_mobile_money_agent: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_payment_terminal: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_clinic_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_clinic: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_dentist_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_dentist: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_veterinary_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_veterinary: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_health_post: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_social_facility_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_social_facility: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_arts_centre_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_arts_centre: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_cinema_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_cinema: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_theatre_building: 0 node(s), 1 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_theatre: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_community_centre_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_community_centre: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_conference_centre_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_conference_centre: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_events_venue_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_events_venue: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_nightclub_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_nightclub: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_casino_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_casino: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_gambling: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_social_centre_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_social_centre: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_studio: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fountain: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_marketplace: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_townhall_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_townhall: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_courthouse_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_courthouse: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fire_station_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_fire_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_prison_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_prison: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_ranger_station_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_ranger_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_post_depot_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_post_depot: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_crematorium_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_crematorium: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_funeral_hall_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_funeral_hall: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_monastery_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_monastery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_public_bath_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_public_bath: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_telephone: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_shower: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_letter_box: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_lounger: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_chair: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_table: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_dressing_room: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_smoking_area: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_reception_desk: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_sanitary_dump_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_waste_transfer_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_waste_dump_site: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_animal_shelter: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_animal_boarding: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_animal_breeding: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_feeding_place: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_game_feeding: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_hunting_stand: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_internet_cafe_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_internet_cafe: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_driver_training: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_lavoir: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amenity_love_hotel: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_temple_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_shrine_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_christian_church_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_christian_cathedral_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_christian_chapel_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_christian: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_jewish_synagogue_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_muslim_mosque_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type religion_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type amenity: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_alcohol_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_alcohol: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_bakery_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_bakery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_beverages_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_beverages: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_butcher_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_butcher: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_cheese_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_cheese: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_chocolate_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_chocolate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_coffee_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_coffee: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_confectionery_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_confectionery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_convenience_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_convenience: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_dairy_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_dairy: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_deli_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_deli: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_farm_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_farm: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_food_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_food: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_frozen_food_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_frozen_food: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_greengrocer_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_greengrocer: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_grocery_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_grocery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_health_food_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_health_food: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_ice_cream_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_ice_cream: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_pastry_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_pastry: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_seafood_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_seafood: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_spices_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_spices: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_supermarket_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_supermarket: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_tea_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_tea: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_wine_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_wine: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type shop: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type office_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type office: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_aquarium: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_attraction_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_attraction: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_artwork: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_camp_site: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_caravan_site: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_camp_pitch: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_trail_riding_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_picnic_site: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_theme_park: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_viewpoint: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_zoo: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_alpine_hut_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_alpine_hut: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_apartment_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_apartment: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_wilderness_hut_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_wilderness_hut: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_chalet_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_chalet: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_guest_house_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_guest_house: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_information_guidepost: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_hostel_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_hostel: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_hotel_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_hotel: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_information_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_information: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_motel_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_motel: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_gallery_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_gallery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_museum_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_museum: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type tourism: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_castle_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_castle: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_manor_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_manor: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_monument_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_monument: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type historic_memorial_stolperstein: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_memorial_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_memorial: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_ruins_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_ruins: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_archaeological_site: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_battlefield: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_wreck: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type historic: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_airfield: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_bunker_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_bunker: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_barracks: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_danger_area: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_range: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type military_naval_base: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_building: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_9pin: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_10pin: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_archery: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_athletics: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_australian_football: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_baseball: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_basketball: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_beachvolleyball: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_boules: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_bowls: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_canoe: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_chess: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_climbing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_cricket: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_cricket_nets: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_croquet: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_cycling: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_dog_racing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_equestrian: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_football: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_golf: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_gymnastics: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_hockey: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_horse_racing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_motor: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_multi: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_orienteering: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_paddle_tennis: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_pelota: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_raquet: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_rowing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_rugby: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_shooting: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_skating: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_skateboard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_skiing: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_soccer: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_swimming: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_table_tenis: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_team_handball: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_tennis: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport_volleyball: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type sport: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type power_tower: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type power_pole: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type power_line: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type power_minor_line: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type power_sub_station: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type power_generator: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_country: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_state: 0 node(s), 1 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_county: 0 node(s), 1 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_municipality: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_suburb: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type boundary_administrative: 0 node(s), 3 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_continent: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type place_peninsula: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_country: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_state: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_region: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_county: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_capitalcity: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_millioncity: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_halfmillioncity: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_bigcity: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_city: 0 node(s), 7 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_town: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_village: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_hamlet: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_suburb: 5 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_locality: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_island: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_islet: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_sea: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type place_ocean: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type building_garage: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type building: 0 node(s), 6 area(s), 0 ways(s), 0 rel(s)
+   WW Type address: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_hedge: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type barrier_fence: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type barrier_wall: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_ditch: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type barrier_retaining_wall: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type barrier_city_wall: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_bollard: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_cycle_barrier: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_block: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_cattle_grid: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_toll_booth: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_entrance: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_gate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_lift_gate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_stile: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_sally_port: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type barrier_kent_carriage_gate: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type building_entrance: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type street_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type tunnel_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type bridge_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type dual_carriageway_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type waterway_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type wayparts_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type associated_street_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type enforcement_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type roadAccess_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type junction_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type label_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type composite_Attribute_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type segmented_tag_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type building_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type related_building_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type site_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type station_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type railway_halt_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type line_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type public_transport_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type public_transport_stop_area_group: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type collection_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type network_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_aerialway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_aerialway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_bus: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_bus: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_ferry: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_monorail: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_monorail: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_subway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_subway: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_train: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_train: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_tram: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_tram: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type routemaster_trolleybus: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_trolleybus: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_bicycle: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_mtb: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_hiking: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   WW Type route_skiing_nordic: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type routemaster_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type route_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type superroute_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type netzwolf_route_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type netzwolf_routemaster_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type border: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type postal_code: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type organization: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type boundary_civil: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type boundary_maritime: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type boundary_political: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type boundary_postal_code: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type place_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type amt_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type suburb_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type city_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type town_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type municipality_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type district_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type county_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type state_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type tmc_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type lez_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type group_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type set_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type compound_any: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+   Type srtm_tile: 0 node(s), 0 area(s), 0 ways(s), 0 rel(s)
+ - Writing 'distribution.dat'...
+ - Generating 'bounding.dat'...
++ Step #3 - CoordDataGenerator...
+   Module description: Generate coord data file
+   Module requires file 'rawcoords.dat'
+   Module provides debugging file 'coord.dat'
+ - Searching for duplicate coordinates...
+   Searching for coordinates with page id >= 0
+   Loaded 55 of 55 coords (28 pages)
+   File '/home/tim/projects/libosmscout/build/Tests/rawcoords.dat' completely scanned
+   Detecting duplicate coordinates
+   Found 0 duplicate coordinates
+ - Storing coordinates...
+   Search for coordinates with page id >= -92233720368
+   Loaded 55 of 55 coords (1 pages)
+   File '/home/tim/projects/libosmscout/build/Tests/rawcoords.dat' completely scanned
+   Writing file '/home/tim/projects/libosmscout/build/Tests/coord.dat'
+ - Written 1 pages to disk, using 1 page dumps...
+ - Writing 1 pages index to disk...
+   File '/home/tim/projects/libosmscout/build/Tests/coord.dat' completely written
++ Step #4 - RawWayIndexGenerator...
+   Module description: Generate id lookup index on raw way data file
+   Module requires file 'rawways.dat'
+   Module provides temporary file 'rawway.idx'
+ - Generating 'rawway.idx'...
+   Writing level 1 (25 entries)
+   Index for 25 data elements will be stored in 1 levels
+   Page count for level 0 is 1
++ Step #5 - RawRelationIndexGenerator...
+   Module description: Generate id lookup index on raw relation data file
+   Module requires file 'rawrels.dat'
+   Module provides temporary file 'rawrel.idx'
+ - Generating 'rawrel.idx'...
+   Writing level 1 (0 entries)
+   Index for 0 data elements will be stored in 1 levels
+   Page count for level 0 is 0
++ Step #6 - RelAreaDataGenerator...
+   Module description: Resolves raw relations to areas
+   Module requires file 'coord.dat'
+   Module requires file 'rawways.dat'
+   Module requires file 'rawrels.dat'
+   Module requires file 'rawway.idx'
+   Module requires file 'rawrel.idx'
+   Module provides temporary file 'relarea.tmp'
+   Module provides temporary file 'wayareablack.dat'
+ - Generate relarea.tmp...
+   0 relations read, 0 relations written
+ - Generate wayareablack.dat...
+   0 ways written to blacklist
+   Dump statistics
++ Step #7 - WayAreaDataGenerator...
+   Module description: Resolves raw ways to areas
+   Module requires file 'coord.dat'
+   Module requires file 'rawways.dat'
+   Module requires file 'wayareablack.dat'
+   Module provides temporary file 'wayarea.tmp'
+ - Generate wayarea.tmp...
+ - Reading way area blacklist...
+ - Processing raw ways as areas...
+   25 raw way(s) read, 20 areas(s) written
++ Step #8 - MergeAreaDataGenerator...
+   Module description: Merge relation and way area data files into one area file
+   Module requires file 'wayarea.tmp'
+   Module requires file 'relarea.tmp'
+   Module provides temporary file 'areas.tmp'
+ - Copying areas from file 'wayarea.tmp'...
+ - Copying areas from file 'relarea.tmp'...
+   Merged 20 ways and 0 relations to 20 areas
++ Step #9 - MergeAreasGenerator...
+   Module description: Merge areas into bigger areas
+   Module requires file 'areas.tmp'
+   Module provides temporary file 'areas2.tmp'
+ - Scanning for nodes joining areas from '/home/tim/projects/libosmscout/build/Tests/areas.tmp'...
+   Scanning took 0.000 second(s)
+   Found 0 nodes as possible connection points for areas
+ - Collecting area data by type (75 type(s))...
+ - Collected 0 areas for 75 types in 0.000 second(s)...
+ - Merging areas with 16 thread(s)...
+ - Merged 75 types in 0.000...
++ Step #10 - WayWayDataGenerator...
+   Module description: Merge ways into bigger ways
+   Module requires file 'distribution.dat'
+   Module requires file 'rawways.dat'
+   Module requires file 'rawturnrestr.dat'
+   Module requires file 'rawroute.dat'
+   Module provides temporary file 'wayway.tmp'
+   Module provides temporary file 'turnrestr.dat'
+ - Generate wayway.tmp...
+ - Reading type distribution...
+ - Reading route members...
+   Read 0 routes
+ - Reading turn restrictions...
+   Read 0 turn restrictions
+ - Collecting way data by type...
+ - Collected 5 ways for types...
+ - Merging ways...
+ - Collecting node ids...
+ - Loading 10 nodes...
+ - Splitting too long ways...
+ - Writing ways...
+   25 raw way(s) read, 5 way(s) written, 0 merges
+ - Storing back updated turn restrictions...
+   Wrote back 0 restrictions
++ Step #11 - OptimizeAreaWayIdsGenerator...
+   Module description: Optimize ids for areas and ways
+   Module requires file 'areas2.tmp'
+   Module requires file 'wayway.tmp'
+   Module provides temporary file 'areas3.tmp'
+   Module provides temporary file 'ways.tmp'
+ - Optimize ids for areas and ways...
+ - Scanning ids from 'areas2.tmp'...
+   20 areas, 0 ids found
+   Phase 'Scan area ids' took 0.000 s
+ - Scanning ids from 'wayway.tmp'...
+   5 ways, 10 ids, 0 circular ways found
+   Phase 'Scan way ids' took 0.000 s
+   Found 10 relevant nodes, 0 of it at least used twice
+ - Copy data from 'areas2.tmp' to 'areas3.tmp'...
+ - Copy data from 'wayway.tmp' to 'ways.tmp'...
+   10 node serials cleared
+   Phase 'Copy way data' took 0.000 s
+   80 node serials cleared
+   Phase 'Copy area data' took 0.000 s
+   Optimize ids: scan areas 0.000 s, scan ways 0.000 s, copy phases 0.001 s
++ Step #12 - NodeDataGenerator...
+   Module description: Convert raw nodes to nodes
+   Module requires file 'rawnodes.dat'
+   Module provides temporary file 'nodes.tmp'
+ - Generating 'nodes.tmp'...
+   Read 5 nodes, wrote 5 nodes
++ Step #13 - SortNodeDataGenerator...
+   Module description: Sort nodes to improve lookup
+   Module requires file 'nodes.tmp'
+   Module provides file 'nodes.dat'
+   Module provides debugging file 'nodes.idmap'
+   Module provides temporary file 'nodeaddress.dat'
+ - Sorting data...
+   Scanning file '/home/tim/projects/libosmscout/build/Tests/nodes.tmp'
+   5 entries in file '/home/tim/projects/libosmscout/build/Tests/nodes.tmp'
+   Reading objects in cell range 0-268435455
+   Reading objects from file '/home/tim/projects/libosmscout/build/Tests/nodes.tmp'
+   Copy renumbered data to '/home/tim/projects/libosmscout/build/Tests/nodes.dat'
+   5 of 5 object(s) written to file '/home/tim/projects/libosmscout/build/Tests/nodes.dat'
+   Nodes without a type removed: 0
++ Step #14 - SortWayDataGenerator...
+   Module description: Sort ways to improve lookup
+   Module requires file 'ways.tmp'
+   Module provides file 'ways.dat'
+   Module provides debugging file 'ways.idmap'
+   Module provides temporary file 'wayaddress.dat'
+ - Sorting data...
+   Scanning file '/home/tim/projects/libosmscout/build/Tests/ways.tmp'
+   5 entries in file '/home/tim/projects/libosmscout/build/Tests/ways.tmp'
+   Reading objects in cell range 0-268435455
+   Reading objects from file '/home/tim/projects/libosmscout/build/Tests/ways.tmp'
+   Copy renumbered data to '/home/tim/projects/libosmscout/build/Tests/ways.dat'
+   5 of 5 object(s) written to file '/home/tim/projects/libosmscout/build/Tests/ways.dat'
+   Duplicate nodes removed: 0
+   Redundant nodes removed: 0
+   Overall nodes: 10
+   Ways without a type removed: 0
++ Step #15 - AreaNodeIndexGenerator...
+   Module description: Index nodes for area lookup
+   Module requires file 'nodes.dat'
+   Module provides file 'areanode.idx'
+ - Scanning distribution of node types...
+ - Analysing distribution of node types...
+   Distribution data:
+   - place_suburb(577), 5 nodes
+ - Generating 'areanode.idx'...
+   Writing 1 list index entries
+   Writing 0 list tile index entries
+   Writing 0 bitmap tile index entries
+   Writing list data
+   Writing tile list and bitmap index data
++ Step #16 - AreaWayIndexGenerator...
+   Module description: Index ways for area lookup
+   Module requires file 'ways.dat'
+   Module provides file 'areaway.idx'
+   Minimum magnification: 10
+ - Scanning level distribution of way type...
+   Scanning Level 10 (93 types remaining)
+   highway_residential 0 | 0 < 4 < 0 *0* - 4
+   Type elevation_contour_major, 0 cells, 0 objects
+   Type elevation_contour_medium, 0 cells, 0 objects
+   Type elevation_contour_minor, 0 cells, 0 objects
+   Type highway_motorway, 0 cells, 0 objects
+   Type highway_motorway_trunk, 0 cells, 0 objects
+   Type highway_motorway_primary, 0 cells, 0 objects
+   Type highway_motorway_link, 0 cells, 0 objects
+   Type highway_trunk, 0 cells, 0 objects
+   Type highway_trunk_link, 0 cells, 0 objects
+   Type highway_primary, 0 cells, 0 objects
+   Type highway_primary_link, 0 cells, 0 objects
+   Type highway_secondary, 0 cells, 0 objects
+   Type highway_secondary_link, 0 cells, 0 objects
+   Type highway_tertiary, 0 cells, 0 objects
+   Type highway_tertiary_link, 0 cells, 0 objects
+   Type highway_unclassified, 0 cells, 0 objects
+   Type highway_road, 0 cells, 0 objects
+   Type highway_residential, 4 cells, 8 objects
+   Type highway_living_street, 0 cells, 0 objects
+   Type highway_service, 0 cells, 0 objects
+   Type highway_track, 0 cells, 0 objects
+   Type highway_pedestrian, 0 cells, 0 objects
+   Type highway_path, 0 cells, 0 objects
+   Type highway_cycleway, 0 cells, 0 objects
+   Type highway_footway, 0 cells, 0 objects
+   Type highway_via_ferrata_easy, 0 cells, 0 objects
+   Type highway_via_ferrata_moderate, 0 cells, 0 objects
+   Type highway_via_ferrata_difficult, 0 cells, 0 objects
+   Type highway_via_ferrata_extreme, 0 cells, 0 objects
+   Type highway_bridleway, 0 cells, 0 objects
+   Type highway_steps, 0 cells, 0 objects
+   Type highway_bus_guideway, 0 cells, 0 objects
+   Type highway_construction, 0 cells, 0 objects
+   Type highway_roundabout, 0 cells, 0 objects
+   Type waterway_stream, 0 cells, 0 objects
+   Type waterway_river, 0 cells, 0 objects
+   Type waterway_canal, 0 cells, 0 objects
+   Type waterway_ditch, 0 cells, 0 objects
+   Type waterway_drain, 0 cells, 0 objects
+   Type waterway_weir, 0 cells, 0 objects
+   Type waterway_waterfall, 0 cells, 0 objects
+   Type waterway_dam, 0 cells, 0 objects
+   Type railway_rail, 0 cells, 0 objects
+   Type railway_tram, 0 cells, 0 objects
+   Type railway_light_rail, 0 cells, 0 objects
+   Type railway_subway, 0 cells, 0 objects
+   Type railway_preserved, 0 cells, 0 objects
+   Type railway_disused, 0 cells, 0 objects
+   Type railway_abandoned, 0 cells, 0 objects
+   Type railway_narrow_gauge, 0 cells, 0 objects
+   Type railway_monorail, 0 cells, 0 objects
+   Type railway_funicular, 0 cells, 0 objects
+   Type public_transport_platform, 0 cells, 0 objects
+   Type aerialway_gondola, 0 cells, 0 objects
+   Type aerialway_chair_lift, 0 cells, 0 objects
+   Type aerialway_drag_lift, 0 cells, 0 objects
+   Type piste_downhill_easy, 0 cells, 0 objects
+   Type piste_downhill_intermediate, 0 cells, 0 objects
+   Type piste_downhill_advanced, 0 cells, 0 objects
+   Type route_ferry, 0 cells, 0 objects
+   Type aeroway_runway, 0 cells, 0 objects
+   Type aeroway_taxiway, 0 cells, 0 objects
+   Type natural_cliff, 0 cells, 0 objects
+   Type natural_tree_row, 0 cells, 0 objects
+   Type natural_arch, 0 cells, 0 objects
+   Type natural_arete, 0 cells, 0 objects
+   Type natural_crevasse, 0 cells, 0 objects
+   Type natural_dune, 0 cells, 0 objects
+   Type natural_earth_bank, 0 cells, 0 objects
+   Type natural_gorge, 0 cells, 0 objects
+   Type natural_gully, 0 cells, 0 objects
+   Type natural_ridge, 0 cells, 0 objects
+   Type natural_valley, 0 cells, 0 objects
+   Type man_made_pier, 0 cells, 0 objects
+   Type leisure_track, 0 cells, 0 objects
+   Type leisure_slipway, 0 cells, 0 objects
+   Type amenity_bicycle_parking, 0 cells, 0 objects
+   Type amenity_bench, 0 cells, 0 objects
+   Type tourism_artwork, 0 cells, 0 objects
+   Type historic_ruins, 0 cells, 0 objects
+   Type historic_archaeological_site, 0 cells, 0 objects
+   Type power_line, 0 cells, 0 objects
+   Type power_minor_line, 0 cells, 0 objects
+   Type boundary_country, 0 cells, 0 objects
+   Type boundary_state, 0 cells, 0 objects
+   Type boundary_county, 0 cells, 0 objects
+   Type boundary_municipality, 0 cells, 0 objects
+   Type boundary_suburb, 0 cells, 0 objects
+   Type boundary_administrative, 0 cells, 0 objects
+   Type barrier_fence, 0 cells, 0 objects
+   Type barrier_wall, 0 cells, 0 objects
+   Type barrier_retaining_wall, 0 cells, 0 objects
+   Type barrier_city_wall, 0 cells, 0 objects
+ - Generating 'areaway.idx'...
+   Scanning ways for index level 10
+   Writing map for highway_residential (17 B, 31,823458 km, 2/cell)
++ Step #17 - AreaAreaIndexGenerator...
+   Module description: Index areas for area lookup
+   Module requires file 'areas3.tmp'
+   Module provides file 'areaarea.idx'
+   Module provides file 'areas.dat'
+   Module provides debugging file 'areaaddress.dat'
+   Module provides debugging file 'areas.idmap'
+ - Building in memory area index from '/home/tim/projects/libosmscout/build/Tests/areas3.tmp'...
+ - Enriching index tree...
+   Level 0 has 1 entries
+   Level 1 has 1 entries
+   Level 2 has 1 entries
+   Level 3 has 1 entries
+   Level 4 has 1 entries
+   Level 5 has 2 entries
+   Level 6 has 2 entries
+   Level 7 has 2 entries
+   Level 8 has 2 entries
+   Level 9 has 2 entries
+   Level 10 has 3 entries
+   Level 11 has 7 entries
+   Level 12 has 8 entries
+   Level 13 has 6 entries
+   Level 14 has 3 entries
+   Level 15 has 3 entries
+   Level 16 has 3 entries
+   Level 17 has 3 entries
+ - Writing files '/home/tim/projects/libosmscout/build/Tests/areaarea.idx', '/home/tim/projects/libosmscout/build/Tests/areas.dat' and '/home/tim/projects/libosmscout/build/Tests/areas.idmap'...
+   17 object(s) written to file '/home/tim/projects/libosmscout/build/Tests/areas.dat'
+   Duplicate nodes removed: 0
+   Redundant nodes removed: 0
+   Overall nodes: 80
+   Areas without a type removed: 0
++ Step #18 - CoverageIndexGenerator...
+   Module description: Index of import area coverage
+   Module requires file 'nodes.dat'
+   Module requires file 'ways.dat'
+   Module requires file 'areas.dat'
+   Module provides file 'coverage.idx'
+   Generating bitmap for cell level 14
+ - Scanning nodes...
+ - Scanning ways...
+ - Scanning areas...
+   5 node bitmap entries
+   35 way bitmap entries
+   4232 area bitmap entries
+ - Calculating bitmap...
+ - Generating 'coverage.idx'...
+   4232 bitmap entries
+   Original bitmap boundary: 8647,12743 - 8692,12834 46x92
+   Aligned bitmap boundary: 8647,12743 - 8694,12838 48x96
++ Step #19 - WaterIndexGenerator...
+   Module description: Create index for lookup of ground/see tiles
+   Module requires file 'bounding.dat'
+   Module requires file 'rawcoastline.dat'
+   Module requires file 'rawdatapolygon.dat'
+   Module requires file 'coord.dat'
+   Module requires file 'ways.dat'
+   Module provides file 'water.idx'
+ - Scanning data polygon...
+   0 coastlines
+ - Resolving nodes of coastline...
+ - Enriching coastline with node data...
+   0 way coastline(s), 0 area coastline(s)
+ - Scanning for coastlines...
+   0 coastlines
+ - Resolving nodes of coastline...
+ - Enriching coastline with node data...
+   0 way coastline(s), 0 area coastline(s)
+ - Merging coastlines...
+   0 way coastline(s), 0 area coastline(s)
+ - Writing 'water.idx'...
+   Generating index for level 6 to 14
+ - Building tiles for level 6...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 6, 2 cells, 0 entries, 1 bytes/entry, 6 B
+ - Building tiles for level 7...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 7, 2 cells, 0 entries, 1 bytes/entry, 6 B
+ - Building tiles for level 8...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 8, 2 cells, 0 entries, 1 bytes/entry, 6 B
+ - Building tiles for level 9...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 9, 8 cells, 0 entries, 1 bytes/entry, 12 B
+ - Building tiles for level 10...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 10, 28 cells, 0 entries, 1 bytes/entry, 32 B
+ - Building tiles for level 11...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 11, 91 cells, 0 entries, 1 bytes/entry, 95 B
+ - Building tiles for level 12...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 12, 312 cells, 0 entries, 1 bytes/entry, 316 B
+ - Building tiles for level 13...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 13, 1128 cells, 0 entries, 1 bytes/entry, 1,1 KiB
+ - Building tiles for level 14...
+   Calculate coast cell environment
+   Assume land
+   Filling land
+   Writing index for level 14, 4232 cells, 0 entries, 1 bytes/entry, 4,0 KiB
++ Step #20 - OptimizeAreasLowZoomGenerator...
+   Module description: Create index for area lookup of reduced resolution areas
+   Module requires file 'areas.dat'
+   Module provides optional file 'areasopt.dat'
+   Minimum visible size in pixel: 25
+ - Collecting area data to optimize...
+   Collected 5 areas for 46 types
+ - Optimizing type waterway_canal...
+ - Optimizing type landuse_basin...
+ - Optimizing type landuse_brownfield...
+ - Optimizing type landuse_commercial...
+ - Optimizing type landuse_farmland...
+ - Optimizing type wood...
+ - Optimizing type landuse_greenfield...
+ - Optimizing type landuse_industrial...
+ - Optimizing type landuse_landfill...
+ - Optimizing type landuse_military...
+ - Optimizing type landuse_quarry...
+ - Optimizing type landuse_recreation_ground...
+ - Optimizing type landuse_reservoir...
+ - Optimizing type landuse_residential...
+ - Optimizing type natural_beach...
+ - Optimizing type natural_bare_rock...
+ - Optimizing type natural_fell...
+ - Optimizing type natural_glacier...
+ - Optimizing type natural_grassland...
+ - Optimizing type natural_heath...
+ - Optimizing type natural_land...
+ - Optimizing type natural_scrub...
+ - Optimizing type natural_water...
+ - Optimizing type natural_wetland_marsh...
+ - Optimizing type natural_wetland_tidalflat...
+ - Optimizing type natural_wetland...
+ - Optimizing type natural_moor...
+ - Optimizing type natural_tundra...
+ - Optimizing type leisure_track...
+ - Optimizing type leisure_pitch...
+ - Optimizing type leisure_fitness_station...
+ - Optimizing type leisure_golf_course...
+ - Optimizing type leisure_water_park...
+ - Optimizing type leisure_swimming_pool...
+ - Optimizing type leisure_marina...
+ - Optimizing type leisure_fishing...
+ - Optimizing type boundary_protected_area...
+ - Optimizing type leisure_park...
+ - Optimizing type leisure_common...
+ - Optimizing type leisure_ice_rink...
+ - Optimizing type boundary_country...
+ - Optimizing type boundary_state...
+   Optimized from 1 to 1 areas
+   Writing map for level 3, index level 5, 2 cells, 2 entries, 7 B
+   Optimized from 1 to 1 areas
+   Writing map for level 4, index level 5, 2 cells, 2 entries, 7 B
+   Optimized from 1 to 1 areas
+   Writing map for level 5, index level 5, 2 cells, 2 entries, 7 B
+   Optimized from 1 to 1 areas
+   Writing map for level 6, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 7, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 8, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 9, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 10, index level 5, 2 cells, 2 entries, 9 B
+ - Optimizing type boundary_county...
+   Optimized from 1 to 1 areas
+   Writing map for level 4, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 5, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 6, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 7, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 8, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 9, index level 5, 2 cells, 2 entries, 9 B
+   Optimized from 1 to 1 areas
+   Writing map for level 10, index level 5, 2 cells, 2 entries, 9 B
+ - Optimizing type boundary_municipality...
+ - Optimizing type boundary_suburb...
+ - Optimizing type boundary_administrative...
+   Optimized from 3 to 3 areas
+   Writing map for level 3, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 4, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 5, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 6, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 7, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 8, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 9, index level 5, 2 cells, 6 entries, 13 B
+   Optimized from 3 to 3 areas
+   Writing map for level 10, index level 5, 2 cells, 6 entries, 13 B
++ Step #21 - OptimizeWaysLowZoomGenerator...
+   Module description: Create index for area lookup of reduced resolution ways
+   Module requires file 'ways.dat'
+   Module provides optional file 'waysopt.dat'
+ - Collecting way data to optimize...
+   Collected 0 ways for 27 types
++ Step #22 - LocationIndexGenerator...
+   Module description: Create index for lookup of objects based on address data
+   Module requires file 'nodes.dat'
+   Module requires file 'ways.dat'
+   Module requires file 'areas.dat'
+   Module requires file 'nodeaddress.dat'
+   Module requires file 'wayaddress.dat'
+   Module requires file 'areaaddress.dat'
+   Module provides file 'location.idx'
+   Module provides analysis file 'location_region.txt'
+   Module provides analysis file 'location_full.txt'
+ - Scanning for administrative boundaries of type 'area'...
+ - Sorting in 0 administrative boundaries of level 0...
+ - Sorting in 0 administrative boundaries of level 1...
+ - Sorting in 0 administrative boundaries of level 2...
+ - Sorting in 0 administrative boundaries of level 3...
+ - Sorting in 1 administrative boundaries of level 4...
+ - Sorting in 3 administrative boundaries of level 5...
+ - Sorting in 1 administrative boundaries of level 6...
+ - Sorting in 0 administrative boundaries of level 7...
+ - Sorting in 0 administrative boundaries of level 8...
+ - Sorting in 0 administrative boundaries of level 9...
+ - Sorting in 0 administrative boundaries of level 10...
+ - Sorting in 0 administrative boundaries of level 11...
+ - Sorting in 0 administrative boundaries of level 12...
+ - Scanning for place regions of type 'area'...
+   Found 7 place regions of type 'area'
+ - Sorting in place regions of type 'area'...
+ - Calculating region tree depth...
+   Area tree depth: 5
+ - Sorting regions by levels...
+   Area tree index 0 size: 1
+   Area tree index 1 size: 1
+   Area tree index 2 size: 3
+   Area tree index 3 size: 6
+   Area tree index 4 size: 2
+ - Index regions...
+ - Indexing regions of type 'Node' as area aliases...
+   Found 5 cities of type 'node'
+ - Index location areas...
+   Found 0 locations of type 'area'
+ - Index location ways...
+   Found 5 locations of type 'way'
+   Area tree index 0 object count size: 0
+   Area tree index 1 object count size: 0
+   Area tree index 2 object count size: 0
+   Area tree index 3 object count size: 10
+   Area tree index 4 object count size: 0
+ - Index address areas...
+   8 areas analyzed, 8 addresses founds, 2 POIs founds, 8 postal codes found
+ - Index address ways...
+   0 ways analyzed, 0 POIs founds
+   0 ways analyzed, 0 POIs founds, 0 postal codes found
+ - Index address nodes...
+   0 nodes analyzed, 0 addresses founds, 0 POIs founds, 0 postal codes found
+ - Cleanup location tree...
+ - Calculate ignore tokens...
+   Detected 0 token(s) to ignore
+ - Calculation region metrics...
+   Region words: 1 - 2
+   Max POI words: 2
+   Location words: 1 - 3
+   Max address words: 1
+ - Dumping region tree...
+ - Dumping location tree...
+ - Validations...
+ - Write 'location.idx'...
++ Step #23 - RouteDataGenerator...
+   Module description: Generate routing graph(s)
+   Module requires file 'coord.dat'
+   Module requires file 'ways.dat'
+   Module requires file 'areas.dat'
+   Module requires file 'ways.idmap'
+   Module requires file 'turnrestr.dat'
+   Module provides file 'intersections.dat'
+ - Scanning for restriction relations...
+   Reading turn restriction way ids
+   Resolving turn restriction way ids to way file offsets
+   0 turn restriction way(s) found, 0 way(s) resolved
+   Resolving turn restriction OSM node ids to node ids
+   0 via node(s) found, 0 node(s) resolved
+   Creating turn restriction data structures
+   Read 0 turn restrictions
+   Restrictions for 0 objects loaded
+ - Scanning for intersections...
+   Scanning ways
+   Scanning areas
+   Found 0 possible routing nodes, 0 at least used twice
+ - Collecting objects at intersections...
+   Scanning ways
+   Scanning areas
+   Scanning nodes
+   Found 0 routing nodes, with in sum 0 ways, 0 areas and 0 nodes
+ - Postprocessing intersections...
+ - Writing intersection file 'intersections.dat'...
+ - Sorting route nodes...
+ - Generating routeNodeIdSet...
++ Step #24 - IntersectionIndexGenerator...
+   Module description: Generate id lookup index on intersection data file
+   Module requires file 'intersections.dat'
+   Module provides file 'intersections.idx'
+ - Generating 'intersections.idx'...
+   Writing level 1 (0 entries)
+   Index for 0 data elements will be stored in 1 levels
+   Page count for level 0 is 0
++ Step #25 - PTRouteDataGenerator...
+   Module description: Generate public transport route data
+   Module requires file 'rawroutemaster.dat'
+   Module requires file 'rawroute.dat'
+   Module requires file 'nodes.idmap'
+   Module requires file 'ways.idmap'
+   Module provides file 'ptroutes.dat'
+ - Scanning route masters...
+ - Scanning routes for object references...
+ - Resolving node ids...
+ - Resolving way ids...
+ - Scanning routes...
+ - Writing 'ptroutes.dat'...
+   Wrote 0 routes
++ Step #26 - RouteDataGenerator2...
+   Module description: Generate route data
+   Module requires file 'rawroute.dat'
+   Module requires file 'ways.idmap'
+   Module requires file 'ways.dat'
+   Module provides file 'route.dat'
+ - Generate route.dat...
+   Process 0 routes
++ Step #27 - AreaRouteIndexGenerator...
+   Module description: Index routes for area lookup
+   Module requires file 'route.dat'
+   Module provides file 'arearoute.idx'
+   Minimum magnification: 10
+ - Scanning level distribution of route type...
+   Scanning Level 10 (11 types remaining)
+   Type route_aerialway, 0 cells, 0 objects
+   Type route_bus, 0 cells, 0 objects
+   Type route_monorail, 0 cells, 0 objects
+   Type route_subway, 0 cells, 0 objects
+   Type route_train, 0 cells, 0 objects
+   Type route_tram, 0 cells, 0 objects
+   Type route_trolleybus, 0 cells, 0 objects
+   Type route_bicycle, 0 cells, 0 objects
+   Type route_mtb, 0 cells, 0 objects
+   Type route_hiking, 0 cells, 0 objects
+   Type route_skiing_nordic, 0 cells, 0 objects
+ - Generating 'arearoute.idx'...
++ Step #28 - TextIndexGenerator...
+   Module description: Generate text based object search
+   Module requires file 'nodes.dat'
+   Module requires file 'ways.dat'
+   Module requires file 'areas.dat'
+   Module provides optional file 'textpoi.dat'
+   Module provides optional file 'textloc.dat'
+   Module provides optional file 'textregion.dat'
+   Module provides optional file 'textother.dat'
+   Module provides analysis file 'textpoi.txt'
+   Module provides analysis file 'textloc.txt'
+   Module provides analysis file 'textregion.txt'
+   Module provides analysis file 'textother.txt'
+ - Calculating required FileOffset size......
+   Node filesize is 93 bytes, req. 1 bytes
+   Way filesize is 209 bytes, req. 1 bytes
+   Area filesize is 701 bytes, req. 2 bytes
+   Using 2-byte offsets
+ - Getting node text data...
+ - Getting way text data...
+ - Getting area text data...
+   Import OK!
+Testing...
+Randomness seeded to: 2.435.534.790
+traversal after a flush: 12 regions visited, 12 region entries read
+first traversal: 12 regions visited, 12 region entries read
+second traversal: 12 regions visited, 12 region entries read
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+LocationLookupTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+A second traversal of the region tree reads no region entry
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/LocationIndexRegionCacheTest.cpp:65
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/LocationIndexRegionCacheTest.cpp:97: FAILED:
+  REQUIRE( readsOfSecondTraversal==0 )
+with expansion:
+  12 == 0
+
+===============================================================================
+test cases:  12 |  11 passed | 1 failed
+assertions: 309 | 308 passed | 1 failed
+
+Testing done.
+tearing down...
+Tearing down done.
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   5.00 sec
+
+The following tests FAILED:
+	 26 - LocationLookupTest (Failed)
+Errors while running CTest
+# exit code: 8
+# provenance: the run measured the tree with the region-read diagnostic and no cache (master plus the
+# seam the case needs). The member alignment of LocationIndex.h was reformatted by uncrustify afterwards;
+# whitespace only, no behaviour changed and no counted line was touched.

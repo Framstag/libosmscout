@@ -1,0 +1,245 @@
+# Formatter conformance of the touched C++ files, uncrustify Uncrustify-0.83.0_f, at 2026-10-16T05:43:24Z
+# command (per file, HEAD side from git show HEAD:<file>): uncrustify -q -c .uncrustify -l CPP -f <file> > <formatted>
+#   then: diff <file> <formatted> | grep "^<"   (the lines uncrustify would change)
+
+== libosmscout/include/osmscout/TypeInfoSet.h
+-- this revision: 8 differing lines
+   <     using self_type         = TypeInfoSetConstIterator;
+   <     using value_type        = TypeInfoRef;
+   <     using reference         = const TypeInfoRef&;
+   <     using pointer           = TypeInfoRef;
+   >     using self_type = TypeInfoSetConstIterator;
+   >     using value_type = TypeInfoRef;
+   >     using reference = const TypeInfoRef&;
+   >     using pointer = TypeInfoRef;
+   <     : iterCurrent(iterCurrent),
+   >       : iterCurrent(iterCurrent),
+   <             !*this->iterCurrent) {
+   >              !*this->iterCurrent) {
+   <             !*iterCurrent) {
+   >              !*iterCurrent) {
+   <     TypeInfoSet(TypeInfoSet&& other) noexcept;
+   >     TypeInfoSet(TypeInfoSet && other) noexcept;
+   > 
+   > 
+   > 
+-- HEAD: 8 differing lines
+   <     using self_type         = TypeInfoSetConstIterator;
+   <     using value_type        = TypeInfoRef;
+   <     using reference         = const TypeInfoRef&;
+   <     using pointer           = TypeInfoRef;
+   >     using self_type = TypeInfoSetConstIterator;
+   >     using value_type = TypeInfoRef;
+   >     using reference = const TypeInfoRef&;
+   >     using pointer = TypeInfoRef;
+   <     : iterCurrent(iterCurrent),
+   >       : iterCurrent(iterCurrent),
+   <             !*this->iterCurrent) {
+   >              !*this->iterCurrent) {
+   <             !*iterCurrent) {
+   >              !*iterCurrent) {
+   <     TypeInfoSet(TypeInfoSet&& other) noexcept;
+   >     TypeInfoSet(TypeInfoSet && other) noexcept;
+   > 
+   > 
+   > 
+
+== libosmscout/src/osmscout/TypeInfoSet.cpp
+-- this revision: 3 differing lines
+   <   /*
+   > /*
+   <       const TypeInfoRef& type=contained[i];
+   <       size_t             index=type->GetIndex();
+   >       const TypeInfoRef & type=contained[i];
+   >       size_t            index=type->GetIndex();
+-- HEAD: 2 differing lines
+   <   /*
+   > /*
+   <           !otherTypes.types[i])) {
+   >            !otherTypes.types[i])) {
+
+== Tests/src/TypeInfoSetStorageTest.cpp
+-- this revision: 85 differing lines
+   <   void* memory=std::malloc(size);
+   >   void * memory=std::malloc(size);
+   <                                                                 std::to_string(typeConfig->GetTypeCount())));
+   >                                                                     std::to_string(typeConfig->GetTypeCount())));
+   <   size_t before=GetAllocatedBytes();
+   >   size_t                before=GetAllocatedBytes();
+   <   size_t bytes=GetAllocatedBytes()-before;
+   >   size_t                bytes=GetAllocatedBytes()-before;
+   <   const std::vector<osmscout::TypeInfoRef>& definedTypes=typeConfig->GetTypes();
+   >   const std::vector<osmscout::TypeInfoRef> & definedTypes=typeConfig->GetTypes();
+   <   size_t before=GetAllocatedBytes();
+   >   size_t                before=GetAllocatedBytes();
+   <   size_t bytes=GetAllocatedBytes()-before;
+   >   size_t                bytes=GetAllocatedBytes()-before;
+   <   INFO("bytes allocated for a set of "<<containedTypes.size()<<" types in "<<typeConfig->GetTypeCount()<<" defined types: "<<bytes);
+   >   INFO("bytes allocated for a set of "<<containedTypes.size()<<" types in "<<typeConfig->GetTypeCount()<<
+   >   " defined types: "<<bytes);
+   <   const size_t typeCount=64;
+   >   const size_t            typeCount=64;
+   <   const std::vector<osmscout::TypeInfoRef>& definedTypes=typeConfig->GetTypes();
+   >   const std::vector<osmscout::TypeInfoRef> & definedTypes=typeConfig->GetTypes();
+   <                                                    definedTypes[3],
+   <                                                    definedTypes[42],
+   <                                                    definedTypes[8]};
+   >                                                     definedTypes[3],
+   >                                                     definedTypes[42],
+   >                                                     definedTypes[8]};
+   <                                              definedTypes[8],
+   <                                              definedTypes[17],
+   <                                              definedTypes[42]};
+   >                                               definedTypes[8],
+   >                                               definedTypes[17],
+   >                                               definedTypes[42]};
+   <   const size_t typeCount=64;
+   >   const size_t            typeCount=64;
+   <   const std::vector<osmscout::TypeInfoRef>& definedTypes=typeConfig->GetTypes();
+   >   const std::vector<osmscout::TypeInfoRef> & definedTypes=typeConfig->GetTypes();
+   <   std::mt19937                           rng(4711);
+   <   std::uniform_int_distribution<size_t> typeDistribution(0,typeCount-1);
+   <   std::uniform_int_distribution<int>    operationDistribution(0,6);
+   < 
+   <   osmscout::TypeInfoSet set;
+   <   osmscout::TypeInfoSet other;
+   <   std::set<size_t>      setModel;
+   <   std::set<size_t>      otherModel;
+   < 
+   <   auto fillOther=[&]() {
+   <                   other.Clear();
+   <                   otherModel.clear();
+   < 
+   <                   for (size_t i=0; i<3; i++) {
+   <                     size_t index=typeDistribution(rng);
+   < 
+   <                     other.Set(definedTypes[index]);
+   <                     otherModel.insert(index);
+   <                   }
+   <                 };
+   >   std::mt19937                             rng(4711);
+   >   std::uniform_int_distribution<size_t>    typeDistribution(0,typeCount-1);
+   >   std::uniform_int_distribution<int>       operationDistribution(0,6);
+   > 
+   >   osmscout::TypeInfoSet                    set;
+   >   osmscout::TypeInfoSet                    other;
+   >   std::set<size_t>                         setModel;
+   >   std::set<size_t>                         otherModel;
+   > 
+   >   auto                                     fillOther=[&]() {
+   >                                                         other.Clear();
+   >                                                         otherModel.clear();
+   > 
+   >                                                         for (size_t i=0; i<3; i++) {
+   >                                                           size_t index=typeDistribution(rng);
+   > 
+   >                                                           other.Set(definedTypes[index]);
+   >                                                           otherModel.insert(index);
+   >                                                         }
+   >                                                       };
+   <       case 0:
+   <       case 1: {
+   <         size_t index=typeDistribution(rng);
+   < 
+   <         set.Set(definedTypes[index]);
+   <         setModel.insert(index);
+   <         break;
+   <       }
+   <       case 2: {
+   <         size_t index=typeDistribution(rng);
+   >     case 0:
+   >     case 1: {
+   >       size_t index=typeDistribution(rng);
+   > 
+   >       set.Set(definedTypes[index]);
+   >       setModel.insert(index);
+   >       break;
+   >     }
+   >     case 2: {
+   >       size_t index=typeDistribution(rng);
+   <         set.Remove(definedTypes[index]);
+   <         setModel.erase(index);
+   <         break;
+   <       }
+   <       case 3: {
+   <         fillOther();
+   >       set.Remove(definedTypes[index]);
+   >       setModel.erase(index);
+   >       break;
+   >     }
+   >     case 3: {
+   >       fillOther();
+   <         set.Add(other);
+   <         setModel.insert(otherModel.begin(),otherModel.end());
+   <         break;
+   <       }
+   <       case 4: {
+   <         fillOther();
+   >       set.Add(other);
+   >       setModel.insert(otherModel.begin(),otherModel.end());
+   >       break;
+   >     }
+   >     case 4: {
+   >       fillOther();
+   <         set.Remove(other);
+   >       set.Remove(other);
+   <         for (size_t index : otherModel) {
+   <           setModel.erase(index);
+   <         }
+   <         break;
+   >       for (size_t index : otherModel) {
+   >         setModel.erase(index);
+   <       case 5: {
+   <         fillOther();
+   >       break;
+   >     }
+   >     case 5: {
+   >       fillOther();
+   <         set.Intersection(other);
+   >       set.Intersection(other);
+   <         for (auto iter=setModel.begin(); iter!=setModel.end();) {
+   <           if (otherModel.find(*iter)==otherModel.end()) {
+   <             iter=setModel.erase(iter);
+   <           }
+   <           else {
+   <             ++iter;
+   <           }
+   >       for (auto iter=setModel.begin(); iter!=setModel.end();) {
+   >         if (otherModel.find(*iter)==otherModel.end()) {
+   >           iter=setModel.erase(iter);
+   >         }
+   >         else {
+   >           ++iter;
+   <         break;
+   <       }
+   <       default: {
+   <         set.Clear();
+   <         setModel.clear();
+   <         break;
+   >       break;
+   >     }
+   >     default: {
+   >       set.Clear();
+   >       setModel.clear();
+   >       break;
+   >     }
+   <   set.Set(std::vector<osmscout::TypeInfoRef>{definedTypes[7],definedTypes[1]});
+   >   set.Set(std::vector<osmscout::TypeInfoRef> {definedTypes[7],definedTypes[1]});
+   <   const size_t typeCount=64;
+   >   const size_t            typeCount=64;
+   <   const std::vector<osmscout::TypeInfoRef>& definedTypes=typeConfig->GetTypes();
+   >   const std::vector<osmscout::TypeInfoRef> & definedTypes=typeConfig->GetTypes();
+   <   osmscout::TypeInfoSet original;
+   >   osmscout::TypeInfoSet                    original;
+-- HEAD: no such file (new file)
+
+== Tests/src/StyleConfigLookupCostTest.cpp
+-- this revision: 0 differing lines
+-- HEAD: 0 differing lines
+
+# The project check over all tracked sources
+# command: ./scripts/format-check.sh check   (run at 2026-10-16T05:43:24Z, exit 1)
+#   tracked .h/.cpp outside Android/Apple/subprojects: 943, unformatted: 820
+#   Unformatted: libosmscout/include/osmscout/TypeInfoSet.h
+#   Unformatted: libosmscout/src/osmscout/TypeInfoSet.cpp
+#   libosmscout-map/src/osmscoutmap/StyleConfig.cpp and its header carry the same reference/alignment class

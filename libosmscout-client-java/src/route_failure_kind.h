@@ -7,7 +7,7 @@
  * failure is something the user can act on. The kind is the machine-readable
  * half of that report: it names the cause, and the caller selects the display
  * text for it from its own resources (openspec change
- * "distinguish-routing-failures", spec `routing-failure-reporting`).
+ * "client-java-route-failure-kind", spec `routing-failure-reporting`).
  *
  * **Why there is no "route too long" kind.** The router reports one error for a
  * search that exhausted its alternatives, and a caller cannot tell from it why:

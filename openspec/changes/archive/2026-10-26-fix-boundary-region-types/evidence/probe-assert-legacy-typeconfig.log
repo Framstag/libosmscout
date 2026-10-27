@@ -1,0 +1,41 @@
+ninja: Entering directory `/home/tim/projects/libosmscout/debug'
+ninja: no work to do.
+1/1 libosmscout:Check the boundary types FAIL            0.13s   killed by signal 6 SIGABRT
+>>> MESON_TEST_ITERATION=1 UBSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 TESTS_TOP_DIR=/home/tim/projects/libosmscout/Tests ASAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1 LD_LIBRARY_PATH=/home/tim/projects/libosmscout/debug/libosmscout-import:/home/tim/projects/libosmscout/debug/libosmscout MALLOC_PERTURB_=203 MSAN_OPTIONS=halt_on_error=1:abort_on_error=1:print_summary=1:print_stacktrace=1 /home/tim/projects/libosmscout/debug/Tests/BoundaryTypesTest
+――――――――――――――――――――――――――――――――――――― ✀  ―――――――――――――――――――――――――――――――――――――
+stdout:
+Randomness seeded to: 1694544247
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BoundaryTypesTest is a Catch2 v3.16.1 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+A type definition without the municipality and suburb types resolves without
+them
+-------------------------------------------------------------------------------
+../Tests/src/BoundaryTypesTest.cpp:107
+...............................................................................
+
+../Tests/src/BoundaryTypesTest.cpp:66: FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGABRT - Abort (abnormal termination) signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 2 | 1 passed | 1 failed
+
+stderr:
+BoundaryTypesTest: ../libosmscout-import/src/osmscoutimport/BoundaryTypes.cpp:66: osmscout::TypeInfoSet osmscout::ResolveBoundaryTypes(const TypeConfig&, Progress&): Assertion `boundaryType' failed.
+――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
+
+
+Summary of Failures:
+
+1/1 libosmscout:Check the boundary types FAIL            0.13s   killed by signal 6 SIGABRT
+
+Ok:                0   
+Fail:              1   
+
+Full log written to /home/tim/projects/libosmscout/debug/meson-logs/testlog.txt

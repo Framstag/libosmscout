@@ -104,6 +104,41 @@ TypeResolutionTest =  executable('TypeResolutionTest',
 test('Check type resolution', TypeResolutionTest,
      env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
 
+TypeInfoSetStorageTest =  executable('TypeInfoSetStorageTest',
+             'src/TypeInfoSetStorageTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check type set storage', TypeInfoSetStorageTest)
+
+TypeDescriptionCoverageTest =  executable('TypeDescriptionCoverageTest',
+             'src/TypeDescriptionCoverageTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check type description coverage', TypeDescriptionCoverageTest,
+     env: ['TESTS_TOP_DIR='+meson.current_source_dir()])
+
+TypeConfigDescriptionTest =  executable('TypeConfigDescriptionTest',
+             'src/TypeConfigDescriptionTest.cpp',
+             include_directories: [testIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+typeConfigDescriptionEnv = environment()
+typeConfigDescriptionEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+typeConfigDescriptionEnv.set('TESTS_TMP_DIR', meson.current_build_dir())
+
+test('Check type config descriptions', TypeConfigDescriptionTest, env: typeConfigDescriptionEnv)
+
 TypeResolutionPerformanceTest =  executable('TypeResolutionPerformanceTest',
              'src/TypeResolutionPerformanceTest.cpp',
              include_directories: [testIncDir, osmscoutIncDir],
@@ -437,7 +472,9 @@ if buildImport
                    'src/LocationServiceTest.cpp',
                    'src/SearchForLocationByStringTest.cpp',
                    'src/SearchForLocationByFormTest.cpp',
-                   'src/SearchForPOIByFormTest.cpp'
+                   'src/SearchForPOIByFormTest.cpp',
+                   'src/LocationIndexRegionCacheTest.cpp',
+                   'src/LocationBoundaryRegionTest.cpp'
                  ],
                  include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir],
                  dependencies: [mathDep, openmpDep, catch2Dep],
@@ -875,6 +912,25 @@ RouteStepTimeTest = executable('RouteStepTimeTest',
 
 test('Check route step time', RouteStepTimeTest)
 
+RenderLabelBoundsTest = executable('RenderLabelBoundsTest',
+             'src/RenderLabelBoundsTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src'), osmscoutmapIncDir, osmscoutIncDir],
+             dependencies: [mathDep, openmpDep, catch2MainDep],
+             link_with: [osmscoutmap, osmscout],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check render label bounds', RenderLabelBoundsTest)
+
+RouteFailureKindTest = executable('RouteFailureKindTest',
+             'src/RouteFailureKindTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route failure kind', RouteFailureKindTest)
+
 RouteLengthTest = executable('RouteLengthTest',
              'src/RouteLengthTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
@@ -1257,6 +1313,19 @@ if buildImport
                install_dir: testInstallDir)
 
   test('Check the area and way id optimization', OptimizeAreaWayIdsTest)
+
+  BoundaryTypesTest = executable('BoundaryTypesTest',
+               'src/BoundaryTypesTest.cpp',
+               include_directories: [testIncDir, osmscoutIncDir, osmscoutimportIncDir],
+               dependencies: [mathDep, openmpDep, catch2MainDep],
+               link_with: [osmscout, osmscoutimport],
+               install: true,
+               install_dir: testInstallDir)
+
+  boundaryTypesEnv = environment()
+  boundaryTypesEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
+
+  test('Check the boundary types', BoundaryTypesTest, env: boundaryTypesEnv)
 
   JsonWriterTest = executable('JsonWriterTest',
                ['src/JsonWriterTest.cpp'],

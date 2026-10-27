@@ -1,0 +1,6 @@
+# sha256 pins of the two touched files and of the two evidence files listed below (not of every file under evidence/), taken at 2026-10-16T11:43:42Z (UTC)
+# command: sha256sum <touched files> <evidence files>
+74aa3107c9fc2a4956b936febd9eb2e22346a5e4bf7a430e374fd55482ba6c39  libosmscout/src/osmscout/util/StringMatcher.cpp
+17bc7e0d3b927124e8b166e23d035a08b43554203d7ff20c3b7444eb6075a1e9  Tests/src/HeaderCheckTest.cpp
+945c0158030d7b67444d001cca715de9c8aeef75177c5a0b85223cc661ea72b6  openspec/changes/fix-stringmatcher-unused-include/evidence/after-fix-check.log
+93e774e74805c06003cc9e8b7579a8ef8eaaf0c620c21eaa30969eb89f50cfee  openspec/changes/fix-stringmatcher-unused-include/evidence/gate-cmake-build.log

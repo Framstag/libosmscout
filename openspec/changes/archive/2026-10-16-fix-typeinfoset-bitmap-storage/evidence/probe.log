@@ -1,0 +1,40 @@
+# Probe: the per-type allocation of HEAD restored (TEMP-REVERT-PROBE)
+# command: ./build/Tests/TypeInfoSetStorageTest
+# run at 2026-10-16T04:54:37Z
+Randomness seeded to: 3430178313
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TypeInfoSetStorageTest is a Catch2 v3.16.0 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+An empty set of a 1527-type configuration allocates a bit per defined type
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:225
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:239: FAILED:
+  REQUIRE( bytes<=BitmapBytes(definedTypeCount) )
+with expansion:
+  24624 (0x6030) <= 192
+with message:
+  bytes allocated for an empty set of 1527 defined types: 24624
+
+-------------------------------------------------------------------------------
+A set of a 1527-type configuration allocates per contained type, not per
+defined type
+-------------------------------------------------------------------------------
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:245
+...............................................................................
+
+/home/tim/projects/libosmscout/Tests/src/TypeInfoSetStorageTest.cpp:268: FAILED:
+  REQUIRE( bytes<=2*BitmapBytes(definedTypeCount)+2*containedTypes.size()*sizeof(osmscout::TypeInfoRef) )
+with expansion:
+  36968 (0x9068) <= 480 (0x1e0)
+with message:
+  bytes allocated for a set of 3 types in 1527 defined types: 36968
+
+===============================================================================
+test cases:     5 |     3 passed | 2 failed
+assertions: 27570 | 27568 passed | 2 failed
+

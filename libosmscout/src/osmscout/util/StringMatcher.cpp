@@ -21,8 +21,6 @@
 
 #include <osmscout/util/String.h>
 
-#include <algorithm>
-
 namespace osmscout {
 
   StringMatcherCI::StringMatcherCI(const std::string& pattern)
