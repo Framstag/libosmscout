@@ -36,7 +36,7 @@ Rendered headers (every enabled module at its include path):
 find build-fh -name '*Features.h' | sort
 ```
 
-Result — eight headers, each at `<build>/<module>/include/<includedir>/`:
+Result — eleven headers, each at `<build>/<module>/include/<includedir>/`:
 
 ```
 build-fh/libosmscout-client/include/osmscoutclient/ClientFeatures.h
