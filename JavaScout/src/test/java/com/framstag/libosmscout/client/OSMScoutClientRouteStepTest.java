@@ -340,59 +340,52 @@ public class OSMScoutClientRouteStepTest {
 
     @Test
     @Timeout(180)
-    public void testListInstructionAndStepAgree() throws InterruptedException {
+    public void testLiveStepListAgreesWithThePublishedSteps() throws InterruptedException {
         RouteEntry route = calculateRoute();
 
         assertNotNull(route.steps, "a calculated route publishes its steps");
 
-        List<RouteInstruction> instructions = instructionList(route);
+        List<RouteStep> live = stepList(route);
 
-        assertTrue(instructions.size() > 0, "the instruction list is non-empty");
+        assertTrue(live.size() > 0, "the live step list is non-empty");
 
         int compared = 0;
 
         for (RouteStep step : route.steps) {
-            TurnType stepTurn = stepTurnTypeOf(step);
+            // One node can describe more than one manoeuvre, so a step is matched by its position
+            // and by the manoeuvre it describes.
+            RouteStep other = null;
 
-            if (stepTurn == null) {
-                continue;
-            }
-
-            // One node can produce more than one instruction (a turn and a motorway enter on the
-            // same node), so the instruction is matched by its position and by the manoeuvre the
-            // step describes.
-            RouteInstruction instruction = null;
-
-            for (RouteInstruction candidate : instructions) {
-                if (Math.abs(candidate.distanceTo - step.distanceFromStart) < 1.0
-                    && candidate.turnType == stepTurn) {
-                    instruction = candidate;
+            for (RouteStep candidate : live) {
+                if (Math.abs(candidate.distanceFromStart - step.distanceFromStart) < 1.0
+                    && candidate.kind == step.kind) {
+                    other = candidate;
                     break;
                 }
             }
 
-            if (instruction == null) {
+            if (other == null) {
                 continue;
             }
 
-            assertEquals(stepTurn, instruction.turnType,
-                "turn type of the manoeuvre at " + step.distanceFromStart);
+            assertEquals(step.kind, other.kind,
+                "kind of the manoeuvre at " + step.distanceFromStart);
 
             if (step.junction != null) {
-                assertEquals(emptyToNull(step.junction.ref), emptyToNull(instruction.junctionRef),
+                assertEquals(emptyToNull(step.junction.ref), emptyToNull(other.junction == null ? null : other.junction.ref),
                     "exit reference of the manoeuvre at " + step.distanceFromStart);
-                assertEquals(emptyToNull(step.junction.name), emptyToNull(instruction.junctionName),
+                assertEquals(emptyToNull(step.junction.name), emptyToNull(other.junction == null ? null : other.junction.name),
                     "junction name of the manoeuvre at " + step.distanceFromStart);
             }
 
-            assertEquals(emptyToNull(step.destination), emptyToNull(instruction.destinations),
+            assertEquals(emptyToNull(step.destination), emptyToNull(other.destination),
                 "destination of the manoeuvre at " + step.distanceFromStart);
 
             compared++;
         }
 
         Assumptions.assumeTrue(compared > 0,
-            "no instruction could be matched to a published step");
+            "no live step could be matched to a published step");
     }
 
     @Test
@@ -417,33 +410,34 @@ public class OSMScoutClientRouteStepTest {
         assertTrue(!leave.junction.ref.isEmpty() || !leave.junction.name.isEmpty(),
             "the junction step carries the exit reference or the name");
 
-        List<RouteInstruction> instructions = instructionList(route);
-        RouteInstruction instruction = null;
+        List<RouteStep> live = stepList(route);
+        RouteStep other = null;
 
-        for (RouteInstruction candidate : instructions) {
-            if (Math.abs(candidate.distanceTo - leave.distanceFromStart) < 1.0) {
-                instruction = candidate;
+        for (RouteStep candidate : live) {
+            if (Math.abs(candidate.distanceFromStart - leave.distanceFromStart) < 1.0) {
+                other = candidate;
                 break;
             }
         }
 
-        assertNotNull(instruction, "the engine reports an instruction for the motorway leave");
-        assertEquals(emptyToNull(leave.junction.ref), emptyToNull(instruction.junctionRef),
-            "the instruction carries the exit reference");
-        assertEquals(emptyToNull(leave.junction.name), emptyToNull(instruction.junctionName),
-            "the instruction carries the junction name");
-        assertEquals(emptyToNull(leave.destination), emptyToNull(instruction.destinations),
-            "the instruction carries the destination signs");
+        assertNotNull(other, "the engine reports a live step for the motorway leave");
+        assertNotNull(other.junction, "the live step carries the junction");
+        assertEquals(emptyToNull(leave.junction.ref), emptyToNull(other.junction.ref),
+            "the live step carries the exit reference");
+        assertEquals(emptyToNull(leave.junction.name), emptyToNull(other.junction.name),
+            "the live step carries the junction name");
+        assertEquals(emptyToNull(leave.destination), emptyToNull(other.destination),
+            "the live step carries the destination signs");
 
         if (!leave.junction.ref.isEmpty()) {
-            assertEquals(leave.junction.ref, instruction.junctionRef);
+            assertEquals(leave.junction.ref, other.junction.ref);
         }
     }
 
-    private static RouteStep matchingStep(RouteEntry route, RouteInstruction instruction) {
+    private static RouteStep matchingStep(RouteEntry route, RouteStep live) {
         for (RouteStep step : route.steps) {
-            if (Math.abs(step.distanceFromStart - instruction.distanceTo) < 1.0
-                && stepTurnTypeOf(step) == instruction.turnType) {
+            if (Math.abs(step.distanceFromStart - live.distanceFromStart) < 1.0
+                && stepTurnTypeOf(step) == stepTurnTypeOf(live)) {
                 return step;
             }
         }
@@ -452,18 +446,18 @@ public class OSMScoutClientRouteStepTest {
     }
 
     /**
-     * The instruction list the engine publishes for the route: a fix at the snapped start makes
-     * the engine generate it from the retained route description.
+     * The step list the engine publishes for the route: a fix at the snapped start makes the
+     * engine generate it from the retained route description.
      */
-    private static List<RouteInstruction> instructionList(RouteEntry route) throws InterruptedException {
+    private static List<RouteStep> stepList(RouteEntry route) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        List<RouteInstruction> instructions = new ArrayList<>();
+        List<RouteStep> steps = new ArrayList<>();
 
         NavigationListener listener = new NavigationListener() {
             @Override
-            public void onRouteInstructions(RouteInstruction[] received) {
-                for (RouteInstruction instruction : received) {
-                    instructions.add(instruction);
+            public void onRouteSteps(RouteStep[] received) {
+                for (RouteStep step : received) {
+                    steps.add(step);
                 }
                 latch.countDown();
             }
@@ -478,7 +472,7 @@ public class OSMScoutClientRouteStepTest {
                 -1.0, -1.0, System.currentTimeMillis());
 
             assertTrue(latch.await(30, TimeUnit.SECONDS),
-                "the engine should publish its instruction list");
+                "the engine should publish its step list");
         } finally {
             controller.stop();
         }

@@ -1677,9 +1677,11 @@ public class MainController implements Initializable {
             }
 
             @Override
-            public void onNextRouteInstruction(RouteInstruction instruction) {
+            public void onNextRouteStep(RouteStep step) {
                 if (isStale()) return;
-                double dist = instruction != null ? instruction.distanceTo : Double.POSITIVE_INFINITY;
+                double dist = step != null && step.remainingDistance != null
+                    ? step.remainingDistance : Double.POSITIVE_INFINITY;
+                final RouteInstruction instruction = JavaScoutInstructions.of(step);
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     nextTurnDistanceM = dist;
@@ -1688,8 +1690,9 @@ public class MainController implements Initializable {
             }
 
             @Override
-            public void onRouteInstructions(RouteInstruction[] instructions) {
+            public void onRouteSteps(RouteStep[] steps) {
                 if (isStale()) return;
+                final RouteInstruction[] instructions = JavaScoutInstructions.of(steps);
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     if (routePanel != null) {
