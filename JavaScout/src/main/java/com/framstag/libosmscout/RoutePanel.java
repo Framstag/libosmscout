@@ -5,7 +5,7 @@ import com.framstag.libosmscout.client.LocationEntry;
 import com.framstag.libosmscout.client.OSMScoutClient;
 import com.framstag.libosmscout.client.RouteCallback;
 import com.framstag.libosmscout.client.RouteEntry;
-import com.framstag.libosmscout.client.RouteInstruction;
+import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.RoutingProfile;
 import com.framstag.libosmscout.client.Vehicle;
 
@@ -1004,17 +1004,19 @@ public class RoutePanel extends StackPane {
     }
 
     /**
-     * Update the next-turn display with the current instruction.
+     * Update the next-turn display with the steps of the route ahead.
      * Called from MainController on each position update.
      */
-    public void updateInstructionList(RouteInstruction[] instructions) {
-        if (instructions == null || instructions.length == 0) return;
+    public void updateInstructionList(RouteStep[] steps) {
+        if (steps == null || steps.length == 0) return;
 
         instructionBox.getChildren().clear();
-        for (RouteInstruction instr : instructions) {
+        for (RouteStep step : steps) {
+            if (step == null) continue;
+
             instructionBox.getChildren().add(createInstructionCard(
-                instr.shortDescription + " \u2192 " + formatDistance(instr.distanceTo),
-                instr.streetName));
+                NextTurnText.line(step) + " \u2192 " + formatDistance(NextTurnText.distanceTo(step)),
+                NextTurnText.street(step)));
         }
         instructionScroll.setVisible(true);
     }

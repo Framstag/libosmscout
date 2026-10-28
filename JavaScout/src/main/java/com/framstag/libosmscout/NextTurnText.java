@@ -1,59 +1,28 @@
 package com.framstag.libosmscout;
 
-import com.framstag.libosmscout.client.RouteInstruction;
 import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.TurnType;
 
 /**
- * Turns the steps the client library publishes into the {@link RouteInstruction} rows JavaScout's
- * own UI still renders.
+ * JavaScout's own wording and glyph choice for a published route step.
  *
- * The library stopped publishing instruction callbacks (its navigation engine now emits
- * {@code RouteStep}, the structured record a calculated route publishes), so a consumer that wants
- * instruction-shaped rows builds them itself. This adapter is deliberately on the <em>consumer</em>
- * side: the library holds no prose and no turn-type mapping, and the wording below is JavaScout's
- * own — a desktop scout's English UI, not a contract of the client library.
+ * The client library publishes values only — a step's kind, its turn type, the road name, the exit
+ * ordinal — and never text, so every consumer words the manoeuvre itself (spec:
+ * `turn-instruction-localization`). This class is that wording for this desktop scout's English UI,
+ * deliberately on the consumer side: it is not a contract of the client library, and the library
+ * holds no prose for it to fall back to.
  */
-final class JavaScoutInstructions {
+final class NextTurnText {
 
-    private JavaScoutInstructions() {
+    private NextTurnText() {
     }
 
-    /** The instruction rows for a published step list, in route order. */
-    static RouteInstruction[] of(RouteStep[] steps) {
-        if (steps == null) {
-            return new RouteInstruction[0];
-        }
-
-        RouteInstruction[] result = new RouteInstruction[steps.length];
-
-        for (int i = 0; i < steps.length; i++) {
-            result[i] = of(steps[i]);
-        }
-
-        return result;
-    }
-
-    /** One step as the instruction row JavaScout's overlay and list render. */
-    static RouteInstruction of(RouteStep step) {
-        if (step == null) {
-            return null;
-        }
-
-        double remaining = step.remainingDistance != null ? step.remainingDistance : 0.0;
-        String street = step.name != null ? step.name.name : "";
-        String wording = wording(step);
-
-        return new RouteInstruction(
-            remaining,
-            turnType(step),
-            street,
-            street.isEmpty() ? wording : wording + " into " + street,
-            wording);
-    }
-
-    /** The instruction row's turn type, for the overlay's arrow. */
+    /** The turn type a step's arrow is drawn from. */
     static TurnType turnType(RouteStep step) {
+        if (step == null) {
+            return TurnType.STRAIGHT_ON;
+        }
+
         switch (step.kind) {
             case START:
                 return TurnType.START;
@@ -71,8 +40,8 @@ final class JavaScoutInstructions {
         }
     }
 
-    /** The move a turn or a motorway leave carries, straight on when it carries none. */
-    private static TurnType move(RouteStep step) {
+    /** The move a turn or a motorway manoeuvre carries, straight on when it carries none. */
+    static TurnType move(RouteStep step) {
         if (step.turn != null) {
             return step.turn;
         }
@@ -85,8 +54,45 @@ final class JavaScoutInstructions {
         return TurnType.STRAIGHT_ON;
     }
 
-    /** JavaScout's own wording for a manoeuvre. */
-    private static String wording(RouteStep step) {
+    /** The road the step leads onto, empty when it names none. */
+    static String street(RouteStep step) {
+        if (step == null || step.name == null || step.name.name == null) {
+            return "";
+        }
+
+        return step.name.name;
+    }
+
+    /** The step's remaining distance, zero when it carries none (a route list entry has no progress). */
+    static double distanceTo(RouteStep step) {
+        if (step == null || step.remainingDistance == null) {
+            return 0.0;
+        }
+
+        return step.remainingDistance;
+    }
+
+    /** The manoeuvre as one line: the wording, and the road it leads onto when it has one. */
+    static String line(RouteStep step) {
+        String wording = wording(step);
+        String street = street(step);
+
+        if (wording.isEmpty()) {
+            return street;
+        }
+        if (street.isEmpty() || wording.contains(street)) {
+            return wording;
+        }
+
+        return wording + " into " + street;
+    }
+
+    /** The manoeuvre alone: "Turn left", "Exit 2", "Arrive". */
+    static String wording(RouteStep step) {
+        if (step == null) {
+            return "";
+        }
+
         switch (step.kind) {
             case START:
                 return "Start";
@@ -108,7 +114,7 @@ final class JavaScoutInstructions {
                 return "Continue";
             case INFORMATIVE:
             case UNKNOWN:
-                return step.name != null && !step.name.name.isEmpty() ? step.name.name : "";
+                return street(step);
             default:
                 return directionWord(move(step));
         }

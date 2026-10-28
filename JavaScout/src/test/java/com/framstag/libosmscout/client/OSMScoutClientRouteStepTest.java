@@ -477,7 +477,7 @@ public class OSMScoutClientRouteStepTest {
             controller.stop();
         }
 
-        return instructions;
+        return steps;
     }
 
     private static String emptyToNull(String value) {
