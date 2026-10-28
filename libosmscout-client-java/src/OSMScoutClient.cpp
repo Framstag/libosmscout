@@ -149,6 +149,24 @@ bool IsBasemapDatabase(const osmscout::DBInstanceRef& db)
   return typeConfig->GetTypeInfo("basemap_boundary_country") != nullptr;
 }
 
+/**
+ * The distance at which a route's own step list ends: the largest cumulative distance of its
+ * steps, which is the description's last node and therefore the route's length (spec:
+ * route-calculation - The published route length is a length of that route). Read from the
+ * steps, so publishing a route needs no second description walk (change
+ * `retire-instruction-prose`).
+ */
+double LastStepDistanceMeters(const std::vector<osmscout::client::RouteStep>& steps)
+{
+  double last=0.0;
+
+  for (const auto& step : steps) {
+    last=std::max(last, step.distanceFromStart.AsMeter());
+  }
+
+  return last;
+}
+
 // Search requests carry a generation and one slot per surface, so a new query or
 // an explicit cancel stops the request it names and never one of another surface;
 // the registry lives per client (ClientData::searchBreakers) and this adapter is
@@ -7334,14 +7352,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
-      std::vector<std::string> routeDescriptionLines;
-      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
-      // with the instruction lines of routeDescriptionLines. All four are published as a set and
-      // dropped as a set when the alignment cannot be shown (see the check after the callback).
-      std::vector<double> routeInstructionLats;
-      std::vector<double> routeInstructionLons;
-      std::vector<double> routeInstructionDistances;
-      std::vector<double> routeInstructionTimes;
       // The route's manoeuvres as structured steps, next to the description lines (spec:
       // route-calculation - a calculated route publishes structured steps). The collection does
       // not depend on the description lines, so a mismatch in the lines never discards the steps.
@@ -7496,194 +7506,17 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 motorwayLinkTypeNames,
                 junctionTypeNames);
 
-            // Collect description lines via callback
-            struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
-              std::vector<std::string> lines;
-              size_t lineCount = 0;
-              double prevDistance = 0.0;
-              osmscout::Duration prevTime = osmscout::Duration::zero();
-              double distance = 0.0;
-              osmscout::Duration time = osmscout::Duration::zero();
-              // Per-step leg values (spec: route-calculation - per-step leg values on a
-              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
-              // with the instruction lines and with the positions below; the distance is the leg
-              // that ENDS at that line's manoeuvre.
-              std::vector<double> instructionDistances;
-              std::vector<double> instructionTimes;
-              // Per-instruction positions (spec: route-calculation - per-instruction positions).
-              // One entry per line pushed by NextLine(), so the arrays align with the instruction
-              // lines of `lines` (the "--- Route ---" header is not an instruction).
-              std::vector<double> instructionLats;
-              std::vector<double> instructionLons;
-              double nodeLat = 0.0;
-              double nodeLon = 0.0;
-              // The description's own total - the cumulative distance at its last node, in metres.
-              // The route's length is taken from the description, not from the router's separately
-              // accumulated distance (spec: route-calculation - The published route length is a
-              // length of that route).
-              double lastNodeDistanceMeters = 0.0;
-
-              void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                // The per-step reference is advanced when a LINE is emitted (see
-                // AppendDistanceTime), never here: this callback runs for every route node,
-                // while only the nodes carrying a description produce a line.
-                distance = node.GetDistance().AsMeter() / 1000.0;
-                // The nodes are walked in order, so the largest cumulative distance seen is the
-                // description's total, which is the route's length (see the derivation below).
-                if (distance * 1000.0 > lastNodeDistanceMeters) {
-                  lastNodeDistanceMeters = distance * 1000.0;
-                }
-                time = node.GetTime();
-                nodeLat = node.GetLocation().GetLat();
-                nodeLon = node.GetLocation().GetLon();
-              }
-
-              void NextLine() {
-                std::ostringstream oss;
-                oss.str("");
-                lines.push_back(oss.str());
-                instructionLats.push_back(nodeLat);
-                instructionLons.push_back(nodeLon);
-                lineCount++;
-              }
-
-              void AppendDistanceTime(std::string& line) {
-                std::ostringstream oss;
-                oss << "  [";
-                double segDist = distance - prevDistance;
-                if (segDist >= 1.0) {
-                  oss << std::fixed << std::setprecision(1) << segDist << " km";
-                } else if (segDist > 0.01) {
-                  oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
-                }
-                auto timeText = naviveylin::FormatRouteStepTime(
-                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
-                if (segDist > 0.01 && timeText.has_value()) {
-                  oss << ", ";
-                }
-                if (timeText.has_value()) {
-                  oss << *timeText;
-                }
-                oss << "]";
-                line += oss.str();
-                // The values belong to the leg that ENDS here, so the reference advances when a
-                // line is emitted - not per route node as BeforeNode does it (Qt's
-                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
-                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
-                // the rows never added up to the route's distance or duration (device: "14 m"
-                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
-                // the positions (spec: route-calculation - per-step leg values on a calculated
-                // route).
-                instructionDistances.push_back(segDist * 1000.0);
-                instructionTimes.push_back(
-                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
-                        time - prevTime).count()));
-                prevDistance = distance;
-                prevTime = time;
-              }
-
-              void BeforeRoute() override {
-                lines.push_back("--- Route ---");
-              }
-
-              void OnStart(
-                  const osmscout::RouteDescription::StartDescriptionRef &startDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                NextLine();
-                std::string s = "Start: " + startDesc->GetDescription();
-                if (typeNameDesc) {
-                  s += " on " + typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
-              }
-
-              void OnTurn(
-                  const osmscout::RouteDescription::TurnDescriptionRef &turnDesc,
-                  const osmscout::RouteDescription::CrossingWaysDescriptionRef &crossDesc,
-                  const osmscout::RouteDescription::DirectionDescriptionRef &dirDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                (void)crossDesc;
-                (void)dirDesc;
-                NextLine();
-                std::string s;
-                if (turnDesc) {
-                  switch (turnDesc->GetDirection()) {
-                    case osmscout::RouteDescription::DirectionDescription::sharpLeft: s += "Sharp left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::left: s += "Left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyLeft: s += "Slight left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::straightOn: s += "Straight"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyRight: s += "Slight right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::right: s += "Right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::sharpRight: s += "Sharp right"; break;
-                    default: s += "Turn"; break;
-                  }
-                }
-                if (typeNameDesc) {
-                  if (!s.empty()) s += " onto ";
-                  s += typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
-              }
-
-              void OnTargetReached(
-                  const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
-              {
-                NextLine();
-                lines.back() += "Destination: " + targetDesc->GetDescription();
-                AppendDistanceTime(lines.back());
-              }
-            };
-
-            DescCallback descCb;
-            osmscout::RouteDescriptionPostprocessor generator;
-            generator.GenerateDescription(*descResult.GetDescription(), descCb);
-
-            routeDescriptionLines = std::move(descCb.lines);
-            routeInstructionLats = std::move(descCb.instructionLats);
-            routeInstructionLons = std::move(descCb.instructionLons);
-            routeInstructionDistances = std::move(descCb.instructionDistances);
-            routeInstructionTimes = std::move(descCb.instructionTimes);
-
             // One step per described route node, carrying that node's manoeuvre data without a
             // client having to read a description line (spec: route-calculation - a calculated
             // route publishes structured steps).
             osmscout::client::RouteStepCollector routeStepCollector;
             routeSteps=routeStepCollector.Collect(*descResult.GetDescription());
-            // Every array must have one entry per instruction line; a mismatch would shift every
-            // later step, so the per-step values and the positions are dropped together instead
-            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
-            // aligned).
-            if (routeInstructionLats.size() != descCb.lineCount ||
-                routeInstructionLons.size() != descCb.lineCount ||
-                routeInstructionDistances.size() != descCb.lineCount ||
-                routeInstructionTimes.size() != descCb.lineCount) {
-              osmscout::log.Warn() << "calculateRouteWithObjectsWithProfile: per-step value count ("
-                                   << routeInstructionDistances.size() << ", position count "
-                                   << routeInstructionLats.size() << ") does not match instruction line count ("
-                                   << descCb.lineCount << ") - per-step values and positions dropped";
-              routeInstructionLats.clear();
-              routeInstructionLons.clear();
-              routeInstructionDistances.clear();
-              routeInstructionTimes.clear();
-            }
-
-            // The route's length is the description's own total (spec: route-calculation - The
-            // published route length is a length of that route): the cumulative distance at the
-            // description's last node, which is the sum of its steps and tracks the geometry the
-            // app draws, lists and highlights to within 0.4 %.
-            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
+            // The route's length is the distance the route's own step list ends at (spec:
+            // route-calculation - The published route length is a length of that route): the
+            // cumulative distance of its last step, which is the description's total and tracks
+            // the geometry the app draws, lists and highlights to within 0.4 %. It is read from
+            // the steps so a calculation needs no second description walk.
+            totalDistance = naviveylin::RouteLengthMeters(LastStepDistanceMeters(routeSteps.steps), 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -7783,34 +7616,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
       // are empty when the alignment check dropped them, and the Java arrays then stay null - the
       // app shows no per-step values or positions instead of shifted ones.
-      jdoubleArray instrLats = nullptr;
-      jdoubleArray instrLons = nullptr;
-      jdoubleArray instrDists = nullptr;
-      jdoubleArray instrTimes = nullptr;
-      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
-      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
-        instrLats = threadEnv->NewDoubleArray(instrCount);
-        instrLons = threadEnv->NewDoubleArray(instrCount);
-        instrDists = threadEnv->NewDoubleArray(instrCount);
-        instrTimes = threadEnv->NewDoubleArray(instrCount);
-        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
-        for (jsize i = 0; i < instrCount; i++) {
-          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
-          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
-          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
-          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
-        }
-        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
-        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
-        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
-        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
-      }
-
       // The route's own length when its description produced nothing: the great-circle length of the
       // polyline this call publishes, so a client that falls back to the total still receives a route
       // length and never the start/target air-line estimate (spec: route-calculation - The published
@@ -7831,13 +7636,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
-      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
-      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
-      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
-      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
-      jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
       jfieldID stepsField = threadEnv->GetFieldID(routeEntryCls, "steps",
           "[Lcom/framstag/libosmscout/client/RouteStep;");
       jfieldID mappingField = threadEnv->GetFieldID(routeEntryCls, "databaseMapping",
@@ -7846,10 +7646,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
-      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
-      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
-      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
-      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -7875,18 +7671,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       double durationSec = (totalDistance / 1000.0) / avgSpeedKmH * 3600.0;
       threadEnv->SetDoubleField(routeEntry, durField, durationSec);
-
-      // Marshal description lines
-      jsize descCount = static_cast<jsize>(routeDescriptionLines.size());
-      jobjectArray descArray = threadEnv->NewObjectArray(
-          descCount,
-          threadEnv->FindClass("java/lang/String"),
-          nullptr);
-      for (jsize i = 0; i < descCount; i++) {
-        threadEnv->SetObjectArrayElement(descArray, i,
-            threadEnv->NewStringUTF(routeDescriptionLines[i].c_str()));
-      }
-      threadEnv->SetObjectField(routeEntry, descField, descArray);
 
       // Call onSuccess
       threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onSuccess, routeEntry);
@@ -8018,14 +7802,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
-      std::vector<std::string> routeDescriptionLines;
-      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
-      // with the instruction lines of routeDescriptionLines. All four are published as a set and
-      // dropped as a set when the alignment cannot be shown (see the check after the callback).
-      std::vector<double> routeInstructionLats;
-      std::vector<double> routeInstructionLons;
-      std::vector<double> routeInstructionDistances;
-      std::vector<double> routeInstructionTimes;
       // The route's manoeuvres as structured steps, next to the description lines (spec:
       // route-calculation - a calculated route publishes structured steps). The collection does
       // not depend on the description lines, so a mismatch in the lines never discards the steps.
@@ -8261,199 +8037,17 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 motorwayLinkTypeNames,
                 junctionTypeNames);
 
-            // Collect description lines via callback
-            struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
-              std::vector<std::string> lines;
-              size_t lineCount = 0;
-              double prevDistance = 0.0;
-              osmscout::Duration prevTime = osmscout::Duration::zero();
-              double distance = 0.0;
-              osmscout::Duration time = osmscout::Duration::zero();
-              // Per-step leg values (spec: route-calculation - per-step leg values on a
-              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
-              // with the instruction lines and with the positions below; the distance is the leg
-              // that ENDS at that line's manoeuvre.
-              std::vector<double> instructionDistances;
-              std::vector<double> instructionTimes;
-              // Per-instruction positions (spec: route-calculation - per-instruction positions).
-              // One entry per line pushed by NextLine(), so the arrays align with the instruction
-              // lines of `lines` (the "--- Route ---" header is not an instruction).
-              std::vector<double> instructionLats;
-              std::vector<double> instructionLons;
-              double nodeLat = 0.0;
-              double nodeLon = 0.0;
-              bool lineDrawn = false;
-              // The description's own total - the cumulative distance at its last node, in metres.
-              // The route's length is taken from the description, not from the router's separately
-              // accumulated distance (spec: route-calculation - The published route length is a
-              // length of that route).
-              double lastNodeDistanceMeters = 0.0;
-
-              void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                // The per-step reference is advanced when a LINE is emitted (see
-                // AppendDistanceTime), never here: this callback runs for every route node,
-                // while only the nodes carrying a description produce a line.
-                distance = node.GetDistance().AsMeter() / 1000.0;
-                // The nodes are walked in order, so the largest cumulative distance seen is the
-                // description's total, which is the route's length (see the derivation below).
-                if (distance * 1000.0 > lastNodeDistanceMeters) {
-                  lastNodeDistanceMeters = distance * 1000.0;
-                }
-                time = node.GetTime();
-                nodeLat = node.GetLocation().GetLat();
-                nodeLon = node.GetLocation().GetLon();
-              }
-
-              void NextLine() {
-                std::ostringstream oss;
-                // Description text comes first as primary information
-                oss.str("");
-                lines.push_back(oss.str());
-                instructionLats.push_back(nodeLat);
-                instructionLons.push_back(nodeLon);
-                lineCount++;
-              }
-
-              void AppendDistanceTime(std::string& line) {
-                std::ostringstream oss;
-                oss << "  [";
-                double segDist = distance - prevDistance;
-                if (segDist >= 1.0) {
-                  oss << std::fixed << std::setprecision(1) << segDist << " km";
-                } else if (segDist > 0.01) {
-                  oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
-                }
-                auto timeText = naviveylin::FormatRouteStepTime(
-                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
-                if (segDist > 0.01 && timeText.has_value()) {
-                  oss << ", ";
-                }
-                if (timeText.has_value()) {
-                  oss << *timeText;
-                }
-                oss << "]";
-                line += oss.str();
-                // The values belong to the leg that ENDS here, so the reference advances when a
-                // line is emitted - not per route node as BeforeNode does it (Qt's
-                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
-                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
-                // the rows never added up to the route's distance or duration (device: "14 m"
-                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
-                // the positions (spec: route-calculation - per-step leg values on a calculated
-                // route).
-                instructionDistances.push_back(segDist * 1000.0);
-                instructionTimes.push_back(
-                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
-                        time - prevTime).count()));
-                prevDistance = distance;
-                prevTime = time;
-              }
-
-              void BeforeRoute() override {
-                lines.push_back("--- Route ---");
-              }
-
-              void OnStart(
-                  const osmscout::RouteDescription::StartDescriptionRef &startDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                NextLine();
-                std::string s = "Start: " + startDesc->GetDescription();
-                if (typeNameDesc) {
-                  s += " on " + typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
-              }
-
-              void OnTurn(
-                  const osmscout::RouteDescription::TurnDescriptionRef &turnDesc,
-                  const osmscout::RouteDescription::CrossingWaysDescriptionRef &crossDesc,
-                  const osmscout::RouteDescription::DirectionDescriptionRef &dirDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                (void)crossDesc;
-                (void)dirDesc;
-                NextLine();
-                std::string s;
-                if (turnDesc) {
-                  switch (turnDesc->GetDirection()) {
-                    case osmscout::RouteDescription::DirectionDescription::sharpLeft: s += "Sharp left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::left: s += "Left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyLeft: s += "Slight left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::straightOn: s += "Straight"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyRight: s += "Slight right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::right: s += "Right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::sharpRight: s += "Sharp right"; break;
-                    default: s += "Turn"; break;
-                  }
-                }
-                if (typeNameDesc) {
-                  if (!s.empty()) s += " onto ";
-                  s += typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
-              }
-
-              void OnTargetReached(
-                  const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
-              {
-                NextLine();
-                lines.back() += "Destination: " + targetDesc->GetDescription();
-                AppendDistanceTime(lines.back());
-              }
-            };
-
-            DescCallback descCb;
-            osmscout::RouteDescriptionPostprocessor generator;
-            generator.GenerateDescription(*descResult.GetDescription(), descCb);
-
-            // Store description lines for marshalling
-            routeDescriptionLines = std::move(descCb.lines);
-            routeInstructionLats = std::move(descCb.instructionLats);
-            routeInstructionLons = std::move(descCb.instructionLons);
-            routeInstructionDistances = std::move(descCb.instructionDistances);
-            routeInstructionTimes = std::move(descCb.instructionTimes);
-
             // One step per described route node, carrying that node's manoeuvre data without a
             // client having to read a description line (spec: route-calculation - a calculated
             // route publishes structured steps).
             osmscout::client::RouteStepCollector routeStepCollector;
             routeSteps=routeStepCollector.Collect(*descResult.GetDescription());
-            // Every array must have one entry per instruction line; a mismatch would shift every
-            // later step, so the per-step values and the positions are dropped together instead
-            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
-            // aligned).
-            if (routeInstructionLats.size() != descCb.lineCount ||
-                routeInstructionLons.size() != descCb.lineCount ||
-                routeInstructionDistances.size() != descCb.lineCount ||
-                routeInstructionTimes.size() != descCb.lineCount) {
-              osmscout::log.Warn() << "calculateRouteWithObjectsAsync: per-step value count ("
-                                   << routeInstructionDistances.size() << ", position count "
-                                   << routeInstructionLats.size() << ") does not match instruction line count ("
-                                   << descCb.lineCount << ") - per-step values and positions dropped";
-              routeInstructionLats.clear();
-              routeInstructionLons.clear();
-              routeInstructionDistances.clear();
-              routeInstructionTimes.clear();
-            }
-            osmscout::log.Warn() << "calculateRouteAsync: generated "
-                                 << routeDescriptionLines.size() << " description lines";
-
-            // The route's length is the description's own total (spec: route-calculation - The
-            // published route length is a length of that route): the cumulative distance at the
-            // description's last node, which is the sum of its steps and tracks the geometry the
-            // app draws, lists and highlights to within 0.4 %.
-            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
+            // The route's length is the distance the route's own step list ends at (spec:
+            // route-calculation - The published route length is a length of that route): the
+            // cumulative distance of its last step, which is the description's total and tracks
+            // the geometry the app draws, lists and highlights to within 0.4 %. It is read from
+            // the steps so a calculation needs no second description walk.
+            totalDistance = naviveylin::RouteLengthMeters(LastStepDistanceMeters(routeSteps.steps), 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -8556,34 +8150,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
       // are empty when the alignment check dropped them, and the Java arrays then stay null - the
       // app shows no per-step values or positions instead of shifted ones.
-      jdoubleArray instrLats = nullptr;
-      jdoubleArray instrLons = nullptr;
-      jdoubleArray instrDists = nullptr;
-      jdoubleArray instrTimes = nullptr;
-      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
-      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
-        instrLats = threadEnv->NewDoubleArray(instrCount);
-        instrLons = threadEnv->NewDoubleArray(instrCount);
-        instrDists = threadEnv->NewDoubleArray(instrCount);
-        instrTimes = threadEnv->NewDoubleArray(instrCount);
-        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
-        for (jsize i = 0; i < instrCount; i++) {
-          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
-          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
-          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
-          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
-        }
-        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
-        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
-        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
-        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
-      }
-
       // The route's own length when its description produced nothing: the great-circle length of the
       // polyline this call publishes, so a client that falls back to the total still receives a route
       // length and never the start/target air-line estimate (spec: route-calculation - The published
@@ -8604,13 +8170,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
-      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
-      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
-      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
-      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
-      jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
       jfieldID stepsField = threadEnv->GetFieldID(routeEntryCls, "steps",
           "[Lcom/framstag/libosmscout/client/RouteStep;");
       jfieldID mappingField = threadEnv->GetFieldID(routeEntryCls, "databaseMapping",
@@ -8619,10 +8180,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
-      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
-      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
-      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
-      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -8642,18 +8199,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       // Estimate duration: 50 km/h average speed (default car)
       double durationSec = (totalDistance / 1000.0) / 50.0 * 3600.0;
       threadEnv->SetDoubleField(routeEntry, durField, durationSec);
-
-      // Marshal description lines
-      jsize descCount = static_cast<jsize>(routeDescriptionLines.size());
-      jobjectArray descArray = threadEnv->NewObjectArray(
-          descCount,
-          threadEnv->FindClass("java/lang/String"),
-          nullptr);
-      for (jsize i = 0; i < descCount; i++) {
-        threadEnv->SetObjectArrayElement(descArray, i,
-            threadEnv->NewStringUTF(routeDescriptionLines[i].c_str()));
-      }
-      threadEnv->SetObjectField(routeEntry, descField, descArray);
 
       // Call onSuccess
       threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onSuccess, routeEntry);
