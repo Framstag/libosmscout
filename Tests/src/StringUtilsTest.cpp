@@ -429,6 +429,12 @@ TEST_CASE("String matcher: transliteration, diacritics and match quality")
     // Case-insensitive in both spellings.
     {"ERBSTOLLENSTRASSE","Erbstollenstraße",true,osmscout::StringMatcher::match},
     {"erbstollenstraße","Erbstollenstrasse",true,osmscout::StringMatcher::match},
+    // Capital sharp s (U+1E9E) folds like the sharp s: the table maps it to
+    // "SS", so an all-caps name spelled with it and an ss-spelled query are
+    // the same word after transliteration and case normalization.
+    {"ERBSTOLLENSTRASSE","ERBSTOLLENSTRAẞE",true,osmscout::StringMatcher::match},
+    {"ERBSTOLLENSTRAẞE","ERBSTOLLENSTRASSE",true,osmscout::StringMatcher::match},
+    {"erbstollenstraße","ERBSTOLLENSTRAẞE",true,osmscout::StringMatcher::match},
     // Diacritics keep folding: a name typed without them matches the spelled one.
     {"Gunnemannshof","Günnemannshof",true,osmscout::StringMatcher::match},
     {"Gunnemannshof","GÜNNEMANNSHOF",true,osmscout::StringMatcher::match},
