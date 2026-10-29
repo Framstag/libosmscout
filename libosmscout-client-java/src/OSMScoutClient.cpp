@@ -7074,6 +7074,70 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 }
 
 /**
+ * Speed factor per grade, index 0..4 meaning grade 1..5, applied when `avoidUnpaved` is requested.
+ * Solid and gravel keep most of their type's speed; unpaved and worse lose most of it.
+ *
+ * A degraded road must stay routable: the parametrization prices a profile's cost limit from its
+ * slowest road type, so a table close to zero makes the limit unreachable and the calculation
+ * reports "no route" instead of a detour. Measured with four candidate tables on a Bremen
+ * database — see openspec/changes/client-java-avoid-unpaved/evidence/.
+ */
+static constexpr double kAvoidUnpavedGradeFactor[5] = {1.0, 0.85, 0.6, 0.3, 0.1};
+
+/** Floor for a degraded road, so avoiding an unpaved way never means being unable to route. */
+static constexpr double kAvoidUnpavedMinSpeedKmh = 3.0;
+
+/**
+ * Re-price every routable type of [profile] with a per-grade speed table.
+ *
+ * Must be called *after* the vehicle parametrization: `FastestPathRoutingProfile::ParametrizeForCar`
+ * (and the bicycle/foot counterparts) also enable the junction penalty and double the profile's cost
+ * limit and factor (RoutingProfile.h). A profile whose type list is built by hand loses both, and then
+ * every route that needs a high-grade way fails with "no route" — measured, same evidence file.
+ *
+ * [carSpeedMap] is the base speed per type name for a car and unused for the other vehicles;
+ * [maxSpeedKmh] is the resolved vehicle speed (the flat speed for bicycle and foot, the ceiling
+ * for a car).
+ */
+static void ApplyAvoidUnpavedGradeSpeeds(osmscout::FastestPathRoutingProfile &profile,
+                                         const osmscout::TypeConfig &typeConfig,
+                                         osmscout::Vehicle vehicle,
+                                         const std::map<std::string,double> &carSpeedMap,
+                                         double maxSpeedKmh)
+{
+  for (const auto &type : typeConfig.GetTypes()) {
+    if (type->GetIgnore()) {
+      continue;
+    }
+
+    bool routable = vehicle == osmscout::vehicleCar ? type->CanRouteCar()
+                  : vehicle == osmscout::vehicleBicycle ? type->CanRouteBicycle()
+                  : type->CanRouteFoot();
+    if (!routable) {
+      continue;
+    }
+
+    double baseSpeed = maxSpeedKmh;
+    if (vehicle == osmscout::vehicleCar) {
+      auto entry = carSpeedMap.find(type->GetName());
+      if (entry == carSpeedMap.end()) {
+        // Not parametrized by the car speed map, so it carries no usable speed (a track, for
+        // instance): leave its entry alone instead of inventing one.
+        continue;
+      }
+      baseSpeed = std::min(entry->second, maxSpeedKmh);
+    }
+
+    osmscout::SpeedVariant variant;
+    for (size_t i = 0; i < 5; i++) {
+      variant.speed[i] = std::max(kAvoidUnpavedMinSpeedKmh, baseSpeed * kAvoidUnpavedGradeFactor[i]);
+    }
+
+    profile.AddType(type, variant);
+  }
+}
+
+/**
  * Create a routing profile for the given vehicle type.
  * Car uses a speed map; bicycle and foot use built-in parametrization.
  *
@@ -7095,46 +7159,50 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
 
   auto profile = std::make_shared<osmscout::FastestPathRoutingProfile>(tc);
 
+  // Hoisted out of the car branch: the graded speed pass needs the car's base speed per type,
+  // and the resolved vehicle speed is the flat speed for bicycle and foot.
+  std::map<std::string,double> carSpeedMap;
+  double resolvedMaxSpeed = 0.0;
+
   switch (vehicle) {
     case osmscout::vehicleCar: {
-      std::map<std::string,double> speedMap;
-      speedMap["highway_motorway"]=110.0;
-      speedMap["highway_motorway_trunk"]=100.0;
-      speedMap["highway_motorway_primary"]=70.0;
-      speedMap["highway_motorway_link"]=60.0;
-      speedMap["highway_motorway_junction"]=60.0;
-      speedMap["highway_trunk"]=100.0;
-      speedMap["highway_trunk_link"]=60.0;
-      speedMap["highway_primary"]=70.0;
-      speedMap["highway_primary_link"]=60.0;
-      speedMap["highway_secondary"]=60.0;
-      speedMap["highway_secondary_link"]=50.0;
-      speedMap["highway_tertiary_link"]=55.0;
-      speedMap["highway_tertiary"]=55.0;
-      speedMap["highway_unclassified"]=50.0;
-      speedMap["highway_road"]=50.0;
-      speedMap["highway_residential"]=20.0;
-      speedMap["highway_roundabout"]=40.0;
-      speedMap["highway_living_street"]=10.0;
-      speedMap["highway_service"]=30.0;
-      double carMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
-      profile->ParametrizeForCar(*tc, speedMap, carMaxSpeed);
+      carSpeedMap["highway_motorway"]=110.0;
+      carSpeedMap["highway_motorway_trunk"]=100.0;
+      carSpeedMap["highway_motorway_primary"]=70.0;
+      carSpeedMap["highway_motorway_link"]=60.0;
+      carSpeedMap["highway_motorway_junction"]=60.0;
+      carSpeedMap["highway_trunk"]=100.0;
+      carSpeedMap["highway_trunk_link"]=60.0;
+      carSpeedMap["highway_primary"]=70.0;
+      carSpeedMap["highway_primary_link"]=60.0;
+      carSpeedMap["highway_secondary"]=60.0;
+      carSpeedMap["highway_secondary_link"]=50.0;
+      carSpeedMap["highway_tertiary_link"]=55.0;
+      carSpeedMap["highway_tertiary"]=55.0;
+      carSpeedMap["highway_unclassified"]=50.0;
+      carSpeedMap["highway_road"]=50.0;
+      carSpeedMap["highway_residential"]=20.0;
+      carSpeedMap["highway_roundabout"]=40.0;
+      carSpeedMap["highway_living_street"]=10.0;
+      carSpeedMap["highway_service"]=30.0;
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
+      profile->ParametrizeForCar(*tc, carSpeedMap, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created car routing profile (max speed "
-                           << carMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleBicycle: {
-      double bicycleMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
-      profile->ParametrizeForBicycle(*tc, bicycleMaxSpeed);
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
+      profile->ParametrizeForBicycle(*tc, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created bicycle routing profile (max speed "
-                           << bicycleMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleFoot: {
-      double footMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
-      profile->ParametrizeForFoot(*tc, footMaxSpeed);
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
+      profile->ParametrizeForFoot(*tc, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created pedestrian routing profile (max speed "
-                           << footMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
   }
@@ -7149,10 +7217,12 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
   }
 
   if (avoidUnpaved) {
-    // Set low speed for unpaved/high-grade roads
-    // Grade 4 (mostly soft) and Grade 5 (soft) get very low speed
-    // This is handled by the grade system in the profile
-    osmscout::log.Warn() << "  avoiding unpaved roads (grade-based speed reduction)";
+    ApplyAvoidUnpavedGradeSpeeds(*profile, *tc, vehicle, carSpeedMap, resolvedMaxSpeed);
+    osmscout::log.Warn() << "  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = "
+                         << kAvoidUnpavedGradeFactor[0] << "/" << kAvoidUnpavedGradeFactor[1] << "/"
+                         << kAvoidUnpavedGradeFactor[2] << "/" << kAvoidUnpavedGradeFactor[3] << "/"
+                         << kAvoidUnpavedGradeFactor[4] << " of the type speed, floor "
+                         << kAvoidUnpavedMinSpeedKmh << " km/h)";
   }
 
   if (avoidTolls) {

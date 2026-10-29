@@ -1,0 +1,38 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by com.framstag.libosmscout.client.OSMScoutClientBuilder in an unnamed module (file:/home/tim/projects/NaviVeylin/app/src/main/cpp/libosmscout/hostbuild/libosmscout-client-java/java/libosmscoutclientjava.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+Lookup databases
+Scanning maps lookup directory: .pi/avoid-unpaved/bremen-db
+  found valid map 'bremen-db' at .pi/avoid-unpaved/bremen-db (no metadata)
+Lookup directory .pi/avoid-unpaved/bremen-db scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/natural.oss': 1 (natural_waterfall)
+  created car routing profile (max speed 120.00000 km/h)
+  created car routing profile (max speed 120.00000 km/h)
+Loading path data: 0.000
+Scanning locations: 0.042
+Loading candidates: 0.050
+Analysing candidates: 0.027
+Route start: the requested start lies 398 m from the snapped node (tolerance 1 m), so the approach is published as the first segment
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/natural.oss': 1 (natural_waterfall)
+  created car routing profile (max speed 120.00000 km/h)
+  created car routing profile (max speed 120.00000 km/h)
+  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = 1.00000/0.85000/0.60000/0.30000/0.10000 of the type speed, floor 3.00000 km/h)
+  created car routing profile (max speed 120.00000 km/h)
+  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = 1.00000/0.85000/0.60000/0.30000/0.10000 of the type speed, floor 3.00000 km/h)
+Loading path data: 0.000
+Scanning locations: 0.075
+Loading candidates: 0.084
+Analysing candidates: 0.020
+Route start: the requested start lies 398 m from the snapped node (tolerance 1 m), so the approach is published as the first segment
+  created car routing profile (max speed 120.00000 km/h)
+  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = 1.00000/0.85000/0.60000/0.30000/0.10000 of the type speed, floor 3.00000 km/h)
+PROBE: avoidUnpaved=false distance=9122.387959085872m duration=656.8119330541828s points=312
+PROBE: avoidUnpaved=true  distance=9122.387959085872m duration=656.8119330541828s points=312
+PROBE: route differs=false

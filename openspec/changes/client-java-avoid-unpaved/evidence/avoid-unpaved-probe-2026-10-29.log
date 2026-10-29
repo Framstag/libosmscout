@@ -1,0 +1,36 @@
+bounding box: 52.7068,7.88853 .. 54.2874,9.15111
+object variants: 179  grade1=116 grade2=29 grade3=21 grade4=7 grade5=6 above-grade5=0
+1 km of highway_unclassified (seconds), baseline: g1=72.0 g2=72.0 g3=72.0 g4=72.0 g5=72.0
+1 km of highway_unclassified (seconds), aggressive  : g1=72.0 g2=84.7 g3=120.0 g4=240.0 g5=720.0
+1 km of highway_unclassified (seconds), moderate  : g1=72.0 g2=80.0 g3=96.0 g4=144.0 g5=240.0
+1 km of highway_unclassified (seconds), gentle  : g1=72.0 g2=72.0 g3=84.7 g4=120.0 g5=180.0
+1 km of highway_unclassified (seconds), very-gentle  : g1=72.0 g2=72.0 g3=80.0 g4=96.0 g5=144.0
+
+No route found!
+No route found!
+No route node found for start way
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+pairs: 51, routed by the baseline profile: 32
+aggressive: differing=0 of 32 routed pairs, lost (no route)=0
+
+moderate: differing=0 of 32 routed pairs, lost (no route)=0
+
+gentle: differing=0 of 32 routed pairs, lost (no route)=0
+
+very-gentle: differing=0 of 32 routed pairs, lost (no route)=0
+
