@@ -72,5 +72,9 @@ this change.
 stamped log beside it is the run of the tables above. The probe is built against the submodule's host build
 (`hostbuild/libosmscout/libosmscout.so`) and runs without a device.
 
-The spec scenario asserts the cost ordering, not a particular route: across 32 routable pairs of that grid
-none of the four tables changed a route, which is a fact about dense city data, not about the flag.
+The spec scenario asserts the cost ordering, not a particular route. The probe walks a grid over two
+real extracts and inspects the ways its routes use: 211 routed pairs, 1 052 ways read, exactly one of
+them graded above 1 (a grade 4 road in Andorra) — and that one is the only option of a 54.2 m route that
+both profiles calculate. So no table changed a route, and no table lost one. That is a fact about where
+car routes run, not about the flag: a graded road almost never lies on a car's route in these extracts,
+which is why the cost ordering, not a route change, is what the spec can assert.

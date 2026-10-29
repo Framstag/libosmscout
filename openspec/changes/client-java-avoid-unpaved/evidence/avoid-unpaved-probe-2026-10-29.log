@@ -7,6 +7,9 @@ object variants: 179  grade1=116 grade2=29 grade3=21 grade4=7 grade5=6 above-gra
 1 km of highway_unclassified (seconds), very-gentle  : g1=72.0 g2=72.0 g3=80.0 g4=96.0 g5=144.0
 
 No route found!
+No route node found for target way
+No route node found for target way
+No route node found for target way
 No route found!
 No route node found for start way
 No route found!
@@ -19,18 +22,20 @@ No route found!
 No route found!
 No route found!
 No route found!
-No route found!
-No route found!
-No route found!
-No route found!
-No route found!
-No route found!
-pairs: 51, routed by the baseline profile: 32
-aggressive: differing=0 of 32 routed pairs, lost (no route)=0
+No route node found for target way
+No route node found for target way
+No route node found for target way
+No route node found for target way
+No route node found for target way
+pairs: 400, routed by the baseline profile: 30
+  ways on the baseline routes: 6595 path objects, 400 ways read, 17 without a grade value, grades: g1=383 g2=0 g3=0 g4=0 g5=0
+graded-road pairs (a graded way the baseline route uses): 0
+graded-road pairs lost with the table: 0/0
+aggressive: differing=0 of 30 routed pairs, lost (no route)=0
 
-moderate: differing=0 of 32 routed pairs, lost (no route)=0
+moderate: differing=0 of 30 routed pairs, lost (no route)=0
 
-gentle: differing=0 of 32 routed pairs, lost (no route)=0
+gentle: differing=0 of 30 routed pairs, lost (no route)=0
 
-very-gentle: differing=0 of 32 routed pairs, lost (no route)=0
+very-gentle: differing=0 of 30 routed pairs, lost (no route)=0
 

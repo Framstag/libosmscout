@@ -33,6 +33,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -144,23 +145,29 @@ namespace {
     double destLon;
   };
 
-  std::vector<Pair> GridPairs()
+  std::vector<Pair> GridPairs(const osmscout::GeoBox& box,
+                              size_t steps)
   {
     std::vector<Pair> pairs;
 
-    // The extract's bounding box is padded (52.71,7.89 .. 54.29,9.15) while its coverage is two
-    // cities, so a coarse box-wide grid finds almost nothing routable. Walk the covered areas
-    // densely instead: Bremen city, the rural north (Blockland/Wümme tracks, where the grade 3+
-    // ways are) and Bremerhaven.
-    for (double lat : {53.03,53.06,53.09,53.12,53.15,53.18}) {
-      for (double lon : {8.65,8.70,8.75,8.80,8.85,8.90,8.95}) {
-        pairs.push_back({lat,lon,lat+0.03,lon+0.03});
-      }
-    }
+    // A grid over the extract's own bounding box: a hand-picked pair is a guess about where a
+    // graded road is, and a guessed pair proves nothing. Pairs that snap to nothing or are not
+    // connected are skipped by the probe.
+    const double minLat=box.GetMinCoord().GetLat();
+    const double maxLat=box.GetMaxCoord().GetLat();
+    const double minLon=box.GetMinCoord().GetLon();
+    const double maxLon=box.GetMaxCoord().GetLon();
 
-    for (double lat : {53.52,53.55,53.58}) {
-      for (double lon : {8.54,8.58,8.62}) {
-        pairs.push_back({lat,lon,lat+0.03,lon+0.03});
+    const size_t stepsInBox=steps;
+    const double latStep=(maxLat-minLat)/stepsInBox;
+    const double lonStep=(maxLon-minLon)/stepsInBox;
+
+    for (size_t i=0; i<stepsInBox; i++) {
+      for (size_t j=0; j<stepsInBox; j++) {
+        double lat=minLat+latStep*(i+0.5);
+        double lon=minLon+lonStep*(j+0.5);
+
+        pairs.push_back({lat,lon,lat+latStep,lon+lonStep});
       }
     }
 
@@ -175,6 +182,7 @@ namespace {
     double                duration=0.0;
     size_t                entries=0;
     std::map<std::string,size_t> types;
+    std::vector<osmscout::ObjectFileRef> pathObjects;
   };
 
   Observation Route(const osmscout::SimpleRoutingServiceRef& router,
@@ -218,6 +226,7 @@ namespace {
 
     for (const auto& entry : route.Entries()) {
       observation.types[entry.GetPathObject().GetName()]++;
+      observation.pathObjects.push_back(entry.GetPathObject());
     }
 
     return observation;
@@ -260,6 +269,77 @@ namespace {
     return osmscout::DurationAsHours(profile.GetTime(way,osmscout::Kilometers(1.0)))*3600.0;
   }
 
+  // Pairs that run along a graded road: two points on a way the baseline route already uses, so
+  // the graded road is the direct option rather than a guess about where one might be.
+  std::vector<Pair> GradedRoadPairs(const osmscout::Database& database,
+                                    const osmscout::TypeConfig& typeConfig,
+                                    const std::vector<Observation>& observations)
+  {
+    osmscout::GradeFeatureValueReader gradeReader(typeConfig);
+    std::vector<Pair>              pairs;
+    std::set<osmscout::FileOffset> seen;
+
+    size_t entries=0;
+    size_t waysRead=0;
+    size_t waysWithoutGrade=0;
+    std::array<size_t,6> gradeHistogram{};
+
+    for (const auto& observation : observations) {
+      if (!observation.success) {
+        continue;
+      }
+
+      for (const auto& object : observation.pathObjects) {
+        entries++;
+
+        if (object.GetType()!=osmscout::refWay || !seen.insert(object.GetFileOffset()).second) {
+          continue;
+        }
+
+        osmscout::WayRef way;
+
+        if (!database.GetWayByOffset(object.GetFileOffset(),way) || way->nodes.size()<4) {
+          continue;
+        }
+
+        waysRead++;
+
+        const auto *gradeValue=gradeReader.GetValue(way->GetFeatureValueBuffer());
+
+        if (gradeValue==nullptr) {
+          waysWithoutGrade++;
+          continue;
+        }
+
+        if (gradeValue->GetGrade()>=1 && gradeValue->GetGrade()<=5) {
+          gradeHistogram[gradeValue->GetGrade()]++;
+        }
+
+        if (gradeValue->GetGrade()<3) {
+          continue;
+        }
+
+        // Points a quarter and three quarters along the way: its first and last node can be the same
+        // coordinate (a closed way), which would make the pair a zero-length route.
+        const size_t n=way->nodes.size();
+        const auto&  first=way->nodes[n/4].GetCoord();
+        const auto&  last=way->nodes[(3*n)/4].GetCoord();
+
+        std::cout << "  graded way " << object.GetFileOffset() << " type=" << object.GetName()
+                  << " grade=" << int(gradeValue->GetGrade()) << " nodes=" << n << std::endl;
+
+        pairs.push_back({first.GetLat(),first.GetLon(),last.GetLat(),last.GetLon()});
+      }
+    }
+
+    std::cout << "  ways on the baseline routes: " << entries << " path objects, " << waysRead
+              << " ways read, " << waysWithoutGrade << " without a grade value, grades: g1="
+              << gradeHistogram[1] << " g2=" << gradeHistogram[2] << " g3=" << gradeHistogram[3]
+              << " g4=" << gradeHistogram[4] << " g5=" << gradeHistogram[5] << std::endl;
+
+    return pairs;
+  }
+
   void PrintObservation(const std::string& name,
                         const Observation& observation)
   {
@@ -293,10 +373,12 @@ namespace {
 
 int main(int argc,char* argv[])
 {
-  if (argc!=2) {
-    std::cerr << "usage: AvoidUnpavedProbe <database directory>" << std::endl;
+  if (argc<2 || argc>3) {
+    std::cerr << "usage: AvoidUnpavedProbe <database directory> [grid steps]" << std::endl;
     return 2;
   }
+
+  const size_t gridSteps=argc==3 ? std::max(2,std::atoi(argv[2])) : 6;
 
   const std::string directory=argv[1];
 
@@ -416,7 +498,7 @@ int main(int argc,char* argv[])
     std::cout << std::endl;
   }
 
-  const std::vector<Pair> pairs=GridPairs();
+  const std::vector<Pair> pairs=GridPairs(boundingBox,gridSteps);
 
   // Baseline once per pair: the route the bridge calculates today.
   std::vector<Observation> baseline(pairs.size());
@@ -436,6 +518,40 @@ int main(int argc,char* argv[])
 
   std::cout << "pairs: " << pairs.size() << ", routed by the baseline profile: " << baselineRouted
             << std::endl;
+
+  // 3. Routes whose direct option is a graded road: does the table break them?
+  const std::vector<Pair> gradedPairs=GradedRoadPairs(*database,*typeConfig,baseline);
+
+  std::cout << "graded-road pairs (a graded way the baseline route uses): " << gradedPairs.size()
+            << std::endl;
+
+  size_t gradedLost=0;
+
+  for (size_t i=0; i<gradedPairs.size(); i++) {
+    osmscout::FastestPathRoutingProfileRef plainProfile=
+      std::make_shared<osmscout::FastestPathRoutingProfile>(typeConfig);
+    ParametrizeBaseline(*plainProfile,*typeConfig,speedMap,carMaxSpeed);
+
+    osmscout::FastestPathRoutingProfileRef gradedProfile=
+      std::make_shared<osmscout::FastestPathRoutingProfile>(typeConfig);
+    ParametrizeGraded(*gradedProfile,*typeConfig,speedMap,carMaxSpeed,tables[0]);
+
+    auto plain=Route(router,*plainProfile,gradedPairs[i]);
+    auto graded=Route(router,*gradedProfile,gradedPairs[i]);
+
+    if (plain.success && !graded.success) {
+      gradedLost++;
+    }
+
+    std::cout << "  graded-road pair " << i
+              << " (" << gradedPairs[i].startLat << "," << gradedPairs[i].startLon << " -> "
+              << gradedPairs[i].destLat << "," << gradedPairs[i].destLon << ")" << std::endl;
+    PrintObservation("baseline",plain);
+    PrintObservation(tables[0].name,graded);
+  }
+
+  std::cout << "graded-road pairs lost with the table: " << gradedLost << "/"
+            << gradedPairs.size() << std::endl;
 
   for (const auto& table : tables) {
     size_t differing=0;

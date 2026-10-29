@@ -29,7 +29,15 @@
   `evidence/AvoidUnpavedBridgeProbe.java` -> `evidence/avoid-unpaved-bridge-probe-<date>.log`. The log
   shows the table line and a route for both flag values; the route itself is unchanged (9 122 m, 312
   points) because the graded roads are not on that route, which is what the C++ grid measured too.
-- [ ] 4.2 Find a route whose only option crosses a way carrying a grade above 1 under a *car-routable
-  type* (a road with `surface`/`tracktype`, not a track — tracks carry no speed in the car profile), and
-  confirm it is still calculated with `avoidUnpaved = true`. The Bremen extract has none: across the
-  C++ probe's 32 routable pairs no table changed a route. This needs a rural extract.
+- [x] 4.2 Find a route whose only option is a way graded above 1 under a car-routable type, and confirm
+  it is still calculated with `avoidUnpaved = true`. Two extracts, 211 routed pairs in total, and the
+  census of the ways those routes use (`evidence/avoid-unpaved-andorra-probe-<date>.log`):
+
+  | extract | routed pairs | ways on the routes | grade 1 | above grade 1 | route lost |
+  |---|---|---|---|---|---|
+  | bremen-latest | 30 | 400 | 383 | 0 | 0 |
+  | andorra-latest | 181 | 652 | 596 | 1 (grade 4) | 0 |
+
+  The single graded way is the only option of a 54.2 m route, and both profiles calculate it (54.2 m,
+  3 entries) — the table does not turn a required graded road into "no route". Every one of the 211
+  pairs was routed by every table, so no route is lost anywhere in the sample.
