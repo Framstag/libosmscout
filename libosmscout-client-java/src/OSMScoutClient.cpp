@@ -6293,7 +6293,7 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
       osmscout::log.Debug() << "[JNI] RunSynchronousJob callback: " << databases.size() << " databases";
       for (const auto &db : databases) {
         osmscout::GeoBox dbBox = db->GetDBGeoBox();
-        osmscout::log.Debug() << "[JNI] checking db box: " << dbBox.GetDisplayText();
+        osmscout::log.Debug() << "[JNI] checking db box of " << db->path;
         if (!dbBox.Includes(coord)) {
           osmscout::log.Debug() << "[JNI] coord not in db box, skipping";
           continue;
@@ -7021,8 +7021,7 @@ static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
   auto result = routingService->GetClosestRoutableNode(coord,
       osmscout::Distance::Of<osmscout::Kilometer>(1), endpoint);
   if (result.IsValid()) {
-    osmscout::log.Debug() << "ResolveRoutePosition: found via coord "
-                          << coord.GetDisplayText();
+    osmscout::log.Debug() << "ResolveRoutePosition: found via coord (1 km)";
     return result.GetRoutePosition();
   }
 
@@ -7030,8 +7029,7 @@ static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
   result = routingService->GetClosestRoutableNode(coord,
       osmscout::Distance::Of<osmscout::Kilometer>(5), endpoint);
   if (result.IsValid()) {
-    osmscout::log.Debug() << "ResolveRoutePosition: found via coord (5km) "
-                          << coord.GetDisplayText();
+    osmscout::log.Debug() << "ResolveRoutePosition: found via coord (5 km)";
     return result.GetRoutePosition();
   }
 
@@ -7897,16 +7895,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           }
 
           // Resolve start position
-          osmscout::log.Warn() << "calculateRouteAsync: resolving start at "
-                               << start.GetDisplayText();
+          osmscout::log.Warn() << "calculateRouteAsync: resolving start";
           auto startPosOpt = ResolveRoutePosition(
               routingService, osmscout::RouteEndpoint::Start,
               start.GetLat(), start.GetLon(),
               static_cast<long long>(startObjOffset), startObjTypeStr,
               errorDistanceMeters);
           if (!startPosOpt) {
-            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near start "
-                                 << start.GetDisplayText();
+            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near start";
             errorMsg = "No routable node near start position";
             errorKind = naviveylin::kRouteFailureStartUnroutable;
             routingService->Close();
@@ -7915,16 +7911,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           osmscout::log.Warn() << "calculateRouteAsync: start resolved OK";
 
           // Resolve destination position
-          osmscout::log.Warn() << "calculateRouteAsync: resolving dest at "
-                               << dest.GetDisplayText();
+          osmscout::log.Warn() << "calculateRouteAsync: resolving dest";
           auto destPosOpt = ResolveRoutePosition(
               routingService, osmscout::RouteEndpoint::Target,
               dest.GetLat(), dest.GetLon(),
               static_cast<long long>(destObjOffset), destObjTypeStr,
               errorDistanceMeters);
           if (!destPosOpt) {
-            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near dest "
-                                 << dest.GetDisplayText();
+            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near dest";
             errorMsg = "No routable node near destination";
             errorKind = naviveylin::kRouteFailureTargetUnroutable;
             routingService->Close();
