@@ -50,9 +50,13 @@
 - [x] 5.3 Through the bridge (`evidence/AvoidTollsBridgeProbe.java`): 2 points without the flag, 3 with it,
   and the log line `avoiding toll roads (cost x3.0 …)`
   (`evidence/avoid-tolls-bridge-probe-<date>.log`).
-- [ ] 5.4 Re-run the `client-java-avoid-unpaved` probe on a database imported with this change and confirm
-  the grade ordering still holds. The re-imported test map shows grades intact in the census; a full
-  re-import of a real extract is owed once this change and its predecessor are both on the branch.
+- [x] 5.4 Re-run the `client-java-avoid-unpaved` probe on a database imported with this change and confirm
+  the grade ordering still holds. The Bremen extract, re-imported with an importer carrying both changes
+  (`evidence/reimported-extract-<date>.log`): 179 object variants, the same grade histogram (116/29/21/7/6),
+  no grade above 5, one kilometre of `highway_unclassified` still 72.0 / 84.7 / 120.0 / 240.0 / 720.0 s, and
+  30 routed pairs with nothing changed or lost. The same database records **0** toll variants — correctly,
+  a German extract has no car tolls — which is the other half of the claim: no toll bit appears where no
+  way charges one.
 
 ## 6. Owed to the map provider
 
