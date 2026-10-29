@@ -902,6 +902,15 @@ SearchBreakerTest = executable('SearchBreakerTest',
 
 test('Check search breaker', SearchBreakerTest)
 
+RouteStartTest = executable('RouteStartTest',
+             'src/RouteStartTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route start', RouteStartTest)
+
 RoutingProgressThrottleTest = executable('RoutingProgressThrottleTest',
              'src/RoutingProgressThrottleTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
