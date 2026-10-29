@@ -7308,9 +7308,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
-            osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
-            errorMsg = "No databases loaded";
-            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
+            // The open the caller issued is registered by a queued DB-thread job, which clears and
+            // repopulates this list; a calculation that starts before it ran sees this. That is not
+            // the same fact as a database that cannot be opened, so it gets its own kind (spec
+            // `route-calculation` - A calculation that outruns the database open reports that, not
+            // unusable routing data).
+            osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
+            errorMsg = "No databases loaded yet";
+            errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
             return;
           }
 
@@ -7813,9 +7818,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
-            osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
-            errorMsg = "No databases loaded";
-            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
+            // Twin of the branch in calculateRouteWithObjectsWithProfile: the list is empty because
+            // the queued set change has not run yet, which a retry clears (spec `route-calculation`).
+            osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
+            errorMsg = "No databases loaded yet";
+            errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
             return;
           }
 
