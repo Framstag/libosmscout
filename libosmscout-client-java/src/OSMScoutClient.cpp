@@ -4876,12 +4876,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // Geographic extent of the resolved search scope, derived from the scope
   // region's own object in the database that resolved it (change
-  // client-java-search-scope-extent, design D2). Computed once per search call,
-  // because the scope is a single region and does not depend on the database
-  // being walked. Unset means "no scope is active" or "the extent could not be
-  // established" - neither filters anything.
+  // client-java-search-scope-extent, design D2). Derived once per search call,
+  // before the database walk, because the free-text budget has to know the scope
+  // while it counts candidates and the resolving database may be walked after the
+  // ones whose hits the budget already spends itself on (issue #19). Unset means
+  // "no scope is active" or "the extent could not be established" - neither
+  // filters anything.
   naviveylin::GeoBox scopeExtent = naviveylin::UnsetGeoBox();
-  bool               scopeExtentResolved = false;
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -4895,10 +4896,25 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       // full page of structured results must not crowd the text-index candidates
       // out of the set (openspec/specs/search-free-text, "Free-text results
       // merged with structured results").
+
+      // The scope of the database that resolved the region handle, resolved once:
+      // its extent is what the free-text budget measures hits against, and its
+      // structured search reads the same vector below.
+      std::vector<osmscout::AdminRegionRef> resolvedScope;
+      if (adminRegion && adminRegionDb) {
+        ResolveSearchScope(adminRegionDb, adminRegion, resolvedScope);
+        scopeExtent = naviveylin::DeriveScopeExtent(adminRegionDb,
+                                                    resolvedScope.empty()
+                                                      ? osmscout::AdminRegionRef()
+                                                      : resolvedScope.front());
+      }
+
+      // The budget counts only the hits the search keeps, so the scope cannot shorten a
+      // scoped candidate list (openspec/specs/search-free-text, "Free-text candidate
+      // budget counts kept candidates").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-      const auto freeTextLimitReached = [&]() {
-        return freeTextEntries.size() >= static_cast<size_t>(limit);
-      };
+      naviveylin::FreeTextBudget freeTextBudget(static_cast<size_t>(limit),
+                                                scopeExtent);
 #endif
 
       for (const auto &db : databases) {
@@ -4942,16 +4958,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         // applied normally.
         std::vector<osmscout::AdminRegionRef> scope;
         if (effectiveRegion && db == adminRegionDb) {
-          ResolveSearchScope(db, effectiveRegion, scope);
-          // Once per search call: the scope does not change while the databases
-          // are walked, so its extent is derived from the resolving database only.
-          if (!scopeExtentResolved) {
-            scopeExtent = naviveylin::DeriveScopeExtent(db,
-                                                        scope.empty()
-                                                          ? osmscout::AdminRegionRef()
-                                                          : scope.front());
-            scopeExtentResolved = true;
-          }
+          scope = resolvedScope;
         } else if (effectiveRegion && !adminRegionDb) {
           scope.push_back(effectiveRegion);
         } else {
@@ -5024,11 +5031,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
             break;
           }
           for (const auto &e : resultsTxt) {
-            if (freeTextLimitReached()) {
+            if (freeTextBudget.Reached()) {
               break;
             }
             for (const auto &fref : e.second) {
-              if (freeTextLimitReached()) {
+              if (freeTextBudget.Reached()) {
                 break;
               }
               // The text index reports one object under every matched name; the same
@@ -5039,7 +5046,8 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
               }
               seenTextOffsets[db].insert(fref.GetFileOffset());
               FreeTextEntry entry;
-              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry)) {
+              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry) &&
+                  freeTextBudget.Admit(entry.lat, entry.lon)) {
                 freeTextEntries.push_back(entry);
               }
             }
@@ -5051,11 +5059,25 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         // Only the free-text budget ends the walk over the databases: a full
         // page of structured results must not stop the text-index candidates of
         // the remaining databases from being collected.
-        if (freeTextLimitReached()) {
+        if (freeTextBudget.Reached()) {
           break;
         }
 #endif
       }
+
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+      // How much the scope refused is a device-check number, so it is logged where the
+      // collection happens: counts and identity only, never a coordinate. Debug-gated -
+      // enable with osmscout::log.Debug(true). The denominator is every hit the index
+      // reported and the walk reached, before the per-database dedup below drops the ones
+      // the structured search already published.
+      if (freeTextBudget.Dropped() != 0) {
+        osmscout::log.Debug() << "search scope: dropped "
+                              << freeTextBudget.Dropped()
+                              << " of " << freeTextBudget.Scanned()
+                              << " free-text hit(s) outside the scope";
+      }
+#endif
     }
   );
 
@@ -5088,33 +5110,10 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                      }),
       freeTextEntries.end());
 
-  // Free-text hits must respect the active search scope. The text index itself
-  // has no region attribution, so the scope is applied geographically: a hit
-  // outside the scope's extent is dropped, whichever database produced it,
-  // including the database that resolved the region. A hit inside the extent is
-  // kept even when a different database holds it, because the extent is
-  // comparable across databases while region offsets are not. An unset extent
-  // (no scope, or an extent that could not be established) drops nothing.
-  if (scopeExtent.isSet) {
-    const size_t freeTextBeforeFilter = freeTextEntries.size();
-
-    freeTextEntries.erase(
-        std::remove_if(freeTextEntries.begin(), freeTextEntries.end(),
-                       [&](const FreeTextEntry &e) {
-                         return !naviveylin::IsInsideGeoBox(scopeExtent, e.lat, e.lon);
-                       }),
-        freeTextEntries.end());
-
-    // Counts and identity only, never a coordinate. Debug-gated: enable with
-    // osmscout::log.Debug(true) when a device check needs to see how much the
-    // scope filtered.
-    if (freeTextEntries.size() != freeTextBeforeFilter) {
-      osmscout::log.Debug() << "search scope: dropped "
-                            << (freeTextBeforeFilter - freeTextEntries.size())
-                            << " of " << freeTextBeforeFilter
-                            << " free-text hit(s) outside the scope";
-    }
-  }
+  // Free-text hits respect the active search scope: the budget refused every hit
+  // outside the extent while the hits were collected, so the survivors are in scope
+  // by construction and no second filter pass follows (issue #19 - a filter after
+  // the walk could only shorten a candidate list the budget had already spent).
 #endif
 
   // An aborted search publishes nothing: a caller that did not check the generation must
