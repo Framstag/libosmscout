@@ -96,6 +96,9 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 set(CLIENT_JAVA_SOURCES
   src/OSMScoutClient.cpp
+  # The search scope's extent derivation (issue #20): no JNI, compiled by
+  # Tests/SearchScopeExtentTest as well.
+  src/search_scope_extent.cpp
 )
 
 add_library(osmscout_client_java SHARED

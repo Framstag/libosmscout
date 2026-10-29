@@ -83,6 +83,7 @@
 #include "routing_progress_throttle.h"
 #include "search_breaker.h"
 #include "search_scope.h"
+#include "search_scope_extent.h"
 #include "type_icon_pixels.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -4172,68 +4173,6 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
   }
 }
 
-// Derives the geographic extent of a resolved search scope from the object that
-// represents the region (change client-java-search-scope-extent, design D2).
-// An admin region carries no coordinates of its own: the extent therefore comes
-// from its object - an area or a way contributes its bounding box, a node
-// region only a point, which is approximated by the documented fallback box.
-// Every other outcome (no region, no database, the object not loadable, an
-// invalid box) leaves the extent unset, which makes the filter admit every
-// position. That is deliberate: a scope whose extent cannot be established must
-// degrade to the unscoped behaviour, never silently empty the search.
-static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
-                                            const osmscout::AdminRegionRef &region)
-{
-  if (!region) {
-    return naviveylin::UnsetGeoBox();
-  }
-
-  auto database = db->GetDatabase();
-  if (!database) {
-    osmscout::log.Warn() << "search scope: no database to derive the extent of region '"
-                         << region->name << "' from - filtering disabled";
-    return naviveylin::UnsetGeoBox();
-  }
-
-  osmscout::GeoBox box;
-  bool             loaded = false;
-
-  if (region->object.GetType() == osmscout::RefType::refArea) {
-    osmscout::AreaRef area;
-    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
-      box = area->GetBoundingBox();
-      loaded = box.IsValid();
-    }
-  } else if (region->object.GetType() == osmscout::RefType::refWay) {
-    osmscout::WayRef way;
-    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
-      box = way->GetBoundingBox();
-      loaded = box.IsValid();
-    }
-  } else if (region->object.GetType() == osmscout::RefType::refNode) {
-    osmscout::NodeRef node;
-    loaded = database->GetNodeByOffset(region->object.GetFileOffset(), node);
-    if (loaded) {
-      return naviveylin::BoxAroundPoint(node->GetCoords().GetLat(),
-                                       node->GetCoords().GetLon());
-    }
-  }
-
-  if (loaded) {
-    return naviveylin::BoxFromCorners(box.GetMinCoord().GetLat(),
-                                      box.GetMinCoord().GetLon(),
-                                      box.GetMaxCoord().GetLat(),
-                                      box.GetMaxCoord().GetLon());
-  }
-
-  // Identity in the line, never a coordinate.
-  osmscout::log.Warn() << "search scope: no extent for region '" << region->name
-                       << "' (object type " << static_cast<int>(region->object.GetType())
-                       << ") - filtering disabled";
-
-  return naviveylin::UnsetGeoBox();
-}
-
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -5007,10 +4946,10 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
           // Once per search call: the scope does not change while the databases
           // are walked, so its extent is derived from the resolving database only.
           if (!scopeExtentResolved) {
-            scopeExtent = DeriveScopeExtent(db,
-                                            scope.empty()
-                                              ? osmscout::AdminRegionRef()
-                                              : scope.front());
+            scopeExtent = naviveylin::DeriveScopeExtent(db,
+                                                        scope.empty()
+                                                          ? osmscout::AdminRegionRef()
+                                                          : scope.front());
             scopeExtentResolved = true;
           }
         } else if (effectiveRegion && !adminRegionDb) {
