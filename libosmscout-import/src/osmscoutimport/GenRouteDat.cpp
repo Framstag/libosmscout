@@ -94,6 +94,23 @@ namespace osmscout {
     return 1;
   }
 
+  /**
+   * The toll signal of a way, as the bit the object variant carries beside its grade.
+   *
+   * A type configuration without the Toll feature has no toll information, and its ways read as "no
+   * toll": the absence of the signal is never taken as a statement about price.
+   */
+  uint8_t RouteDataGenerator::TollBit(const Way& way) const
+  {
+    const TollFeatureValue *tollValue=tollReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (tollValue!=nullptr && tollValue->IsToll()) {
+      return ObjectVariantData::TollBit;
+    }
+
+    return 0;
+  }
+
   uint8_t RouteDataGenerator::CopyFlags(const Area::Ring& ring) const
   {
     uint8_t                            flags=0;
@@ -1604,7 +1621,7 @@ namespace osmscout {
               uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
                                                                          way->GetType(),
                                                                          GetMaxSpeed(*way),
-                                                                         GetGrade(*way));
+                                                                         GetGrade(*way) | TollBit(*way));
 
               if (way->IsCircular()) {
                 // Circular way routing (similar to current area routing, but respecting isOneway())
@@ -1733,11 +1750,13 @@ namespace osmscout {
     AccessFeatureValueReader           accessReader(*typeConfig);
     MaxSpeedFeatureValueReader         maxSpeedReader(*typeConfig);
     GradeFeatureValueReader            gradeReader(*typeConfig);
+    TollFeatureValueReader             tollReader(*typeConfig);
 
     this->accessRestrictedReader=&accessRestrictedReader;
     this->accessReader=&accessReader;
     this->maxSpeedReader=&maxSpeedReader;
     this->gradeReader=&gradeReader;
+    this->tollReader=&tollReader;
 
     //
     // Handling of restriction relations

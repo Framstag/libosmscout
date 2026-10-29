@@ -220,6 +220,11 @@ FEATURES
     en: "slope"
     de: "Steigung"
 
+  FEATURE Toll
+  DESC
+    en: "toll"
+    de: "Maut"
+
   FEATURE HighwayMilestone
   DESC
     en: "milestone"
@@ -440,7 +445,7 @@ TYPES
 
   TYPE highway_roundabout
     = WAY AREA ("highway"=="roundabout")
-      {Name, NameAlt}
+      {Name, NameAlt, Toll}
       PATH[FOOT BICYCLE CAR] PIN_WAY
       DESC
         en: "roundabout"
@@ -448,7 +453,7 @@ TYPES
 
   TYPE highway_motorway_junction
     = NODE ("highway"=="motorway_junction")
-      {Name, NameAlt, Ref}
+      {Name, NameAlt, Ref, Toll}
       PATH[CAR]
       DESC
         en: "motorway junction"

@@ -7226,10 +7226,12 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
   }
 
   if (avoidTolls) {
-    // Toll roads are tagged per-way, not per-type.
-    // Full support requires checking AccessFeature at routing time.
-    // For now, log that toll avoidance is requested but not fully implemented.
-    osmscout::log.Warn() << "  avoidTolls requested but requires per-way tag checking (not yet implemented)";
+    // The toll signal lives in the routing index beside the grade, so the profile can only price it when
+    // the database was imported by an importer that records it. A database without the signal reads as
+    // "no toll information" and this flag then changes nothing, by design.
+    profile->SetAvoidTolls(true);
+    osmscout::log.Warn() << "  avoiding toll roads (cost x" << profile->GetTollPenaltyFactor()
+                         << " on an object variant that records a toll)";
   }
 
   return profile;

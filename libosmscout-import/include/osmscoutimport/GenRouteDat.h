@@ -37,6 +37,7 @@
 #include <osmscout/feature/AccessFeature.h>
 #include <osmscout/feature/AccessRestrictedFeature.h>
 #include <osmscout/feature/GradeFeature.h>
+#include <osmscout/feature/TollFeature.h>
 #include <osmscout/feature/MaxSpeedFeature.h>
 
 #include <osmscout/routing/RouteNode.h>
@@ -107,6 +108,7 @@ namespace osmscout {
     AccessRestrictedFeatureValueReader *accessRestrictedReader;
     MaxSpeedFeatureValueReader         *maxSpeedReader;
     GradeFeatureValueReader            *gradeReader;
+    TollFeatureValueReader             *tollReader;
 
   private:
     AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;
@@ -118,7 +120,7 @@ namespace osmscout {
 
     uint8_t GetMaxSpeed(const Way& way) const;
     uint8_t GetGrade(const Way& way) const;
-
+    uint8_t TollBit(const Way& way) const;
     uint8_t CopyFlags(const Area::Ring& ring) const;
     uint8_t CopyFlagsForward(const Way& way) const;
     uint8_t CopyFlagsBackward(const Way& way) const;

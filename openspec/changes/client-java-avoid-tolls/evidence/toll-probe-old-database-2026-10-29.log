@@ -1,0 +1,37 @@
+bounding box: 52.7068,7.88853 .. 54.2874,9.15111
+object variants: 179  recording a toll: 0  grades: g1=116 g2=29 g3=21 g4=7 g5=6
+toll penalty factor: 3
+No route found!
+No route node found for target way
+No route node found for target way
+No route node found for target way
+No route found!
+No route node found for start way
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route node found for target way
+No route node found for target way
+No route node found for target way
+No route node found for target way
+No route node found for target way
+pairs routed: 30, differing with avoidTolls: 0, lost: 0
+corner pair (52.7068,7.8885 -> 52.7068,9.1511)
+  plain      -> no route (no routable node near start)
+  avoidTolls -> no route (no routable node near start)
+corner pair (52.7068,9.1511 -> 52.7068,7.8885)
+  plain      -> no route (no routable node near start)
+  avoidTolls -> no route (no routable node near start)
+corner pair (52.7068,7.8885 -> 54.2874,9.1511)
+  plain      -> no route (no routable node near start)
+  avoidTolls -> no route (no routable node near start)
+corner pair (54.2874,7.8885 -> 52.7068,9.1511)
+  plain      -> no route (no routable node near start)
+  avoidTolls -> no route (no routable node near start)

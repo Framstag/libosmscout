@@ -39,6 +39,7 @@
 #include <osmscout/feature/FeeFeature.h>
 #include <osmscout/feature/FromToFeature.h>
 #include <osmscout/feature/GradeFeature.h>
+#include <osmscout/feature/TollFeature.h>
 #include <osmscout/feature/IsInFeature.h>
 #include <osmscout/feature/IsInFeature.h>
 #include <osmscout/feature/LanesFeature.h>
@@ -722,6 +723,9 @@
 
     featureGrade=std::make_shared<GradeFeature>();
     RegisterFeature(featureGrade);
+
+    featureToll=std::make_shared<TollFeature>();
+    RegisterFeature(featureToll);
 
     RegisterFeature(std::make_shared<AdminLevelFeature>());
 
