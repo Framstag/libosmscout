@@ -108,7 +108,8 @@ namespace osmscout {
     AccessRestrictedFeatureValueReader *accessRestrictedReader;
     MaxSpeedFeatureValueReader         *maxSpeedReader;
     GradeFeatureValueReader            *gradeReader;
-    TollFeatureValueReader             *tollReader;
+    // Null while the Toll feature is not enabled in the type files; TollBit() then records no toll.
+    TollFeatureValueReader             *tollReader=nullptr;
 
   private:
     AccessFeatureValue GetAccess(const FeatureValueBuffer& buffer) const;

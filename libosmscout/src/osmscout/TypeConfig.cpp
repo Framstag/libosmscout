@@ -724,8 +724,14 @@
     featureGrade=std::make_shared<GradeFeature>();
     RegisterFeature(featureGrade);
 
-    featureToll=std::make_shared<TollFeature>();
-    RegisterFeature(featureToll);
+    // The Toll feature exists in the library but is NOT enabled (guidelines/FileFormatVersion.md,
+    // "A feature that exists but is not enabled"): registering it and listing it on a type would make
+    // every database built from these type files unreadable for older library builds, which is a
+    // FILE_FORMAT_VERSION bump and therefore a coordinated release with the map provider. Until then the
+    // class stays compiled and unused, and no type declares it, so no import can record a toll.
+    //
+    // featureToll=std::make_shared<TollFeature>();
+    // RegisterFeature(featureToll);
 
     RegisterFeature(std::make_shared<AdminLevelFeature>());
 
