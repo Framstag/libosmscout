@@ -1,0 +1,19 @@
+bounding box: 50,8 .. 50.03,8.05
+object variants: 2  recording a toll: 1  grades: g1=2 g2=0 g3=0 g4=0 g5=0
+toll penalty factor: 3
+  differing pair (50.0025,8.0208 -> 50.0075,8.0292)
+  plain      path=3584.7m points=2 entries=2
+  avoidTolls path=7575.1m points=3 entries=3
+pairs routed: 36, differing with avoidTolls: 1, lost: 0
+corner pair (50.0000,8.0000 -> 50.0000,8.0500)
+  plain      path=3584.7m points=2 entries=2
+  avoidTolls path=7575.1m points=3 entries=3
+corner pair (50.0000,8.0500 -> 50.0000,8.0000)
+  plain      path=3584.7m points=2 entries=2
+  avoidTolls path=7575.1m points=3 entries=3
+corner pair (50.0000,8.0000 -> 50.0300,8.0500)
+  plain      path=3787.5m points=2 entries=2
+  avoidTolls path=3787.5m points=2 entries=2
+corner pair (50.0300,8.0000 -> 50.0000,8.0500)
+  plain      path=3787.6m points=2 entries=2
+  avoidTolls path=3787.6m points=2 entries=2

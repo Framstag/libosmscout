@@ -52,6 +52,15 @@ public interface RouteCallback {
     int KIND_ENGINE_FAILURE = 6;
 
     /**
+     * The routing data was not loaded yet: the database open the caller issued had not been
+     * registered when the calculation started, so the same call can succeed a moment later.
+     * <p>
+     * Distinct from {@link #KIND_ROUTING_DATA_UNAVAILABLE}, which a database that cannot be opened
+     * reports: a retry clears this one, a different or re-downloaded map clears the other.
+     */
+    int KIND_DATABASE_NOT_LOADED = 7;
+
+    /**
      * Called periodically during route calculation.
      *
      * @param percent progress percentage (0-100)

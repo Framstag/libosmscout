@@ -124,21 +124,21 @@ public class OSMScoutClientInstructionDistanceTest {
             assertTrue(route.distance > 0.0, "route should have a length");
             assertTrue(route.latitudes.length > 2, "route geometry should have several points");
 
-            AtomicReference<RouteInstruction[]> listHolder = new AtomicReference<>();
-            AtomicReference<RouteInstruction> nextHolder = new AtomicReference<>();
+            AtomicReference<RouteStep[]> listHolder = new AtomicReference<>();
+            AtomicReference<RouteStep> nextHolder = new AtomicReference<>();
             CountDownLatch listLatch = new CountDownLatch(1);
             CountDownLatch nextLatch = new CountDownLatch(1);
 
             NavigationListener listener = new NavigationListener() {
                 @Override
-                public void onRouteInstructions(RouteInstruction[] instructions) {
-                    listHolder.set(instructions);
+                public void onRouteSteps(RouteStep[] steps) {
+                    listHolder.set(steps);
                     listLatch.countDown();
                 }
 
                 @Override
-                public void onNextRouteInstruction(RouteInstruction instruction) {
-                    nextHolder.set(instruction);
+                public void onNextRouteStep(RouteStep step) {
+                    nextHolder.set(step);
                     nextLatch.countDown();
                 }
 
@@ -163,17 +163,17 @@ public class OSMScoutClientInstructionDistanceTest {
             assertTrue(nextLatch.await(30, TimeUnit.SECONDS),
                 "the next instruction should be delivered on the route change");
 
-            RouteInstruction[] list = listHolder.get();
+            RouteStep[] list = listHolder.get();
             assertNotNull(list, "instruction list should not be null");
             assertTrue(list.length > 0, "instruction list should not be empty");
 
             System.out.println("[InstructionDistanceTest] route.distance=" + route.distance
                 + " geometryLength=" + polylineLength(route)
                 + " instructions=" + list.length);
-            for (RouteInstruction instruction : list) {
-                System.out.println("[InstructionDistanceTest]   " + instruction.turnType
-                    + " distanceTo=" + instruction.distanceTo
-                    + " short=" + instruction.shortDescription);
+            for (RouteStep step : list) {
+                System.out.println("[InstructionDistanceTest]   " + step.kind
+                    + " distanceFromStart=" + step.distanceFromStart
+                    + " leg=" + step.legDistance);
             }
 
             // The arrival instruction is the last entry of the list and carries the
@@ -181,23 +181,24 @@ public class OSMScoutClientInstructionDistanceTest {
             // it must be greater than zero and at least as large as every other
             // instruction's distance. Reporting 0 here made it indistinguishable from the
             // route start.
-            RouteInstruction arrival = list[list.length - 1];
-            assertEquals(TurnType.TARGET_REACHED, arrival.turnType,
-                "the last instruction of the list should be the arrival");
-            assertTrue(arrival.distanceTo > 0.0,
-                "the arrival instruction should carry a distance, not 0 (was " +
-                    arrival.distanceTo + ")");
-            for (RouteInstruction instruction : list) {
-                assertTrue(arrival.distanceTo >= instruction.distanceTo,
-                    "the arrival instruction should carry the largest distance of the list"
-                        + " (arrival " + arrival.distanceTo + ", " + instruction.turnType
-                        + " " + instruction.distanceTo + ")");
+            RouteStep arrival = list[list.length - 1];
+            assertEquals(RouteStep.Kind.TARGET, arrival.kind,
+                "the last step of the list should be the arrival");
+            assertTrue(arrival.distanceFromStart > 0.0,
+                "the arrival step should carry a distance from the start, not 0 (was " +
+                    arrival.distanceFromStart + ")");
+            for (RouteStep step : list) {
+                assertTrue(arrival.distanceFromStart >= step.distanceFromStart,
+                    "the arrival step should carry the largest distance of the list"
+                        + " (arrival " + arrival.distanceFromStart + ", " + step.kind
+                        + " " + step.distanceFromStart + ")");
             }
 
-            RouteInstruction firstNext = nextHolder.get();
-            assertNotNull(firstNext, "the next instruction should be delivered");
-            assertTrue(firstNext.distanceTo >= 0.0,
-                "the next instruction's distance should not be negative");
+            RouteStep firstNext = nextHolder.get();
+            assertNotNull(firstNext, "the next step should be delivered");
+            double firstRemaining = remainingOf(firstNext);
+            assertTrue(firstRemaining >= 0.0,
+                "the next step's remaining distance should not be negative");
 
             // Feed a fix between two route points, so the position agent reports progress
             // *inside* a segment instead of exactly on a node (where progress would be 0 and
@@ -210,13 +211,14 @@ public class OSMScoutClientInstructionDistanceTest {
 
             controller.processLocation(laterLat, laterLon, -1.0, -1.0, baseTime + 2000);
 
-            RouteInstruction laterNext = waitForNextInstruction(nextHolder, 30);
-            assertNotNull(laterNext, "the next instruction should be delivered for the later fix");
-            assertTrue(laterNext.distanceTo >= 0.0,
-                "the next instruction's distance should not be negative");
-            assertTrue(laterNext.distanceTo <= firstNext.distanceTo,
+            RouteStep laterNext = waitForNextStep(nextHolder, 30);
+            assertNotNull(laterNext, "the next step should be delivered for the later fix");
+            double laterRemaining = remainingOf(laterNext);
+            assertTrue(laterRemaining >= 0.0,
+                "the next step's remaining distance should not be negative");
+            assertTrue(laterRemaining <= firstRemaining,
                 "the remaining distance should shrink as the position advances along the route"
-                    + " (was " + firstNext.distanceTo + ", later " + laterNext.distanceTo + ")");
+                    + " (was " + firstRemaining + ", later " + laterRemaining + ")");
 
             controller.stop();
         } finally {
@@ -224,16 +226,21 @@ public class OSMScoutClientInstructionDistanceTest {
         }
     }
 
-    /** Polls the holder for a next instruction, so the test does not depend on callback timing. */
-    private static RouteInstruction waitForNextInstruction(AtomicReference<RouteInstruction> holder,
-                                                          long timeoutSeconds)
+    /** The remaining distance the engine published for a live step; unknown reads as 0. */
+    private static double remainingOf(RouteStep step) {
+        return step.remainingDistance == null ? 0.0 : step.remainingDistance;
+    }
+
+    /** Polls the holder for a next step, so the test does not depend on callback timing. */
+    private static RouteStep waitForNextStep(AtomicReference<RouteStep> holder,
+                                             long timeoutSeconds)
         throws InterruptedException {
         long deadline = System.currentTimeMillis() + timeoutSeconds * 1000;
 
         while (System.currentTimeMillis() < deadline) {
-            RouteInstruction instruction = holder.get();
-            if (instruction != null) {
-                return instruction;
+            RouteStep step = holder.get();
+            if (step != null) {
+                return step;
             }
             Thread.sleep(50);
         }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Toll test map for change client-java-avoid-tolls.
+
+  Two ways between the same pair of places: a short one that charges a toll and a longer free one.
+  A profile without avoidTolls takes the short one; a profile with it must take the detour, and a
+  profile running against a database that records no toll information must take the short one too.
+
+  A (50.000,8.000) to B (50.000,8.050): the short way is 3.5 km and charges a toll, the free way runs
+  via C (50.030,8.025) and is about 7.4 km long.
+-->
+<osm version="0.6" generator="hand-written">
+
+  <node id="1" lat="50.0000" lon="8.0000"/>
+  <node id="2" lat="50.0000" lon="8.0500"/>
+  <node id="3" lat="50.0300" lon="8.0250"/>
+
+  <!-- The short way between A and B: it charges a toll. -->
+  <way id="10">
+    <nd ref="1"/>
+    <nd ref="2"/>
+    <tag k="highway" v="motorway"/>
+    <tag k="toll" v="yes"/>
+    <tag k="name" v="Toll Shortcut"/>
+  </way>
+
+  <!-- The longer way between A and B: free, and about 6.9 km. It is a motorway like the toll way, so
+       the only thing that separates the two is the toll. -->
+  <way id="11">
+    <nd ref="1"/>
+    <nd ref="3"/>
+    <tag k="highway" v="trunk"/>
+    <tag k="name" v="Free Detour West"/>
+  </way>
+
+  <way id="12">
+    <nd ref="3"/>
+    <nd ref="2"/>
+    <tag k="highway" v="trunk"/>
+    <tag k="name" v="Free Detour East"/>
+  </way>
+
+</osm>

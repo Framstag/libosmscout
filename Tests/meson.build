@@ -486,6 +486,23 @@ if buildImport
     ostandossEnv.set('TESTS_TOP_DIR', meson.current_source_dir())
     test('Check LocationService', LocationServiceTest, env: ostandossEnv)
 
+    # The derivation behind the scope filter (issue #20): it loads the scope
+    # region's object, so it imports its own fixture at start-up and is compiled
+    # from the client-java source beside its case, against the client library that
+    # owns DBInstance.
+    SearchScopeExtentTest = executable('SearchScopeExtentTest',
+                 [
+                   'src/SearchScopeExtentTest.cpp',
+                   '../libosmscout-client-java/src/search_scope_extent.cpp'
+                 ],
+                 include_directories: [testIncDir, osmscouttestIncDir, osmscoutimportIncDir, osmscoutIncDir, osmscoutmapIncDir, osmscoutclientIncDir, include_directories('../libosmscout-client-java/src')],
+                 dependencies: [mathDep, openmpDep, catch2Dep],
+                 link_with: [osmscoutclient, osmscoutmap, osmscouttest, osmscoutimport, osmscout],
+                 install: true,
+                 install_dir: testInstallDir)
+
+    test('Check search scope extent', SearchScopeExtentTest, env: ostandossEnv)
+
 LocationDescriptionServiceTest = executable('LocationDescriptionServiceTest',
                                            'src/LocationDescriptionServiceTest.cpp',
                                            include_directories: [osmscoutIncDir],
@@ -884,6 +901,15 @@ SearchBreakerTest = executable('SearchBreakerTest',
              install_dir: testInstallDir)
 
 test('Check search breaker', SearchBreakerTest)
+
+RouteStartTest = executable('RouteStartTest',
+             'src/RouteStartTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route start', RouteStartTest)
 
 RoutingProgressThrottleTest = executable('RoutingProgressThrottleTest',
              'src/RoutingProgressThrottleTest.cpp',

@@ -1,7 +1,6 @@
 package com.framstag.libosmscout;
 
 import com.framstag.libosmscout.client.RouteEntry;
-import com.framstag.libosmscout.client.RouteInstruction;
 import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.TurnType;
 
@@ -134,56 +133,6 @@ class RouteRowBuilderTest {
     }
 
     @Test
-    void testRouteWithoutStepsFallsBackToDescriptionLines() {
-        RouteEntry route = new RouteEntry();
-
-        route.steps = null;
-        route.descriptions = new String[]{
-            "--- Route ---",
-            "Start: Home  [0 m]",
-            "Left onto Ringstrasse  [3.4 km, 2 min]"
-        };
-        // The per-instruction positions are index-aligned with the instruction lines only, so the
-        // description list is one entry longer than them: the header is dropped structurally.
-        route.instructionLats = new double[]{52.0, 52.02};
-
-        List<RouteRowBuilder.Row> rows = RouteRowBuilder.buildRows(route);
-
-        assertEquals(2, rows.size());
-        assertEquals("Start: Home  [0 m]", rows.get(0).primary);
-        assertEquals("Left onto Ringstrasse  [3.4 km, 2 min]", rows.get(1).primary);
-    }
-
-    @Test
-    void testHeaderIsNotRecognisedByItsText() {
-        RouteEntry route = new RouteEntry();
-
-        route.steps = null;
-        // A description line whose text is a manoeuvre, in a list that carries a header: the entry
-        // the alignment excludes is dropped because of its position, never because of its text.
-        route.descriptions = new String[]{"Turn left into X", "Right onto Y"};
-        route.instructionLats = new double[]{52.0};
-
-        List<RouteRowBuilder.Row> rows = RouteRowBuilder.buildRows(route);
-
-        assertEquals(1, rows.size());
-        assertEquals("Right onto Y", rows.get(0).primary);
-
-        // Without alignment information nothing is dropped: a line that happens to read like a
-        // header is a row, because its text is not inspected.
-        RouteEntry unaligned = new RouteEntry();
-
-        unaligned.steps = null;
-        unaligned.descriptions = new String[]{"--- Route ---"};
-        unaligned.instructionLats = null;
-
-        List<RouteRowBuilder.Row> unalignedRows = RouteRowBuilder.buildRows(unaligned);
-
-        assertEquals(1, unalignedRows.size());
-        assertEquals("--- Route ---", unalignedRows.get(0).primary);
-    }
-
-    @Test
     void testEmptyResultProducesNoRow() {
         assertTrue(RouteRowBuilder.buildRows(null).isEmpty());
         assertTrue(RouteRowBuilder.buildRows(new RouteEntry()).isEmpty());
@@ -191,11 +140,13 @@ class RouteRowBuilderTest {
 
     @Test
     void testNextTurnDetailCarriesTheFactsAsData() {
-        RouteInstruction withFacts = new RouteInstruction(
-            200.0, 12.0, 200.0, TurnType.RIGHT, "B233",
-            "Turn right into B233", "Turn right",
-            0.0, TurnType.STRAIGHT_ON, "", "", 0, true, 0,
-            "12", "Kreuz Kamen", "Dortmund;Kamen", "highway_motorway_link", 80);
+        RouteStep withFacts = new RouteStep();
+
+        withFacts.kind = RouteStep.Kind.MOTORWAY_LEAVE;
+        withFacts.junction = new RouteStep.Name();
+        withFacts.junction.ref = "12";
+        withFacts.junction.name = "Kreuz Kamen";
+        withFacts.destination = "Dortmund;Kamen";
 
         String detail = RouteRowBuilder.nextTurnDetail(withFacts);
 
@@ -203,10 +154,13 @@ class RouteRowBuilderTest {
         assertTrue(detail.contains("Kreuz Kamen"), "detail shows the junction name: " + detail);
         assertTrue(detail.contains("Dortmund;Kamen"), "detail shows the destination: " + detail);
 
-        // A turn instruction without those facts contributes nothing, so the display renders as
-        // before.
-        RouteInstruction plain = new RouteInstruction(
-            200.0, TurnType.LEFT, "Hauptstrasse", "Turn left", "Turn left");
+        // A turn step without those facts contributes nothing, so the display renders as before.
+        RouteStep plain = new RouteStep();
+
+        plain.kind = RouteStep.Kind.TURN;
+        plain.turn = TurnType.LEFT;
+        plain.name = new RouteStep.Name();
+        plain.name.name = "Hauptstrasse";
 
         assertTrue(RouteRowBuilder.nextTurnDetail(plain).isEmpty());
         assertFalse(RouteRowBuilder.nextTurnDetail(plain).contains("Exit"));

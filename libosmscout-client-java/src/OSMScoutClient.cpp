@@ -46,6 +46,7 @@
 #include <osmscoutclient/DatabasePathRegistry.h>
 #include <osmscoutclient/Settings.h>
 #include <osmscoutclient/routing/RouteStep.h>
+#include <osmscoutclient/routing/RouteStepBuilder.h>
 #include <osmscoutclient/routing/RouteStepCollector.h>
 
 #include <osmscout/db/Database.h>
@@ -77,11 +78,13 @@
 #include "render_label_bounds.h"
 #include "route_failure_kind.h"
 #include "route_length.h"
+#include "route_start.h"
 #include "route_step_time.h"
 #include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
 #include "search_breaker.h"
 #include "search_scope.h"
+#include "search_scope_extent.h"
 #include "type_icon_pixels.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -146,6 +149,24 @@ bool IsBasemapDatabase(const osmscout::DBInstanceRef& db)
     return false;
   }
   return typeConfig->GetTypeInfo("basemap_boundary_country") != nullptr;
+}
+
+/**
+ * The distance at which a route's own step list ends: the largest cumulative distance of its
+ * steps, which is the description's last node and therefore the route's length (spec:
+ * route-calculation - The published route length is a length of that route). Read from the
+ * steps, so publishing a route needs no second description walk (change
+ * `retire-instruction-prose`).
+ */
+double LastStepDistanceMeters(const std::vector<osmscout::client::RouteStep>& steps)
+{
+  double last=0.0;
+
+  for (const auto& step : steps) {
+    last=std::max(last, step.distanceFromStart.AsMeter());
+  }
+
+  return last;
 }
 
 // Search requests carry a generation and one slot per surface, so a new query or
@@ -3308,20 +3329,14 @@ struct NavigationListenerMethods
   jmethodID onLaneUpdate{nullptr};
   jmethodID onVoiceInstruction{nullptr};
   jmethodID onError{nullptr};
-  jmethodID onRouteInstructions{nullptr};
-  jmethodID onNextRouteInstruction{nullptr};
+  jmethodID onRouteSteps{nullptr};
+  jmethodID onNextRouteStep{nullptr};
 
   jobject positionClsGlobal{nullptr};
   jmethodID positionCtor{nullptr};
 
   jobject stateClsGlobal{nullptr};
   jmethodID stateValueOf{nullptr};
-
-  jobject instructionClsGlobal{nullptr};
-  jmethodID instructionCtor{nullptr};
-
-  jobject turnTypeClsGlobal{nullptr};
-  jmethodID turnTypeValueOf{nullptr};
 
   jobject laneTurnClsGlobal{nullptr};
   jmethodID laneTurnFromId{nullptr};
@@ -3330,7 +3345,7 @@ struct NavigationListenerMethods
 // A failed FindClass / GetMethodID / GetStaticMethodID leaves a *pending* exception
 // (ClassNotFoundException, NoSuchMethodError, ...). While one is pending, the next JNI call
 // aborts the process - "JNI DETECTED ERROR IN APPLICATION: JNI FindClass called with pending
-// exception java.lang.NoSuchMethodError: no non-static method \"...RouteInstruction;.<init>(...)\""
+// exception java.lang.NoSuchMethodError: no non-static method \"...RouteStep;.<init>()V\""
 // - so every null-returning guard downstream becomes unreachable and a mismatching
 // descriptor crashes at bridge init instead of degrading. Clearing it here is what makes a
 // missing class or method a null method id, and from there a refused dispatch.
@@ -3418,35 +3433,15 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
         "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/NavigationState;");
   }
 
-  // Route instruction callbacks
-  methods.onRouteInstructions = GetMethodOrClear(
-      env, listenerCls, "onRouteInstructions",
-      "([Lcom/framstag/libosmscout/client/RouteInstruction;)V");
-  methods.onNextRouteInstruction = GetMethodOrClear(
-      env, listenerCls, "onNextRouteInstruction",
-      "(Lcom/framstag/libosmscout/client/RouteInstruction;)V");
-
-  jclass instructionCls = FindClassOrClear(env, "com/framstag/libosmscout/client/RouteInstruction");
-  if (instructionCls) {
-    methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
-    // The descriptor must match the full Java constructor exactly - it is the one
-    // with the roundabout fields. A mismatch leaves instructionCtor null, which
-    // CreateJavaRouteInstruction reports by returning null (see DispatchRouteInstructions,
-    // which then sends no instructions rather than an array with null entries). That path
-    // is only reachable because the lookup clears its own pending exception above: left
-    // pending, the exception aborts the process on the next JNI call, before any of this.
-    methods.instructionCtor = GetMethodOrClear(
-        env, instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V");
-  }
-
-  jclass turnTypeCls = FindClassOrClear(env, "com/framstag/libosmscout/client/TurnType");
-  if (turnTypeCls) {
-    methods.turnTypeClsGlobal = env->NewGlobalRef(turnTypeCls);
-    methods.turnTypeValueOf = GetStaticMethodOrClear(
-        env, turnTypeCls, "fromString",
-        "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/TurnType;");
-  }
+  // Route step callbacks. Live guidance publishes the same structured record a calculated
+  // route publishes, so the listener's parameter type is RouteStep and no guidance text is
+  // carried at all.
+  methods.onRouteSteps = GetMethodOrClear(
+      env, listenerCls, "onRouteSteps",
+      "([Lcom/framstag/libosmscout/client/RouteStep;)V");
+  methods.onNextRouteStep = GetMethodOrClear(
+      env, listenerCls, "onNextRouteStep",
+      "(Lcom/framstag/libosmscout/client/RouteStep;)V");
 
   jclass laneTurnCls = FindClassOrClear(env, "com/framstag/libosmscout/client/LaneTurn");
   if (laneTurnCls) {
@@ -3458,494 +3453,6 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
 
   return true;
 }
-
-// --------------------------------------------------------------------------
-// JavaRouteInstruction — lightweight instruction type for JNI bridge
-// --------------------------------------------------------------------------
-
-struct JavaRouteInstruction
-{
-  double distanceTo{0.0};       // meters to next manoeuvre
-  double timeTo{0.0};           // seconds of the leg ending at this manoeuvre
-  double legDistance{0.0};      // meters of that leg (0 = unknown, see legStartKnown)
-  double nodeTimeSeconds{0.0};  // C++ internal: seconds from the route start at this
-                                // manoeuvre's node; the remaining-time estimate needs it
-  std::string turnType;         // "sharpLeft", "left", "straightOn", etc.
-  std::string streetName;       // street to turn into
-  std::string description;      // "Turn left into Hauptstrasse"
-  std::string shortDescription; // "Turn left"
-
-  // Roundabout manoeuvres: the 1-based ordinal, counted in circulation order, of the
-  // exit the route takes, and the ring's circulation direction. 0 / true when the
-  // instruction is not a roundabout manoeuvre.
-  //
-  // libosmscout's RoundaboutLeaveDescription::GetExitCount() counts the exits passed
-  // (RoutePostprocessor: roundaboutCrossingCounter), so the value it returns IS that
-  // ordinal - it is not the number of exits the ring has, which no part of the
-  // description carries. The English "Exit N" text is not a substitute for either
-  // field: it carries no direction, and an unparseable text is indistinguishable
-  // from an unknown exit at the call site.
-  int roundaboutExitNumber{0};
-  bool roundaboutClockwise{true};
-
-  // Optional "next next" hint — populated when the following instruction
-  // is within CloseHintDistance of the current one (e.g. roundabout exit).
-  double nextNextDistanceTo{0.0};
-  std::string nextNextTurnType;
-  std::string nextNextDescription;
-  std::string nextNextShortDescription;
-
-  // The following manoeuvre's roundabout exit ordinal, on the same terms as
-  // roundaboutExitNumber: 0 when the hint's manoeuvre is not a roundabout exit or the hint
-  // is absent. It is its own field because the hint can be a different roundabout from the
-  // one roundaboutExitNumber describes.
-  int nextNextRoundaboutExitNumber{0};
-
-  // The manoeuvre facts of the instruction's route node, read from the route step model of that
-  // node. An empty value (and maxSpeedKmh < 0) means "absent": the step carries these as
-  // optional values, so an absent fact is distinguishable from a known empty or zero one.
-  std::string junctionRef;   // exit reference of the motorway junction
-  std::string junctionName;  // name of the motorway junction
-  std::string destinations;  // raw semicolon separated destination tag
-  std::string wayType;       // type name of the way
-  int maxSpeedKmh{-1};       // maximum speed in km/h, < 0 when unknown
-
-  static constexpr double CloseHintDistance = 200.0; // meters
-
-  osmscout::Distance GetDistance() const
-  {
-    return osmscout::Distance::Of<osmscout::Meter>(distanceTo);
-  }
-};
-
-// --------------------------------------------------------------------------
-// JavaRouteInstructionBuilder — walks RouteDescription nodes via
-// RouteDescriptionPostprocessor and produces JavaRouteInstruction lists.
-// Duplicates some logic from Qt's RouteDescriptionBuilder but avoids
-// pulling Qt into the Java JNI build.
-// --------------------------------------------------------------------------
-
-class JavaRouteInstructionBuilder
-{
-public:
-  std::list<JavaRouteInstruction> GenerateRouteInstructions(
-      osmscout::RouteDescription::NodeIterator first,
-      osmscout::RouteDescription::NodeIterator last) const
-  {
-    std::list<JavaRouteInstruction> result;
-    CollectCallback callback(result);
-    osmscout::RouteDescriptionPostprocessor postprocessor;
-    postprocessor.GenerateDescription(first, last, callback);
-    return result;
-  }
-
-  JavaRouteInstruction GenerateNextRouteInstruction(
-      osmscout::RouteDescription::NodeIterator previous,
-      osmscout::RouteDescription::NodeIterator last,
-      const osmscout::GeoCoord &coord,
-      double abscissa) const
-  {
-    if (previous == last) {
-      return JavaRouteInstruction{};
-    }
-
-    // Collect instructions from current position forward.
-    // Use generous stopAfter so we get enough nodes ahead for "next next".
-    double nodeDist = previous->GetDistance().AsMeter();
-    osmscout::Distance stopAfter = previous->GetDistance()
-        + osmscout::Distance::Of<osmscout::Meter>(JavaRouteInstruction::CloseHintDistance * 2);
-
-    std::list<JavaRouteInstruction> collected;
-    CollectCallback callback(collected, stopAfter);
-    osmscout::RouteDescriptionPostprocessor postprocessor;
-    postprocessor.GenerateDescription(previous, last, callback);
-
-    if (collected.empty()) {
-      return JavaRouteInstruction{};
-    }
-
-    // Find first instruction past current node → "next"
-    auto it = collected.begin();
-    while (it != collected.end() && it->distanceTo <= nodeDist) {
-      ++it;
-    }
-    if (it == collected.end()) {
-      return JavaRouteInstruction{};
-    }
-
-    double nextAbs = it->distanceTo; // absolute distance of next instruction
-    JavaRouteInstruction next = *it;
-    ++it;
-    bool hasNextNext = (it != collected.end());
-
-    // Convert absolute distances to remaining distances. The travelled part is
-    // taken from the position's progress along its current route segment: the
-    // straight-line distance from the segment start understates the travelled
-    // distance on a segment that folds back and overstates it with cross-track
-    // GPS error, which both distort the distance to the next manoeuvre. A
-    // position that reports no progress (an unsnapped fix) keeps that estimate.
-    double travelled = osmscout::GetEllipsoidalDistance(coord, previous->GetLocation()).AsMeter();
-    auto nextNode = previous;
-    ++nextNode;
-    if (abscissa > 0.0 && nextNode != last) {
-      double segmentLength = osmscout::GetEllipsoidalDistance(previous->GetLocation(),
-                                                             nextNode->GetLocation()).AsMeter();
-      if (segmentLength > 0.0) {
-        travelled = std::min(segmentLength * abscissa, segmentLength);
-      }
-    }
-    double raw = nextAbs - nodeDist - travelled;
-    next.distanceTo = (raw > 0.0) ? raw : 0.0;
-
-    // The next manoeuvre's time is the *remaining* time of its leg, consistent with the remaining
-    // distance above: interpolate the description's own node times at the current position (the
-    // same abscissa the distance path uses) and take the difference to the instruction's node.
-    // Publishing the leg's whole time instead left an arrival estimate that did not shrink while
-    // the manoeuvre was approached, next to a distance that did.
-    double timeAtPosition = TimeSeconds(previous->GetTime());
-    if (abscissa > 0.0 && nextNode != last) {
-      double nodeTime = timeAtPosition;
-      double nextNodeTime = TimeSeconds(nextNode->GetTime());
-      timeAtPosition = nodeTime + std::min(abscissa, 1.0) * (nextNodeTime - nodeTime);
-    }
-    double remainingTime = next.nodeTimeSeconds - timeAtPosition;
-    next.timeTo = (remainingTime > 0.0) ? remainingTime : 0.0;
-
-    // Populate "next next" hint
-    if (hasNextNext) {
-      double nnAbs = it->distanceTo;
-      double gap = nnAbs - nextAbs;
-      if (gap > 0 && gap <= JavaRouteInstruction::CloseHintDistance) {
-        next.nextNextDistanceTo = gap; // relative to "next", not absolute
-        next.nextNextTurnType = it->turnType;
-        next.nextNextDescription = it->description;
-        next.nextNextShortDescription = it->shortDescription;
-        next.nextNextRoundaboutExitNumber = it->roundaboutExitNumber;
-      }
-    }
-
-    return next;
-  }
-
-private:
-  /** Whole seconds of a description duration (the granularity the route description has). */
-  static double TimeSeconds(const osmscout::Duration &duration)
-  {
-    return static_cast<double>(
-        std::chrono::duration_cast<std::chrono::seconds>(duration).count());
-  }
-
-  // -- Turn type helpers (mirrors Demos/src/Navigation.cpp::MoveToTurnCommand) --
-
-  static std::string MoveToTurnType(osmscout::RouteDescription::DirectionDescription::Move move)
-  {
-    switch (move) {
-      case osmscout::RouteDescription::DirectionDescription::sharpLeft:    return "sharpLeft";
-      case osmscout::RouteDescription::DirectionDescription::left:         return "left";
-      case osmscout::RouteDescription::DirectionDescription::slightlyLeft: return "slightlyLeft";
-      case osmscout::RouteDescription::DirectionDescription::straightOn:   return "straightOn";
-      case osmscout::RouteDescription::DirectionDescription::slightlyRight:return "slightlyRight";
-      case osmscout::RouteDescription::DirectionDescription::right:        return "right";
-      case osmscout::RouteDescription::DirectionDescription::sharpRight:   return "sharpRight";
-    }
-    return "straightOn";
-  }
-
-  static std::string MoveToDescription(osmscout::RouteDescription::DirectionDescription::Move move)
-  {
-    switch (move) {
-      case osmscout::RouteDescription::DirectionDescription::sharpLeft:    return "Turn sharp left";
-      case osmscout::RouteDescription::DirectionDescription::left:         return "Turn left";
-      case osmscout::RouteDescription::DirectionDescription::slightlyLeft: return "Turn slightly left";
-      case osmscout::RouteDescription::DirectionDescription::straightOn:   return "Straight on";
-      case osmscout::RouteDescription::DirectionDescription::slightlyRight:return "Turn slightly right";
-      case osmscout::RouteDescription::DirectionDescription::right:        return "Turn right";
-      case osmscout::RouteDescription::DirectionDescription::sharpRight:   return "Turn sharp right";
-    }
-    return "Straight on";
-  }
-
-  static std::string NameOrRef(const osmscout::RouteDescription::NameDescriptionRef &nameDesc)
-  {
-    if (!nameDesc) return "";
-    if (nameDesc->HasName()) return nameDesc->GetName();
-    std::string ref = nameDesc->GetRef();
-    return ref.empty() ? "" : ref;
-  }
-
-  // -- Callback that collects JavaRouteInstruction from RouteDescriptionPostprocessor --
-
-  class CollectCallback : public osmscout::RouteDescriptionPostprocessor::Callback
-  {
-  private:
-    std::list<JavaRouteInstruction> &result;
-    osmscout::Distance stopAfter; // < 0 = unlimited
-    osmscout::GeoCoord coord;
-    osmscout::Distance distance;
-    osmscout::Distance prevInstructionDistance{osmscout::Distance::Zero()};
-    osmscout::Duration prevTime{osmscout::Duration::zero()};
-    osmscout::Duration time{osmscout::Duration::zero()};
-    // True while the walk contains the beginning of the leg that ends at the next emitted
-    // instruction. It does unless the walk starts mid-leg (see BeforeNode).
-    bool legStartKnown{true};
-    bool firstNode{true};
-    std::string currentStreet;
-    // The step of the node whose hook is running: the manoeuvre facts of the instruction come
-    // from it, so the instruction and the published steps cannot describe one manoeuvre
-    // differently.
-    osmscout::client::RouteStep currentStep;
-    bool currentStepValid{false};
-
-  public:
-    CollectCallback(std::list<JavaRouteInstruction> &result,
-                    osmscout::Distance stopAfter = osmscout::Distance::Lowest())
-      : result(result), stopAfter(stopAfter) {}
-
-    void BeforeNode(const osmscout::RouteDescription::Node &node) override
-    {
-      if (firstNode) {
-        // The walk's first node begins a leg only when it is the route's start: only then is
-        // the instruction before it part of the walk. A window that starts mid-leg (the
-        // instruction list is rebuilt from the current node on a route change, and the next
-        // instruction is generated from the current node) cannot know that leg, so its first
-        // emitted instruction reports unknown values instead of a cumulative-from-the-route-
-        // start number (owner finding 2026-10-04: "14 m / 2 s" per step).
-        legStartKnown = node.GetDistance().AsMeter() <= 0.0;
-        firstNode = false;
-      }
-      time = node.GetTime();
-      distance = node.GetDistance();
-      coord = node.GetLocation();
-
-      auto nodeStep=osmscout::client::RouteStepCollector::BuildNodeStep(node);
-
-      currentStepValid=nodeStep.has_value();
-      currentStep=nodeStep.value_or(osmscout::client::RouteStep());
-    }
-
-    /**
-     * Fill the leg values of one instruction: its distance and time are measured from the
-     * previous *emitted instruction*, not from the previous route node.
-     *
-     * A node-based delta is the last geometry edge before the manoeuvre, so the per-step values
-     * never added up to the route's distance or duration (device: "14 m" + "2 s" for one step of
-     * a 17,3 km route, 2026-10-04). Qt's RouteDescriptionBuilder::MkStep advances its reference
-     * per emitted step; this is the same rule. Call it once per emitted instruction - it advances
-     * the reference.
-     */
-    void FillLeg(JavaRouteInstruction &instr)
-    {
-      auto dt = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
-      osmscout::Distance legDistance = distance - prevInstructionDistance;
-
-      instr.nodeTimeSeconds = static_cast<double>(
-          std::chrono::duration_cast<std::chrono::seconds>(time).count());
-
-      // The manoeuvre facts of this node, from its step (spec: turn-by-turn-instructions - Java
-      // RouteInstruction data class). They are values, not prose: the description text below stays
-      // byte-identical.
-      if (currentStepValid) {
-        if (currentStep.junction) {
-          instr.junctionRef=currentStep.junction->ref;
-          instr.junctionName=currentStep.junction->name;
-        }
-
-        if (currentStep.destination) {
-          instr.destinations=*currentStep.destination;
-        }
-
-        if (currentStep.typeName) {
-          instr.wayType=*currentStep.typeName;
-        }
-
-        if (currentStep.maxSpeed) {
-          instr.maxSpeedKmh=static_cast<int>(*currentStep.maxSpeed);
-        }
-      }
-
-      if (legStartKnown) {
-        instr.legDistance = static_cast<double>(legDistance.AsMeter());
-        instr.timeTo = static_cast<double>(dt.count());
-      }
-      else {
-        instr.legDistance = 0.0;
-        instr.timeTo = 0.0;
-      }
-
-      prevTime = time;
-      prevInstructionDistance = distance;
-      legStartKnown = true;
-    }
-
-    bool Continue() const override
-    {
-      return stopAfter < osmscout::Distance::Zero() ||
-             result.empty() ||
-             result.back().distanceTo <= stopAfter.AsMeter();
-    }
-
-    void OnStart(const osmscout::RouteDescription::StartDescriptionRef &startDesc,
-                 const osmscout::RouteDescription::TypeNameDescriptionRef & /*typeNameDesc*/,
-                 const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-    {
-      currentStreet = NameOrRef(nameDesc);
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "start";
-      instr.streetName = currentStreet;
-      instr.description = startDesc ? startDesc->GetDescription() : "Start";
-      instr.shortDescription = "Start";
-      result.push_back(instr);
-    }
-
-    void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
-    {
-      JavaRouteInstruction instr;
-      // The distance of this instruction's own node from the route start, like
-      // every other instruction in the list (see OnStart and OnTurn). Reporting 0
-      // here made the arrival indistinguishable from the route start: the search
-      // for the next instruction walks forward while an instruction's distance is
-      // behind the current node, so the arrival was skipped and a client got an
-      // empty instruction after the last manoeuvre instead of "Arrive - X m".
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "targetReached";
-      instr.description = targetDesc ? targetDesc->GetDescription() : "Destination reached";
-      instr.shortDescription = "Arrive";
-      result.push_back(instr);
-    }
-
-    void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef &turnDesc,
-                const osmscout::RouteDescription::CrossingWaysDescriptionRef &crossingWaysDesc,
-                const osmscout::RouteDescription::DirectionDescriptionRef &directionDesc,
-                const osmscout::RouteDescription::TypeNameDescriptionRef & /*typeNameDesc*/,
-                const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-    {
-      auto move = turnDesc ? turnDesc->GetDirection()
-                 : (directionDesc ? directionDesc->GetCurve()
-                    : osmscout::RouteDescription::DirectionDescription::straightOn);
-
-      std::string street = NameOrRef(nameDesc);
-      if (street.empty() && crossingWaysDesc) {
-        street = NameOrRef(crossingWaysDesc->GetTargetDesccription());
-      }
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = MoveToTurnType(move);
-      instr.streetName = street;
-      instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
-      instr.shortDescription = MoveToDescription(move);
-      result.push_back(instr);
-    }
-
-    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDesc,
-                           const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
-    {
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "roundaboutEnter";
-      instr.description = "Enter roundabout";
-      instr.shortDescription = "Roundabout";
-      // The ring's circulation direction: without it a consumer cannot tell a
-      // clockwise roundabout from a counter-clockwise one, and the direction
-      // cannot be recovered from the instruction text.
-      if (roundaboutEnterDesc) {
-        instr.roundaboutClockwise = roundaboutEnterDesc->IsClockwise();
-      }
-      result.push_back(instr);
-    }
-
-    void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef &roundaboutLeaveDesc,
-                           const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-    {
-      std::string exitStr = roundaboutLeaveDesc
-          ? std::to_string(roundaboutLeaveDesc->GetExitCount()) : "?";
-      std::string street = NameOrRef(nameDesc);
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "roundaboutLeave";
-      instr.streetName = street;
-      instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
-      instr.shortDescription = "Exit " + exitStr;
-      // The ordinal of the exit taken (see the field's comment) and the direction,
-      // as structure - the text above stays byte-identical so a consumer that reads
-      // only strings observes no change.
-      if (roundaboutLeaveDesc) {
-        instr.roundaboutExitNumber = static_cast<int>(roundaboutLeaveDesc->GetExitCount());
-        instr.roundaboutClockwise = roundaboutLeaveDesc->IsClockwise();
-      }
-      result.push_back(instr);
-    }
-
-    void OnMotorwayEnter(const osmscout::RouteDescription::MotorwayEnterDescriptionRef &motorwayEnterDesc,
-                         const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
-    {
-      std::string motorway = motorwayEnterDesc
-          ? NameOrRef(motorwayEnterDesc->GetToDescription()) : "";
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "motorwayEnter";
-      instr.streetName = motorway;
-      instr.description = "Enter " + (motorway.empty() ? "motorway" : motorway);
-      instr.shortDescription = "Enter motorway";
-      result.push_back(instr);
-    }
-
-    void OnMotorwayChange(const osmscout::RouteDescription::MotorwayChangeDescriptionRef &motorwayChangeDesc,
-                          const osmscout::RouteDescription::MotorwayJunctionDescriptionRef & /*motorwayJunctionDesc*/,
-                          const osmscout::RouteDescription::DirectionDescriptionRef &directionDesc,
-                          const osmscout::RouteDescription::DestinationDescriptionRef & /*destDesc*/) override
-    {
-      auto move = directionDesc ? directionDesc->GetCurve()
-                  : osmscout::RouteDescription::DirectionDescription::straightOn;
-      std::string toMotorway = motorwayChangeDesc
-          ? NameOrRef(motorwayChangeDesc->GetToDescription()) : "";
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = MoveToTurnType(move);
-      instr.streetName = toMotorway;
-      instr.description = "Keep " + MoveToDescription(move) + " onto " + (toMotorway.empty() ? "motorway" : toMotorway);
-      instr.shortDescription = "Keep " + MoveToTurnType(move);
-      result.push_back(instr);
-    }
-
-    void OnMotorwayLeave(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef & /*motorwayLeaveDesc*/,
-                         const osmscout::RouteDescription::MotorwayJunctionDescriptionRef & /*motorwayJunctionDesc*/,
-                         const osmscout::RouteDescription::DirectionDescriptionRef &directionDesc,
-                         const osmscout::RouteDescription::NameDescriptionRef &nameDesc,
-                         const osmscout::RouteDescription::DestinationDescriptionRef & /*destDesc*/) override
-    {
-      auto move = directionDesc ? directionDesc->GetCurve()
-                  : osmscout::RouteDescription::DirectionDescription::straightOn;
-      std::string street = NameOrRef(nameDesc);
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = MoveToTurnType(move);
-      instr.streetName = street;
-      instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
-      instr.shortDescription = "Leave motorway";
-      result.push_back(instr);
-    }
-
-    void OnPathNameChange(const osmscout::RouteDescription::NameChangedDescriptionRef &nameChangedDesc) override
-    {
-      currentStreet = nameChangedDesc
-          ? NameOrRef(nameChangedDesc->GetTargetDescription()) : "";
-    }
-  };
-};
 
 class JavaNavigationController
 {
@@ -3971,7 +3478,8 @@ public:
         std::make_shared<osmscout::SpeedAgent>(),
         std::make_shared<osmscout::LaneAgent>(),
         std::make_shared<osmscout::VoiceInstructionAgent>(osmscout::DistanceUnitSystem::Metrics, std::make_shared<osmscout::NoOpTTSMessageGenerator>()),
-        std::make_shared<osmscout::RouteInstructionAgent<JavaRouteInstruction, JavaRouteInstructionBuilder>>()
+        std::make_shared<osmscout::RouteInstructionAgent<osmscout::client::RouteStep,
+                                                         osmscout::client::RouteStepBuilder>>()
       }
   {
   }
@@ -4030,14 +3538,6 @@ public:
         if (methods.stateClsGlobal != nullptr) {
           env->DeleteGlobalRef(methods.stateClsGlobal);
           methods.stateClsGlobal = nullptr;
-        }
-        if (methods.instructionClsGlobal != nullptr) {
-          env->DeleteGlobalRef(methods.instructionClsGlobal);
-          methods.instructionClsGlobal = nullptr;
-        }
-        if (methods.turnTypeClsGlobal != nullptr) {
-          env->DeleteGlobalRef(methods.turnTypeClsGlobal);
-          methods.turnTypeClsGlobal = nullptr;
         }
         if (methods.laneTurnClsGlobal != nullptr) {
           env->DeleteGlobalRef(methods.laneTurnClsGlobal);
@@ -4284,13 +3784,13 @@ private:
         env->DeleteLocalRef(samples);
       }
     }
-    else if (auto routeInstrMsg = dynamic_cast<osmscout::RouteInstructionsMessage<JavaRouteInstruction> *>(message.get());
-             routeInstrMsg != nullptr) {
-      DispatchRouteInstructions(env, routeInstrMsg->instructions);
+    else if (auto routeStepsMsg = dynamic_cast<osmscout::RouteInstructionsMessage<osmscout::client::RouteStep> *>(message.get());
+             routeStepsMsg != nullptr) {
+      DispatchRouteSteps(env, routeStepsMsg->instructions);
     }
-    else if (auto nextInstrMsg = dynamic_cast<osmscout::NextRouteInstructionsMessage<JavaRouteInstruction> *>(message.get());
-             nextInstrMsg != nullptr) {
-      DispatchNextRouteInstruction(env, nextInstrMsg->nextRouteInstruction);
+    else if (auto nextStepMsg = dynamic_cast<osmscout::NextRouteInstructionsMessage<osmscout::client::RouteStep> *>(message.get());
+             nextStepMsg != nullptr) {
+      DispatchNextRouteStep(env, nextStepMsg->nextRouteInstruction);
     }
   }
 
@@ -4353,131 +3853,74 @@ private:
     env->DeleteLocalRef(wayRefJ);
     env->DeleteLocalRef(wayTypeJ);
   }
-
-  jobject CreateJavaRouteInstruction(JNIEnv *env, const JavaRouteInstruction &instr)
+  /**
+   * One coordinate-free line per guidance publication: how long the marshalling took and how
+   * many steps it carried. The step record is richer than the instruction it replaces (nested
+   * records, boxed values, a nested next-next step) and this is the publication path of every
+   * position update, so the number is the measurement the cache decision is taken from
+   * (change `route-steps-live-guidance`, design "Performance").
+   */
+  static void LogDispatch(const char *what, size_t count, long long microseconds)
   {
-    if (!methods.instructionCtor || !methods.turnTypeValueOf ||
-        !methods.instructionClsGlobal || !methods.turnTypeClsGlobal) {
-      return nullptr;
-    }
-
-    // Convert turn type string to TurnType enum
-    jstring turnTypeStr = env->NewStringUTF(instr.turnType.c_str());
-    jobject turnTypeObj = env->CallStaticObjectMethod(
-        static_cast<jclass>(methods.turnTypeClsGlobal), methods.turnTypeValueOf, turnTypeStr);
-    env->DeleteLocalRef(turnTypeStr);
-
-    jstring streetNameJ = env->NewStringUTF(instr.streetName.c_str());
-    jstring descriptionJ = env->NewStringUTF(instr.description.c_str());
-    jstring shortDescJ = env->NewStringUTF(instr.shortDescription.c_str());
-
-    // "Next next" hint
-    jstring nnTurnTypeStr = env->NewStringUTF(instr.nextNextTurnType.c_str());
-    jobject nnTurnTypeObj = env->CallStaticObjectMethod(
-        static_cast<jclass>(methods.turnTypeClsGlobal), methods.turnTypeValueOf, nnTurnTypeStr);
-    env->DeleteLocalRef(nnTurnTypeStr);
-
-    jstring nnDescJ = env->NewStringUTF(instr.nextNextDescription.c_str());
-    jstring nnShortDescJ = env->NewStringUTF(instr.nextNextShortDescription.c_str());
-
-    // The manoeuvre facts of the node: absent is null, never an empty or zero placeholder.
-    jstring junctionRefJ = instr.junctionRef.empty()
-        ? nullptr : env->NewStringUTF(instr.junctionRef.c_str());
-    jstring junctionNameJ = instr.junctionName.empty()
-        ? nullptr : env->NewStringUTF(instr.junctionName.c_str());
-    jstring destinationsJ = instr.destinations.empty()
-        ? nullptr : env->NewStringUTF(instr.destinations.c_str());
-    jstring wayTypeJ = instr.wayType.empty()
-        ? nullptr : env->NewStringUTF(instr.wayType.c_str());
-    jobject maxSpeedJ = nullptr;
-    if (instr.maxSpeedKmh >= 0) {
-      maxSpeedJ = env->CallStaticObjectMethod(g_RouteStepJni.integerCls,
-                                              g_RouteStepJni.integerValueOf,
-                                              static_cast<jint>(instr.maxSpeedKmh));
-    }
-
-    jobject instrObj = env->NewObject(
-        static_cast<jclass>(methods.instructionClsGlobal), methods.instructionCtor,
-        instr.distanceTo,
-        instr.timeTo,
-        instr.legDistance,
-        turnTypeObj,
-        streetNameJ,
-        descriptionJ,
-        shortDescJ,
-        instr.nextNextDistanceTo,
-        nnTurnTypeObj,
-        nnDescJ,
-        nnShortDescJ,
-        instr.roundaboutExitNumber,
-        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE,
-        instr.nextNextRoundaboutExitNumber,
-        junctionRefJ,
-        junctionNameJ,
-        destinationsJ,
-        wayTypeJ,
-        maxSpeedJ);
-
-    env->DeleteLocalRef(turnTypeObj);
-    env->DeleteLocalRef(streetNameJ);
-    env->DeleteLocalRef(descriptionJ);
-    env->DeleteLocalRef(shortDescJ);
-    env->DeleteLocalRef(nnTurnTypeObj);
-    env->DeleteLocalRef(nnDescJ);
-    env->DeleteLocalRef(nnShortDescJ);
-    if (junctionRefJ != nullptr) env->DeleteLocalRef(junctionRefJ);
-    if (junctionNameJ != nullptr) env->DeleteLocalRef(junctionNameJ);
-    if (destinationsJ != nullptr) env->DeleteLocalRef(destinationsJ);
-    if (wayTypeJ != nullptr) env->DeleteLocalRef(wayTypeJ);
-    if (maxSpeedJ != nullptr) env->DeleteLocalRef(maxSpeedJ);
-
-    return instrObj;
+    osmscout::log.Info() << "[JNI] guidance dispatch: " << what
+                         << " steps=" << count
+                         << " us=" << microseconds;
   }
 
-  void DispatchRouteInstructions(JNIEnv *env,
-                                 const std::list<JavaRouteInstruction> &instructions)
+  void DispatchRouteSteps(JNIEnv *env,
+                          const std::list<osmscout::client::RouteStep> &steps)
   {
-    if (!methods.onRouteInstructions) return;
+    if (!methods.onRouteSteps) return;
 
-    // Build every instruction before the array exists. An instruction the bridge cannot
-    // build yields null - a missing constructor method id (a descriptor that does not
-    // match the Java constructor) or a missing TurnType enum method makes every
-    // instruction unbuildable - and an array sized for the input would then carry null
-    // entries that the listener dereferences far from here. No buildable instruction
-    // means no dispatch at all, which is observable as an absent instruction list.
+    const auto started = std::chrono::steady_clock::now();
+
+    // Build every step before the array exists. A step the bridge cannot build yields null -
+    // a missing method or field id of any sub-record makes that step unbuildable - and an
+    // array sized for the input would then carry null entries that the listener dereferences
+    // far from here. No buildable step means no dispatch at all, which is observable as an
+    // absent step list.
     std::vector<jobject> built;
-    built.reserve(instructions.size());
-    for (const auto &instr : instructions) {
-      jobject instrObj = CreateJavaRouteInstruction(env, instr);
-      if (instrObj) {
-        built.push_back(instrObj);
+    built.reserve(steps.size());
+    for (const auto &step : steps) {
+      jobject stepObj = CreateJavaRouteStep(env, step);
+      if (stepObj) {
+        built.push_back(stepObj);
       }
     }
     if (built.empty()) return;
 
     jobjectArray arr = env->NewObjectArray(
         static_cast<jsize>(built.size()),
-        static_cast<jclass>(methods.instructionClsGlobal),
+        static_cast<jclass>(g_RouteStepJni.stepCls),
         nullptr);
     for (size_t i = 0; i < built.size(); ++i) {
       env->SetObjectArrayElement(arr, static_cast<jsize>(i), built[i]);
       env->DeleteLocalRef(built[i]);
     }
 
-    env->CallVoidMethod(listenerGlobal, methods.onRouteInstructions, arr);
+    env->CallVoidMethod(listenerGlobal, methods.onRouteSteps, arr);
     env->DeleteLocalRef(arr);
+
+    LogDispatch("list", steps.size(),
+                 std::chrono::duration_cast<std::chrono::microseconds>(
+                     std::chrono::steady_clock::now() - started).count());
   }
 
-  void DispatchNextRouteInstruction(JNIEnv *env,
-                                    const JavaRouteInstruction &instruction)
+  void DispatchNextRouteStep(JNIEnv *env,
+                             const osmscout::client::RouteStep &step)
   {
-    if (!methods.onNextRouteInstruction) return;
+    if (!methods.onNextRouteStep) return;
 
-    jobject instrObj = CreateJavaRouteInstruction(env, instruction);
-    if (instrObj) {
-      env->CallVoidMethod(listenerGlobal, methods.onNextRouteInstruction, instrObj);
-      env->DeleteLocalRef(instrObj);
+    const auto started = std::chrono::steady_clock::now();
+    jobject stepObj = CreateJavaRouteStep(env, step);
+    if (stepObj) {
+      env->CallVoidMethod(listenerGlobal, methods.onNextRouteStep, stepObj);
+      env->DeleteLocalRef(stepObj);
     }
+
+    LogDispatch("next", 1,
+                 std::chrono::duration_cast<std::chrono::microseconds>(
+                     std::chrono::steady_clock::now() - started).count());
   }
 
 private:
@@ -4729,68 +4172,6 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
     scope.clear();
     scope.push_back(scopeRegion);
   }
-}
-
-// Derives the geographic extent of a resolved search scope from the object that
-// represents the region (change client-java-search-scope-extent, design D2).
-// An admin region carries no coordinates of its own: the extent therefore comes
-// from its object - an area or a way contributes its bounding box, a node
-// region only a point, which is approximated by the documented fallback box.
-// Every other outcome (no region, no database, the object not loadable, an
-// invalid box) leaves the extent unset, which makes the filter admit every
-// position. That is deliberate: a scope whose extent cannot be established must
-// degrade to the unscoped behaviour, never silently empty the search.
-static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
-                                            const osmscout::AdminRegionRef &region)
-{
-  if (!region) {
-    return naviveylin::UnsetGeoBox();
-  }
-
-  auto database = db->GetDatabase();
-  if (!database) {
-    osmscout::log.Warn() << "search scope: no database to derive the extent of region '"
-                         << region->name << "' from - filtering disabled";
-    return naviveylin::UnsetGeoBox();
-  }
-
-  osmscout::GeoBox box;
-  bool             loaded = false;
-
-  if (region->object.GetType() == osmscout::RefType::refArea) {
-    osmscout::AreaRef area;
-    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
-      box = area->GetBoundingBox();
-      loaded = box.IsValid();
-    }
-  } else if (region->object.GetType() == osmscout::RefType::refWay) {
-    osmscout::WayRef way;
-    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
-      box = way->GetBoundingBox();
-      loaded = box.IsValid();
-    }
-  } else if (region->object.GetType() == osmscout::RefType::refNode) {
-    osmscout::NodeRef node;
-    loaded = database->GetNodeByOffset(region->object.GetFileOffset(), node);
-    if (loaded) {
-      return naviveylin::BoxAroundPoint(node->GetCoords().GetLat(),
-                                       node->GetCoords().GetLon());
-    }
-  }
-
-  if (loaded) {
-    return naviveylin::BoxFromCorners(box.GetMinCoord().GetLat(),
-                                      box.GetMinCoord().GetLon(),
-                                      box.GetMaxCoord().GetLat(),
-                                      box.GetMaxCoord().GetLon());
-  }
-
-  // Identity in the line, never a coordinate.
-  osmscout::log.Warn() << "search scope: no extent for region '" << region->name
-                       << "' (object type " << static_cast<int>(region->object.GetType())
-                       << ") - filtering disabled";
-
-  return naviveylin::UnsetGeoBox();
 }
 
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
@@ -5496,12 +4877,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // Geographic extent of the resolved search scope, derived from the scope
   // region's own object in the database that resolved it (change
-  // client-java-search-scope-extent, design D2). Computed once per search call,
-  // because the scope is a single region and does not depend on the database
-  // being walked. Unset means "no scope is active" or "the extent could not be
-  // established" - neither filters anything.
+  // client-java-search-scope-extent, design D2). Derived once per search call,
+  // before the database walk, because the free-text budget has to know the scope
+  // while it counts candidates and the resolving database may be walked after the
+  // ones whose hits the budget already spends itself on (issue #19). Unset means
+  // "no scope is active" or "the extent could not be established" - neither
+  // filters anything.
   naviveylin::GeoBox scopeExtent = naviveylin::UnsetGeoBox();
-  bool               scopeExtentResolved = false;
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -5515,10 +4897,25 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       // full page of structured results must not crowd the text-index candidates
       // out of the set (openspec/specs/search-free-text, "Free-text results
       // merged with structured results").
+
+      // The scope of the database that resolved the region handle, resolved once:
+      // its extent is what the free-text budget measures hits against, and its
+      // structured search reads the same vector below.
+      std::vector<osmscout::AdminRegionRef> resolvedScope;
+      if (adminRegion && adminRegionDb) {
+        ResolveSearchScope(adminRegionDb, adminRegion, resolvedScope);
+        scopeExtent = naviveylin::DeriveScopeExtent(adminRegionDb,
+                                                    resolvedScope.empty()
+                                                      ? osmscout::AdminRegionRef()
+                                                      : resolvedScope.front());
+      }
+
+      // The budget counts only the hits the search keeps, so the scope cannot shorten a
+      // scoped candidate list (openspec/specs/search-free-text, "Free-text candidate
+      // budget counts kept candidates").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-      const auto freeTextLimitReached = [&]() {
-        return freeTextEntries.size() >= static_cast<size_t>(limit);
-      };
+      naviveylin::FreeTextBudget freeTextBudget(static_cast<size_t>(limit),
+                                                scopeExtent);
 #endif
 
       for (const auto &db : databases) {
@@ -5562,16 +4959,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         // applied normally.
         std::vector<osmscout::AdminRegionRef> scope;
         if (effectiveRegion && db == adminRegionDb) {
-          ResolveSearchScope(db, effectiveRegion, scope);
-          // Once per search call: the scope does not change while the databases
-          // are walked, so its extent is derived from the resolving database only.
-          if (!scopeExtentResolved) {
-            scopeExtent = DeriveScopeExtent(db,
-                                            scope.empty()
-                                              ? osmscout::AdminRegionRef()
-                                              : scope.front());
-            scopeExtentResolved = true;
-          }
+          scope = resolvedScope;
         } else if (effectiveRegion && !adminRegionDb) {
           scope.push_back(effectiveRegion);
         } else {
@@ -5644,11 +5032,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
             break;
           }
           for (const auto &e : resultsTxt) {
-            if (freeTextLimitReached()) {
+            if (freeTextBudget.Reached()) {
               break;
             }
             for (const auto &fref : e.second) {
-              if (freeTextLimitReached()) {
+              if (freeTextBudget.Reached()) {
                 break;
               }
               // The text index reports one object under every matched name; the same
@@ -5659,7 +5047,8 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
               }
               seenTextOffsets[db].insert(fref.GetFileOffset());
               FreeTextEntry entry;
-              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry)) {
+              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry) &&
+                  freeTextBudget.Admit(entry.lat, entry.lon)) {
                 freeTextEntries.push_back(entry);
               }
             }
@@ -5671,11 +5060,25 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         // Only the free-text budget ends the walk over the databases: a full
         // page of structured results must not stop the text-index candidates of
         // the remaining databases from being collected.
-        if (freeTextLimitReached()) {
+        if (freeTextBudget.Reached()) {
           break;
         }
 #endif
       }
+
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+      // How much the scope refused is a device-check number, so it is logged where the
+      // collection happens: counts and identity only, never a coordinate. Debug-gated -
+      // enable with osmscout::log.Debug(true). The denominator is every hit the index
+      // reported and the walk reached, before the per-database dedup below drops the ones
+      // the structured search already published.
+      if (freeTextBudget.Dropped() != 0) {
+        osmscout::log.Debug() << "search scope: dropped "
+                              << freeTextBudget.Dropped()
+                              << " of " << freeTextBudget.Scanned()
+                              << " free-text hit(s) outside the scope";
+      }
+#endif
     }
   );
 
@@ -5708,33 +5111,10 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                      }),
       freeTextEntries.end());
 
-  // Free-text hits must respect the active search scope. The text index itself
-  // has no region attribution, so the scope is applied geographically: a hit
-  // outside the scope's extent is dropped, whichever database produced it,
-  // including the database that resolved the region. A hit inside the extent is
-  // kept even when a different database holds it, because the extent is
-  // comparable across databases while region offsets are not. An unset extent
-  // (no scope, or an extent that could not be established) drops nothing.
-  if (scopeExtent.isSet) {
-    const size_t freeTextBeforeFilter = freeTextEntries.size();
-
-    freeTextEntries.erase(
-        std::remove_if(freeTextEntries.begin(), freeTextEntries.end(),
-                       [&](const FreeTextEntry &e) {
-                         return !naviveylin::IsInsideGeoBox(scopeExtent, e.lat, e.lon);
-                       }),
-        freeTextEntries.end());
-
-    // Counts and identity only, never a coordinate. Debug-gated: enable with
-    // osmscout::log.Debug(true) when a device check needs to see how much the
-    // scope filtered.
-    if (freeTextEntries.size() != freeTextBeforeFilter) {
-      osmscout::log.Debug() << "search scope: dropped "
-                            << (freeTextBeforeFilter - freeTextEntries.size())
-                            << " of " << freeTextBeforeFilter
-                            << " free-text hit(s) outside the scope";
-    }
-  }
+  // Free-text hits respect the active search scope: the budget refused every hit
+  // outside the extent while the hits were collected, so the survivors are in scope
+  // by construction and no second filter pass follows (issue #19 - a filter after
+  // the walk could only shorten a candidate list the budget had already spent).
 #endif
 
   // An aborted search publishes nothing: a caller that did not check the generation must
@@ -6913,7 +6293,7 @@ std::vector<RankedDescriptionCandidate> CollectDescriptionCandidates(ClientData 
       osmscout::log.Debug() << "[JNI] RunSynchronousJob callback: " << databases.size() << " databases";
       for (const auto &db : databases) {
         osmscout::GeoBox dbBox = db->GetDBGeoBox();
-        osmscout::log.Debug() << "[JNI] checking db box: " << dbBox.GetDisplayText();
+        osmscout::log.Debug() << "[JNI] checking db box of " << db->path;
         if (!dbBox.Includes(coord)) {
           osmscout::log.Debug() << "[JNI] coord not in db box, skipping";
           continue;
@@ -7641,8 +7021,7 @@ static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
   auto result = routingService->GetClosestRoutableNode(coord,
       osmscout::Distance::Of<osmscout::Kilometer>(1), endpoint);
   if (result.IsValid()) {
-    osmscout::log.Debug() << "ResolveRoutePosition: found via coord "
-                          << coord.GetDisplayText();
+    osmscout::log.Debug() << "ResolveRoutePosition: found via coord (1 km)";
     return result.GetRoutePosition();
   }
 
@@ -7650,8 +7029,7 @@ static std::optional<osmscout::RoutePosition> ResolveRoutePosition(
   result = routingService->GetClosestRoutableNode(coord,
       osmscout::Distance::Of<osmscout::Kilometer>(5), endpoint);
   if (result.IsValid()) {
-    osmscout::log.Debug() << "ResolveRoutePosition: found via coord (5km) "
-                          << coord.GetDisplayText();
+    osmscout::log.Debug() << "ResolveRoutePosition: found via coord (5 km)";
     return result.GetRoutePosition();
   }
 
@@ -7696,6 +7074,70 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 }
 
 /**
+ * Speed factor per grade, index 0..4 meaning grade 1..5, applied when `avoidUnpaved` is requested.
+ * Solid and gravel keep most of their type's speed; unpaved and worse lose most of it.
+ *
+ * A degraded road must stay routable: the parametrization prices a profile's cost limit from its
+ * slowest road type, so a table close to zero makes the limit unreachable and the calculation
+ * reports "no route" instead of a detour. Measured with four candidate tables on a Bremen
+ * database — see openspec/changes/client-java-avoid-unpaved/evidence/.
+ */
+static constexpr double kAvoidUnpavedGradeFactor[5] = {1.0, 0.85, 0.6, 0.3, 0.1};
+
+/** Floor for a degraded road, so avoiding an unpaved way never means being unable to route. */
+static constexpr double kAvoidUnpavedMinSpeedKmh = 3.0;
+
+/**
+ * Re-price every routable type of [profile] with a per-grade speed table.
+ *
+ * Must be called *after* the vehicle parametrization: `FastestPathRoutingProfile::ParametrizeForCar`
+ * (and the bicycle/foot counterparts) also enable the junction penalty and double the profile's cost
+ * limit and factor (RoutingProfile.h). A profile whose type list is built by hand loses both, and then
+ * every route that needs a high-grade way fails with "no route" — measured, same evidence file.
+ *
+ * [carSpeedMap] is the base speed per type name for a car and unused for the other vehicles;
+ * [maxSpeedKmh] is the resolved vehicle speed (the flat speed for bicycle and foot, the ceiling
+ * for a car).
+ */
+static void ApplyAvoidUnpavedGradeSpeeds(osmscout::FastestPathRoutingProfile &profile,
+                                         const osmscout::TypeConfig &typeConfig,
+                                         osmscout::Vehicle vehicle,
+                                         const std::map<std::string,double> &carSpeedMap,
+                                         double maxSpeedKmh)
+{
+  for (const auto &type : typeConfig.GetTypes()) {
+    if (type->GetIgnore()) {
+      continue;
+    }
+
+    bool routable = vehicle == osmscout::vehicleCar ? type->CanRouteCar()
+                  : vehicle == osmscout::vehicleBicycle ? type->CanRouteBicycle()
+                  : type->CanRouteFoot();
+    if (!routable) {
+      continue;
+    }
+
+    double baseSpeed = maxSpeedKmh;
+    if (vehicle == osmscout::vehicleCar) {
+      auto entry = carSpeedMap.find(type->GetName());
+      if (entry == carSpeedMap.end()) {
+        // Not parametrized by the car speed map, so it carries no usable speed (a track, for
+        // instance): leave its entry alone instead of inventing one.
+        continue;
+      }
+      baseSpeed = std::min(entry->second, maxSpeedKmh);
+    }
+
+    osmscout::SpeedVariant variant;
+    for (size_t i = 0; i < 5; i++) {
+      variant.speed[i] = std::max(kAvoidUnpavedMinSpeedKmh, baseSpeed * kAvoidUnpavedGradeFactor[i]);
+    }
+
+    profile.AddType(type, variant);
+  }
+}
+
+/**
  * Create a routing profile for the given vehicle type.
  * Car uses a speed map; bicycle and foot use built-in parametrization.
  *
@@ -7717,46 +7159,50 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
 
   auto profile = std::make_shared<osmscout::FastestPathRoutingProfile>(tc);
 
+  // Hoisted out of the car branch: the graded speed pass needs the car's base speed per type,
+  // and the resolved vehicle speed is the flat speed for bicycle and foot.
+  std::map<std::string,double> carSpeedMap;
+  double resolvedMaxSpeed = 0.0;
+
   switch (vehicle) {
     case osmscout::vehicleCar: {
-      std::map<std::string,double> speedMap;
-      speedMap["highway_motorway"]=110.0;
-      speedMap["highway_motorway_trunk"]=100.0;
-      speedMap["highway_motorway_primary"]=70.0;
-      speedMap["highway_motorway_link"]=60.0;
-      speedMap["highway_motorway_junction"]=60.0;
-      speedMap["highway_trunk"]=100.0;
-      speedMap["highway_trunk_link"]=60.0;
-      speedMap["highway_primary"]=70.0;
-      speedMap["highway_primary_link"]=60.0;
-      speedMap["highway_secondary"]=60.0;
-      speedMap["highway_secondary_link"]=50.0;
-      speedMap["highway_tertiary_link"]=55.0;
-      speedMap["highway_tertiary"]=55.0;
-      speedMap["highway_unclassified"]=50.0;
-      speedMap["highway_road"]=50.0;
-      speedMap["highway_residential"]=20.0;
-      speedMap["highway_roundabout"]=40.0;
-      speedMap["highway_living_street"]=10.0;
-      speedMap["highway_service"]=30.0;
-      double carMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
-      profile->ParametrizeForCar(*tc, speedMap, carMaxSpeed);
+      carSpeedMap["highway_motorway"]=110.0;
+      carSpeedMap["highway_motorway_trunk"]=100.0;
+      carSpeedMap["highway_motorway_primary"]=70.0;
+      carSpeedMap["highway_motorway_link"]=60.0;
+      carSpeedMap["highway_motorway_junction"]=60.0;
+      carSpeedMap["highway_trunk"]=100.0;
+      carSpeedMap["highway_trunk_link"]=60.0;
+      carSpeedMap["highway_primary"]=70.0;
+      carSpeedMap["highway_primary_link"]=60.0;
+      carSpeedMap["highway_secondary"]=60.0;
+      carSpeedMap["highway_secondary_link"]=50.0;
+      carSpeedMap["highway_tertiary_link"]=55.0;
+      carSpeedMap["highway_tertiary"]=55.0;
+      carSpeedMap["highway_unclassified"]=50.0;
+      carSpeedMap["highway_road"]=50.0;
+      carSpeedMap["highway_residential"]=20.0;
+      carSpeedMap["highway_roundabout"]=40.0;
+      carSpeedMap["highway_living_street"]=10.0;
+      carSpeedMap["highway_service"]=30.0;
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
+      profile->ParametrizeForCar(*tc, carSpeedMap, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created car routing profile (max speed "
-                           << carMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleBicycle: {
-      double bicycleMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
-      profile->ParametrizeForBicycle(*tc, bicycleMaxSpeed);
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
+      profile->ParametrizeForBicycle(*tc, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created bicycle routing profile (max speed "
-                           << bicycleMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleFoot: {
-      double footMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
-      profile->ParametrizeForFoot(*tc, footMaxSpeed);
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
+      profile->ParametrizeForFoot(*tc, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created pedestrian routing profile (max speed "
-                           << footMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
   }
@@ -7771,17 +7217,21 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
   }
 
   if (avoidUnpaved) {
-    // Set low speed for unpaved/high-grade roads
-    // Grade 4 (mostly soft) and Grade 5 (soft) get very low speed
-    // This is handled by the grade system in the profile
-    osmscout::log.Warn() << "  avoiding unpaved roads (grade-based speed reduction)";
+    ApplyAvoidUnpavedGradeSpeeds(*profile, *tc, vehicle, carSpeedMap, resolvedMaxSpeed);
+    osmscout::log.Warn() << "  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = "
+                         << kAvoidUnpavedGradeFactor[0] << "/" << kAvoidUnpavedGradeFactor[1] << "/"
+                         << kAvoidUnpavedGradeFactor[2] << "/" << kAvoidUnpavedGradeFactor[3] << "/"
+                         << kAvoidUnpavedGradeFactor[4] << " of the type speed, floor "
+                         << kAvoidUnpavedMinSpeedKmh << " km/h)";
   }
 
   if (avoidTolls) {
-    // Toll roads are tagged per-way, not per-type.
-    // Full support requires checking AccessFeature at routing time.
-    // For now, log that toll avoidance is requested but not fully implemented.
-    osmscout::log.Warn() << "  avoidTolls requested but requires per-way tag checking (not yet implemented)";
+    // The toll signal lives in the routing index beside the grade, so the profile can only price it when
+    // the database was imported by an importer that records it. A database without the signal reads as
+    // "no toll information" and this flag then changes nothing, by design.
+    profile->SetAvoidTolls(true);
+    osmscout::log.Warn() << "  avoiding toll roads (cost x" << profile->GetTollPenaltyFactor()
+                         << " on an object variant that records a toll)";
   }
 
   return profile;
@@ -7911,14 +7361,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
-      std::vector<std::string> routeDescriptionLines;
-      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
-      // with the instruction lines of routeDescriptionLines. All four are published as a set and
-      // dropped as a set when the alignment cannot be shown (see the check after the callback).
-      std::vector<double> routeInstructionLats;
-      std::vector<double> routeInstructionLons;
-      std::vector<double> routeInstructionDistances;
-      std::vector<double> routeInstructionTimes;
+      // The published route begins at the requested start (spec: osmscout-jni - The published route
+      // starts at the requested start position; design D1/D2/D3). The router used the caller's
+      // coordinate only to find a routable node, so the description's first node sits on that snapped
+      // node. When the requested start lies off the network by more than the snap tolerance, the first
+      // node takes the requested position and every later node carries the approach in its cumulative
+      // distance - which is what makes the per-step distances, the description total and the drawn
+      // polyline count the approach once (helpers: route_start.h). 0.0 means "the start was on the
+      // network": the description is left untouched and the polyline gets no extra vertex.
+      double startApproachMeters = 0.0;
       // The route's manoeuvres as structured steps, next to the description lines (spec:
       // route-calculation - a calculated route publishes structured steps). The collection does
       // not depend on the description lines, so a mismatch in the lines never discards the steps.
@@ -7927,9 +7378,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
-            osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
-            errorMsg = "No databases loaded";
-            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
+            // The open the caller issued is registered by a queued DB-thread job, which clears and
+            // repopulates this list; a calculation that starts before it ran sees this. That is not
+            // the same fact as a database that cannot be opened, so it gets its own kind (spec
+            // `route-calculation` - A calculation that outruns the database open reports that, not
+            // unusable routing data).
+            osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
+            errorMsg = "No databases loaded yet";
+            errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
             return;
           }
 
@@ -8073,194 +7529,53 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 motorwayLinkTypeNames,
                 junctionTypeNames);
 
-            // Collect description lines via callback
-            struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
-              std::vector<std::string> lines;
-              size_t lineCount = 0;
-              double prevDistance = 0.0;
-              osmscout::Duration prevTime = osmscout::Duration::zero();
-              double distance = 0.0;
-              osmscout::Duration time = osmscout::Duration::zero();
-              // Per-step leg values (spec: route-calculation - per-step leg values on a
-              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
-              // with the instruction lines and with the positions below; the distance is the leg
-              // that ENDS at that line's manoeuvre.
-              std::vector<double> instructionDistances;
-              std::vector<double> instructionTimes;
-              // Per-instruction positions (spec: route-calculation - per-instruction positions).
-              // One entry per line pushed by NextLine(), so the arrays align with the instruction
-              // lines of `lines` (the "--- Route ---" header is not an instruction).
-              std::vector<double> instructionLats;
-              std::vector<double> instructionLons;
-              double nodeLat = 0.0;
-              double nodeLon = 0.0;
-              // The description's own total - the cumulative distance at its last node, in metres.
-              // The route's length is taken from the description, not from the router's separately
-              // accumulated distance (spec: route-calculation - The published route length is a
-              // length of that route).
-              double lastNodeDistanceMeters = 0.0;
+            // Move the published start to the requested position before anything reads the
+            // description: the step collector below, the copy kept for live navigation, and the
+            // polyline built further down then all speak of one start (design D1/D5).
+            if (!descResult.GetDescription()->Nodes().empty()) {
+              const osmscout::GeoCoord snappedStart =
+                  descResult.GetDescription()->Nodes().front().GetLocation();
+              const double approachMeters = naviveylin::RouteStartApproachMeters(
+                  start.GetLat(), start.GetLon(), snappedStart.GetLat(), snappedStart.GetLon());
 
-              void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                // The per-step reference is advanced when a LINE is emitted (see
-                // AppendDistanceTime), never here: this callback runs for every route node,
-                // while only the nodes carrying a description produce a line.
-                distance = node.GetDistance().AsMeter() / 1000.0;
-                // The nodes are walked in order, so the largest cumulative distance seen is the
-                // description's total, which is the route's length (see the derivation below).
-                if (distance * 1000.0 > lastNodeDistanceMeters) {
-                  lastNodeDistanceMeters = distance * 1000.0;
-                }
-                time = node.GetTime();
-                nodeLat = node.GetLocation().GetLat();
-                nodeLon = node.GetLocation().GetLon();
-              }
+              if (naviveylin::ShouldPrependRouteStart(approachMeters)) {
+                startApproachMeters = approachMeters;
 
-              void NextLine() {
-                std::ostringstream oss;
-                oss.str("");
-                lines.push_back(oss.str());
-                instructionLats.push_back(nodeLat);
-                instructionLons.push_back(nodeLon);
-                lineCount++;
-              }
-
-              void AppendDistanceTime(std::string& line) {
-                std::ostringstream oss;
-                oss << "  [";
-                double segDist = distance - prevDistance;
-                if (segDist >= 1.0) {
-                  oss << std::fixed << std::setprecision(1) << segDist << " km";
-                } else if (segDist > 0.01) {
-                  oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
-                }
-                auto timeText = naviveylin::FormatRouteStepTime(
-                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
-                if (segDist > 0.01 && timeText.has_value()) {
-                  oss << ", ";
-                }
-                if (timeText.has_value()) {
-                  oss << *timeText;
-                }
-                oss << "]";
-                line += oss.str();
-                // The values belong to the leg that ENDS here, so the reference advances when a
-                // line is emitted - not per route node as BeforeNode does it (Qt's
-                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
-                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
-                // the rows never added up to the route's distance or duration (device: "14 m"
-                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
-                // the positions (spec: route-calculation - per-step leg values on a calculated
-                // route).
-                instructionDistances.push_back(segDist * 1000.0);
-                instructionTimes.push_back(
-                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
-                        time - prevTime).count()));
-                prevDistance = distance;
-                prevTime = time;
-              }
-
-              void BeforeRoute() override {
-                lines.push_back("--- Route ---");
-              }
-
-              void OnStart(
-                  const osmscout::RouteDescription::StartDescriptionRef &startDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                NextLine();
-                std::string s = "Start: " + startDesc->GetDescription();
-                if (typeNameDesc) {
-                  s += " on " + typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
-              }
-
-              void OnTurn(
-                  const osmscout::RouteDescription::TurnDescriptionRef &turnDesc,
-                  const osmscout::RouteDescription::CrossingWaysDescriptionRef &crossDesc,
-                  const osmscout::RouteDescription::DirectionDescriptionRef &dirDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                (void)crossDesc;
-                (void)dirDesc;
-                NextLine();
-                std::string s;
-                if (turnDesc) {
-                  switch (turnDesc->GetDirection()) {
-                    case osmscout::RouteDescription::DirectionDescription::sharpLeft: s += "Sharp left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::left: s += "Left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyLeft: s += "Slight left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::straightOn: s += "Straight"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyRight: s += "Slight right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::right: s += "Right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::sharpRight: s += "Sharp right"; break;
-                    default: s += "Turn"; break;
+                std::size_t nodeIndex = 0;
+                for (auto &node : descResult.GetDescription()->Nodes()) {
+                  if (nodeIndex == 0) {
+                    node.SetLocation(osmscout::GeoCoord(start.GetLat(), start.GetLon()));
+                  } else {
+                    node.SetDistance(osmscout::Distance::Of<osmscout::Meter>(
+                        naviveylin::RouteStartNodeDistanceMeters(nodeIndex,
+                                                                 node.GetDistance().AsMeter(),
+                                                                 approachMeters)));
                   }
+                  nodeIndex++;
                 }
-                if (typeNameDesc) {
-                  if (!s.empty()) s += " onto ";
-                  s += typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
+
+                // Metres, tolerance and the decision only - a position never reaches a log line
+                // (guidelines/Logging.md, spec auto-diagnostics).
+                osmscout::log.Info() << "Route start: the requested start lies "
+                                     << static_cast<std::size_t>(approachMeters)
+                                     << " m from the snapped node (tolerance "
+                                     << static_cast<std::size_t>(
+                                            naviveylin::kRouteStartSnapToleranceMeters)
+                                     << " m), so the approach is published as the first segment";
               }
-
-              void OnTargetReached(
-                  const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
-              {
-                NextLine();
-                lines.back() += "Destination: " + targetDesc->GetDescription();
-                AppendDistanceTime(lines.back());
-              }
-            };
-
-            DescCallback descCb;
-            osmscout::RouteDescriptionPostprocessor generator;
-            generator.GenerateDescription(*descResult.GetDescription(), descCb);
-
-            routeDescriptionLines = std::move(descCb.lines);
-            routeInstructionLats = std::move(descCb.instructionLats);
-            routeInstructionLons = std::move(descCb.instructionLons);
-            routeInstructionDistances = std::move(descCb.instructionDistances);
-            routeInstructionTimes = std::move(descCb.instructionTimes);
+            }
 
             // One step per described route node, carrying that node's manoeuvre data without a
             // client having to read a description line (spec: route-calculation - a calculated
             // route publishes structured steps).
             osmscout::client::RouteStepCollector routeStepCollector;
             routeSteps=routeStepCollector.Collect(*descResult.GetDescription());
-            // Every array must have one entry per instruction line; a mismatch would shift every
-            // later step, so the per-step values and the positions are dropped together instead
-            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
-            // aligned).
-            if (routeInstructionLats.size() != descCb.lineCount ||
-                routeInstructionLons.size() != descCb.lineCount ||
-                routeInstructionDistances.size() != descCb.lineCount ||
-                routeInstructionTimes.size() != descCb.lineCount) {
-              osmscout::log.Warn() << "calculateRouteWithObjectsWithProfile: per-step value count ("
-                                   << routeInstructionDistances.size() << ", position count "
-                                   << routeInstructionLats.size() << ") does not match instruction line count ("
-                                   << descCb.lineCount << ") - per-step values and positions dropped";
-              routeInstructionLats.clear();
-              routeInstructionLons.clear();
-              routeInstructionDistances.clear();
-              routeInstructionTimes.clear();
-            }
-
-            // The route's length is the description's own total (spec: route-calculation - The
-            // published route length is a length of that route): the cumulative distance at the
-            // description's last node, which is the sum of its steps and tracks the geometry the
-            // app draws, lists and highlights to within 0.4 %.
-            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
+            // The route's length is the distance the route's own step list ends at (spec:
+            // route-calculation - The published route length is a length of that route): the
+            // cumulative distance of its last step, which is the description's total and tracks
+            // the geometry the app draws, lists and highlights to within 0.4 %. It is read from
+            // the steps so a calculation needs no second description walk.
+            totalDistance = naviveylin::RouteLengthMeters(LastStepDistanceMeters(routeSteps.steps), 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -8339,13 +7654,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jobject routeEntry = threadEnv->NewObject(routeEntryCls, routeEntryCtor);
 
       const auto &points = pointsResult.GetPoints()->points;
-      jsize count = static_cast<jsize>(points.size());
+
+      // When the start was snapped, the published polyline gains one vertex in front: the requested
+      // start position. Everything else - the routed vertices, their order, the step list - is the
+      // routed geometry (spec: osmscout-jni - The published route starts at the requested start
+      // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
+      const bool prependStart = startApproachMeters > 0.0;
+      jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
 
       // Fill latitudes array
       jdoubleArray lats = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> latValues(count);
       for (jsize i = 0; i < count; i++) {
-        latValues[i] = points[static_cast<size_t>(i)].GetLat();
+        latValues[i] = (prependStart && i == 0)
+            ? start.GetLat()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLat();
       }
       threadEnv->SetDoubleArrayRegion(lats, 0, count, latValues.data());
 
@@ -8353,41 +7676,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jdoubleArray lons = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> lonValues(count);
       for (jsize i = 0; i < count; i++) {
-        lonValues[i] = points[static_cast<size_t>(i)].GetLon();
+        lonValues[i] = (prependStart && i == 0)
+            ? start.GetLon()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
       // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
       // are empty when the alignment check dropped them, and the Java arrays then stay null - the
       // app shows no per-step values or positions instead of shifted ones.
-      jdoubleArray instrLats = nullptr;
-      jdoubleArray instrLons = nullptr;
-      jdoubleArray instrDists = nullptr;
-      jdoubleArray instrTimes = nullptr;
-      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
-      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
-        instrLats = threadEnv->NewDoubleArray(instrCount);
-        instrLons = threadEnv->NewDoubleArray(instrCount);
-        instrDists = threadEnv->NewDoubleArray(instrCount);
-        instrTimes = threadEnv->NewDoubleArray(instrCount);
-        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
-        for (jsize i = 0; i < instrCount; i++) {
-          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
-          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
-          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
-          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
-        }
-        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
-        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
-        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
-        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
-      }
-
       // The route's own length when its description produced nothing: the great-circle length of the
       // polyline this call publishes, so a client that falls back to the total still receives a route
       // length and never the start/target air-line estimate (spec: route-calculation - The published
@@ -8408,13 +7705,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
-      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
-      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
-      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
-      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
-      jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
       jfieldID stepsField = threadEnv->GetFieldID(routeEntryCls, "steps",
           "[Lcom/framstag/libosmscout/client/RouteStep;");
       jfieldID mappingField = threadEnv->GetFieldID(routeEntryCls, "databaseMapping",
@@ -8423,10 +7715,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
-      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
-      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
-      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
-      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -8452,18 +7740,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       }
       double durationSec = (totalDistance / 1000.0) / avgSpeedKmH * 3600.0;
       threadEnv->SetDoubleField(routeEntry, durField, durationSec);
-
-      // Marshal description lines
-      jsize descCount = static_cast<jsize>(routeDescriptionLines.size());
-      jobjectArray descArray = threadEnv->NewObjectArray(
-          descCount,
-          threadEnv->FindClass("java/lang/String"),
-          nullptr);
-      for (jsize i = 0; i < descCount; i++) {
-        threadEnv->SetObjectArrayElement(descArray, i,
-            threadEnv->NewStringUTF(routeDescriptionLines[i].c_str()));
-      }
-      threadEnv->SetObjectField(routeEntry, descField, descArray);
 
       // Call onSuccess
       threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onSuccess, routeEntry);
@@ -8595,14 +7871,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
-      std::vector<std::string> routeDescriptionLines;
-      // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
-      // with the instruction lines of routeDescriptionLines. All four are published as a set and
-      // dropped as a set when the alignment cannot be shown (see the check after the callback).
-      std::vector<double> routeInstructionLats;
-      std::vector<double> routeInstructionLons;
-      std::vector<double> routeInstructionDistances;
-      std::vector<double> routeInstructionTimes;
+      // The published route begins at the requested start (spec: osmscout-jni - The published route
+      // starts at the requested start position; design D1/D2/D3). The router used the caller's
+      // coordinate only to find a routable node, so the description's first node sits on that snapped
+      // node. When the requested start lies off the network by more than the snap tolerance, the first
+      // node takes the requested position and every later node carries the approach in its cumulative
+      // distance - which is what makes the per-step distances, the description total and the drawn
+      // polyline count the approach once (helpers: route_start.h). 0.0 means "the start was on the
+      // network": the description is left untouched and the polyline gets no extra vertex.
+      double startApproachMeters = 0.0;
       // The route's manoeuvres as structured steps, next to the description lines (spec:
       // route-calculation - a calculated route publishes structured steps). The collection does
       // not depend on the description lines, so a mismatch in the lines never discards the steps.
@@ -8611,9 +7888,11 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
-            osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
-            errorMsg = "No databases loaded";
-            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
+            // Twin of the branch in calculateRouteWithObjectsWithProfile: the list is empty because
+            // the queued set change has not run yet, which a retry clears (spec `route-calculation`).
+            osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
+            errorMsg = "No databases loaded yet";
+            errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
             return;
           }
 
@@ -8688,16 +7967,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           }
 
           // Resolve start position
-          osmscout::log.Warn() << "calculateRouteAsync: resolving start at "
-                               << start.GetDisplayText();
+          osmscout::log.Warn() << "calculateRouteAsync: resolving start";
           auto startPosOpt = ResolveRoutePosition(
               routingService, osmscout::RouteEndpoint::Start,
               start.GetLat(), start.GetLon(),
               static_cast<long long>(startObjOffset), startObjTypeStr,
               errorDistanceMeters);
           if (!startPosOpt) {
-            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near start "
-                                 << start.GetDisplayText();
+            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near start";
             errorMsg = "No routable node near start position";
             errorKind = naviveylin::kRouteFailureStartUnroutable;
             routingService->Close();
@@ -8706,16 +7983,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
           osmscout::log.Warn() << "calculateRouteAsync: start resolved OK";
 
           // Resolve destination position
-          osmscout::log.Warn() << "calculateRouteAsync: resolving dest at "
-                               << dest.GetDisplayText();
+          osmscout::log.Warn() << "calculateRouteAsync: resolving dest";
           auto destPosOpt = ResolveRoutePosition(
               routingService, osmscout::RouteEndpoint::Target,
               dest.GetLat(), dest.GetLon(),
               static_cast<long long>(destObjOffset), destObjTypeStr,
               errorDistanceMeters);
           if (!destPosOpt) {
-            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near dest "
-                                 << dest.GetDisplayText();
+            osmscout::log.Warn() << "calculateRouteAsync: FAILED to find routable node near dest";
             errorMsg = "No routable node near destination";
             errorKind = naviveylin::kRouteFailureTargetUnroutable;
             routingService->Close();
@@ -8838,199 +8113,53 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 motorwayLinkTypeNames,
                 junctionTypeNames);
 
-            // Collect description lines via callback
-            struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
-              std::vector<std::string> lines;
-              size_t lineCount = 0;
-              double prevDistance = 0.0;
-              osmscout::Duration prevTime = osmscout::Duration::zero();
-              double distance = 0.0;
-              osmscout::Duration time = osmscout::Duration::zero();
-              // Per-step leg values (spec: route-calculation - per-step leg values on a
-              // calculated route). One entry per line emitted by AppendDistanceTime, index-aligned
-              // with the instruction lines and with the positions below; the distance is the leg
-              // that ENDS at that line's manoeuvre.
-              std::vector<double> instructionDistances;
-              std::vector<double> instructionTimes;
-              // Per-instruction positions (spec: route-calculation - per-instruction positions).
-              // One entry per line pushed by NextLine(), so the arrays align with the instruction
-              // lines of `lines` (the "--- Route ---" header is not an instruction).
-              std::vector<double> instructionLats;
-              std::vector<double> instructionLons;
-              double nodeLat = 0.0;
-              double nodeLon = 0.0;
-              bool lineDrawn = false;
-              // The description's own total - the cumulative distance at its last node, in metres.
-              // The route's length is taken from the description, not from the router's separately
-              // accumulated distance (spec: route-calculation - The published route length is a
-              // length of that route).
-              double lastNodeDistanceMeters = 0.0;
+            // Move the published start to the requested position before anything reads the
+            // description: the step collector below, the copy kept for live navigation, and the
+            // polyline built further down then all speak of one start (design D1/D5).
+            if (!descResult.GetDescription()->Nodes().empty()) {
+              const osmscout::GeoCoord snappedStart =
+                  descResult.GetDescription()->Nodes().front().GetLocation();
+              const double approachMeters = naviveylin::RouteStartApproachMeters(
+                  start.GetLat(), start.GetLon(), snappedStart.GetLat(), snappedStart.GetLon());
 
-              void BeforeNode(const osmscout::RouteDescription::Node &node) override {
-                // The per-step reference is advanced when a LINE is emitted (see
-                // AppendDistanceTime), never here: this callback runs for every route node,
-                // while only the nodes carrying a description produce a line.
-                distance = node.GetDistance().AsMeter() / 1000.0;
-                // The nodes are walked in order, so the largest cumulative distance seen is the
-                // description's total, which is the route's length (see the derivation below).
-                if (distance * 1000.0 > lastNodeDistanceMeters) {
-                  lastNodeDistanceMeters = distance * 1000.0;
-                }
-                time = node.GetTime();
-                nodeLat = node.GetLocation().GetLat();
-                nodeLon = node.GetLocation().GetLon();
-              }
+              if (naviveylin::ShouldPrependRouteStart(approachMeters)) {
+                startApproachMeters = approachMeters;
 
-              void NextLine() {
-                std::ostringstream oss;
-                // Description text comes first as primary information
-                oss.str("");
-                lines.push_back(oss.str());
-                instructionLats.push_back(nodeLat);
-                instructionLons.push_back(nodeLon);
-                lineCount++;
-              }
-
-              void AppendDistanceTime(std::string& line) {
-                std::ostringstream oss;
-                oss << "  [";
-                double segDist = distance - prevDistance;
-                if (segDist >= 1.0) {
-                  oss << std::fixed << std::setprecision(1) << segDist << " km";
-                } else if (segDist > 0.01) {
-                  oss << std::fixed << std::setprecision(0) << (segDist * 1000.0) << " m";
-                }
-                auto timeText = naviveylin::FormatRouteStepTime(
-                    std::chrono::duration_cast<std::chrono::seconds>(time - prevTime));
-                if (segDist > 0.01 && timeText.has_value()) {
-                  oss << ", ";
-                }
-                if (timeText.has_value()) {
-                  oss << *timeText;
-                }
-                oss << "]";
-                line += oss.str();
-                // The values belong to the leg that ENDS here, so the reference advances when a
-                // line is emitted - not per route node as BeforeNode does it (Qt's
-                // RouteDescriptionBuilder::MkStep advances per emitted step, this is the same
-                // rule). A node-based delta is the last geometry edge before the manoeuvre, so
-                // the rows never added up to the route's distance or duration (device: "14 m"
-                // and "2 s" for one step of a 17,3 km route, 2026-10-04). The numbers go out with
-                // the positions (spec: route-calculation - per-step leg values on a calculated
-                // route).
-                instructionDistances.push_back(segDist * 1000.0);
-                instructionTimes.push_back(
-                    static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(
-                        time - prevTime).count()));
-                prevDistance = distance;
-                prevTime = time;
-              }
-
-              void BeforeRoute() override {
-                lines.push_back("--- Route ---");
-              }
-
-              void OnStart(
-                  const osmscout::RouteDescription::StartDescriptionRef &startDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                NextLine();
-                std::string s = "Start: " + startDesc->GetDescription();
-                if (typeNameDesc) {
-                  s += " on " + typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
-              }
-
-              void OnTurn(
-                  const osmscout::RouteDescription::TurnDescriptionRef &turnDesc,
-                  const osmscout::RouteDescription::CrossingWaysDescriptionRef &crossDesc,
-                  const osmscout::RouteDescription::DirectionDescriptionRef &dirDesc,
-                  const osmscout::RouteDescription::TypeNameDescriptionRef &typeNameDesc,
-                  const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-              {
-                (void)crossDesc;
-                (void)dirDesc;
-                NextLine();
-                std::string s;
-                if (turnDesc) {
-                  switch (turnDesc->GetDirection()) {
-                    case osmscout::RouteDescription::DirectionDescription::sharpLeft: s += "Sharp left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::left: s += "Left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyLeft: s += "Slight left"; break;
-                    case osmscout::RouteDescription::DirectionDescription::straightOn: s += "Straight"; break;
-                    case osmscout::RouteDescription::DirectionDescription::slightlyRight: s += "Slight right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::right: s += "Right"; break;
-                    case osmscout::RouteDescription::DirectionDescription::sharpRight: s += "Sharp right"; break;
-                    default: s += "Turn"; break;
+                std::size_t nodeIndex = 0;
+                for (auto &node : descResult.GetDescription()->Nodes()) {
+                  if (nodeIndex == 0) {
+                    node.SetLocation(osmscout::GeoCoord(start.GetLat(), start.GetLon()));
+                  } else {
+                    node.SetDistance(osmscout::Distance::Of<osmscout::Meter>(
+                        naviveylin::RouteStartNodeDistanceMeters(nodeIndex,
+                                                                 node.GetDistance().AsMeter(),
+                                                                 approachMeters)));
                   }
+                  nodeIndex++;
                 }
-                if (typeNameDesc) {
-                  if (!s.empty()) s += " onto ";
-                  s += typeNameDesc->GetDescription();
-                }
-                if (nameDesc && nameDesc->HasName()) {
-                  s += " " + nameDesc->GetDescription();
-                }
-                lines.back() += s;
-                AppendDistanceTime(lines.back());
+
+                // Metres, tolerance and the decision only - a position never reaches a log line
+                // (guidelines/Logging.md, spec auto-diagnostics).
+                osmscout::log.Info() << "Route start: the requested start lies "
+                                     << static_cast<std::size_t>(approachMeters)
+                                     << " m from the snapped node (tolerance "
+                                     << static_cast<std::size_t>(
+                                            naviveylin::kRouteStartSnapToleranceMeters)
+                                     << " m), so the approach is published as the first segment";
               }
-
-              void OnTargetReached(
-                  const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
-              {
-                NextLine();
-                lines.back() += "Destination: " + targetDesc->GetDescription();
-                AppendDistanceTime(lines.back());
-              }
-            };
-
-            DescCallback descCb;
-            osmscout::RouteDescriptionPostprocessor generator;
-            generator.GenerateDescription(*descResult.GetDescription(), descCb);
-
-            // Store description lines for marshalling
-            routeDescriptionLines = std::move(descCb.lines);
-            routeInstructionLats = std::move(descCb.instructionLats);
-            routeInstructionLons = std::move(descCb.instructionLons);
-            routeInstructionDistances = std::move(descCb.instructionDistances);
-            routeInstructionTimes = std::move(descCb.instructionTimes);
+            }
 
             // One step per described route node, carrying that node's manoeuvre data without a
             // client having to read a description line (spec: route-calculation - a calculated
             // route publishes structured steps).
             osmscout::client::RouteStepCollector routeStepCollector;
             routeSteps=routeStepCollector.Collect(*descResult.GetDescription());
-            // Every array must have one entry per instruction line; a mismatch would shift every
-            // later step, so the per-step values and the positions are dropped together instead
-            // (spec: route-calculation - the arrays are dropped as a set when they cannot be
-            // aligned).
-            if (routeInstructionLats.size() != descCb.lineCount ||
-                routeInstructionLons.size() != descCb.lineCount ||
-                routeInstructionDistances.size() != descCb.lineCount ||
-                routeInstructionTimes.size() != descCb.lineCount) {
-              osmscout::log.Warn() << "calculateRouteWithObjectsAsync: per-step value count ("
-                                   << routeInstructionDistances.size() << ", position count "
-                                   << routeInstructionLats.size() << ") does not match instruction line count ("
-                                   << descCb.lineCount << ") - per-step values and positions dropped";
-              routeInstructionLats.clear();
-              routeInstructionLons.clear();
-              routeInstructionDistances.clear();
-              routeInstructionTimes.clear();
-            }
-            osmscout::log.Warn() << "calculateRouteAsync: generated "
-                                 << routeDescriptionLines.size() << " description lines";
-
-            // The route's length is the description's own total (spec: route-calculation - The
-            // published route length is a length of that route): the cumulative distance at the
-            // description's last node, which is the sum of its steps and tracks the geometry the
-            // app draws, lists and highlights to within 0.4 %.
-            totalDistance = naviveylin::RouteLengthMeters(descCb.lastNodeDistanceMeters, 0.0);
+            // The route's length is the distance the route's own step list ends at (spec:
+            // route-calculation - The published route length is a length of that route): the
+            // cumulative distance of its last step, which is the description's total and tracks
+            // the geometry the app draws, lists and highlights to within 0.4 %. It is read from
+            // the steps so a calculation needs no second description walk.
+            totalDistance = naviveylin::RouteLengthMeters(LastStepDistanceMeters(routeSteps.steps), 0.0);
 
             // Keep a copy of the route description for live navigation
             if (descResult.GetDescription()) {
@@ -9112,13 +8241,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jobject routeEntry = threadEnv->NewObject(routeEntryCls, routeEntryCtor);
 
       const auto &points = pointsResult.GetPoints()->points;
-      jsize count = static_cast<jsize>(points.size());
+
+      // When the start was snapped, the published polyline gains one vertex in front: the requested
+      // start position. Everything else - the routed vertices, their order, the step list - is the
+      // routed geometry (spec: osmscout-jni - The published route starts at the requested start
+      // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
+      const bool prependStart = startApproachMeters > 0.0;
+      jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
 
       // Fill latitudes array
       jdoubleArray lats = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> latValues(count);
       for (jsize i = 0; i < count; i++) {
-        latValues[i] = points[static_cast<size_t>(i)].GetLat();
+        latValues[i] = (prependStart && i == 0)
+            ? start.GetLat()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLat();
       }
       threadEnv->SetDoubleArrayRegion(lats, 0, count, latValues.data());
 
@@ -9126,41 +8263,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jdoubleArray lons = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> lonValues(count);
       for (jsize i = 0; i < count; i++) {
-        lonValues[i] = points[static_cast<size_t>(i)].GetLon();
+        lonValues[i] = (prependStart && i == 0)
+            ? start.GetLon()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
       // Per-instruction positions and per-step leg values (spec: route-calculation). The vectors
       // are empty when the alignment check dropped them, and the Java arrays then stay null - the
       // app shows no per-step values or positions instead of shifted ones.
-      jdoubleArray instrLats = nullptr;
-      jdoubleArray instrLons = nullptr;
-      jdoubleArray instrDists = nullptr;
-      jdoubleArray instrTimes = nullptr;
-      const jsize instrCount = static_cast<jsize>(routeInstructionLats.size());
-      if (instrCount > 0 && instrCount == static_cast<jsize>(routeInstructionLons.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionDistances.size()) &&
-          instrCount == static_cast<jsize>(routeInstructionTimes.size())) {
-        instrLats = threadEnv->NewDoubleArray(instrCount);
-        instrLons = threadEnv->NewDoubleArray(instrCount);
-        instrDists = threadEnv->NewDoubleArray(instrCount);
-        instrTimes = threadEnv->NewDoubleArray(instrCount);
-        std::vector<jdouble> instrLatValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrLonValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrDistValues(static_cast<size_t>(instrCount));
-        std::vector<jdouble> instrTimeValues(static_cast<size_t>(instrCount));
-        for (jsize i = 0; i < instrCount; i++) {
-          instrLatValues[static_cast<size_t>(i)] = routeInstructionLats[static_cast<size_t>(i)];
-          instrLonValues[static_cast<size_t>(i)] = routeInstructionLons[static_cast<size_t>(i)];
-          instrDistValues[static_cast<size_t>(i)] = routeInstructionDistances[static_cast<size_t>(i)];
-          instrTimeValues[static_cast<size_t>(i)] = routeInstructionTimes[static_cast<size_t>(i)];
-        }
-        threadEnv->SetDoubleArrayRegion(instrLats, 0, instrCount, instrLatValues.data());
-        threadEnv->SetDoubleArrayRegion(instrLons, 0, instrCount, instrLonValues.data());
-        threadEnv->SetDoubleArrayRegion(instrDists, 0, instrCount, instrDistValues.data());
-        threadEnv->SetDoubleArrayRegion(instrTimes, 0, instrCount, instrTimeValues.data());
-      }
-
       // The route's own length when its description produced nothing: the great-circle length of the
       // polyline this call publishes, so a client that falls back to the total still receives a route
       // length and never the start/target air-line estimate (spec: route-calculation - The published
@@ -9181,13 +8292,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       // Set fields on RouteEntry
       jfieldID latsField = threadEnv->GetFieldID(routeEntryCls, "latitudes", "[D");
       jfieldID lonsField = threadEnv->GetFieldID(routeEntryCls, "longitudes", "[D");
-      jfieldID instrLatsField = threadEnv->GetFieldID(routeEntryCls, "instructionLats", "[D");
-      jfieldID instrLonsField = threadEnv->GetFieldID(routeEntryCls, "instructionLons", "[D");
-      jfieldID instrDistField = threadEnv->GetFieldID(routeEntryCls, "instructionDistances", "[D");
-      jfieldID instrTimeField = threadEnv->GetFieldID(routeEntryCls, "instructionTimes", "[D");
       jfieldID distField = threadEnv->GetFieldID(routeEntryCls, "distance", "D");
       jfieldID durField = threadEnv->GetFieldID(routeEntryCls, "duration", "D");
-      jfieldID descField = threadEnv->GetFieldID(routeEntryCls, "descriptions", "[Ljava/lang/String;");
       jfieldID stepsField = threadEnv->GetFieldID(routeEntryCls, "steps",
           "[Lcom/framstag/libosmscout/client/RouteStep;");
       jfieldID mappingField = threadEnv->GetFieldID(routeEntryCls, "databaseMapping",
@@ -9196,10 +8302,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       threadEnv->SetObjectField(routeEntry, latsField, lats);
       threadEnv->SetObjectField(routeEntry, lonsField, lons);
-      threadEnv->SetObjectField(routeEntry, instrLatsField, instrLats);
-      threadEnv->SetObjectField(routeEntry, instrLonsField, instrLons);
-      threadEnv->SetObjectField(routeEntry, instrDistField, instrDists);
-      threadEnv->SetObjectField(routeEntry, instrTimeField, instrTimes);
       threadEnv->SetDoubleField(routeEntry, distField, totalDistance);
       threadEnv->SetLongField(routeEntry, handleField, routeHandle);
 
@@ -9219,18 +8321,6 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       // Estimate duration: 50 km/h average speed (default car)
       double durationSec = (totalDistance / 1000.0) / 50.0 * 3600.0;
       threadEnv->SetDoubleField(routeEntry, durField, durationSec);
-
-      // Marshal description lines
-      jsize descCount = static_cast<jsize>(routeDescriptionLines.size());
-      jobjectArray descArray = threadEnv->NewObjectArray(
-          descCount,
-          threadEnv->FindClass("java/lang/String"),
-          nullptr);
-      for (jsize i = 0; i < descCount; i++) {
-        threadEnv->SetObjectArrayElement(descArray, i,
-            threadEnv->NewStringUTF(routeDescriptionLines[i].c_str()));
-      }
-      threadEnv->SetObjectField(routeEntry, descField, descArray);
 
       // Call onSuccess
       threadEnv->CallVoidMethod(callbackGlobal, cbMethods.onSuccess, routeEntry);

@@ -171,3 +171,77 @@ TEST_CASE("A region's bounding box never drops a position inside the region")
   REQUIRE_FALSE(naviveylin::GeoBoxContains(region, unset));
   REQUIRE(naviveylin::GeoBoxContains(unset, unset));
 }
+
+TEST_CASE("A scoped free-text walk collects the requested candidates, not fewer")
+{
+  /*
+   * The text index reports a query's whole hit set in one call, and the
+   * per-source budget bounds the object loads behind it. Counting *scanned* hits
+   * against the budget spent it on hits the scope then dropped: 60 reported hits
+   * of which 30 lie outside the extent delivered 15 candidates for a limit of 30
+   * (issue #19). The walk therefore offers every hit and spends the budget only
+   * on the ones it keeps.
+   */
+  const auto extent=naviveylin::BoxAroundPoint(51.5136, 7.4653, 0.5);
+  naviveylin::FreeTextBudget budget(30, extent);
+
+  size_t scanned=0;
+
+  // 60 reported hits: the first 30 outside the extent (Reykjavik), the last 30
+  // inside it (Dortmund).
+  for (size_t i=0; i<60; i++) {
+    const bool   inside=i>=30;
+    const double lat=inside ? 51.5136 : 64.1466;
+    const double lon=inside ? 7.4653  : -21.9426;
+
+    if (budget.Reached()) {
+      break;
+    }
+
+    scanned++;
+
+    budget.Admit(lat, lon);
+  }
+
+  // The walk passed every refused hit and still delivered the full candidate
+  // count, which is what the caller asked for.
+  REQUIRE(budget.Kept()==30);
+  REQUIRE(budget.Reached());
+  REQUIRE(budget.Dropped()==30);
+
+  // Every reported hit was inspected: the walk no longer stops at the limit's
+  // worth of hits, only at the limit's worth of candidates.
+  REQUIRE(scanned==60);
+  REQUIRE(budget.Scanned()==60);
+}
+
+TEST_CASE("Without a scope every hit spends the budget")
+{
+  // An unset extent admits every position (fail-open), so the budget is spent on
+  // the hits themselves and the walk stops at the limit as it always did.
+  naviveylin::FreeTextBudget budget(5, naviveylin::UnsetGeoBox());
+
+  for (size_t i=0; i<5; i++) {
+    REQUIRE(budget.Admit(64.1466, -21.9426));
+  }
+
+  REQUIRE(budget.Reached());
+  REQUIRE(budget.Scanned()==5);
+  REQUIRE(budget.Dropped()==0);
+}
+
+TEST_CASE("A refused hit does not spend the budget")
+{
+  // The single hit the limit allows is still available after a hit outside the
+  // extent was refused.
+  const auto extent=naviveylin::BoxAroundPoint(51.5136, 7.4653, 0.5);
+  naviveylin::FreeTextBudget budget(1, extent);
+
+  REQUIRE_FALSE(budget.Admit(64.1466, -21.9426)); // outside the extent
+  REQUIRE_FALSE(budget.Reached());
+  REQUIRE(budget.Dropped()==1);
+
+  REQUIRE(budget.Admit(51.5136, 7.4653)); // inside it
+  REQUIRE(budget.Reached());
+  REQUIRE(budget.Kept()==1);
+}

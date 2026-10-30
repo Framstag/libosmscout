@@ -33,6 +33,7 @@ osmscoutHeader = [
             'osmscout/feature/FeeFeature.h',
             'osmscout/feature/FromToFeature.h',
             'osmscout/feature/GradeFeature.h',
+            'osmscout/feature/TollFeature.h',
             'osmscout/feature/IsInFeature.h',
             'osmscout/feature/LanesFeature.h',
             'osmscout/feature/LayerFeature.h',

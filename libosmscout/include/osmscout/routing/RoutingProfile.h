@@ -365,9 +365,34 @@ constexpr bool debugRouting = false;
     Distance penaltySameType=Meters(40);
     Distance penaltyDifferentType=Meters(250);
     HourDuration maxPenalty=std::chrono::seconds(10);
+    bool avoidTolls=false;
+    double tollPenaltyFactor=3.0;
 
   public:
     explicit FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
+
+    /**
+     * Price an object whose variant carries the toll signal higher, so that a detour is chosen when one
+     * is reasonable. The factor multiplies the travel time, never the availability: a toll way stays
+     * routable, because a profile whose edge cost goes to zero prices its own cost limit out of reach and
+     * the search then reports "no route" instead of a detour.
+     */
+    void SetAvoidTolls(bool avoidTolls,
+                       double tollPenaltyFactor=3.0)
+    {
+      this->avoidTolls=avoidTolls;
+      this->tollPenaltyFactor=tollPenaltyFactor;
+    }
+
+    bool GetAvoidTolls() const
+    {
+      return avoidTolls;
+    }
+
+    double GetTollPenaltyFactor() const
+    {
+      return tollPenaltyFactor;
+    }
 
     void ParametrizeForFoot(const TypeConfig& typeConfig,
                             double maxSpeed) override
@@ -459,7 +484,7 @@ constexpr bool debugRouting = false;
 
       auto GetMaxSpeed = [&](const ObjectVariantData &variant) -> double {
         TypeInfoRef type=variant.type;
-        Grade grade=static_cast<Grade>(variant.grade);
+        Grade grade=static_cast<Grade>(variant.GetGrade());
         double speed=speeds[type->GetIndex()][grade];
         if (speed<=0){
           log.Warn() << "Infinite cost for type " << type->GetName();
@@ -475,6 +500,13 @@ constexpr bool debugRouting = false;
       double outPrice = speed <= 0 ?
           std::numeric_limits<double>::infinity() :
           currentNode.paths[outPathIndex].distance.As<Kilometer>() / speed;
+
+      // A toll way costs more time than it takes: the detour is chosen when one is reasonable, and the
+      // way stays routable when it is the only option (a zero price here would put the profile's own
+      // cost limit out of reach and the search would report "no route" instead of a detour).
+      if (avoidTolls && outPathVariant.IsToll()) {
+        outPrice *= tollPenaltyFactor;
+      }
 
       // add penalty for junction
       // it is estimated without considering real junction geometry

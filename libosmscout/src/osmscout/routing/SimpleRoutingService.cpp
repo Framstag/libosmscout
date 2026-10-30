@@ -722,7 +722,6 @@ namespace osmscout {
         continue;
       }
 
-
       // The closest segment of this way first, then one decision for the way as a whole: a way the
       // position cannot be attached to for this end is skipped entirely, so the next way within the
       // given radius gets its chance instead of the whole calculation failing (IsEndpointAttachable).

@@ -1,7 +1,6 @@
 package com.framstag.libosmscout;
 
 import com.framstag.libosmscout.client.RouteEntry;
-import com.framstag.libosmscout.client.RouteInstruction;
 import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.TurnType;
 
@@ -21,8 +20,8 @@ import java.util.Locale;
  * recovered from the characters of a description line, and a header is never recognised by
  * comparing its text to a literal.
  * <p>
- * A result that carries no structured steps falls back to its description lines, which is the
- * behaviour a native library of an older vintage leaves the app with.
+ * A result carries its steps or it carries nothing: the library stopped publishing description
+ * lines, so there is no prose fallback to fall back to (change `retire-instruction-prose`).
  */
 public final class RouteRowBuilder {
 
@@ -52,8 +51,7 @@ public final class RouteRowBuilder {
      * Build the rows of a route result.
      *
      * @param route the route result
-     * @return one row per published step, in route order; one row per description line when the
-     *         result carries no steps; empty when it carries neither
+     * @return one row per published step, in route order; empty when it carries none
      */
     public static List<Row> buildRows(RouteEntry route) {
         List<Row> rows = new ArrayList<>();
@@ -62,17 +60,15 @@ public final class RouteRowBuilder {
             return rows;
         }
 
-        if (route.steps != null && route.steps.length > 0) {
+        if (route.steps != null) {
             for (RouteStep step : route.steps) {
                 if (step != null && isRendered(step)) {
                     rows.add(rowOf(step));
                 }
             }
-
-            return rows;
         }
 
-        return rowsFromDescriptions(route);
+        return rows;
     }
 
     /**
@@ -105,38 +101,6 @@ public final class RouteRowBuilder {
             default:
                 return false;
         }
-    }
-
-    /**
-     * The rows of a result without structured steps: its description lines.
-     * <p>
-     * The header line is dropped structurally, never by its text: when the per-instruction
-     * positions are present they are index-aligned with the instruction lines only, so a
-     * description list one entry longer than them carries the header in its first entry.
-     */
-    private static List<Row> rowsFromDescriptions(RouteEntry route) {
-        List<Row> rows = new ArrayList<>();
-
-        if (route.descriptions == null || route.descriptions.length == 0) {
-            return rows;
-        }
-
-        int first = 0;
-
-        if (route.instructionLats != null
-            && route.descriptions.length == route.instructionLats.length + 1) {
-            first = 1;
-        }
-
-        for (int i = first; i < route.descriptions.length; i++) {
-            String line = route.descriptions[i];
-
-            if (line != null) {
-                rows.add(new Row(line, ""));
-            }
-        }
-
-        return rows;
     }
 
     /**
@@ -310,36 +274,36 @@ public final class RouteRowBuilder {
 
     /**
      * The detail line of the next-turn display: the exit reference, the junction name and the
-     * destination signs, when the instruction carries them.
+     * destination signs, when the step carries them.
      *
-     * @param instruction the instruction ahead
-     * @return the detail text, empty when the instruction carries none of those facts
+     * @param step the step ahead
+     * @return the detail text, empty when the step carries none of those facts
      */
-    public static String nextTurnDetail(RouteInstruction instruction) {
-        if (instruction == null) {
+    public static String nextTurnDetail(RouteStep step) {
+        if (step == null) {
             return "";
         }
 
         StringBuilder detail = new StringBuilder();
 
-        if (instruction.junctionRef != null && !instruction.junctionRef.isEmpty()) {
-            detail.append("Exit ").append(instruction.junctionRef);
+        if (step.junction != null && step.junction.ref != null && !step.junction.ref.isEmpty()) {
+            detail.append("Exit ").append(step.junction.ref);
         }
 
-        if (instruction.junctionName != null && !instruction.junctionName.isEmpty()) {
+        if (step.junction != null && step.junction.name != null && !step.junction.name.isEmpty()) {
             if (detail.length() > 0) {
                 detail.append(" ");
             }
 
-            detail.append(instruction.junctionName);
+            detail.append(step.junction.name);
         }
 
-        if (instruction.destinations != null && !instruction.destinations.isEmpty()) {
+        if (step.destination != null && !step.destination.isEmpty()) {
             if (detail.length() > 0) {
                 detail.append(" \u2192 ");
             }
 
-            detail.append(instruction.destinations);
+            detail.append(step.destination);
         }
 
         return detail.toString();

@@ -128,11 +128,12 @@ A route's published steps SHALL expose the manoeuvre facts that the route descri
 
 The Java interface `RouteCallback` SHALL carry the failure kinds as integer constants — `KIND_UNKNOWN`,
 `KIND_ROUTING_DATA_UNAVAILABLE`, `KIND_START_UNROUTABLE`, `KIND_TARGET_UNROUTABLE`, `KIND_NO_ROUTE_FOUND`,
-`KIND_ROUTING_DATA_FAILURE`, `KIND_ENGINE_FAILURE` — and the methods `onProgress(int percent)`,
-`onSuccess(RouteEntry route)`, `onError(String message)`, `onErrorDetail(int kind, String detail, double
-nearestRoadDistanceMeters)` and `onCancel()`. `onErrorDetail` SHALL be a default method that delegates to
-`onError(detail)`, and the kind numbering SHALL be identical on the Java and the native side, because the
-integer is what crosses the boundary. It SHALL be passed to the route calculation and invoked from JNI.
+`KIND_ROUTING_DATA_FAILURE`, `KIND_ENGINE_FAILURE`, `KIND_DATABASE_NOT_LOADED` — and the methods
+`onProgress(int percent)`, `onSuccess(RouteEntry route)`, `onError(String message)`, `onErrorDetail(int kind,
+String detail, double nearestRoadDistanceMeters)` and `onCancel()`. `onErrorDetail` SHALL be a default method
+that delegates to `onError(detail)`, and the kind numbering SHALL be identical on the Java and the native
+side, because the integer is what crosses the boundary. It SHALL be passed to the route calculation and
+invoked from JNI.
 
 #### Scenario: Callback methods invoked from JNI
 
@@ -145,6 +146,14 @@ integer is what crosses the boundary. It SHALL be passed to the route calculatio
 - **WHEN** the failure reaches Java
 - **THEN** `onErrorDetail` SHALL be called with `KIND_START_UNROUTABLE` or `KIND_TARGET_UNROUTABLE`
 - **AND** the detail SHALL be an English description for a log, not display text
+
+#### Scenario: A calculation that outruns the database open reports that
+
+- **GIVEN** a client that has just asked for a map database to be opened, and a calculation issued before the
+  database list has been populated
+- **WHEN** the calculation starts and finds no database instance
+- **THEN** it SHALL report `KIND_DATABASE_NOT_LOADED`, not `KIND_ROUTING_DATA_UNAVAILABLE`
+- **AND** the same calculation SHALL succeed when it is issued again after the list is populated
 
 #### Scenario: An implementation written before the method existed keeps working
 

@@ -34,7 +34,6 @@ set(JAVA_SOURCES
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RoadInfo.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteCallback.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteEntry.java
-  ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteInstruction.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RouteStep.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/RoutingProfile.java
   ${JAVA_SOURCES_DIR}/com/framstag/libosmscout/client/StarredFavoriteLocation.java
@@ -97,6 +96,9 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 set(CLIENT_JAVA_SOURCES
   src/OSMScoutClient.cpp
+  # The search scope's extent derivation (issue #20): no JNI, compiled by
+  # Tests/SearchScopeExtentTest as well.
+  src/search_scope_extent.cpp
 )
 
 add_library(osmscout_client_java SHARED
