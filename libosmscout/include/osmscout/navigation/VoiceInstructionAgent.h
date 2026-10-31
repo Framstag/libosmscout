@@ -21,9 +21,15 @@
  */
 
 #include <osmscout/navigation/Engine.h>
-#include <osmscout/navigation/Agents.h>
-#include <osmscout/navigation/DataAgent.h>
-#include <osmscout/navigation/PositionAgent.h>
+#include <osmscout/util/Distance.h>
+#include <osmscout/util/Time.h>
+#include <osmscout/lib/CoreImportExport.h>
+#include <osmscout/system/Compiler.h>
+
+#include <vector>
+#include <string>
+#include <optional>
+#include <variant>
 
 namespace osmscout {
 
@@ -140,16 +146,19 @@ struct OSMSCOUT_API TTSVoiceInstructionMessage CLASS_FINAL : public NavigationMe
   {}
 };
 
-struct VoiceMessageStruct {
+struct VoiceMessageStruct
+{
+  struct LaneSuggestion
+  {
+    int laneCount;
+    int suggestedLaneFrom; // 0-based, from left
+    int suggestedLaneTo; // 0-based, from left, inclusive
+  };
+
   enum class OSMSCOUT_API Type: int {
     NoMessage = 0,
 
-    LeaveRbExit1,
-    LeaveRbExit2,
-    LeaveRbExit3,
-    LeaveRbExit4,
-    LeaveRbExit5,
-    LeaveRbExit6,
+    LeaveRoundabout,
 
     TargetReached,
 
@@ -159,6 +168,7 @@ struct VoiceMessageStruct {
     TurnRight,
     SharpRight,
 
+    MotorwayChange,
     LeaveMotorway,
     LeaveMotorwayRight,
     LeaveMotorwayLeft,
@@ -166,11 +176,22 @@ struct VoiceMessageStruct {
     GpsLost,
     GpsFound,
 
-    Silent
+    Silent,
   };
 
   Type type{Type::NoMessage};
   Distance distance;
+
+  std::optional<LaneSuggestion> laneSuggestion; // optional lane suggestion for the maneuver
+
+  // type==LeaveRoundabout
+  int exitNumber=1; // exit number to leave roundabout, 1-based
+
+  // type==LeaveMotorway*
+  std::optional<std::string> exitRef; // optional exit reference for LeaveMotorway*
+  std::optional<std::string> destinationName; // optional name of the destination (town, street...) TODO: propagate language code of the name, if available
+  std::optional<std::string> fromName; // optional ref or name of the motorway we are leaving
+  std::optional<std::string> toName; // optional ref or name of the motorway we are entering
 
   VoiceMessageStruct() = default;
   VoiceMessageStruct(const VoiceMessageStruct&) = default;
@@ -191,7 +212,11 @@ struct VoiceMessageStruct {
 
   bool operator==(const VoiceMessageStruct &other) const
   {
-    return type==other.type && distance==other.distance;
+    return type==other.type &&
+          distance==other.distance &&
+          exitNumber==other.exitNumber &&
+          exitRef==other.exitRef && destinationName==other.destinationName &&
+          fromName==other.fromName && toName==other.toName;
   }
 
   bool operator!=(const VoiceMessageStruct &other) const
@@ -309,7 +334,7 @@ public:
 
 private:
   void toSamples(std::vector<SampleVoiceInstructionMessage::VoiceSample> &samples,
-                 const VoiceMessageStruct::Type &messageType,
+                 const VoiceMessageStruct &message,
                  bool shortRoundaboutMessage);
 
   std::vector<SampleVoiceInstructionMessage::VoiceSample> toSamples(const Distance &distanceFromStart,
