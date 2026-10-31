@@ -22,8 +22,30 @@
 #include <osmscout/TypeConfig.h>
 
 #include <algorithm>
+#include <optional>
 
 namespace osmscout {
+
+namespace {
+
+/**
+ * The data format version the given database directory's types.dat names, or no value when that file is
+ * missing, shorter than the version field, or unreadable. A version this helper cannot read decides nothing:
+ * the reader stays the authority on such a directory.
+ */
+std::optional<uint32_t> ReadDatabaseFileFormatVersion(const std::filesystem::path &databaseDirectory)
+{
+  try {
+    return TypeConfig::GetDatabaseFileFormatVersion(databaseDirectory.string());
+  }
+  catch (const std::exception &e) {
+    osmscout::log.Debug() << "  data format version of " << databaseDirectory.string()
+                          << " cannot be read: " << e.what();
+    return std::nullopt;
+  }
+}
+
+}
 
 MapManager::MapManager(const std::vector<std::filesystem::path> &databaseLookupDirs):
   AsyncWorker("MapManager"),
@@ -82,6 +104,21 @@ CancelableFuture<bool> MapManager::LookupDatabases()
           if (fInfo.is_regular_file() && entryPath.has_filename() && entryPath.has_parent_path() && entryPath.filename() == TypeConfig::FILE_TYPES_DAT){
             candidateCount++;
             try {
+              // A directory whose data format this build does not read stays out of the database list:
+              // the reader would refuse it later, with its own error, while everything registered in
+              // between holds a database that never opens. One line names the skip instead.
+              auto fileFormatVersion=ReadDatabaseFileFormatVersion(entryPath.parent_path());
+
+              if (fileFormatVersion.has_value() &&
+                  *fileFormatVersion!=FILE_FORMAT_VERSION) {
+                invalidCount++;
+                osmscout::log.Warn() << "  skipping map directory whose data format version is "
+                                     << *fileFormatVersion << ", this build reads "
+                                     << FILE_FORMAT_VERSION << ": "
+                                     << entryPath.parent_path().string();
+                continue;
+              }
+
               MapDirectory mapDir(entryPath.parent_path());
               if (mapDir.IsValid()) {
                 validCount++;
