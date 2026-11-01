@@ -16,9 +16,9 @@ Spec: `specs/ci-build-fixes/spec.md` (delta to the `ci-build-fixes` capability).
 
 ## 3. Build and test verification (the pull request's own runs, the only environment with a macOS 26 runner)
 
-- [ ] 3.1 Confirm the OS X `meson` job configures, builds and runs its test set on `macos-26`. Verify: the job's conclusion and its `meson test` summary on the pull request.
-- [ ] 3.2 Confirm the OS X `cmake` job configures, builds and runs its test set on `macos-26`. Verify: the job's conclusion and its `ctest` summary on the pull request.
-- [ ] 3.3 Confirm the iOS job configures and builds against the iOS 26.5 SDK with deployment target 15. Verify: the job's conclusion and the configure output of the pull request.
+- [x] 3.1 Confirm the OS X `meson` job configures, builds and runs its test set on `macos-26`. Verify: the job's conclusion and its `meson test` summary on the pull request.
+- [x] 3.2 Confirm the OS X `cmake` job configures, builds and runs its test set on `macos-26`. Verify: the job's conclusion and its `ctest` summary on the pull request.
+- [x] 3.3 Confirm the iOS job configures and builds against the iOS 26.5 SDK with deployment target 15. Verify: the job's conclusion and the configure output of the pull request.
 - [x] 3.4 Confirm no unit test is required for this change: it modifies workflow configuration only, so no new Catch2 test is added; the existing suites run inside the macOS jobs and are the verification (tasks 3.1, 3.2). Verify: the diff contains no file under `Tests/`, `libosmscout*/`, `OSMScout*/` or `Apple/`.
 - [x] 3.5 Confirm no other workflow is affected and both build systems are untouched: the Ubuntu, MSYS, Visual Studio, Android, sanitizer, Sonar and JavaScout jobs name labels this change does not touch, and no `CMakeLists.txt` or `meson.build` changes. Verify: `git diff --stat` against the base revision lists the two macOS workflows, the change's own files and `AGENTS.md`/`TODO.md` only.
 
@@ -26,4 +26,4 @@ Spec: `specs/ci-build-fixes/spec.md` (delta to the `ci-build-fixes` capability).
 
 - [x] 4.1 Add a note to the CI/CD section of `AGENTS.md` that the macOS jobs name their image version, that `macos-26` is the current GA arm64 image, and why the iOS job's deployment target is 15. Verify: the note exists and names the image and the deployment target.
 - [x] 4.2 Record the follow-ups this change does not take in `TODO.md`: the arm64 Homebrew prefix the OS X jobs' `PKG_CONFIG_PATH` contradicts, the deprecated `qt@5` formula both jobs install, and the deployment target difference of task 2.2. Verify: each entry carries an id, a category and a status, and names the file it is about.
-- [ ] 4.3 Validate the change: `openspec validate ci-macos-26-runner-migration --strict`. Verify: the command reports the change as valid.
+- [x] 4.3 Validate the change: `openspec validate ci-macos-26-runner-migration --strict`. Verify: the command reports the change as valid.
