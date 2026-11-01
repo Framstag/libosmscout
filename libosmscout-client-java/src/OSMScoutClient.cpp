@@ -78,11 +78,13 @@
 #include "render_label_bounds.h"
 #include "route_failure_kind.h"
 #include "route_length.h"
+#include "route_start.h"
 #include "route_step_time.h"
 #include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
 #include "search_breaker.h"
 #include "search_scope.h"
+#include "search_scope_extent.h"
 #include "type_icon_pixels.h"
 
 #include <osmscout/util/StringMatcher.h>
@@ -4154,68 +4156,6 @@ static void ResolveSearchScope(const osmscout::DBInstanceRef &db,
   }
 }
 
-// Derives the geographic extent of a resolved search scope from the object that
-// represents the region (change client-java-search-scope-extent, design D2).
-// An admin region carries no coordinates of its own: the extent therefore comes
-// from its object - an area or a way contributes its bounding box, a node
-// region only a point, which is approximated by the documented fallback box.
-// Every other outcome (no region, no database, the object not loadable, an
-// invalid box) leaves the extent unset, which makes the filter admit every
-// position. That is deliberate: a scope whose extent cannot be established must
-// degrade to the unscoped behaviour, never silently empty the search.
-static naviveylin::GeoBox DeriveScopeExtent(const osmscout::DBInstanceRef &db,
-                                            const osmscout::AdminRegionRef &region)
-{
-  if (!region) {
-    return naviveylin::UnsetGeoBox();
-  }
-
-  auto database = db->GetDatabase();
-  if (!database) {
-    osmscout::log.Warn() << "search scope: no database to derive the extent of region '"
-                         << region->name << "' from - filtering disabled";
-    return naviveylin::UnsetGeoBox();
-  }
-
-  osmscout::GeoBox box;
-  bool             loaded = false;
-
-  if (region->object.GetType() == osmscout::RefType::refArea) {
-    osmscout::AreaRef area;
-    if (database->GetAreaByOffset(region->object.GetFileOffset(), area)) {
-      box = area->GetBoundingBox();
-      loaded = box.IsValid();
-    }
-  } else if (region->object.GetType() == osmscout::RefType::refWay) {
-    osmscout::WayRef way;
-    if (database->GetWayByOffset(region->object.GetFileOffset(), way)) {
-      box = way->GetBoundingBox();
-      loaded = box.IsValid();
-    }
-  } else if (region->object.GetType() == osmscout::RefType::refNode) {
-    osmscout::NodeRef node;
-    loaded = database->GetNodeByOffset(region->object.GetFileOffset(), node);
-    if (loaded) {
-      return naviveylin::BoxAroundPoint(node->GetCoords().GetLat(),
-                                       node->GetCoords().GetLon());
-    }
-  }
-
-  if (loaded) {
-    return naviveylin::BoxFromCorners(box.GetMinCoord().GetLat(),
-                                      box.GetMinCoord().GetLon(),
-                                      box.GetMaxCoord().GetLat(),
-                                      box.GetMaxCoord().GetLon());
-  }
-
-  // Identity in the line, never a coordinate.
-  osmscout::log.Warn() << "search scope: no extent for region '" << region->name
-                       << "' (object type " << static_cast<int>(region->object.GetType())
-                       << ") - filtering disabled";
-
-  return naviveylin::UnsetGeoBox();
-}
-
 // Validates that a std::string contains well-formed UTF-8. JNI's NewStringUTF
 // requires valid Modified UTF-8 and ABORTS the whole process on illegal bytes
 // (e.g. garbage read from a corrupt text index entry). Entries carrying such
@@ -4919,12 +4859,13 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
 
   // Geographic extent of the resolved search scope, derived from the scope
   // region's own object in the database that resolved it (change
-  // client-java-search-scope-extent, design D2). Computed once per search call,
-  // because the scope is a single region and does not depend on the database
-  // being walked. Unset means "no scope is active" or "the extent could not be
-  // established" - neither filters anything.
+  // client-java-search-scope-extent, design D2). Derived once per search call,
+  // before the database walk, because the free-text budget has to know the scope
+  // while it counts candidates and the resolving database may be walked after the
+  // ones whose hits the budget already spends itself on (issue #19). Unset means
+  // "no scope is active" or "the extent could not be established" - neither
+  // filters anything.
   naviveylin::GeoBox scopeExtent = naviveylin::UnsetGeoBox();
-  bool               scopeExtentResolved = false;
 
   data->dbThread->RunSynchronousJob(
     [&](const std::list<osmscout::DBInstanceRef> &databases) {
@@ -4938,10 +4879,25 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
       // full page of structured results must not crowd the text-index candidates
       // out of the set (openspec/specs/search-free-text, "Free-text results
       // merged with structured results").
+
+      // The scope of the database that resolved the region handle, resolved once:
+      // its extent is what the free-text budget measures hits against, and its
+      // structured search reads the same vector below.
+      std::vector<osmscout::AdminRegionRef> resolvedScope;
+      if (adminRegion && adminRegionDb) {
+        ResolveSearchScope(adminRegionDb, adminRegion, resolvedScope);
+        scopeExtent = naviveylin::DeriveScopeExtent(adminRegionDb,
+                                                    resolvedScope.empty()
+                                                      ? osmscout::AdminRegionRef()
+                                                      : resolvedScope.front());
+      }
+
+      // The budget counts only the hits the search keeps, so the scope cannot shorten a
+      // scoped candidate list (openspec/specs/search-free-text, "Free-text candidate
+      // budget counts kept candidates").
 #ifdef OSMSCOUT_HAVE_LIB_MARISA
-      const auto freeTextLimitReached = [&]() {
-        return freeTextEntries.size() >= static_cast<size_t>(limit);
-      };
+      naviveylin::FreeTextBudget freeTextBudget(static_cast<size_t>(limit),
+                                                scopeExtent);
 #endif
 
       for (const auto &db : databases) {
@@ -4985,16 +4941,7 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         // applied normally.
         std::vector<osmscout::AdminRegionRef> scope;
         if (effectiveRegion && db == adminRegionDb) {
-          ResolveSearchScope(db, effectiveRegion, scope);
-          // Once per search call: the scope does not change while the databases
-          // are walked, so its extent is derived from the resolving database only.
-          if (!scopeExtentResolved) {
-            scopeExtent = DeriveScopeExtent(db,
-                                            scope.empty()
-                                              ? osmscout::AdminRegionRef()
-                                              : scope.front());
-            scopeExtentResolved = true;
-          }
+          scope = resolvedScope;
         } else if (effectiveRegion && !adminRegionDb) {
           scope.push_back(effectiveRegion);
         } else {
@@ -5067,11 +5014,11 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
             break;
           }
           for (const auto &e : resultsTxt) {
-            if (freeTextLimitReached()) {
+            if (freeTextBudget.Reached()) {
               break;
             }
             for (const auto &fref : e.second) {
-              if (freeTextLimitReached()) {
+              if (freeTextBudget.Reached()) {
                 break;
               }
               // The text index reports one object under every matched name; the same
@@ -5082,7 +5029,8 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
               }
               seenTextOffsets[db].insert(fref.GetFileOffset());
               FreeTextEntry entry;
-              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry)) {
+              if (BuildFreeTextEntry(DescriptionLanguageOf(data), db, fref, e.first, entry) &&
+                  freeTextBudget.Admit(entry.lat, entry.lon)) {
                 freeTextEntries.push_back(entry);
               }
             }
@@ -5094,11 +5042,25 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
         // Only the free-text budget ends the walk over the databases: a full
         // page of structured results must not stop the text-index candidates of
         // the remaining databases from being collected.
-        if (freeTextLimitReached()) {
+        if (freeTextBudget.Reached()) {
           break;
         }
 #endif
       }
+
+#ifdef OSMSCOUT_HAVE_LIB_MARISA
+      // How much the scope refused is a device-check number, so it is logged where the
+      // collection happens: counts and identity only, never a coordinate. Debug-gated -
+      // enable with osmscout::log.Debug(true). The denominator is every hit the index
+      // reported and the walk reached, before the per-database dedup below drops the ones
+      // the structured search already published.
+      if (freeTextBudget.Dropped() != 0) {
+        osmscout::log.Debug() << "search scope: dropped "
+                              << freeTextBudget.Dropped()
+                              << " of " << freeTextBudget.Scanned()
+                              << " free-text hit(s) outside the scope";
+      }
+#endif
     }
   );
 
@@ -5131,33 +5093,10 @@ jobjectArray DoSearchLocations(JNIEnv *env, jobject self,
                      }),
       freeTextEntries.end());
 
-  // Free-text hits must respect the active search scope. The text index itself
-  // has no region attribution, so the scope is applied geographically: a hit
-  // outside the scope's extent is dropped, whichever database produced it,
-  // including the database that resolved the region. A hit inside the extent is
-  // kept even when a different database holds it, because the extent is
-  // comparable across databases while region offsets are not. An unset extent
-  // (no scope, or an extent that could not be established) drops nothing.
-  if (scopeExtent.isSet) {
-    const size_t freeTextBeforeFilter = freeTextEntries.size();
-
-    freeTextEntries.erase(
-        std::remove_if(freeTextEntries.begin(), freeTextEntries.end(),
-                       [&](const FreeTextEntry &e) {
-                         return !naviveylin::IsInsideGeoBox(scopeExtent, e.lat, e.lon);
-                       }),
-        freeTextEntries.end());
-
-    // Counts and identity only, never a coordinate. Debug-gated: enable with
-    // osmscout::log.Debug(true) when a device check needs to see how much the
-    // scope filtered.
-    if (freeTextEntries.size() != freeTextBeforeFilter) {
-      osmscout::log.Debug() << "search scope: dropped "
-                            << (freeTextBeforeFilter - freeTextEntries.size())
-                            << " of " << freeTextBeforeFilter
-                            << " free-text hit(s) outside the scope";
-    }
-  }
+  // Free-text hits respect the active search scope: the budget refused every hit
+  // outside the extent while the hits were collected, so the survivors are in scope
+  // by construction and no second filter pass follows (issue #19 - a filter after
+  // the walk could only shorten a candidate list the budget had already spent).
 #endif
 
   // An aborted search publishes nothing: a caller that did not check the generation must
@@ -7119,6 +7058,58 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 }
 
 /**
+ * Re-price every routable type of [profile] with a per-grade speed table.
+ *
+ * Must be called *after* the vehicle parametrization: `FastestPathRoutingProfile::ParametrizeForCar`
+ * (and the bicycle/foot counterparts) also enable the junction penalty and double the profile's cost
+ * limit and factor (RoutingProfile.h). A profile whose type list is built by hand loses both, and then
+ * every route that needs a high-grade way fails with "no route".
+ *
+ * [carSpeedMap] is the base speed per type name for a car and unused for the other vehicles;
+ * [maxSpeedKmh] is the resolved vehicle speed (the flat speed for bicycle and foot, the ceiling
+ * for a car).
+ */
+static void ApplyAvoidUnpavedGradeSpeeds(osmscout::FastestPathRoutingProfile &profile,
+                                         const osmscout::TypeConfig &typeConfig,
+                                         osmscout::Vehicle vehicle,
+                                         const std::map<std::string,double> &carSpeedMap,
+                                         double maxSpeedKmh)
+{
+  for (const auto &type : typeConfig.GetTypes()) {
+    if (type->GetIgnore()) {
+      continue;
+    }
+
+    bool routable = vehicle == osmscout::vehicleCar ? type->CanRouteCar()
+                  : vehicle == osmscout::vehicleBicycle ? type->CanRouteBicycle()
+                  : type->CanRouteFoot();
+    if (!routable) {
+      continue;
+    }
+
+    double baseSpeed = maxSpeedKmh;
+    if (vehicle == osmscout::vehicleCar) {
+      auto entry = carSpeedMap.find(type->GetName());
+      if (entry == carSpeedMap.end()) {
+        // Not parametrized by the car speed map, so it carries no usable speed (a track, for
+        // instance): leave its entry alone instead of inventing one.
+        continue;
+      }
+      baseSpeed = std::min(entry->second, maxSpeedKmh);
+    }
+
+    std::array<double,5> speeds = naviveylin::AvoidUnpavedGradeSpeedsKmh(baseSpeed);
+
+    osmscout::SpeedVariant variant;
+    for (size_t i = 0; i < 5; i++) {
+      variant.speed[i] = speeds[i];
+    }
+
+    profile.AddType(type, variant);
+  }
+}
+
+/**
  * Create a routing profile for the given vehicle type.
  * Car uses a speed map; bicycle and foot use built-in parametrization.
  *
@@ -7140,46 +7131,50 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
 
   auto profile = std::make_shared<osmscout::FastestPathRoutingProfile>(tc);
 
+  // Hoisted out of the car branch: the graded speed pass needs the car's base speed per type,
+  // and the resolved vehicle speed is the flat speed for bicycle and foot.
+  std::map<std::string,double> carSpeedMap;
+  double resolvedMaxSpeed = 0.0;
+
   switch (vehicle) {
     case osmscout::vehicleCar: {
-      std::map<std::string,double> speedMap;
-      speedMap["highway_motorway"]=110.0;
-      speedMap["highway_motorway_trunk"]=100.0;
-      speedMap["highway_motorway_primary"]=70.0;
-      speedMap["highway_motorway_link"]=60.0;
-      speedMap["highway_motorway_junction"]=60.0;
-      speedMap["highway_trunk"]=100.0;
-      speedMap["highway_trunk_link"]=60.0;
-      speedMap["highway_primary"]=70.0;
-      speedMap["highway_primary_link"]=60.0;
-      speedMap["highway_secondary"]=60.0;
-      speedMap["highway_secondary_link"]=50.0;
-      speedMap["highway_tertiary_link"]=55.0;
-      speedMap["highway_tertiary"]=55.0;
-      speedMap["highway_unclassified"]=50.0;
-      speedMap["highway_road"]=50.0;
-      speedMap["highway_residential"]=20.0;
-      speedMap["highway_roundabout"]=40.0;
-      speedMap["highway_living_street"]=10.0;
-      speedMap["highway_service"]=30.0;
-      double carMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
-      profile->ParametrizeForCar(*tc, speedMap, carMaxSpeed);
+      carSpeedMap["highway_motorway"]=110.0;
+      carSpeedMap["highway_motorway_trunk"]=100.0;
+      carSpeedMap["highway_motorway_primary"]=70.0;
+      carSpeedMap["highway_motorway_link"]=60.0;
+      carSpeedMap["highway_motorway_junction"]=60.0;
+      carSpeedMap["highway_trunk"]=100.0;
+      carSpeedMap["highway_trunk_link"]=60.0;
+      carSpeedMap["highway_primary"]=70.0;
+      carSpeedMap["highway_primary_link"]=60.0;
+      carSpeedMap["highway_secondary"]=60.0;
+      carSpeedMap["highway_secondary_link"]=50.0;
+      carSpeedMap["highway_tertiary_link"]=55.0;
+      carSpeedMap["highway_tertiary"]=55.0;
+      carSpeedMap["highway_unclassified"]=50.0;
+      carSpeedMap["highway_road"]=50.0;
+      carSpeedMap["highway_residential"]=20.0;
+      carSpeedMap["highway_roundabout"]=40.0;
+      carSpeedMap["highway_living_street"]=10.0;
+      carSpeedMap["highway_service"]=30.0;
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,120.0);
+      profile->ParametrizeForCar(*tc, carSpeedMap, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created car routing profile (max speed "
-                           << carMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleBicycle: {
-      double bicycleMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
-      profile->ParametrizeForBicycle(*tc, bicycleMaxSpeed);
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,30.0);
+      profile->ParametrizeForBicycle(*tc, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created bicycle routing profile (max speed "
-                           << bicycleMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
     case osmscout::vehicleFoot: {
-      double footMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
-      profile->ParametrizeForFoot(*tc, footMaxSpeed);
+      resolvedMaxSpeed=naviveylin::ResolveProfileMaxSpeedKmh(maxSpeedKmh,10.0);
+      profile->ParametrizeForFoot(*tc, resolvedMaxSpeed);
       osmscout::log.Warn() << "  created pedestrian routing profile (max speed "
-                           << footMaxSpeed << " km/h)";
+                           << resolvedMaxSpeed << " km/h)";
       break;
     }
   }
@@ -7194,10 +7189,12 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
   }
 
   if (avoidUnpaved) {
-    // Set low speed for unpaved/high-grade roads
-    // Grade 4 (mostly soft) and Grade 5 (soft) get very low speed
-    // This is handled by the grade system in the profile
-    osmscout::log.Warn() << "  avoiding unpaved roads (grade-based speed reduction)";
+    ApplyAvoidUnpavedGradeSpeeds(*profile, *tc, vehicle, carSpeedMap, resolvedMaxSpeed);
+    osmscout::log.Warn() << "  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = "
+                         << naviveylin::kAvoidUnpavedGradeFactor[0] << "/" << naviveylin::kAvoidUnpavedGradeFactor[1] << "/"
+                         << naviveylin::kAvoidUnpavedGradeFactor[2] << "/" << naviveylin::kAvoidUnpavedGradeFactor[3] << "/"
+                         << naviveylin::kAvoidUnpavedGradeFactor[4] << " of the type speed, floor "
+                         << naviveylin::kAvoidUnpavedMinSpeedKmh << " km/h)";
   }
 
   if (avoidTolls) {
@@ -7334,6 +7331,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
+      // The published route begins at the requested start (spec: route-description - The published route
+      // starts at the requested start position; design D1/D2/D3). The router used the caller's
+      // coordinate only to find a routable node, so the description's first node sits on that snapped
+      // node. When the requested start lies off the network by more than the snap tolerance, the first
+      // node takes the requested position and every later node carries the approach in its cumulative
+      // distance - which is what makes the per-step distances, the description total and the drawn
+      // polyline count the approach once (helpers: route_start.h). 0.0 means "the start was on the
+      // network": the description is left untouched and the polyline gets no extra vertex.
+      double startApproachMeters = 0.0;
       std::vector<std::string> routeDescriptionLines;
       // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
       // with the instruction lines of routeDescriptionLines. All four are published as a set and
@@ -7350,9 +7356,14 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
-            osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
-            errorMsg = "No databases loaded";
-            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
+            // The open the caller issued is registered by a queued DB-thread job, which clears and
+            // repopulates this list; a calculation that starts before it ran sees this. That is not
+            // the same fact as a database that cannot be opened, so it gets its own kind (spec
+            // `routing-failure-reporting` - A calculation that outruns the database open reports
+            // that, not unusable routing data).
+            osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
+            errorMsg = "No databases loaded yet";
+            errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
             return;
           }
 
@@ -7495,6 +7506,42 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 motorwayTypeNames,
                 motorwayLinkTypeNames,
                 junctionTypeNames);
+
+            // Move the published start to the requested position before anything reads the
+            // description: the step collector below, the copy kept for live navigation, and the
+            // polyline built further down then all speak of one start (design D1/D2).
+            if (!descResult.GetDescription()->Nodes().empty()) {
+              const osmscout::GeoCoord snappedStart =
+                  descResult.GetDescription()->Nodes().front().GetLocation();
+              const double approachMeters = naviveylin::RouteStartApproachMeters(
+                  start.GetLat(), start.GetLon(), snappedStart.GetLat(), snappedStart.GetLon());
+
+              if (naviveylin::ShouldPrependRouteStart(approachMeters)) {
+                startApproachMeters = approachMeters;
+
+                std::size_t nodeIndex = 0;
+                for (auto &node : descResult.GetDescription()->Nodes()) {
+                  if (nodeIndex == 0) {
+                    node.SetLocation(osmscout::GeoCoord(start.GetLat(), start.GetLon()));
+                  } else {
+                    node.SetDistance(osmscout::Distance::Of<osmscout::Meter>(
+                        naviveylin::RouteStartNodeDistanceMeters(nodeIndex,
+                                                                 node.GetDistance().AsMeter(),
+                                                                 approachMeters)));
+                  }
+                  nodeIndex++;
+                }
+
+                // Metres, tolerance and the decision only - a position never reaches a log line
+                // (guidelines/Logging.md, spec auto-diagnostics).
+                osmscout::log.Info() << "Route start: the requested start lies "
+                                     << static_cast<std::size_t>(approachMeters)
+                                     << " m from the snapped node (tolerance "
+                                     << static_cast<std::size_t>(
+                                            naviveylin::kRouteStartSnapToleranceMeters)
+                                     << " m), so the approach is published as the first segment";
+              }
+            }
 
             // Collect description lines via callback
             struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
@@ -7762,13 +7809,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jobject routeEntry = threadEnv->NewObject(routeEntryCls, routeEntryCtor);
 
       const auto &points = pointsResult.GetPoints()->points;
-      jsize count = static_cast<jsize>(points.size());
+
+      // When the start was snapped, the published polyline gains one vertex in front: the requested
+      // start position. Everything else - the routed vertices, their order, the step list - is the
+      // routed geometry (spec: route-description - The published route starts at the requested start
+      // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
+      const bool prependStart = startApproachMeters > 0.0;
+      jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
 
       // Fill latitudes array
       jdoubleArray lats = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> latValues(count);
       for (jsize i = 0; i < count; i++) {
-        latValues[i] = points[static_cast<size_t>(i)].GetLat();
+        latValues[i] = (prependStart && i == 0)
+            ? start.GetLat()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLat();
       }
       threadEnv->SetDoubleArrayRegion(lats, 0, count, latValues.data());
 
@@ -7776,7 +7831,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jdoubleArray lons = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> lonValues(count);
       for (jsize i = 0; i < count; i++) {
-        lonValues[i] = points[static_cast<size_t>(i)].GetLon();
+        lonValues[i] = (prependStart && i == 0)
+            ? start.GetLon()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
@@ -8018,6 +8075,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
+      // The published route begins at the requested start (spec: route-description - The published route
+      // starts at the requested start position; design D1/D2/D3). The router used the caller's
+      // coordinate only to find a routable node, so the description's first node sits on that snapped
+      // node. When the requested start lies off the network by more than the snap tolerance, the first
+      // node takes the requested position and every later node carries the approach in its cumulative
+      // distance - which is what makes the per-step distances, the description total and the drawn
+      // polyline count the approach once (helpers: route_start.h). 0.0 means "the start was on the
+      // network": the description is left untouched and the polyline gets no extra vertex.
+      double startApproachMeters = 0.0;
       std::vector<std::string> routeDescriptionLines;
       // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
       // with the instruction lines of routeDescriptionLines. All four are published as a set and
@@ -8034,9 +8100,12 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       data->dbThread->RunSynchronousJob(
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
-            osmscout::log.Error() << "calculateRouteAsync: no databases loaded";
-            errorMsg = "No databases loaded";
-            errorKind = naviveylin::kRouteFailureRoutingDataUnavailable;
+            // Twin of the branch in calculateRouteWithObjectsWithProfile: the list is empty because
+            // the queued set change has not run yet, which a retry clears (spec
+            // `routing-failure-reporting`).
+            osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
+            errorMsg = "No databases loaded yet";
+            errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
             return;
           }
 
@@ -8260,6 +8329,42 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 motorwayTypeNames,
                 motorwayLinkTypeNames,
                 junctionTypeNames);
+
+            // Move the published start to the requested position before anything reads the
+            // description: the step collector below, the copy kept for live navigation, and the
+            // polyline built further down then all speak of one start (design D1/D2).
+            if (!descResult.GetDescription()->Nodes().empty()) {
+              const osmscout::GeoCoord snappedStart =
+                  descResult.GetDescription()->Nodes().front().GetLocation();
+              const double approachMeters = naviveylin::RouteStartApproachMeters(
+                  start.GetLat(), start.GetLon(), snappedStart.GetLat(), snappedStart.GetLon());
+
+              if (naviveylin::ShouldPrependRouteStart(approachMeters)) {
+                startApproachMeters = approachMeters;
+
+                std::size_t nodeIndex = 0;
+                for (auto &node : descResult.GetDescription()->Nodes()) {
+                  if (nodeIndex == 0) {
+                    node.SetLocation(osmscout::GeoCoord(start.GetLat(), start.GetLon()));
+                  } else {
+                    node.SetDistance(osmscout::Distance::Of<osmscout::Meter>(
+                        naviveylin::RouteStartNodeDistanceMeters(nodeIndex,
+                                                                 node.GetDistance().AsMeter(),
+                                                                 approachMeters)));
+                  }
+                  nodeIndex++;
+                }
+
+                // Metres, tolerance and the decision only - a position never reaches a log line
+                // (guidelines/Logging.md, spec auto-diagnostics).
+                osmscout::log.Info() << "Route start: the requested start lies "
+                                     << static_cast<std::size_t>(approachMeters)
+                                     << " m from the snapped node (tolerance "
+                                     << static_cast<std::size_t>(
+                                            naviveylin::kRouteStartSnapToleranceMeters)
+                                     << " m), so the approach is published as the first segment";
+              }
+            }
 
             // Collect description lines via callback
             struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
@@ -8535,13 +8640,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jobject routeEntry = threadEnv->NewObject(routeEntryCls, routeEntryCtor);
 
       const auto &points = pointsResult.GetPoints()->points;
-      jsize count = static_cast<jsize>(points.size());
+
+      // When the start was snapped, the published polyline gains one vertex in front: the requested
+      // start position. Everything else - the routed vertices, their order, the step list - is the
+      // routed geometry (spec: route-description - The published route starts at the requested start
+      // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
+      const bool prependStart = startApproachMeters > 0.0;
+      jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
 
       // Fill latitudes array
       jdoubleArray lats = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> latValues(count);
       for (jsize i = 0; i < count; i++) {
-        latValues[i] = points[static_cast<size_t>(i)].GetLat();
+        latValues[i] = (prependStart && i == 0)
+            ? start.GetLat()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLat();
       }
       threadEnv->SetDoubleArrayRegion(lats, 0, count, latValues.data());
 
@@ -8549,7 +8662,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jdoubleArray lons = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> lonValues(count);
       for (jsize i = 0; i < count; i++) {
-        lonValues[i] = points[static_cast<size_t>(i)].GetLon();
+        lonValues[i] = (prependStart && i == 0)
+            ? start.GetLon()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 

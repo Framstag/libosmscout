@@ -69,3 +69,44 @@ TEST_CASE("A usable speed is used as it was requested")
   REQUIRE(naviveylin::ResolveProfileMaxSpeedKmh(20.0, 30.0)==20.0);
   REQUIRE(naviveylin::ResolveProfileMaxSpeedKmh(4.0, 10.0)==4.0);
 }
+
+TEST_CASE("The avoid-unpaved grade table is the published 1.0/0.85/0.6/0.3/0.1")
+{
+  REQUIRE(naviveylin::kAvoidUnpavedGradeFactor[0]==1.0);
+  REQUIRE(naviveylin::kAvoidUnpavedGradeFactor[1]==0.85);
+  REQUIRE(naviveylin::kAvoidUnpavedGradeFactor[2]==0.6);
+  REQUIRE(naviveylin::kAvoidUnpavedGradeFactor[3]==0.3);
+  REQUIRE(naviveylin::kAvoidUnpavedGradeFactor[4]==0.1);
+}
+
+TEST_CASE("A degraded type keeps its base speed at grade 1")
+{
+  // highway_unclassified at 50 km/h: the solid grade keeps the whole type speed, so a profile with
+  // avoidUnpaved prices grade 1 exactly like one without the flag.
+  const auto speeds=naviveylin::AvoidUnpavedGradeSpeedsKmh(50.0);
+  REQUIRE(speeds[0]==50.0);
+}
+
+TEST_CASE("The grade speeds of a type fall strictly from grade 1 to grade 5")
+{
+  // 50 km/h: 50, 42.5, 30, 15, 5 — every step is slower, so a kilometre of it costs more.
+  const auto speeds=naviveylin::AvoidUnpavedGradeSpeedsKmh(50.0);
+  REQUIRE(speeds[0] > speeds[1]);
+  REQUIRE(speeds[1] > speeds[2]);
+  REQUIRE(speeds[2] > speeds[3]);
+  REQUIRE(speeds[3] > speeds[4]);
+}
+
+TEST_CASE("A degraded road keeps a floor speed instead of becoming unusable")
+{
+  // A 2 km/h type is below the floor on every grade, so each grade keeps the floor.
+  const auto slow=naviveylin::AvoidUnpavedGradeSpeedsKmh(2.0);
+  for (const auto& speed : slow) {
+    REQUIRE(speed==naviveylin::kAvoidUnpavedMinSpeedKmh);
+  }
+
+  // 10 km/h: grade 5 would be 1 km/h, which the floor lifts to 3.
+  const auto speeds=naviveylin::AvoidUnpavedGradeSpeedsKmh(10.0);
+  REQUIRE(speeds[4]==naviveylin::kAvoidUnpavedMinSpeedKmh);
+  REQUIRE(speeds[4] > 0.0);
+}

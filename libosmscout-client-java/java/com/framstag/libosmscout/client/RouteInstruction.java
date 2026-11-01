@@ -1,13 +1,13 @@
 package com.framstag.libosmscout.client;
 
 /**
- * A turn-by-turn instruction produced by the navigation engine.
+ * A turn-by-turn instruction row.
  * <p>
- * Bridged from C++ {@code JavaRouteInstruction} via JNI. Instances are
- * created by the native {@code DispatchMessage} handler and delivered
- * through {@link NavigationListener#onNextRouteInstruction(RouteInstruction)}
- * (live) or {@link NavigationListener#onRouteInstructions(RouteInstruction[])}
- * (full list on route change).
+ * The client library no longer publishes this shape: live guidance delivers the structured
+ * {@link RouteStep} model through {@link NavigationListener#onNextRouteStep(RouteStep)} (the step
+ * ahead) and {@link NavigationListener#onRouteSteps(RouteStep[])} (the full list on a route
+ * change). The type stays in the Java API for consumers that build instruction-shaped rows for
+ * their own UI; retiring it is a later change.
  */
 public class RouteInstruction {
 
