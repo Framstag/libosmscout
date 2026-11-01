@@ -77,6 +77,7 @@
 #include "render_label_bounds.h"
 #include "route_failure_kind.h"
 #include "route_length.h"
+#include "route_start.h"
 #include "route_step_time.h"
 #include "routing_profile_speed.h"
 #include "routing_progress_throttle.h"
@@ -7911,6 +7912,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
+      // The published route begins at the requested start (spec: route-description - The published route
+      // starts at the requested start position; design D1/D2/D3). The router used the caller's
+      // coordinate only to find a routable node, so the description's first node sits on that snapped
+      // node. When the requested start lies off the network by more than the snap tolerance, the first
+      // node takes the requested position and every later node carries the approach in its cumulative
+      // distance - which is what makes the per-step distances, the description total and the drawn
+      // polyline count the approach once (helpers: route_start.h). 0.0 means "the start was on the
+      // network": the description is left untouched and the polyline gets no extra vertex.
+      double startApproachMeters = 0.0;
       std::vector<std::string> routeDescriptionLines;
       // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
       // with the instruction lines of routeDescriptionLines. All four are published as a set and
@@ -8072,6 +8082,42 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
                 motorwayTypeNames,
                 motorwayLinkTypeNames,
                 junctionTypeNames);
+
+            // Move the published start to the requested position before anything reads the
+            // description: the step collector below, the copy kept for live navigation, and the
+            // polyline built further down then all speak of one start (design D1/D2).
+            if (!descResult.GetDescription()->Nodes().empty()) {
+              const osmscout::GeoCoord snappedStart =
+                  descResult.GetDescription()->Nodes().front().GetLocation();
+              const double approachMeters = naviveylin::RouteStartApproachMeters(
+                  start.GetLat(), start.GetLon(), snappedStart.GetLat(), snappedStart.GetLon());
+
+              if (naviveylin::ShouldPrependRouteStart(approachMeters)) {
+                startApproachMeters = approachMeters;
+
+                std::size_t nodeIndex = 0;
+                for (auto &node : descResult.GetDescription()->Nodes()) {
+                  if (nodeIndex == 0) {
+                    node.SetLocation(osmscout::GeoCoord(start.GetLat(), start.GetLon()));
+                  } else {
+                    node.SetDistance(osmscout::Distance::Of<osmscout::Meter>(
+                        naviveylin::RouteStartNodeDistanceMeters(nodeIndex,
+                                                                 node.GetDistance().AsMeter(),
+                                                                 approachMeters)));
+                  }
+                  nodeIndex++;
+                }
+
+                // Metres, tolerance and the decision only - a position never reaches a log line
+                // (guidelines/Logging.md, spec auto-diagnostics).
+                osmscout::log.Info() << "Route start: the requested start lies "
+                                     << static_cast<std::size_t>(approachMeters)
+                                     << " m from the snapped node (tolerance "
+                                     << static_cast<std::size_t>(
+                                            naviveylin::kRouteStartSnapToleranceMeters)
+                                     << " m), so the approach is published as the first segment";
+              }
+            }
 
             // Collect description lines via callback
             struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
@@ -8339,13 +8385,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jobject routeEntry = threadEnv->NewObject(routeEntryCls, routeEntryCtor);
 
       const auto &points = pointsResult.GetPoints()->points;
-      jsize count = static_cast<jsize>(points.size());
+
+      // When the start was snapped, the published polyline gains one vertex in front: the requested
+      // start position. Everything else - the routed vertices, their order, the step list - is the
+      // routed geometry (spec: route-description - The published route starts at the requested start
+      // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
+      const bool prependStart = startApproachMeters > 0.0;
+      jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
 
       // Fill latitudes array
       jdoubleArray lats = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> latValues(count);
       for (jsize i = 0; i < count; i++) {
-        latValues[i] = points[static_cast<size_t>(i)].GetLat();
+        latValues[i] = (prependStart && i == 0)
+            ? start.GetLat()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLat();
       }
       threadEnv->SetDoubleArrayRegion(lats, 0, count, latValues.data());
 
@@ -8353,7 +8407,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       jdoubleArray lons = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> lonValues(count);
       for (jsize i = 0; i < count; i++) {
-        lonValues[i] = points[static_cast<size_t>(i)].GetLon();
+        lonValues[i] = (prependStart && i == 0)
+            ? start.GetLon()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
@@ -8595,6 +8651,15 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
+      // The published route begins at the requested start (spec: route-description - The published route
+      // starts at the requested start position; design D1/D2/D3). The router used the caller's
+      // coordinate only to find a routable node, so the description's first node sits on that snapped
+      // node. When the requested start lies off the network by more than the snap tolerance, the first
+      // node takes the requested position and every later node carries the approach in its cumulative
+      // distance - which is what makes the per-step distances, the description total and the drawn
+      // polyline count the approach once (helpers: route_start.h). 0.0 means "the start was on the
+      // network": the description is left untouched and the polyline gets no extra vertex.
+      double startApproachMeters = 0.0;
       std::vector<std::string> routeDescriptionLines;
       // Per-instruction positions and per-step leg values (spec: route-calculation), index-aligned
       // with the instruction lines of routeDescriptionLines. All four are published as a set and
@@ -8837,6 +8902,42 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
                 motorwayTypeNames,
                 motorwayLinkTypeNames,
                 junctionTypeNames);
+
+            // Move the published start to the requested position before anything reads the
+            // description: the step collector below, the copy kept for live navigation, and the
+            // polyline built further down then all speak of one start (design D1/D2).
+            if (!descResult.GetDescription()->Nodes().empty()) {
+              const osmscout::GeoCoord snappedStart =
+                  descResult.GetDescription()->Nodes().front().GetLocation();
+              const double approachMeters = naviveylin::RouteStartApproachMeters(
+                  start.GetLat(), start.GetLon(), snappedStart.GetLat(), snappedStart.GetLon());
+
+              if (naviveylin::ShouldPrependRouteStart(approachMeters)) {
+                startApproachMeters = approachMeters;
+
+                std::size_t nodeIndex = 0;
+                for (auto &node : descResult.GetDescription()->Nodes()) {
+                  if (nodeIndex == 0) {
+                    node.SetLocation(osmscout::GeoCoord(start.GetLat(), start.GetLon()));
+                  } else {
+                    node.SetDistance(osmscout::Distance::Of<osmscout::Meter>(
+                        naviveylin::RouteStartNodeDistanceMeters(nodeIndex,
+                                                                 node.GetDistance().AsMeter(),
+                                                                 approachMeters)));
+                  }
+                  nodeIndex++;
+                }
+
+                // Metres, tolerance and the decision only - a position never reaches a log line
+                // (guidelines/Logging.md, spec auto-diagnostics).
+                osmscout::log.Info() << "Route start: the requested start lies "
+                                     << static_cast<std::size_t>(approachMeters)
+                                     << " m from the snapped node (tolerance "
+                                     << static_cast<std::size_t>(
+                                            naviveylin::kRouteStartSnapToleranceMeters)
+                                     << " m), so the approach is published as the first segment";
+              }
+            }
 
             // Collect description lines via callback
             struct DescCallback : public osmscout::RouteDescriptionPostprocessor::Callback {
@@ -9112,13 +9213,21 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jobject routeEntry = threadEnv->NewObject(routeEntryCls, routeEntryCtor);
 
       const auto &points = pointsResult.GetPoints()->points;
-      jsize count = static_cast<jsize>(points.size());
+
+      // When the start was snapped, the published polyline gains one vertex in front: the requested
+      // start position. Everything else - the routed vertices, their order, the step list - is the
+      // routed geometry (spec: route-description - The published route starts at the requested start
+      // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
+      const bool prependStart = startApproachMeters > 0.0;
+      jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
 
       // Fill latitudes array
       jdoubleArray lats = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> latValues(count);
       for (jsize i = 0; i < count; i++) {
-        latValues[i] = points[static_cast<size_t>(i)].GetLat();
+        latValues[i] = (prependStart && i == 0)
+            ? start.GetLat()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLat();
       }
       threadEnv->SetDoubleArrayRegion(lats, 0, count, latValues.data());
 
@@ -9126,7 +9235,9 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       jdoubleArray lons = threadEnv->NewDoubleArray(count);
       std::vector<jdouble> lonValues(count);
       for (jsize i = 0; i < count; i++) {
-        lonValues[i] = points[static_cast<size_t>(i)].GetLon();
+        lonValues[i] = (prependStart && i == 0)
+            ? start.GetLon()
+            : points[static_cast<size_t>(i - (prependStart ? 1 : 0))].GetLon();
       }
       threadEnv->SetDoubleArrayRegion(lons, 0, count, lonValues.data());
 
