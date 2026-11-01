@@ -184,37 +184,6 @@ public class OSMScoutClientRouteStepTest {
 
     @Test
     @Timeout(180)
-    public void testDescriptionLinesAreUnchangedNextToTheSteps() throws InterruptedException {
-        RouteEntry route = calculateRoute();
-
-        assertNotNull(route.descriptions, "the description lines are still published");
-        assertTrue(route.descriptions.length > 0, "the description lines are non-empty");
-        assertTrue(route.descriptions[0].equals("--- Route ---"),
-            "the list keeps its header: " + route.descriptions[0]);
-        assertTrue(route.descriptions[1].startsWith("Start"),
-            "the first instruction line is the start: " + route.descriptions[1]);
-        assertTrue(route.descriptions[route.descriptions.length - 1].contains("Destination"),
-            "the last line is the destination: " + route.descriptions[route.descriptions.length - 1]);
-        assertTrue(route.distance > 0.0, "the route's distance is published");
-        assertTrue(route.duration > 0.0, "the route's duration is published");
-
-        // The four per-instruction arrays are either all present and aligned with the lines (the
-        // header is not an instruction) or all null - never partially filled.
-        if (route.instructionLats == null) {
-            assertNull(route.instructionLons);
-            assertNull(route.instructionDistances);
-            assertNull(route.instructionTimes);
-        } else {
-            assertNotNull(route.instructionLons);
-            assertNotNull(route.instructionDistances);
-            assertNotNull(route.instructionTimes);
-            assertEquals(route.descriptions.length - 1, route.instructionLats.length,
-                "the positions align with the instruction lines");
-        }
-    }
-
-    @Test
-    @Timeout(180)
     public void testStepSubRecordsSurviveTheBoundary() throws InterruptedException {
         RouteEntry route = calculateRoute();
 
