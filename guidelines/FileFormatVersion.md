@@ -142,6 +142,31 @@ full re-import regenerates matching data. Current counts (map.ost): ~335 node,
 ~451 area, ~72 way types, all already in the 2-byte range with headroom to
 65535. Only layout changes to the serialization code bump the version.
 
+### A feature that exists but is not enabled
+
+A new feature class can be merged **without** a bump, provided nothing enables it: the class stays
+compiled in the library, `TypeConfig::Setup()` does not register it, and no type file lists it. Then no
+type configuration can name it, no import can record a value for it, and a database built by that build is
+the database the previous build produced — measured on a re-imported extract: `types.dat` 81 350 bytes,
+`ways.dat` 2 870 207 bytes and the routing index 541 bytes, exactly the sizes from before the class existed.
+
+Why this state is worth having: the feature is reviewable, testable in isolation (a hand-written
+`--typefile` can declare it) and one edit away from use, without taking on the bump's release cost. What it
+is not: enabled. A reader for a feature the type configuration does not know asserts (`FeatureValueReader`),
+so any code that consumes such a feature must guard its reader — `GenRouteDat::TollBit()` returns `0` when
+its reader is null.
+
+Enabling it is the bump, in one change:
+
+1. uncomment the registration in `TypeConfig::Setup()` and the `FEATURE` block plus the per-type entries in
+   `map.ost`/`motorways.ost`;
+2. bump `FILE_FORMAT_VERSION`, which makes every older database unreadable for the new build and every new
+   database unreadable for older builds;
+3. re-import, and have the map provider publish the new version slot — clients request slots by
+   `typeConfigVersion`, so a bump without the provider's slot leaves the app with no maps at all.
+
+The toll feature (`TollFeature`, `stylesheets/map.ost`) is in exactly this state today.
+
 ## Why the bump exists — protection model
 
 MIN == MAX == current version means:

@@ -28,6 +28,7 @@ osmscoutSrc = [
             'src/osmscout/feature/FeeFeature.cpp',
             'src/osmscout/feature/FromToFeature.cpp',
             'src/osmscout/feature/GradeFeature.cpp',
+            'src/osmscout/feature/TollFeature.cpp',
             'src/osmscout/feature/IsInFeature.cpp',
             'src/osmscout/feature/LanesFeature.cpp',
             'src/osmscout/feature/LayerFeature.cpp',
