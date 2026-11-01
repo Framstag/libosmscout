@@ -25,11 +25,13 @@
 #include <osmscout/util/Time.h>
 #include <osmscout/lib/CoreImportExport.h>
 #include <osmscout/system/Compiler.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <vector>
 #include <string>
 #include <optional>
 #include <variant>
+#include <cstddef>
 
 namespace osmscout {
 
@@ -316,6 +318,7 @@ private:
   bool prevGpsSignal{true};
   Timestamp lastSeenGpsSignal{Timestamp::min()};
 
+  size_t announcedTriggers{0};
   VoiceMessageStruct lastMessage;
   Distance lastMessagePosition; // where we trigger last message (it is before lastMessage.distance usually)
 
@@ -333,6 +336,11 @@ public:
   std::list<NavigationMessageRef> Process(const NavigationMessageRef& message) override;
 
 private:
+  /** Distances (descending, in meters or yards) where the message type should be voiced. */
+  static std::vector<double> TriggerDistances(VoiceMessageStruct::Type type,
+                                              NavigationVoiceType voiceType,
+                                              Vehicle vehicle);
+
   void toSamples(std::vector<SampleVoiceInstructionMessage::VoiceSample> &samples,
                  const VoiceMessageStruct &message,
                  bool shortRoundaboutMessage);

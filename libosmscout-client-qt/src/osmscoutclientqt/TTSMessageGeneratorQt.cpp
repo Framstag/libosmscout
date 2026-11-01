@@ -23,6 +23,7 @@
 #include <osmscout/util/Distance.h>
 
 #include <QCoreApplication>
+#include <cmath>
 #include <QLocale>
 #include <QStandardPaths>
 
@@ -203,28 +204,15 @@ QString TTSMessageGeneratorQt::Phrase(const VoiceMessageStruct &message, bool sh
 
 QString TTSMessageGeneratorQt::DistancePhrase(double distanceInUnits) const
 {
-  // Bucket the distance the same way the Voice of Marble messages do.
   int value;
-  if (distanceInUnits > 800) {
-    value = 800;
-  } else if (distanceInUnits > 700) {
-    value = 700;
-  } else if (distanceInUnits > 600) {
-    value = 600;
-  } else if (distanceInUnits > 500) {
-    value = 500;
-  } else if (distanceInUnits > 400) {
-    value = 400;
-  } else if (distanceInUnits > 300) {
-    value = 300;
-  } else if (distanceInUnits > 200) {
-    value = 200;
-  } else if (distanceInUnits > 100) {
-    value = 100;
-  } else if (distanceInUnits > 80) {
-    value = 80;
+  // in navigation it would make sense to use floor, but the message is triggered when we just pass the distance, so we round to the nearest bucket.
+  if (distanceInUnits < 100) {
+    value = std::round(distanceInUnits / 10) * 10;
+    if (value == 0) {
+      value = distanceInUnits;
+    }
   } else {
-    value = 50;
+    value = std::round(distanceInUnits / 100) * 100;
   }
 
   QString unit = (units == DistanceUnitSystem::Metrics)
@@ -254,10 +242,6 @@ std::optional<std::string> TTSMessageGeneratorQt::GenerateMessage(const Distance
       ? nextMessageDistance.AsMeter()
       : nextMessageDistance.As<Yard>();
 
-  if (distanceInUnits > 900) {
-    // too far away, nothing to announce yet
-    return std::nullopt;
-  }
 
   // when the roundabout is close, omit the "At the roundabout" part
   bool shortRoundaboutMessage = message.type == Type::LeaveRoundabout &&
