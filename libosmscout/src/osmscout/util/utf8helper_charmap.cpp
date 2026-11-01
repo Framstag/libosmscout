@@ -1879,7 +1879,7 @@ const character charmap_e1_ba[64] = {
   { 0xe1ba9b , 0xe1b9a0 , 0xe1ba9b , None , "\xe1\xba\x9b" }, /* ẛ : up=Ṡ : lo=ẛ */
   { 0xe1ba9c , 0xe1ba9c , 0xe1ba9c , None , "\xe1\xba\x9c" }, /* ẜ : up=ẜ : lo=ẜ */
   { 0xe1ba9d , 0xe1ba9d , 0xe1ba9d , None , "\xe1\xba\x9d" }, /* ẝ : up=ẝ : lo=ẝ */
-  { 0xe1ba9e , 0xe1ba9e , 0xc39f , None , "\xe1\xba\x9e" }, /* ẞ : up=ẞ : lo=ß */
+  { 0xe1ba9e , 0xe1ba9e , 0xc39f , None , "SS" }, /* ẞ : up=ẞ : lo=ß */
   { 0xe1ba9f , 0xe1ba9f , 0xe1ba9f , None , "\xe1\xba\x9f" }, /* ẟ : up=ẟ : lo=ẟ */
   { 0xe1baa0 , 0xe1baa0 , 0xe1baa1 , None , "\xe1\xba\xa0" }, /* Ạ : up=Ạ : lo=ạ */
   { 0xe1baa1 , 0xe1baa0 , 0xe1baa1 , None , "\xe1\xba\xa1" }, /* ạ : up=Ạ : lo=ạ */
