@@ -12,7 +12,9 @@ import com.framstag.libosmscout.client.LaneTurn;
 import com.framstag.libosmscout.client.LocationEntry;
 import com.framstag.libosmscout.client.ObjectDescription;
 import com.framstag.libosmscout.client.PoiEntry;
+import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.RouteInstruction;
+import com.framstag.libosmscout.JavaScoutInstructions;
 import com.framstag.libosmscout.client.RouteCallback;
 import com.framstag.libosmscout.client.RouteEntry;
 import com.framstag.libosmscout.client.TurnType;
@@ -1677,9 +1679,11 @@ public class MainController implements Initializable {
             }
 
             @Override
-            public void onNextRouteInstruction(RouteInstruction instruction) {
+            public void onNextRouteStep(RouteStep step) {
                 if (isStale()) return;
-                double dist = instruction != null ? instruction.distanceTo : Double.POSITIVE_INFINITY;
+                double dist = step != null && step.remainingDistance != null
+                    ? step.remainingDistance : Double.POSITIVE_INFINITY;
+                final RouteInstruction instruction = JavaScoutInstructions.of(step);
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     nextTurnDistanceM = dist;
@@ -1688,8 +1692,9 @@ public class MainController implements Initializable {
             }
 
             @Override
-            public void onRouteInstructions(RouteInstruction[] instructions) {
+            public void onRouteSteps(RouteStep[] steps) {
                 if (isStale()) return;
+                final RouteInstruction[] instructions = JavaScoutInstructions.of(steps);
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     if (routePanel != null) {
