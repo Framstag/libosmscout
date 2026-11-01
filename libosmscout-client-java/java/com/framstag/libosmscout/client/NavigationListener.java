@@ -103,23 +103,34 @@ public interface NavigationListener {
     }
 
     /**
-     * Called when the full list of route instructions changes (new route or
+     * Called when the full list of route steps changes (new route or
      * route recalculation).
+     * <p>
+     * The steps are the same structured record a calculated route publishes
+     * ({@link RouteEntry#steps}), in route order. They carry values only: no
+     * description, no short description and no turn type name. A surface words
+     * every manoeuvre itself, in its own language, from the step's kind, move,
+     * exit ordinal, street name and way type.
+     * <p>
+     * The list never contains a {@code null} element: when the bridge cannot
+     * build a step it delivers no list at all rather than a partial one.
      *
-     * @param instructions all route instructions for the current route
+     * @param steps all route steps for the current route
      */
-    default void onRouteInstructions(RouteInstruction[] instructions) {
+    default void onRouteSteps(RouteStep[] steps) {
     }
 
     /**
-     * Called on every position update with the next manoeuvre instruction.
+     * Called on every position update with the step of the next manoeuvre.
      * <p>
-     * This is the primary callback for live turn-by-turn guidance. The UI
-     * should update the next-turn display with the instruction's distance,
-     * turn type, and street name.
+     * This is the primary callback for live turn-by-turn guidance. The step
+     * carries its manoeuvre records plus the distance and time remaining to the
+     * manoeuvre, and - when the following manoeuvre is close enough to be
+     * announced - that manoeuvre as a nested {@link RouteStep} in
+     * {@link RouteStep#nextNext}.
      *
-     * @param instruction the next route instruction
+     * @param step the step ahead
      */
-    default void onNextRouteInstruction(RouteInstruction instruction) {
+    default void onNextRouteStep(RouteStep step) {
     }
 }

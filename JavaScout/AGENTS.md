@@ -213,7 +213,7 @@ MainController (orchestrator)
 | `ObjectDescription` / `DescriptionEntry` | `client` | Structured object info |
 | `TrackPoint` | `client` | GPX track point |
 | `FavoriteLocation` / `FavoriteLocationGroup` | `client` | Favorites with group hierarchy |
-| `RouteInstruction` | `client` | Turn-by-turn instruction with next-next hint |
+| `RouteStep` | `client` | One manoeuvre with every description of its route node; values are untranslated |
 | `NavigationPosition` | `client` | Estimated vehicle position with state |
 | `MainController` | app | FXML controller, orchestrates all features |
 | `MapRenderer` | app | Canvas rendering engine with 200ms debounce |
@@ -238,7 +238,7 @@ MainController (orchestrator)
 - UI updates marshalled via `Platform.runLater()`
 - JNI methods return `null` or empty arrays on error
 - Synthetic POI types (`_route_start`, `_route_end`, `_favorite`, `_search_selected`, `_track`) registered via `OSMScoutClientBuilder.withCustomPoiType()`- Map rotation angle: radians, counter-clockwise (math convention), 0 = north-up
-- Route description list: rows come from `RouteEntry.steps` through `RouteRowBuilder` (one row per manoeuvre step, plus a row for a POI on the route); a result without steps falls back to its description lines and drops the header structurally, never by its text. The next-turn overlay appends the exit reference, junction name and destination signs from the instruction's fields via `RouteRowBuilder.nextTurnDetail`.- Bearing: degrees, clockwise (navigation convention)
+- Route description list: rows come from `RouteEntry.steps` through `RouteRowBuilder` (one row per manoeuvre step, plus a row for a POI on the route); a result carries its steps or it carries nothing, so there is no prose fallback to drop a header from. The next-turn overlay shows `NextTurnText.line(step)` — this scout's own wording — and appends the exit reference, junction name and destination signs from the step's fields via `RouteRowBuilder.nextTurnDetail`.- Bearing: degrees, clockwise (navigation convention)
 
 ### Pitfalls
 - Native library (`libosmscout_client_java`) must be built separately via Meson

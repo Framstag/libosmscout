@@ -16,7 +16,11 @@ endif
 osmscoutclientjavaIncDir = include_directories('../include')
 
 osmscoutclientjavaSrc = [
-  'OSMScoutClient.cpp'
+  'OSMScoutClient.cpp',
+  # The scope extent is derived here rather than in the JNI translation unit: it
+  # touches no JNI, and Tests/SearchScopeExtentTest compiles this source so the
+  # derivation runs against a real region object (issue #20).
+  'search_scope_extent.cpp'
 ]
 
 gpxDeps = []

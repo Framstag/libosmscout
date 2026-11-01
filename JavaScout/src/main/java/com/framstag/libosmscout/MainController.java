@@ -12,7 +12,7 @@ import com.framstag.libosmscout.client.LaneTurn;
 import com.framstag.libosmscout.client.LocationEntry;
 import com.framstag.libosmscout.client.ObjectDescription;
 import com.framstag.libosmscout.client.PoiEntry;
-import com.framstag.libosmscout.client.RouteInstruction;
+import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.RouteCallback;
 import com.framstag.libosmscout.client.RouteEntry;
 import com.framstag.libosmscout.client.TurnType;
@@ -1305,12 +1305,13 @@ public class MainController implements Initializable {
         thread.start();
     }
 
-    private void updateNextTurnOverlay(RouteInstruction instruction) {
-        if (instruction == null || nextTurnBox == null) return;
+    private void updateNextTurnOverlay(RouteStep step) {
+        if (step == null || nextTurnBox == null) return;
 
         // Row 1: next instruction
-        if (instruction.distanceTo > 0) {
-            nextTurnDistance.setText(formatDistance(instruction.distanceTo));
+        double distanceTo = NextTurnText.distanceTo(step);
+        if (distanceTo > 0) {
+            nextTurnDistance.setText(formatDistance(distanceTo));
         } else {
             nextTurnDistance.setText("");
         }
@@ -1324,41 +1325,25 @@ public class MainController implements Initializable {
                 default: vehicleIcon = ""; break;
             }
         }
-        nextTurnIcon.setText(vehicleIcon + turnTypeToIcon(instruction.turnType));
+        nextTurnIcon.setText(vehicleIcon + turnTypeToIcon(NextTurnText.turnType(step)));
 
-        String text;
-        if (instruction.description != null && !instruction.description.isEmpty()) {
-            text = instruction.description;
-        } else if (instruction.shortDescription != null && !instruction.shortDescription.isEmpty()) {
-            text = instruction.shortDescription;
-        } else if (instruction.streetName != null && !instruction.streetName.isEmpty()) {
-            text = instruction.streetName;
-        } else {
-            text = "";
-        }
+        String text = NextTurnText.line(step);
         nextTurnStreet.setText(text);
 
         // The exit reference and the destination sign texts, taken from the instruction's fields.
         // An instruction without them is rendered exactly as before (spec:
         // turn-by-turn-instructions - the next-turn display shows the exit and the destination as
         // data).
-        String detail = RouteRowBuilder.nextTurnDetail(instruction);
+        String detail = RouteRowBuilder.nextTurnDetail(step);
         if (!detail.isEmpty()) {
             nextTurnStreet.setText(text.isEmpty() ? detail : text + "\n" + detail);
         }
 
         // Row 2: "next next" hint
-        if (instruction.hasNextNext()) {
-            nextNextDistance.setText(formatDistance(instruction.nextNextDistanceTo));
-            String nnText;
-            if (instruction.nextNextDescription != null && !instruction.nextNextDescription.isEmpty()) {
-                nnText = instruction.nextNextDescription;
-            } else if (instruction.nextNextShortDescription != null && !instruction.nextNextShortDescription.isEmpty()) {
-                nnText = instruction.nextNextShortDescription;
-            } else {
-                nnText = "";
-            }
-            nextNextStreet.setText(nnText);
+        RouteStep follower = step.nextNext;
+        if (follower != null) {
+            nextNextDistance.setText(formatDistance(NextTurnText.distanceTo(follower)));
+            nextNextStreet.setText(NextTurnText.line(follower));
             nextNextRow.setVisible(true);
             nextNextRow.setManaged(true);
         } else {
@@ -1677,23 +1662,26 @@ public class MainController implements Initializable {
             }
 
             @Override
-            public void onNextRouteInstruction(RouteInstruction instruction) {
+            public void onNextRouteStep(RouteStep step) {
                 if (isStale()) return;
-                double dist = instruction != null ? instruction.distanceTo : Double.POSITIVE_INFINITY;
+                double dist = step != null && step.remainingDistance != null
+                    ? step.remainingDistance : Double.POSITIVE_INFINITY;
+                final RouteStep stepAhead = step;
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     nextTurnDistanceM = dist;
-                    updateNextTurnOverlay(instruction);
+                    updateNextTurnOverlay(stepAhead);
                 });
             }
 
             @Override
-            public void onRouteInstructions(RouteInstruction[] instructions) {
+            public void onRouteSteps(RouteStep[] steps) {
                 if (isStale()) return;
+                final RouteStep[] published = steps;
                 Platform.runLater(() -> {
                     if (isStale()) return;
                     if (routePanel != null) {
-                        routePanel.updateInstructionList(instructions);
+                        routePanel.updateInstructionList(published);
                     }
                 });
             }

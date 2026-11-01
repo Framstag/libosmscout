@@ -136,3 +136,83 @@ The existing `calculateRouteAsync(double, double, double, double, RouteCallback)
 #### Scenario: The avoid-flag constructor without a speed keeps meaning the built-in profile
 - **WHEN** `new RoutingProfile(Vehicle.CAR, true, true, true)` is constructed
 - **THEN** `maxSpeedKmh` is `0`
+
+### Requirement: Grade-aware speeds when avoidUnpaved is set
+
+A routing profile created with `avoidUnpaved` SHALL price every routable type of its vehicle with a
+per-grade speed table instead of one speed per type: grade 1 (solid) SHALL keep the type's speed, and the
+time one kilometre of that type costs SHALL increase strictly from grade 1 to grade 5 while staying finite.
+A profile created without the flag SHALL keep one speed for every grade.
+
+#### Scenario: Grade 1 keeps the type's speed
+- **GIVEN** a car profile created with `avoidUnpaved`
+- **WHEN** one kilometre of a road type at grade 1 is priced
+- **THEN** it costs the same as with a profile created without the flag
+
+#### Scenario: The cost rises with the grade
+- **GIVEN** a car profile created with `avoidUnpaved`
+- **[WHEN]** one kilometre of the same type is priced at grade 1, 2, 3, 4 and 5
+- **THEN** the seconds per kilometre increase strictly from grade to grade
+
+#### Scenario: A degraded road stays routable
+- **GIVEN** a profile created with `avoidUnpaved`
+- **WHEN** the five grade speeds of a routable type are inspected
+- **THEN** each of them is greater than zero
+- **AND** the profile keeps the junction penalty and the raised cost limit that the vehicle
+  parametrization sets, so a route that needs a high-grade way is still calculated instead of reported
+  as not found
+
+#### Scenario: Without the flag every grade costs the same
+- **GIVEN** a profile created without `avoidUnpaved`
+- **WHEN** one kilometre of the same type is priced at grade 1 and at grade 5
+- **THEN** both cost the same
+
+#### Scenario: The table covers each vehicle's own routable types
+- **GIVEN** a profile created with `avoidUnpaved` for a bicycle or for a pedestrian
+- **WHEN** a type that vehicle can route is priced at grade 4
+- **THEN** it costs more than the same type at grade 1
+- **AND** a type that vehicle cannot route keeps no speed entry
+
+### Requirement: Toll ways are recorded in the routing index
+
+A way whose tags declare that using it costs a toll SHALL be recorded in the routing index in a way a
+routing profile can see during the search, and the record SHALL be distinguishable from "this database
+carries no toll information". The index file's layout SHALL NOT change: a database imported before this
+capability reads back as carrying no toll information. The road grade SHALL keep its own value wherever it
+is read, whether or not a toll is recorded.
+
+#### Scenario: An importer records a toll way
+- **WHEN** a way tagged as charging a toll is imported into a routing index
+- **THEN** the object variant recorded for it carries the toll signal
+- **AND** the grade recorded for it still selects the same speed it would without the signal
+
+#### Scenario: A way without the tag carries no toll signal
+- **WHEN** a way is imported whose tags do not declare a toll
+- **THEN** its object variant carries no toll signal
+
+#### Scenario: A database without the signal still loads and routes
+- **GIVEN** a database imported before this capability existed
+- **WHEN** it is opened and a route is calculated with and without `avoidTolls`
+- **THEN** the database loads, the route is calculated, and both calculations produce the same route
+- **AND** no error is reported
+
+#### Scenario: The grade keeps its value next to the toll signal
+- **WHEN** an object variant records both a toll and a grade
+- **THEN** reading its grade yields the grade the importer recorded
+
+### Requirement: avoidTolls prices a toll way higher
+
+A route calculation whose profile requests `avoidTolls` SHALL price an object variant carrying the toll
+signal higher than the same variant without the flag, so that a detour is chosen when one is reasonable,
+and SHALL still calculate a route when the toll way is the only option.
+
+#### Scenario: A toll way costs more with the flag
+- **GIVEN** a database that records a way as charging a toll
+- **WHEN** the same origin and destination are calculated with `avoidTolls` false and true
+- **THEN** the toll way's contribution to the second calculation's cost is higher
+- **AND** the second calculation still returns a route
+
+#### Scenario: A toll way stays routable when it is the only option
+- **GIVEN** an origin and a destination connected only by a way that charges a toll
+- **WHEN** the calculation is made with `avoidTolls` true
+- **THEN** a route is returned rather than a routing failure

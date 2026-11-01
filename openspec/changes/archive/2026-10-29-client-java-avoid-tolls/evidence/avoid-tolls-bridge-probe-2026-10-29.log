@@ -1,0 +1,36 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by com.framstag.libosmscout.client.OSMScoutClientBuilder in an unnamed module (file:/home/tim/projects/NaviVeylin/app/src/main/cpp/libosmscout/hostbuild/libosmscout-client-java/java/libosmscoutclientjava.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+Lookup databases
+Scanning maps lookup directory: .pi/toll/toll-db
+  found valid map 'toll-db' at .pi/toll/toll-db (no metadata)
+Lookup directory .pi/toll/toll-db scan complete: 1 candidates, 1 valid, 0 invalid
+Total installed maps found: 1
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/natural.oss': 1 (natural_waterfall)
+  created car routing profile (max speed 120.00000 km/h)
+  created car routing profile (max speed 120.00000 km/h)
+Loading path data: 0.000
+Scanning locations: 0.000
+Loading candidates: 0.001
+Analysing candidates: 0.000
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/route.oss': 5 (_favorite, _route_end, _route_start, _search_selected, _track)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/basemap.oss': 1 (basemap_boundary_country)
+Unknown types in 'app/src/main/cpp/libosmscout/stylesheets/include/natural.oss': 1 (natural_waterfall)
+  created car routing profile (max speed 120.00000 km/h)
+  created car routing profile (max speed 120.00000 km/h)
+  avoiding toll roads (cost x3.00000 on an object variant that records a toll)
+  created car routing profile (max speed 120.00000 km/h)
+  avoiding toll roads (cost x3.00000 on an object variant that records a toll)
+Loading path data: 0.000
+Scanning locations: 0.000
+Loading candidates: 0.001
+Analysing candidates: 0.000
+  created car routing profile (max speed 120.00000 km/h)
+  avoiding toll roads (cost x3.00000 on an object variant that records a toll)
+PROBE: avoidTolls=false points=2 duration=258.0998519063829s
+PROBE: avoidTolls=true  points=3 duration=272.7019378461637s
+PROBE: route differs=true

@@ -278,6 +278,19 @@ osmscout_test_project(NAME StringMatcherTest SOURCES src/StringMatcherTest.cpp)
 #---- SearchScope
 osmscout_test_project(NAME SearchScopeTest SOURCES src/SearchScopeTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- SearchScopeExtent
+# The derivation the scope filter rests on (issue #20): it loads the scope region's
+# object, so the case and the unit under test are built together, against the
+# client library that owns DBInstance, and the case imports its own fixture at
+# start-up - which is why it carries its own main and unity build is off.
+osmscout_test_project(NAME SearchScopeExtentTest
+  SOURCES src/SearchScopeExtentTest.cpp ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src/search_scope_extent.cpp
+  TARGET OSMScout::Client OSMScout::Test OSMScout::Import
+  INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+set_source_files_properties(src/SearchScopeExtentTest.cpp ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src/search_scope_extent.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+set_tests_properties(SearchScopeExtentTest PROPERTIES ENVIRONMENT "TESTS_TOP_DIR=${CMAKE_CURRENT_SOURCE_DIR};TESTS_TMP_DIR=${CMAKE_CURRENT_BINARY_DIR}")
+set_tests_properties(SearchScopeExtentTest PROPERTIES UNITY_BUILD FALSE)
+
 #---- SearchBreaker
 # The search-request lifecycle (one slot per surface, one generation per request, the
 # abort predicate) is the single decision every search surface's cancellation rests on,
