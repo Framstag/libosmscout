@@ -966,6 +966,15 @@ RouteLengthTest = executable('RouteLengthTest',
 
 test('Check route length', RouteLengthTest)
 
+RouteStartTest = executable('RouteStartTest',
+             'src/RouteStartTest.cpp',
+             include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],
+             dependencies: [catch2MainDep],
+             install: true,
+             install_dir: testInstallDir)
+
+test('Check route start', RouteStartTest)
+
 RoutingProfileSpeedTest = executable('RoutingProfileSpeedTest',
              'src/RoutingProfileSpeedTest.cpp',
              include_directories: [testIncDir, include_directories('../libosmscout-client-java/src')],

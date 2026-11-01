@@ -337,6 +337,9 @@ osmscout_test_project(NAME RouteFailureKindTest SOURCES src/RouteFailureKindTest
 #---- RouteLength
 osmscout_test_project(NAME RouteLengthTest SOURCES src/RouteLengthTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
+#---- RouteStart
+osmscout_test_project(NAME RouteStartTest SOURCES src/RouteStartTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
+
 #---- RoutingProfileSpeed
 osmscout_test_project(NAME RoutingProfileSpeedTest SOURCES src/RoutingProfileSpeedTest.cpp INCLUDES ${PROJECT_SOURCE_DIR}/libosmscout-client-java/src)
 
