@@ -18,6 +18,12 @@
  * the box and the position; loading the region's object stays in
  * OSMScoutClient.cpp.
  *
+ * The budget rule: the per-source free-text candidate budget counts the hits a
+ * search keeps, not the hits it looks at, so a scoped search still collects the
+ * requested number of candidates when the index holds them (issue #19). The rule
+ * is a pure function of the extent and the limit; building the entries stays in
+ * OSMScoutClient.cpp.
+ *
  * Kept dependency-free on purpose (no libosmscout includes) so it can be
  * unit-tested on the host without database/file I/O.
  */
@@ -147,6 +153,66 @@ inline bool GeoBoxContains(const GeoBox &outer, const GeoBox &inner)
   return outer.minLat <= inner.minLat && outer.maxLat >= inner.maxLat &&
          outer.minLon <= inner.minLon && outer.maxLon >= inner.maxLon;
 }
+
+// The per-source candidate budget of the free-text search
+//
+// The budget bounds the object loads behind the text index, not the index
+// traversal: the index hands a query's complete hit set back in one call
+// (TextSearchIndex::Search materializes every predictive-search hit), so the walk
+// that spends the budget is a walk over a map that already exists. A hit the scope
+// refuses therefore costs its own load and nothing else, which is why it must not
+// spend the budget as well - counting scanned hits made a scoped search deliver
+// fewer than `limit` candidates while in-scope hits sat behind the walk's stopping
+// point (issue #19, spec `search-free-text` - "Free-text candidate budget counts
+// kept candidates"). The extent is comparable across databases while region
+// offsets are not, so every database's hits are measured against the same box.
+class FreeTextBudget
+{
+public:
+  FreeTextBudget(size_t limit,
+                 const GeoBox &extent)
+    : limit(limit),
+      extent(extent)
+  {
+    // No-op
+  }
+
+  // Whether the budget is spent. Only kept hits count towards the limit.
+  bool Reached() const
+  {
+    return kept >= limit;
+  }
+
+  // Offers one hit at the given position; the caller keeps the hit exactly when
+  // this returns true. A hit outside the extent is refused without spending the
+  // budget, so the search keeps collecting until it has `limit` in-scope hits.
+  // The caller stops offering hits once Reached() is true.
+  bool Admit(double lat, double lon)
+  {
+    scanned++;
+
+    if (!IsInsideGeoBox(extent, lat, lon)) {
+      dropped++;
+
+      return false;
+    }
+
+    kept++;
+
+    return true;
+  }
+
+  size_t Kept() const { return kept; }
+  size_t Scanned() const { return scanned; }
+  size_t Dropped() const { return dropped; }
+
+private:
+  size_t  limit;
+  GeoBox  extent;
+  size_t  kept    = 0;
+  size_t  scanned = 0;
+  size_t  dropped = 0;
+};
 
 } // namespace naviveylin
 
