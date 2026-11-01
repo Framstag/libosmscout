@@ -25,10 +25,12 @@
 #include <osmscout/util/Distance.h>
 #include <osmscout/util/Time.h>
 #include <osmscout/system/Compiler.h>
+#include <osmscout/OSMScoutTypes.h>
 
 #include <list>
 #include <optional>
 #include <algorithm>
+#include <cstddef>
 
 namespace osmscout {
 
@@ -339,7 +341,7 @@ std::vector<SampleVoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::t
   }
 
   // distance from our position to next message
-  Distance nextMessageDistance = (message.distance - distanceFromStart);
+  Distance nextMessageDistance = message.distance - distanceFromStart;
   double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
 
   if (distanceInUnits > 900){
@@ -398,6 +400,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
     // reset state
     lastMessage.type=VoiceMessageStruct::Type::NoMessage;
     lastMessagePosition=Distance::Zero();
+    announcedTriggers=0;
     vehicle=routeUpdateMessage->vehicle;
     if (ttsMessageGenerator) {
       ttsMessageGenerator->SetVehicle(vehicle);
@@ -501,10 +504,24 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
   Distance nextMessageDistance = callback.nextMessage.distance - distanceFromStart;
   double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
 
-  if (callback.nextMessage && distanceInUnits < 900){
+  if (callback.nextMessage) {
+    const std::vector<double> triggers = TriggerDistances(callback.nextMessage.type, voiceType, vehicle);
 
-    if (callback.nextMessage != lastMessage){
+    // number of trigger distances already passed (triggers are sorted descending)
+    size_t active = 0;
+    while (active < triggers.size() && distanceInUnits <= triggers[active]) {
+      ++active;
+    }
 
+    bool sameMessage = callback.nextMessage == lastMessage;
+    if (!sameMessage) {
+      announcedTriggers = 0;
+    } else if ((distanceFromStart - lastMessagePosition) < Meters(-50)) {
+      // position jumped back, announce again
+      announcedTriggers = 0;
+    }
+
+    if (active > announcedTriggers) {
       if (voiceType==NavigationVoiceType::VoiceOfMarble) {
         result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
           positionMessage->timestamp,
@@ -516,35 +533,63 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
             positionMessage->timestamp, std::move(*ttsMessage)));
         }
       }
-
-      lastMessage=callback.nextMessage;
-      lastMessagePosition=distanceFromStart;
-    } else {
-      Distance distFromLast = distanceFromStart - lastMessagePosition;
-      if (!lastMessage ||
-          distFromLast.AsMeter() < -50 ||
-          (distanceInUnits < 550 && distFromLast > Meters(300)) ||
-          (distanceInUnits < 150 && distFromLast > Meters(200)) ||
-          (distanceInUnits < 60 && distFromLast > Meters(100))) {
-
-        if (voiceType==NavigationVoiceType::VoiceOfMarble) {
-          result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
-              positionMessage->timestamp,
-              toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
-        } else {
-          assert(voiceType==NavigationVoiceType::TextToSpeech);
-          if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(distanceFromStart, callback.nextMessage, callback.thenMessage)) {
-            result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
-              positionMessage->timestamp, std::move(*ttsMessage)));
-          }
-        }
-        lastMessage=callback.nextMessage;
-        lastMessagePosition=distanceFromStart;
-      }
+      announcedTriggers = active;
     }
+    lastMessage=callback.nextMessage;
+    lastMessagePosition=distanceFromStart;
   }
 
   return result;
+}
+
+std::vector<double> VoiceInstructionAgent::TriggerDistances(VoiceMessageStruct::Type type,
+                                                            NavigationVoiceType voiceType,
+                                                            Vehicle vehicle)
+{
+  using Type = VoiceMessageStruct::Type;
+  // Distances (in meters or yards, depending on units) in descending order,
+  // when the instruction should be voiced.
+  // VoiceOfMarble has only limited set of recorded distances (up to 800),
+  // TTS may use arbitrary distances.
+  if (vehicle==vehicleBicycle) {
+    switch (type) {
+      case Type::TargetReached:
+        return {40};
+      default:
+        return std::vector<double>{50, 10};
+    }
+  }
+  if (vehicle==vehicleFoot) {
+    switch (type) {
+      case Type::TargetReached:
+        return {40};
+      default:
+        return std::vector<double>{50, 10};
+    }
+  }
+  // vehicleCar
+  const bool tts = voiceType == NavigationVoiceType::TextToSpeech;
+  switch (type) {
+    case Type::LeaveMotorway:
+    case Type::LeaveMotorwayLeft:
+    case Type::LeaveMotorwayRight:
+      return tts ? std::vector<double>{1500, 1000, 500} : std::vector<double>{800, 500, 200};
+    case Type::MotorwayChange:
+      // there is no recorded sample for it
+      return tts ? std::vector<double>{500} : std::vector<double>{};
+    case Type::TargetReached:
+      return {40};
+    case Type::LeaveRoundabout:
+    case Type::SharpLeft:
+    case Type::TurnLeft:
+    case Type::StraightOn:
+    case Type::TurnRight:
+    case Type::SharpRight:
+      return tts ? std::vector<double>{1000, 500, 150, 60} : std::vector<double>{800, 500, 150, 60};
+    default:
+      return {};
+  }
+
 }
 
 }
