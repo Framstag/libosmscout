@@ -14,6 +14,7 @@ import com.framstag.libosmscout.client.ObjectDescription;
 import com.framstag.libosmscout.client.PoiEntry;
 import com.framstag.libosmscout.client.RouteStep;
 import com.framstag.libosmscout.client.RouteInstruction;
+import com.framstag.libosmscout.JavaScoutInstructions;
 import com.framstag.libosmscout.client.RouteCallback;
 import com.framstag.libosmscout.client.RouteEntry;
 import com.framstag.libosmscout.client.TurnType;
