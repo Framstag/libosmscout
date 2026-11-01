@@ -104,8 +104,8 @@ public class OSMScoutClientNavigationLiveTest {
 
         List<NavigationPosition> positions = new ArrayList<>();
         CountDownLatch positionLatch = new CountDownLatch(2);
-        CountDownLatch instructionLatch = new CountDownLatch(1);
-        RouteInstruction[] lastInstructions = new RouteInstruction[1];
+        CountDownLatch stepLatch = new CountDownLatch(1);
+        RouteStep[] lastInstruction = new RouteStep[1];
         NavigationListener listener = new NavigationListener() {
             @Override
             public void onPositionEstimate(NavigationPosition position) {
@@ -127,15 +127,15 @@ public class OSMScoutClientNavigationLiveTest {
             }
 
             @Override
-            public void onRouteInstructions(RouteInstruction[] instructions) {
-                System.out.println("[NavigationListener] received " + instructions.length + " route instructions");
-                lastInstructions[0] = instructions.length > 0 ? instructions[0] : null;
+            public void onRouteSteps(RouteStep[] steps) {
+                System.out.println("[NavigationListener] received " + steps.length + " route steps");
+                lastInstruction[0] = steps.length > 0 ? steps[0] : null;
             }
 
             @Override
-            public void onNextRouteInstruction(RouteInstruction instruction) {
-                System.out.println("[NavigationListener] next instruction: " + instruction);
-                instructionLatch.countDown();
+            public void onNextRouteStep(RouteStep step) {
+                System.out.println("[NavigationListener] next step: " + step.kind);
+                stepLatch.countDown();
             }
         };
 
@@ -190,9 +190,9 @@ public class OSMScoutClientNavigationLiveTest {
             "way type should be an OSM type name, got: " + positionWithWayType.wayType);
 
         // Verify that route instructions were delivered
-        assertTrue(instructionLatch.await(10, TimeUnit.SECONDS),
+        assertTrue(stepLatch.await(10, TimeUnit.SECONDS),
             "navigation should report at least one next-route instruction");
-        assertNotNull(lastInstructions[0],
+        assertNotNull(lastInstruction[0],
             "route instructions callback should have been called");
 
         controller.stop();

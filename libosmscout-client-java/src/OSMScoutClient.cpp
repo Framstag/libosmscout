@@ -46,6 +46,7 @@
 #include <osmscoutclient/DatabasePathRegistry.h>
 #include <osmscoutclient/Settings.h>
 #include <osmscoutclient/routing/RouteStep.h>
+#include <osmscoutclient/routing/RouteStepBuilder.h>
 #include <osmscoutclient/routing/RouteStepCollector.h>
 
 #include <osmscout/db/Database.h>
@@ -3308,20 +3309,14 @@ struct NavigationListenerMethods
   jmethodID onLaneUpdate{nullptr};
   jmethodID onVoiceInstruction{nullptr};
   jmethodID onError{nullptr};
-  jmethodID onRouteInstructions{nullptr};
-  jmethodID onNextRouteInstruction{nullptr};
+  jmethodID onRouteSteps{nullptr};
+  jmethodID onNextRouteStep{nullptr};
 
   jobject positionClsGlobal{nullptr};
   jmethodID positionCtor{nullptr};
 
   jobject stateClsGlobal{nullptr};
   jmethodID stateValueOf{nullptr};
-
-  jobject instructionClsGlobal{nullptr};
-  jmethodID instructionCtor{nullptr};
-
-  jobject turnTypeClsGlobal{nullptr};
-  jmethodID turnTypeValueOf{nullptr};
 
   jobject laneTurnClsGlobal{nullptr};
   jmethodID laneTurnFromId{nullptr};
@@ -3330,7 +3325,7 @@ struct NavigationListenerMethods
 // A failed FindClass / GetMethodID / GetStaticMethodID leaves a *pending* exception
 // (ClassNotFoundException, NoSuchMethodError, ...). While one is pending, the next JNI call
 // aborts the process - "JNI DETECTED ERROR IN APPLICATION: JNI FindClass called with pending
-// exception java.lang.NoSuchMethodError: no non-static method \"...RouteInstruction;.<init>(...)\""
+// exception java.lang.NoSuchMethodError: no non-static method \"...RouteStep;.<init>()V\""
 // - so every null-returning guard downstream becomes unreachable and a mismatching
 // descriptor crashes at bridge init instead of degrading. Clearing it here is what makes a
 // missing class or method a null method id, and from there a refused dispatch.
@@ -3418,35 +3413,15 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
         "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/NavigationState;");
   }
 
-  // Route instruction callbacks
-  methods.onRouteInstructions = GetMethodOrClear(
-      env, listenerCls, "onRouteInstructions",
-      "([Lcom/framstag/libosmscout/client/RouteInstruction;)V");
-  methods.onNextRouteInstruction = GetMethodOrClear(
-      env, listenerCls, "onNextRouteInstruction",
-      "(Lcom/framstag/libosmscout/client/RouteInstruction;)V");
-
-  jclass instructionCls = FindClassOrClear(env, "com/framstag/libosmscout/client/RouteInstruction");
-  if (instructionCls) {
-    methods.instructionClsGlobal = env->NewGlobalRef(instructionCls);
-    // The descriptor must match the full Java constructor exactly - it is the one
-    // with the roundabout fields. A mismatch leaves instructionCtor null, which
-    // CreateJavaRouteInstruction reports by returning null (see DispatchRouteInstructions,
-    // which then sends no instructions rather than an array with null entries). That path
-    // is only reachable because the lookup clears its own pending exception above: left
-    // pending, the exception aborts the process on the next JNI call, before any of this.
-    methods.instructionCtor = GetMethodOrClear(
-        env, instructionCls, "<init>",
-        "(DDDLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;DLcom/framstag/libosmscout/client/TurnType;Ljava/lang/String;Ljava/lang/String;IZILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V");
-  }
-
-  jclass turnTypeCls = FindClassOrClear(env, "com/framstag/libosmscout/client/TurnType");
-  if (turnTypeCls) {
-    methods.turnTypeClsGlobal = env->NewGlobalRef(turnTypeCls);
-    methods.turnTypeValueOf = GetStaticMethodOrClear(
-        env, turnTypeCls, "fromString",
-        "(Ljava/lang/String;)Lcom/framstag/libosmscout/client/TurnType;");
-  }
+  // Route step callbacks. Live guidance publishes the same structured record a calculated
+  // route publishes, so the listener's parameter type is RouteStep and no guidance text is
+  // carried at all.
+  methods.onRouteSteps = GetMethodOrClear(
+      env, listenerCls, "onRouteSteps",
+      "([Lcom/framstag/libosmscout/client/RouteStep;)V");
+  methods.onNextRouteStep = GetMethodOrClear(
+      env, listenerCls, "onNextRouteStep",
+      "(Lcom/framstag/libosmscout/client/RouteStep;)V");
 
   jclass laneTurnCls = FindClassOrClear(env, "com/framstag/libosmscout/client/LaneTurn");
   if (laneTurnCls) {
@@ -3458,494 +3433,6 @@ static bool GetNavigationListenerMethods(JNIEnv *env, jobject listener,
 
   return true;
 }
-
-// --------------------------------------------------------------------------
-// JavaRouteInstruction — lightweight instruction type for JNI bridge
-// --------------------------------------------------------------------------
-
-struct JavaRouteInstruction
-{
-  double distanceTo{0.0};       // meters to next manoeuvre
-  double timeTo{0.0};           // seconds of the leg ending at this manoeuvre
-  double legDistance{0.0};      // meters of that leg (0 = unknown, see legStartKnown)
-  double nodeTimeSeconds{0.0};  // C++ internal: seconds from the route start at this
-                                // manoeuvre's node; the remaining-time estimate needs it
-  std::string turnType;         // "sharpLeft", "left", "straightOn", etc.
-  std::string streetName;       // street to turn into
-  std::string description;      // "Turn left into Hauptstrasse"
-  std::string shortDescription; // "Turn left"
-
-  // Roundabout manoeuvres: the 1-based ordinal, counted in circulation order, of the
-  // exit the route takes, and the ring's circulation direction. 0 / true when the
-  // instruction is not a roundabout manoeuvre.
-  //
-  // libosmscout's RoundaboutLeaveDescription::GetExitCount() counts the exits passed
-  // (RoutePostprocessor: roundaboutCrossingCounter), so the value it returns IS that
-  // ordinal - it is not the number of exits the ring has, which no part of the
-  // description carries. The English "Exit N" text is not a substitute for either
-  // field: it carries no direction, and an unparseable text is indistinguishable
-  // from an unknown exit at the call site.
-  int roundaboutExitNumber{0};
-  bool roundaboutClockwise{true};
-
-  // Optional "next next" hint — populated when the following instruction
-  // is within CloseHintDistance of the current one (e.g. roundabout exit).
-  double nextNextDistanceTo{0.0};
-  std::string nextNextTurnType;
-  std::string nextNextDescription;
-  std::string nextNextShortDescription;
-
-  // The following manoeuvre's roundabout exit ordinal, on the same terms as
-  // roundaboutExitNumber: 0 when the hint's manoeuvre is not a roundabout exit or the hint
-  // is absent. It is its own field because the hint can be a different roundabout from the
-  // one roundaboutExitNumber describes.
-  int nextNextRoundaboutExitNumber{0};
-
-  // The manoeuvre facts of the instruction's route node, read from the route step model of that
-  // node. An empty value (and maxSpeedKmh < 0) means "absent": the step carries these as
-  // optional values, so an absent fact is distinguishable from a known empty or zero one.
-  std::string junctionRef;   // exit reference of the motorway junction
-  std::string junctionName;  // name of the motorway junction
-  std::string destinations;  // raw semicolon separated destination tag
-  std::string wayType;       // type name of the way
-  int maxSpeedKmh{-1};       // maximum speed in km/h, < 0 when unknown
-
-  static constexpr double CloseHintDistance = 200.0; // meters
-
-  osmscout::Distance GetDistance() const
-  {
-    return osmscout::Distance::Of<osmscout::Meter>(distanceTo);
-  }
-};
-
-// --------------------------------------------------------------------------
-// JavaRouteInstructionBuilder — walks RouteDescription nodes via
-// RouteDescriptionPostprocessor and produces JavaRouteInstruction lists.
-// Duplicates some logic from Qt's RouteDescriptionBuilder but avoids
-// pulling Qt into the Java JNI build.
-// --------------------------------------------------------------------------
-
-class JavaRouteInstructionBuilder
-{
-public:
-  std::list<JavaRouteInstruction> GenerateRouteInstructions(
-      osmscout::RouteDescription::NodeIterator first,
-      osmscout::RouteDescription::NodeIterator last) const
-  {
-    std::list<JavaRouteInstruction> result;
-    CollectCallback callback(result);
-    osmscout::RouteDescriptionPostprocessor postprocessor;
-    postprocessor.GenerateDescription(first, last, callback);
-    return result;
-  }
-
-  JavaRouteInstruction GenerateNextRouteInstruction(
-      osmscout::RouteDescription::NodeIterator previous,
-      osmscout::RouteDescription::NodeIterator last,
-      const osmscout::GeoCoord &coord,
-      double abscissa) const
-  {
-    if (previous == last) {
-      return JavaRouteInstruction{};
-    }
-
-    // Collect instructions from current position forward.
-    // Use generous stopAfter so we get enough nodes ahead for "next next".
-    double nodeDist = previous->GetDistance().AsMeter();
-    osmscout::Distance stopAfter = previous->GetDistance()
-        + osmscout::Distance::Of<osmscout::Meter>(JavaRouteInstruction::CloseHintDistance * 2);
-
-    std::list<JavaRouteInstruction> collected;
-    CollectCallback callback(collected, stopAfter);
-    osmscout::RouteDescriptionPostprocessor postprocessor;
-    postprocessor.GenerateDescription(previous, last, callback);
-
-    if (collected.empty()) {
-      return JavaRouteInstruction{};
-    }
-
-    // Find first instruction past current node → "next"
-    auto it = collected.begin();
-    while (it != collected.end() && it->distanceTo <= nodeDist) {
-      ++it;
-    }
-    if (it == collected.end()) {
-      return JavaRouteInstruction{};
-    }
-
-    double nextAbs = it->distanceTo; // absolute distance of next instruction
-    JavaRouteInstruction next = *it;
-    ++it;
-    bool hasNextNext = (it != collected.end());
-
-    // Convert absolute distances to remaining distances. The travelled part is
-    // taken from the position's progress along its current route segment: the
-    // straight-line distance from the segment start understates the travelled
-    // distance on a segment that folds back and overstates it with cross-track
-    // GPS error, which both distort the distance to the next manoeuvre. A
-    // position that reports no progress (an unsnapped fix) keeps that estimate.
-    double travelled = osmscout::GetEllipsoidalDistance(coord, previous->GetLocation()).AsMeter();
-    auto nextNode = previous;
-    ++nextNode;
-    if (abscissa > 0.0 && nextNode != last) {
-      double segmentLength = osmscout::GetEllipsoidalDistance(previous->GetLocation(),
-                                                             nextNode->GetLocation()).AsMeter();
-      if (segmentLength > 0.0) {
-        travelled = std::min(segmentLength * abscissa, segmentLength);
-      }
-    }
-    double raw = nextAbs - nodeDist - travelled;
-    next.distanceTo = (raw > 0.0) ? raw : 0.0;
-
-    // The next manoeuvre's time is the *remaining* time of its leg, consistent with the remaining
-    // distance above: interpolate the description's own node times at the current position (the
-    // same abscissa the distance path uses) and take the difference to the instruction's node.
-    // Publishing the leg's whole time instead left an arrival estimate that did not shrink while
-    // the manoeuvre was approached, next to a distance that did.
-    double timeAtPosition = TimeSeconds(previous->GetTime());
-    if (abscissa > 0.0 && nextNode != last) {
-      double nodeTime = timeAtPosition;
-      double nextNodeTime = TimeSeconds(nextNode->GetTime());
-      timeAtPosition = nodeTime + std::min(abscissa, 1.0) * (nextNodeTime - nodeTime);
-    }
-    double remainingTime = next.nodeTimeSeconds - timeAtPosition;
-    next.timeTo = (remainingTime > 0.0) ? remainingTime : 0.0;
-
-    // Populate "next next" hint
-    if (hasNextNext) {
-      double nnAbs = it->distanceTo;
-      double gap = nnAbs - nextAbs;
-      if (gap > 0 && gap <= JavaRouteInstruction::CloseHintDistance) {
-        next.nextNextDistanceTo = gap; // relative to "next", not absolute
-        next.nextNextTurnType = it->turnType;
-        next.nextNextDescription = it->description;
-        next.nextNextShortDescription = it->shortDescription;
-        next.nextNextRoundaboutExitNumber = it->roundaboutExitNumber;
-      }
-    }
-
-    return next;
-  }
-
-private:
-  /** Whole seconds of a description duration (the granularity the route description has). */
-  static double TimeSeconds(const osmscout::Duration &duration)
-  {
-    return static_cast<double>(
-        std::chrono::duration_cast<std::chrono::seconds>(duration).count());
-  }
-
-  // -- Turn type helpers (mirrors Demos/src/Navigation.cpp::MoveToTurnCommand) --
-
-  static std::string MoveToTurnType(osmscout::RouteDescription::DirectionDescription::Move move)
-  {
-    switch (move) {
-      case osmscout::RouteDescription::DirectionDescription::sharpLeft:    return "sharpLeft";
-      case osmscout::RouteDescription::DirectionDescription::left:         return "left";
-      case osmscout::RouteDescription::DirectionDescription::slightlyLeft: return "slightlyLeft";
-      case osmscout::RouteDescription::DirectionDescription::straightOn:   return "straightOn";
-      case osmscout::RouteDescription::DirectionDescription::slightlyRight:return "slightlyRight";
-      case osmscout::RouteDescription::DirectionDescription::right:        return "right";
-      case osmscout::RouteDescription::DirectionDescription::sharpRight:   return "sharpRight";
-    }
-    return "straightOn";
-  }
-
-  static std::string MoveToDescription(osmscout::RouteDescription::DirectionDescription::Move move)
-  {
-    switch (move) {
-      case osmscout::RouteDescription::DirectionDescription::sharpLeft:    return "Turn sharp left";
-      case osmscout::RouteDescription::DirectionDescription::left:         return "Turn left";
-      case osmscout::RouteDescription::DirectionDescription::slightlyLeft: return "Turn slightly left";
-      case osmscout::RouteDescription::DirectionDescription::straightOn:   return "Straight on";
-      case osmscout::RouteDescription::DirectionDescription::slightlyRight:return "Turn slightly right";
-      case osmscout::RouteDescription::DirectionDescription::right:        return "Turn right";
-      case osmscout::RouteDescription::DirectionDescription::sharpRight:   return "Turn sharp right";
-    }
-    return "Straight on";
-  }
-
-  static std::string NameOrRef(const osmscout::RouteDescription::NameDescriptionRef &nameDesc)
-  {
-    if (!nameDesc) return "";
-    if (nameDesc->HasName()) return nameDesc->GetName();
-    std::string ref = nameDesc->GetRef();
-    return ref.empty() ? "" : ref;
-  }
-
-  // -- Callback that collects JavaRouteInstruction from RouteDescriptionPostprocessor --
-
-  class CollectCallback : public osmscout::RouteDescriptionPostprocessor::Callback
-  {
-  private:
-    std::list<JavaRouteInstruction> &result;
-    osmscout::Distance stopAfter; // < 0 = unlimited
-    osmscout::GeoCoord coord;
-    osmscout::Distance distance;
-    osmscout::Distance prevInstructionDistance{osmscout::Distance::Zero()};
-    osmscout::Duration prevTime{osmscout::Duration::zero()};
-    osmscout::Duration time{osmscout::Duration::zero()};
-    // True while the walk contains the beginning of the leg that ends at the next emitted
-    // instruction. It does unless the walk starts mid-leg (see BeforeNode).
-    bool legStartKnown{true};
-    bool firstNode{true};
-    std::string currentStreet;
-    // The step of the node whose hook is running: the manoeuvre facts of the instruction come
-    // from it, so the instruction and the published steps cannot describe one manoeuvre
-    // differently.
-    osmscout::client::RouteStep currentStep;
-    bool currentStepValid{false};
-
-  public:
-    CollectCallback(std::list<JavaRouteInstruction> &result,
-                    osmscout::Distance stopAfter = osmscout::Distance::Lowest())
-      : result(result), stopAfter(stopAfter) {}
-
-    void BeforeNode(const osmscout::RouteDescription::Node &node) override
-    {
-      if (firstNode) {
-        // The walk's first node begins a leg only when it is the route's start: only then is
-        // the instruction before it part of the walk. A window that starts mid-leg (the
-        // instruction list is rebuilt from the current node on a route change, and the next
-        // instruction is generated from the current node) cannot know that leg, so its first
-        // emitted instruction reports unknown values instead of a cumulative-from-the-route-
-        // start number (owner finding 2026-10-04: "14 m / 2 s" per step).
-        legStartKnown = node.GetDistance().AsMeter() <= 0.0;
-        firstNode = false;
-      }
-      time = node.GetTime();
-      distance = node.GetDistance();
-      coord = node.GetLocation();
-
-      auto nodeStep=osmscout::client::RouteStepCollector::BuildNodeStep(node);
-
-      currentStepValid=nodeStep.has_value();
-      currentStep=nodeStep.value_or(osmscout::client::RouteStep());
-    }
-
-    /**
-     * Fill the leg values of one instruction: its distance and time are measured from the
-     * previous *emitted instruction*, not from the previous route node.
-     *
-     * A node-based delta is the last geometry edge before the manoeuvre, so the per-step values
-     * never added up to the route's distance or duration (device: "14 m" + "2 s" for one step of
-     * a 17,3 km route, 2026-10-04). Qt's RouteDescriptionBuilder::MkStep advances its reference
-     * per emitted step; this is the same rule. Call it once per emitted instruction - it advances
-     * the reference.
-     */
-    void FillLeg(JavaRouteInstruction &instr)
-    {
-      auto dt = std::chrono::duration_cast<std::chrono::seconds>(time - prevTime);
-      osmscout::Distance legDistance = distance - prevInstructionDistance;
-
-      instr.nodeTimeSeconds = static_cast<double>(
-          std::chrono::duration_cast<std::chrono::seconds>(time).count());
-
-      // The manoeuvre facts of this node, from its step (spec: turn-by-turn-instructions - Java
-      // RouteInstruction data class). They are values, not prose: the description text below stays
-      // byte-identical.
-      if (currentStepValid) {
-        if (currentStep.junction) {
-          instr.junctionRef=currentStep.junction->ref;
-          instr.junctionName=currentStep.junction->name;
-        }
-
-        if (currentStep.destination) {
-          instr.destinations=*currentStep.destination;
-        }
-
-        if (currentStep.typeName) {
-          instr.wayType=*currentStep.typeName;
-        }
-
-        if (currentStep.maxSpeed) {
-          instr.maxSpeedKmh=static_cast<int>(*currentStep.maxSpeed);
-        }
-      }
-
-      if (legStartKnown) {
-        instr.legDistance = static_cast<double>(legDistance.AsMeter());
-        instr.timeTo = static_cast<double>(dt.count());
-      }
-      else {
-        instr.legDistance = 0.0;
-        instr.timeTo = 0.0;
-      }
-
-      prevTime = time;
-      prevInstructionDistance = distance;
-      legStartKnown = true;
-    }
-
-    bool Continue() const override
-    {
-      return stopAfter < osmscout::Distance::Zero() ||
-             result.empty() ||
-             result.back().distanceTo <= stopAfter.AsMeter();
-    }
-
-    void OnStart(const osmscout::RouteDescription::StartDescriptionRef &startDesc,
-                 const osmscout::RouteDescription::TypeNameDescriptionRef & /*typeNameDesc*/,
-                 const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-    {
-      currentStreet = NameOrRef(nameDesc);
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "start";
-      instr.streetName = currentStreet;
-      instr.description = startDesc ? startDesc->GetDescription() : "Start";
-      instr.shortDescription = "Start";
-      result.push_back(instr);
-    }
-
-    void OnTargetReached(const osmscout::RouteDescription::TargetDescriptionRef &targetDesc) override
-    {
-      JavaRouteInstruction instr;
-      // The distance of this instruction's own node from the route start, like
-      // every other instruction in the list (see OnStart and OnTurn). Reporting 0
-      // here made the arrival indistinguishable from the route start: the search
-      // for the next instruction walks forward while an instruction's distance is
-      // behind the current node, so the arrival was skipped and a client got an
-      // empty instruction after the last manoeuvre instead of "Arrive - X m".
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "targetReached";
-      instr.description = targetDesc ? targetDesc->GetDescription() : "Destination reached";
-      instr.shortDescription = "Arrive";
-      result.push_back(instr);
-    }
-
-    void OnTurn(const osmscout::RouteDescription::TurnDescriptionRef &turnDesc,
-                const osmscout::RouteDescription::CrossingWaysDescriptionRef &crossingWaysDesc,
-                const osmscout::RouteDescription::DirectionDescriptionRef &directionDesc,
-                const osmscout::RouteDescription::TypeNameDescriptionRef & /*typeNameDesc*/,
-                const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-    {
-      auto move = turnDesc ? turnDesc->GetDirection()
-                 : (directionDesc ? directionDesc->GetCurve()
-                    : osmscout::RouteDescription::DirectionDescription::straightOn);
-
-      std::string street = NameOrRef(nameDesc);
-      if (street.empty() && crossingWaysDesc) {
-        street = NameOrRef(crossingWaysDesc->GetTargetDesccription());
-      }
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = MoveToTurnType(move);
-      instr.streetName = street;
-      instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
-      instr.shortDescription = MoveToDescription(move);
-      result.push_back(instr);
-    }
-
-    void OnRoundaboutEnter(const osmscout::RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDesc,
-                           const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
-    {
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "roundaboutEnter";
-      instr.description = "Enter roundabout";
-      instr.shortDescription = "Roundabout";
-      // The ring's circulation direction: without it a consumer cannot tell a
-      // clockwise roundabout from a counter-clockwise one, and the direction
-      // cannot be recovered from the instruction text.
-      if (roundaboutEnterDesc) {
-        instr.roundaboutClockwise = roundaboutEnterDesc->IsClockwise();
-      }
-      result.push_back(instr);
-    }
-
-    void OnRoundaboutLeave(const osmscout::RouteDescription::RoundaboutLeaveDescriptionRef &roundaboutLeaveDesc,
-                           const osmscout::RouteDescription::NameDescriptionRef &nameDesc) override
-    {
-      std::string exitStr = roundaboutLeaveDesc
-          ? std::to_string(roundaboutLeaveDesc->GetExitCount()) : "?";
-      std::string street = NameOrRef(nameDesc);
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "roundaboutLeave";
-      instr.streetName = street;
-      instr.description = "Take exit " + exitStr + (street.empty() ? "" : " onto " + street);
-      instr.shortDescription = "Exit " + exitStr;
-      // The ordinal of the exit taken (see the field's comment) and the direction,
-      // as structure - the text above stays byte-identical so a consumer that reads
-      // only strings observes no change.
-      if (roundaboutLeaveDesc) {
-        instr.roundaboutExitNumber = static_cast<int>(roundaboutLeaveDesc->GetExitCount());
-        instr.roundaboutClockwise = roundaboutLeaveDesc->IsClockwise();
-      }
-      result.push_back(instr);
-    }
-
-    void OnMotorwayEnter(const osmscout::RouteDescription::MotorwayEnterDescriptionRef &motorwayEnterDesc,
-                         const osmscout::RouteDescription::CrossingWaysDescriptionRef & /*crossingWaysDesc*/) override
-    {
-      std::string motorway = motorwayEnterDesc
-          ? NameOrRef(motorwayEnterDesc->GetToDescription()) : "";
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = "motorwayEnter";
-      instr.streetName = motorway;
-      instr.description = "Enter " + (motorway.empty() ? "motorway" : motorway);
-      instr.shortDescription = "Enter motorway";
-      result.push_back(instr);
-    }
-
-    void OnMotorwayChange(const osmscout::RouteDescription::MotorwayChangeDescriptionRef &motorwayChangeDesc,
-                          const osmscout::RouteDescription::MotorwayJunctionDescriptionRef & /*motorwayJunctionDesc*/,
-                          const osmscout::RouteDescription::DirectionDescriptionRef &directionDesc,
-                          const osmscout::RouteDescription::DestinationDescriptionRef & /*destDesc*/) override
-    {
-      auto move = directionDesc ? directionDesc->GetCurve()
-                  : osmscout::RouteDescription::DirectionDescription::straightOn;
-      std::string toMotorway = motorwayChangeDesc
-          ? NameOrRef(motorwayChangeDesc->GetToDescription()) : "";
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = MoveToTurnType(move);
-      instr.streetName = toMotorway;
-      instr.description = "Keep " + MoveToDescription(move) + " onto " + (toMotorway.empty() ? "motorway" : toMotorway);
-      instr.shortDescription = "Keep " + MoveToTurnType(move);
-      result.push_back(instr);
-    }
-
-    void OnMotorwayLeave(const osmscout::RouteDescription::MotorwayLeaveDescriptionRef & /*motorwayLeaveDesc*/,
-                         const osmscout::RouteDescription::MotorwayJunctionDescriptionRef & /*motorwayJunctionDesc*/,
-                         const osmscout::RouteDescription::DirectionDescriptionRef &directionDesc,
-                         const osmscout::RouteDescription::NameDescriptionRef &nameDesc,
-                         const osmscout::RouteDescription::DestinationDescriptionRef & /*destDesc*/) override
-    {
-      auto move = directionDesc ? directionDesc->GetCurve()
-                  : osmscout::RouteDescription::DirectionDescription::straightOn;
-      std::string street = NameOrRef(nameDesc);
-
-      JavaRouteInstruction instr;
-      instr.distanceTo = distance.AsMeter();
-      FillLeg(instr);
-      instr.turnType = MoveToTurnType(move);
-      instr.streetName = street;
-      instr.description = MoveToDescription(move) + (street.empty() ? "" : " into " + street);
-      instr.shortDescription = "Leave motorway";
-      result.push_back(instr);
-    }
-
-    void OnPathNameChange(const osmscout::RouteDescription::NameChangedDescriptionRef &nameChangedDesc) override
-    {
-      currentStreet = nameChangedDesc
-          ? NameOrRef(nameChangedDesc->GetTargetDescription()) : "";
-    }
-  };
-};
 
 class JavaNavigationController
 {
@@ -3971,7 +3458,8 @@ public:
         std::make_shared<osmscout::SpeedAgent>(),
         std::make_shared<osmscout::LaneAgent>(),
         std::make_shared<osmscout::VoiceInstructionAgent>(osmscout::DistanceUnitSystem::Metrics, std::make_shared<osmscout::NoOpTTSMessageGenerator>()),
-        std::make_shared<osmscout::RouteInstructionAgent<JavaRouteInstruction, JavaRouteInstructionBuilder>>()
+        std::make_shared<osmscout::RouteInstructionAgent<osmscout::client::RouteStep,
+                                                         osmscout::client::RouteStepBuilder>>()
       }
   {
   }
@@ -4030,14 +3518,6 @@ public:
         if (methods.stateClsGlobal != nullptr) {
           env->DeleteGlobalRef(methods.stateClsGlobal);
           methods.stateClsGlobal = nullptr;
-        }
-        if (methods.instructionClsGlobal != nullptr) {
-          env->DeleteGlobalRef(methods.instructionClsGlobal);
-          methods.instructionClsGlobal = nullptr;
-        }
-        if (methods.turnTypeClsGlobal != nullptr) {
-          env->DeleteGlobalRef(methods.turnTypeClsGlobal);
-          methods.turnTypeClsGlobal = nullptr;
         }
         if (methods.laneTurnClsGlobal != nullptr) {
           env->DeleteGlobalRef(methods.laneTurnClsGlobal);
@@ -4284,13 +3764,13 @@ private:
         env->DeleteLocalRef(samples);
       }
     }
-    else if (auto routeInstrMsg = dynamic_cast<osmscout::RouteInstructionsMessage<JavaRouteInstruction> *>(message.get());
-             routeInstrMsg != nullptr) {
-      DispatchRouteInstructions(env, routeInstrMsg->instructions);
+    else if (auto routeStepsMsg = dynamic_cast<osmscout::RouteInstructionsMessage<osmscout::client::RouteStep> *>(message.get());
+             routeStepsMsg != nullptr) {
+      DispatchRouteSteps(env, routeStepsMsg->instructions);
     }
-    else if (auto nextInstrMsg = dynamic_cast<osmscout::NextRouteInstructionsMessage<JavaRouteInstruction> *>(message.get());
-             nextInstrMsg != nullptr) {
-      DispatchNextRouteInstruction(env, nextInstrMsg->nextRouteInstruction);
+    else if (auto nextStepMsg = dynamic_cast<osmscout::NextRouteInstructionsMessage<osmscout::client::RouteStep> *>(message.get());
+             nextStepMsg != nullptr) {
+      DispatchNextRouteStep(env, nextStepMsg->nextRouteInstruction);
     }
   }
 
@@ -4353,131 +3833,74 @@ private:
     env->DeleteLocalRef(wayRefJ);
     env->DeleteLocalRef(wayTypeJ);
   }
-
-  jobject CreateJavaRouteInstruction(JNIEnv *env, const JavaRouteInstruction &instr)
+  /**
+   * One coordinate-free line per guidance publication: how long the marshalling took and how
+   * many steps it carried. The step record is richer than the instruction it replaces (nested
+   * records, boxed values, a nested next-next step) and this is the publication path of every
+   * position update, so the number is the measurement the cache decision is taken from
+   * (change `route-steps-live-guidance`, design "Performance").
+   */
+  static void LogDispatch(const char *what, size_t count, long long microseconds)
   {
-    if (!methods.instructionCtor || !methods.turnTypeValueOf ||
-        !methods.instructionClsGlobal || !methods.turnTypeClsGlobal) {
-      return nullptr;
-    }
-
-    // Convert turn type string to TurnType enum
-    jstring turnTypeStr = env->NewStringUTF(instr.turnType.c_str());
-    jobject turnTypeObj = env->CallStaticObjectMethod(
-        static_cast<jclass>(methods.turnTypeClsGlobal), methods.turnTypeValueOf, turnTypeStr);
-    env->DeleteLocalRef(turnTypeStr);
-
-    jstring streetNameJ = env->NewStringUTF(instr.streetName.c_str());
-    jstring descriptionJ = env->NewStringUTF(instr.description.c_str());
-    jstring shortDescJ = env->NewStringUTF(instr.shortDescription.c_str());
-
-    // "Next next" hint
-    jstring nnTurnTypeStr = env->NewStringUTF(instr.nextNextTurnType.c_str());
-    jobject nnTurnTypeObj = env->CallStaticObjectMethod(
-        static_cast<jclass>(methods.turnTypeClsGlobal), methods.turnTypeValueOf, nnTurnTypeStr);
-    env->DeleteLocalRef(nnTurnTypeStr);
-
-    jstring nnDescJ = env->NewStringUTF(instr.nextNextDescription.c_str());
-    jstring nnShortDescJ = env->NewStringUTF(instr.nextNextShortDescription.c_str());
-
-    // The manoeuvre facts of the node: absent is null, never an empty or zero placeholder.
-    jstring junctionRefJ = instr.junctionRef.empty()
-        ? nullptr : env->NewStringUTF(instr.junctionRef.c_str());
-    jstring junctionNameJ = instr.junctionName.empty()
-        ? nullptr : env->NewStringUTF(instr.junctionName.c_str());
-    jstring destinationsJ = instr.destinations.empty()
-        ? nullptr : env->NewStringUTF(instr.destinations.c_str());
-    jstring wayTypeJ = instr.wayType.empty()
-        ? nullptr : env->NewStringUTF(instr.wayType.c_str());
-    jobject maxSpeedJ = nullptr;
-    if (instr.maxSpeedKmh >= 0) {
-      maxSpeedJ = env->CallStaticObjectMethod(g_RouteStepJni.integerCls,
-                                              g_RouteStepJni.integerValueOf,
-                                              static_cast<jint>(instr.maxSpeedKmh));
-    }
-
-    jobject instrObj = env->NewObject(
-        static_cast<jclass>(methods.instructionClsGlobal), methods.instructionCtor,
-        instr.distanceTo,
-        instr.timeTo,
-        instr.legDistance,
-        turnTypeObj,
-        streetNameJ,
-        descriptionJ,
-        shortDescJ,
-        instr.nextNextDistanceTo,
-        nnTurnTypeObj,
-        nnDescJ,
-        nnShortDescJ,
-        instr.roundaboutExitNumber,
-        instr.roundaboutClockwise ? JNI_TRUE : JNI_FALSE,
-        instr.nextNextRoundaboutExitNumber,
-        junctionRefJ,
-        junctionNameJ,
-        destinationsJ,
-        wayTypeJ,
-        maxSpeedJ);
-
-    env->DeleteLocalRef(turnTypeObj);
-    env->DeleteLocalRef(streetNameJ);
-    env->DeleteLocalRef(descriptionJ);
-    env->DeleteLocalRef(shortDescJ);
-    env->DeleteLocalRef(nnTurnTypeObj);
-    env->DeleteLocalRef(nnDescJ);
-    env->DeleteLocalRef(nnShortDescJ);
-    if (junctionRefJ != nullptr) env->DeleteLocalRef(junctionRefJ);
-    if (junctionNameJ != nullptr) env->DeleteLocalRef(junctionNameJ);
-    if (destinationsJ != nullptr) env->DeleteLocalRef(destinationsJ);
-    if (wayTypeJ != nullptr) env->DeleteLocalRef(wayTypeJ);
-    if (maxSpeedJ != nullptr) env->DeleteLocalRef(maxSpeedJ);
-
-    return instrObj;
+    osmscout::log.Info() << "[JNI] guidance dispatch: " << what
+                         << " steps=" << count
+                         << " us=" << microseconds;
   }
 
-  void DispatchRouteInstructions(JNIEnv *env,
-                                 const std::list<JavaRouteInstruction> &instructions)
+  void DispatchRouteSteps(JNIEnv *env,
+                          const std::list<osmscout::client::RouteStep> &steps)
   {
-    if (!methods.onRouteInstructions) return;
+    if (!methods.onRouteSteps) return;
 
-    // Build every instruction before the array exists. An instruction the bridge cannot
-    // build yields null - a missing constructor method id (a descriptor that does not
-    // match the Java constructor) or a missing TurnType enum method makes every
-    // instruction unbuildable - and an array sized for the input would then carry null
-    // entries that the listener dereferences far from here. No buildable instruction
-    // means no dispatch at all, which is observable as an absent instruction list.
+    const auto started = std::chrono::steady_clock::now();
+
+    // Build every step before the array exists. A step the bridge cannot build yields null -
+    // a missing method or field id of any sub-record makes that step unbuildable - and an
+    // array sized for the input would then carry null entries that the listener dereferences
+    // far from here. No buildable step means no dispatch at all, which is observable as an
+    // absent step list.
     std::vector<jobject> built;
-    built.reserve(instructions.size());
-    for (const auto &instr : instructions) {
-      jobject instrObj = CreateJavaRouteInstruction(env, instr);
-      if (instrObj) {
-        built.push_back(instrObj);
+    built.reserve(steps.size());
+    for (const auto &step : steps) {
+      jobject stepObj = CreateJavaRouteStep(env, step);
+      if (stepObj) {
+        built.push_back(stepObj);
       }
     }
     if (built.empty()) return;
 
     jobjectArray arr = env->NewObjectArray(
         static_cast<jsize>(built.size()),
-        static_cast<jclass>(methods.instructionClsGlobal),
+        static_cast<jclass>(g_RouteStepJni.stepCls),
         nullptr);
     for (size_t i = 0; i < built.size(); ++i) {
       env->SetObjectArrayElement(arr, static_cast<jsize>(i), built[i]);
       env->DeleteLocalRef(built[i]);
     }
 
-    env->CallVoidMethod(listenerGlobal, methods.onRouteInstructions, arr);
+    env->CallVoidMethod(listenerGlobal, methods.onRouteSteps, arr);
     env->DeleteLocalRef(arr);
+
+    LogDispatch("list", steps.size(),
+                 std::chrono::duration_cast<std::chrono::microseconds>(
+                     std::chrono::steady_clock::now() - started).count());
   }
 
-  void DispatchNextRouteInstruction(JNIEnv *env,
-                                    const JavaRouteInstruction &instruction)
+  void DispatchNextRouteStep(JNIEnv *env,
+                             const osmscout::client::RouteStep &step)
   {
-    if (!methods.onNextRouteInstruction) return;
+    if (!methods.onNextRouteStep) return;
 
-    jobject instrObj = CreateJavaRouteInstruction(env, instruction);
-    if (instrObj) {
-      env->CallVoidMethod(listenerGlobal, methods.onNextRouteInstruction, instrObj);
-      env->DeleteLocalRef(instrObj);
+    const auto started = std::chrono::steady_clock::now();
+    jobject stepObj = CreateJavaRouteStep(env, step);
+    if (stepObj) {
+      env->CallVoidMethod(listenerGlobal, methods.onNextRouteStep, stepObj);
+      env->DeleteLocalRef(stepObj);
     }
+
+    LogDispatch("next", 1,
+                 std::chrono::duration_cast<std::chrono::microseconds>(
+                     std::chrono::steady_clock::now() - started).count());
   }
 
 private:
