@@ -9,6 +9,15 @@
  * text for it from its own resources (openspec change
  * "client-java-route-failure-kind", spec `routing-failure-reporting`).
  *
+ * **Why the not-yet-loaded list has a kind of its own.** `openDatabases` publishes the set change to
+ * the DB thread's job queue and returns; that job clears and repopulates the instance list. A route
+ * calculation issued in between therefore reads an empty list, and it used to read the same
+ * `kRouteFailureRoutingDataUnavailable` a database that genuinely cannot be opened reads. The two are
+ * different facts for a caller: one is cleared by trying again, the other by changing the map data.
+ * Measured 2026-10-13 on a 416-point sweep of Dortmund's old town: the first two points reported
+ * "no databases loaded" and the 414 after them did not, with the sweep's own client having called
+ * `openDatabases` immediately before the run.
+ *
  * **Why there is no "route too long" kind.** The router reports one error for a
  * search that exhausted its alternatives, and a caller cannot tell from it why:
  * an empty open list means the connection is longer than the profile's cost
@@ -42,6 +51,7 @@ inline constexpr int kRouteFailureTargetUnroutable=3;
 inline constexpr int kRouteFailureNoRouteFound=4;
 inline constexpr int kRouteFailureRoutingDataFailure=5;
 inline constexpr int kRouteFailureEngineFailure=6;
+inline constexpr int kRouteFailureDatabaseNotLoaded=7;
 
 /**
  * Why a route calculation produced no route, in the terms the route callback
@@ -62,6 +72,11 @@ enum class RouteFailureCause
   DataFailure,
   /** No routing data could be used at all (none loaded, or none could be opened). */
   RoutingDataUnavailable,
+  /**
+   * The instance list the router reads was still empty: the open the caller issued had not been
+   * registered yet, so the same call can succeed a moment later.
+   */
+  DatabaseNotLoaded,
   /** The native routing work failed outside the router. */
   EngineFailure
 };
@@ -85,6 +100,8 @@ inline int RouteFailureKind(RouteFailureCause cause)
       return kRouteFailureRoutingDataFailure;
     case RouteFailureCause::RoutingDataUnavailable:
       return kRouteFailureRoutingDataUnavailable;
+    case RouteFailureCause::DatabaseNotLoaded:
+      return kRouteFailureDatabaseNotLoaded;
     case RouteFailureCause::EngineFailure:
       return kRouteFailureEngineFailure;
     case RouteFailureCause::Unknown:

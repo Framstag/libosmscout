@@ -33,7 +33,7 @@ struct CauseAndKind
 
 // Every enumerator of RouteFailureCause, so a cause added without a branch in RouteFailureKind() is
 // seen here (the mapping is total).
-constexpr std::array<CauseAndKind,7> causes{{
+constexpr std::array<CauseAndKind,8> causes{{
                                              {naviveylin::RouteFailureCause::NoStartNode,
                                               naviveylin::kRouteFailureStartUnroutable},
                                              {naviveylin::RouteFailureCause::NoTargetNode,
@@ -44,6 +44,8 @@ constexpr std::array<CauseAndKind,7> causes{{
                                               naviveylin::kRouteFailureRoutingDataFailure},
                                              {naviveylin::RouteFailureCause::RoutingDataUnavailable,
                                               naviveylin::kRouteFailureRoutingDataUnavailable},
+                                             {naviveylin::RouteFailureCause::DatabaseNotLoaded,
+                                              naviveylin::kRouteFailureDatabaseNotLoaded},
                                              {naviveylin::RouteFailureCause::EngineFailure,
                                               naviveylin::kRouteFailureEngineFailure},
                                              {naviveylin::RouteFailureCause::Unknown,
@@ -67,7 +69,7 @@ TEST_CASE("A cause the bridge does not name is the unknown kind")
 
 TEST_CASE("The kind numbers are the ones the Java interface declares")
 {
-  // RouteCallback.java declares these seven values; the integer is what crosses the boundary, so a
+  // RouteCallback.java declares these eight values; the integer is what crosses the boundary, so a
   // constant that no longer matches the Java one is a runtime mismatch, not a compile error. The
   // numbers are written out here so that a change on either side fails this test.
   REQUIRE(naviveylin::kRouteFailureUnknown==0);
@@ -77,6 +79,7 @@ TEST_CASE("The kind numbers are the ones the Java interface declares")
   REQUIRE(naviveylin::kRouteFailureNoRouteFound==4);
   REQUIRE(naviveylin::kRouteFailureRoutingDataFailure==5);
   REQUIRE(naviveylin::kRouteFailureEngineFailure==6);
+  REQUIRE(naviveylin::kRouteFailureDatabaseNotLoaded==7);
 
   // The other way round: the kind the Java side reads for each cause.
   REQUIRE(naviveylin::RouteFailureKind(naviveylin::RouteFailureCause::NoStartNode)==2);
@@ -85,4 +88,5 @@ TEST_CASE("The kind numbers are the ones the Java interface declares")
   REQUIRE(naviveylin::RouteFailureKind(naviveylin::RouteFailureCause::DataFailure)==5);
   REQUIRE(naviveylin::RouteFailureKind(naviveylin::RouteFailureCause::RoutingDataUnavailable)==1);
   REQUIRE(naviveylin::RouteFailureKind(naviveylin::RouteFailureCause::EngineFailure)==6);
+  REQUIRE(naviveylin::RouteFailureKind(naviveylin::RouteFailureCause::DatabaseNotLoaded)==7);
 }
