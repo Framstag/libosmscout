@@ -56,14 +56,14 @@
 
 ## 5. Verify on the image
 
-- [ ] 5.1 Open the pull request and let the whole matrix run on `ubuntu-26.04`. Verify: every Linux
+- [x] 5.1 Open the pull request and let the whole matrix run on `ubuntu-26.04`. Verify: every Linux
   workflow that triggers on a pull request concludes successfully.
-- [ ] 5.2 Read the configure log of the gcc/cmake job and confirm that the test suite was built. Verify:
+- [x] 5.2 Read the configure log of the gcc/cmake job and confirm that the test suite was built. Verify:
   the log does not contain `Disabled building of tests, since Catch2 dependency is not available`, and
   `ctest` reports the test count (spec: *The test framework is installed under its current package
   name*).
-- [ ] 5.3 Read the memory sanitizer log and confirm that the toolchain came from the archive. Verify:
+- [x] 5.3 Read the memory sanitizer log and confirm that the toolchain came from the archive. Verify:
   `clang-21` is installed, the allocator check passes, and no `apt.llvm.org` step remains (spec: *The
   compiler comes from the release of the image*).
-- [ ] 5.4 Record the run identifiers and the conclusions in `verification.md`. Verify: each task of
+- [x] 5.4 Record the run identifiers and the conclusions in `verification.md`. Verify: each task of
   section 5 has its run id and result.

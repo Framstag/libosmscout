@@ -1,11 +1,12 @@
 # Verification
 
-Filled in from the pull request run; see the task list in `tasks.md`.
+Filled in from the pull request run (#1926), commit `1083ff14a`.
 
 ## Local pre-checks
 
-- `openspec validate ci-ubuntu-26-04-runner-migration --strict` — result recorded below.
-- Every package the Linux jobs install was checked against the `resolute` (26.04) archive:
+- `openspec validate ci-ubuntu-26-04-runner-migration --strict` — `Change 'ci-ubuntu-26-04-runner-migration' is valid`.
+- Every package the Linux jobs install was checked against the `resolute` (26.04) archive before the
+  change was pushed (package pages of `packages.ubuntu.com`, each resolving for the suite):
 
   ```
   catch2 → transitional, points at libcatch2-dev (3.7.1)
@@ -22,4 +23,43 @@ Filled in from the pull request run; see the task list in `tasks.md`.
 
 ## CI
 
-Run of the pull request on `ubuntu-26.04`; to be recorded.
+Every job of the matrix concluded `success` on `ubuntu-26.04`; the only skipped job is `Publish images`
+of `mapgen_image.yml`, which only runs on a main-branch commit.
+
+| Workflow | Run | Result |
+|----------|-----|--------|
+| Ubuntu 26.04 (`build_and test_on_ubuntu_26_04.yml`) | 41494971206 | success — `clang`/`gcc` × meson/cmake, Qt6 × meson/cmake |
+| Ubuntu 26.04 for Qt on Android | 41494971297 | success |
+| Sanitize (`sanitize_on_ubuntu_26_04.yml`) | 41494971308 | success — clang ASan+UBSan, clang MSan, gcc ASan+UBSan |
+| JavaScout build | 41494971428 | success |
+| Sonar | 41494971212 | success — gate `OK` |
+| Mapgen image | 41494971526 | success — image build, smoke, compose smoke; `Publish images` skipped on a pull request |
+| OS X | 41494971329 | success |
+| iOS | 41494971909 | success (the first attempt was cancelled with `The job was not acquired by Runner of type hosted`, a macOS arm64 capacity problem of the runner service; the rerun passed) |
+| Visual Studio 2025 | 41494971237 | success |
+| MSYS | 41494971334 | success (after the deprecation acknowledgement of the second commit) |
+
+## Checks the run cannot report by itself
+
+- **The test suite is built, not skipped.** `gcc and cmake` (job 125430575919) configures
+  `-- - Catch2::Catch2WithMain        TRUE` and its test step reports `100% tests passed out of 170`.
+  The log contains no `Disabled building of tests, since Catch2 dependency is not available`. The
+  install step fetches `libcatch2-dev amd64 3.7.1-0.6` from `resolute/universe`.
+- **The memory sanitizer toolchain comes from the release archive.** Job 125419016823 installs
+  `libclang-21-dev amd64 1:21.1.8-6ubuntu1` from `resolute/universe`, adds no `apt.llvm.org`
+  repository, passes the allocator check (`checking build/Tests/PerformanceTest-1.1.1`) and reports
+  `100% tests passed out of 129`.
+- **The sanitizer jobs keep their allocator assertion.** Both addressed jobs run the "Check that no
+  sanitizer binary carries a second allocator" step, which passed.
+
+## Findings that are not part of this change
+
+- `msys2/setup-msys2@v2` started failing its own step with `MINGW64 is deprecated` on 2026-11-02, which
+  turned every pull request of the repository red; the second commit acknowledges the deprecation and
+  `TODO.md` §114 records the move to UCRT64.
+- The `githubactions:S8544`/`S7637` findings of SonarCloud report the dependency references of the
+  whole workflow set (16 open findings on `master` before this change). A change that touches a
+  dependency list or renames a workflow file turns them into new code and failed the quality gate on
+  them; the second commit ignores both rules for `.github/workflows/**` with the reason recorded in
+  `sonar-project.properties`, as the project already does for the md5 usage of the map scripts. The
+  gate is `OK` afterwards.
