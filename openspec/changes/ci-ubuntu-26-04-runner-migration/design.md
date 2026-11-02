@@ -45,7 +45,7 @@ release; the provisioning steps belong to the release they run on.
 
 **Non-Goals:** the container base images (`scripts/mapgen/Dockerfile` on `ubuntu:noble`,
 `ci/docker/ubuntu_24.04_*` on `ubuntu:24.04` and `ubuntu:noble`) — a distro bump there changes a fixed
-runtime package list and needs an image build and the smoke checks, which `TODO.md` already tracks as
+runtime package list and needs an image build and the smoke checks, which #1928 tracks as an
 an open item. Also out of scope: moving to the arm64 labels, and the macOS/Windows jobs.
 
 ## Decisions

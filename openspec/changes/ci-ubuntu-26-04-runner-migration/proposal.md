@@ -66,7 +66,7 @@ None. Runner image selection and workflow provisioning are CI behavior that the 
   `release_latest.yml`, `mapgen_image.yml` — every job moves to `ubuntu-26.04`; the two JavaScout jobs
   and the Sonar job install `libcatch2-dev`. The container base images the `mapgen_image.yml` jobs
   build (`scripts/mapgen/Dockerfile`, `ubuntu:noble`) are unchanged: that is a separate, unverified
-  image bump that `TODO.md` already tracks.
+  image bump that #1928 tracks.
 - `README.md` — the build-status table names the renamed workflows and drops the stale rows.
 - `AGENTS.md` (CI/CD section) — the workflow table names the renamed files, and a note records that the
   Linux jobs name their image version, why 26.04, and the two provisioning differences to 24.04.
