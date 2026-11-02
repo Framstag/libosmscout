@@ -128,6 +128,16 @@ namespace {
   }
 
 /**
+ * A node that carries a name and a way type only: the shape every described route node has, and
+ * no manoeuvre.
+ */
+  void AddFactsOnlyDescriptions(RouteDescription::Node& node, const std::string& wayName)
+  {
+    node.AddDescription(std::make_shared<RouteDescription::NameDescription>(wayName));
+    node.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_secondary"));
+  }
+
+/**
  * Collect every string a step carries, so a test can prove that none of them is a composed
  * instruction sentence.
  */
@@ -262,6 +272,80 @@ namespace {
     leave.AddDescription(std::make_shared<RouteDescription::MaxSpeedDescription>(80));
 
     auto & target=AddNode(description, 2, 22000.0, 800.0, GeoCoord(52.12, 8.25));
+
+    target.AddDescription(std::make_shared<RouteDescription::TargetDescription>("Work"));
+
+    return description;
+  }
+
+/**
+ * A route whose manoeuvres are separated by described route nodes: a name and a way type on
+ * every node, a turn at 400 m, a second turn at 560 m and the arrival at 900 m.
+ */
+  RouteDescription DescribedNodesRoute()
+  {
+    RouteDescription description;
+
+    description.SetDatabaseMapping({{databaseId, "/maps/region"}});
+
+    auto & start=AddNode(description, 0, 0.0, 0.0, GeoCoord(52.0, 8.0));
+
+    start.AddDescription(std::make_shared<RouteDescription::StartDescription>("Home"));
+    start.AddDescription(std::make_shared<RouteDescription::NameDescription>("Hauptstrasse"));
+
+    AddFactsOnlyDescriptions(AddNode(description, 1, 300.0, 20.0, GeoCoord(52.002, 8.0)),
+                             "A-Strasse");
+    AddFactsOnlyDescriptions(AddNode(description, 2, 350.0, 24.0, GeoCoord(52.003, 8.0)),
+                             "B-Strasse");
+
+    AddTurnDescriptions(AddNode(description, 3, 400.0, 30.0, GeoCoord(52.004, 8.001)),
+                        RouteDescription::DirectionDescription::left,
+                        "C-Strasse");
+
+    AddFactsOnlyDescriptions(AddNode(description, 4, 430.0, 33.0, GeoCoord(52.005, 8.001)),
+                             "D-Strasse");
+
+    AddTurnDescriptions(AddNode(description, 5, 560.0, 45.0, GeoCoord(52.006, 8.002)),
+                        RouteDescription::DirectionDescription::right,
+                        "E-Strasse");
+
+    auto & target=AddNode(description, 6, 900.0, 80.0, GeoCoord(52.008, 8.003));
+
+    target.AddDescription(std::make_shared<RouteDescription::TargetDescription>("Work"));
+
+    return description;
+  }
+
+/**
+ * A motorway leg whose first manoeuvre (the leave) lies far beyond the collect window, with
+ * described nodes along the way.
+ */
+  RouteDescription LongLegRoute()
+  {
+    RouteDescription description;
+
+    description.SetDatabaseMapping({{databaseId, "/maps/region"}});
+
+    auto & start=AddNode(description, 0, 0.0, 0.0, GeoCoord(52.0, 8.0));
+
+    start.AddDescription(std::make_shared<RouteDescription::StartDescription>("Home"));
+    start.AddDescription(std::make_shared<RouteDescription::NameDescription>("A2"));
+
+    AddFactsOnlyDescriptions(AddNode(description, 1, 300.0, 12.0, GeoCoord(52.01, 8.0)),
+                             "A2");
+    AddFactsOnlyDescriptions(AddNode(description, 2, 900.0, 36.0, GeoCoord(52.02, 8.0)),
+                             "A2");
+
+    auto & leave=AddNode(description, 3, 5000.0, 200.0, GeoCoord(52.1, 8.1));
+
+    leave.AddDescription(std::make_shared<RouteDescription::MotorwayLeaveDescription>(
+                           std::make_shared<RouteDescription::NameDescription>("A2"),
+                           RouteDescription::DirectionDescription::right));
+    leave.AddDescription(std::make_shared<RouteDescription::MotorwayJunctionDescription>(
+                           std::make_shared<RouteDescription::NameDescription>("Kreuz Kamen", "12")));
+    leave.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_motorway_link"));
+
+    auto & target=AddNode(description, 4, 6000.0, 260.0, GeoCoord(52.12, 8.2));
 
     target.AddDescription(std::make_shared<RouteDescription::TargetDescription>("Work"));
 
@@ -519,6 +603,122 @@ TEST_CASE("Live guidance extends the same step with progress")
   REQUIRE(laterStep.remainingDistance->AsMeter()>=0.0);
   REQUIRE(osmscout::DurationAsSeconds(*firstStep.remainingTime)>=0.0);
   REQUIRE(osmscout::DurationAsSeconds(*laterStep.remainingTime)>=0.0);
+}
+
+TEST_CASE("The step ahead is the next manoeuvre, not the next described node")
+{
+  RouteDescription description=DescribedNodesRoute();
+
+  RouteStepBuilder builder;
+
+  RouteStep        step=builder.GenerateNextRouteInstruction(description.Nodes().cbegin(),
+                                                             description.Nodes().cend(),
+                                                             GeoCoord(52.0, 8.0),
+                                                             0.0);
+
+  // The node at 300 m carries a name and a way type only; the manoeuvre ahead is the turn at 400 m.
+  REQUIRE(step.kind==RouteStep::Kind::turn);
+  REQUIRE(step.currentNodeIndex==3);
+  REQUIRE(step.distanceFromStart.AsMeter()==400.0);
+  REQUIRE(step.remainingDistance.has_value());
+  REQUIRE(step.remainingDistance->AsMeter()==400.0);
+
+  // The hint is the following manoeuvre (560 m), never the described node at 350 m or 430 m.
+  REQUIRE(step.nextNext);
+  REQUIRE(step.nextNext->kind==RouteStep::Kind::turn);
+  REQUIRE(step.nextNext->currentNodeIndex==5);
+  REQUIRE(step.nextNext->distanceFromStart.AsMeter()==560.0);
+}
+
+TEST_CASE("The following manoeuvre is announced before a roundabout is entered")
+{
+  RouteDescription description;
+
+  description.SetDatabaseMapping({{databaseId, "/maps/region"}});
+
+  auto & start=AddNode(description, 0, 0.0, 0.0, GeoCoord(52.0, 8.0));
+
+  start.AddDescription(std::make_shared<RouteDescription::StartDescription>("Home"));
+  start.AddDescription(std::make_shared<RouteDescription::NameDescription>("Hauptstrasse"));
+
+  auto & enter=AddNode(description, 1, 1000.0, 60.0, GeoCoord(52.01, 8.0));
+
+  enter.AddDescription(std::make_shared<RouteDescription::RoundaboutEnterDescription>(true));
+  enter.AddDescription(std::make_shared<RouteDescription::NameDescription>("Kreisverkehr"));
+
+  AddFactsOnlyDescriptions(AddNode(description, 2, 1010.0, 62.0, GeoCoord(52.011, 8.0)),
+                           "Ringstrasse");
+
+  auto & leave=AddNode(description, 3, 1035.0, 70.0, GeoCoord(52.012, 8.001));
+
+  leave.AddDescription(std::make_shared<RouteDescription::RoundaboutLeaveDescription>(2, true));
+  leave.AddDescription(std::make_shared<RouteDescription::NameDescription>("Bahnhofstrasse"));
+
+  auto & target=AddNode(description, 4, 2000.0, 140.0, GeoCoord(52.02, 8.01));
+
+  target.AddDescription(std::make_shared<RouteDescription::TargetDescription>("Work"));
+
+  RouteStepBuilder builder;
+
+  RouteStep        step=builder.GenerateNextRouteInstruction(description.Nodes().cbegin(),
+                                                             description.Nodes().cend(),
+                                                             GeoCoord(52.0, 8.0),
+                                                             0.0);
+
+  REQUIRE(step.kind==RouteStep::Kind::roundaboutEnter);
+  REQUIRE(step.currentNodeIndex==1);
+
+  // The exit is the hint before the ring is entered, with the ordinal the route takes.
+  REQUIRE(step.nextNext);
+  REQUIRE(step.nextNext->kind==RouteStep::Kind::roundaboutLeave);
+  REQUIRE(step.nextNext->roundaboutLeave.has_value());
+  REQUIRE(step.nextNext->roundaboutLeave->exitCountTaken==2);
+}
+
+TEST_CASE("A manoeuvre beyond the collect window is still the step ahead")
+{
+  RouteDescription description=LongLegRoute();
+
+  RouteStepBuilder builder;
+
+  RouteStep        step=builder.GenerateNextRouteInstruction(description.Nodes().cbegin(),
+                                                             description.Nodes().cend(),
+                                                             GeoCoord(52.0, 8.0),
+                                                             0.0);
+
+  // The motorway leave lies 5 km ahead: the builder looks past the described nodes, not to the
+  // arrival only.
+  REQUIRE(step.kind==RouteStep::Kind::motorwayLeave);
+  REQUIRE(step.currentNodeIndex==3);
+  REQUIRE(step.remainingDistance.has_value());
+  REQUIRE(step.remainingDistance->AsMeter()==5000.0);
+
+  // The following manoeuvre (the arrival, 1 km later) is beyond the announce window.
+  REQUIRE(!step.nextNext);
+}
+
+TEST_CASE("A passed manoeuvre is no longer the step ahead")
+{
+  RouteDescription description=DescribedNodesRoute();
+
+  auto             previous=description.Nodes().cbegin();
+
+  std::advance(previous, 3);
+
+  RouteStepBuilder builder;
+
+  RouteStep        step=builder.GenerateNextRouteInstruction(previous,
+                                                             description.Nodes().cend(),
+                                                             previous->GetLocation(),
+                                                             0.0);
+
+  REQUIRE(step.kind==RouteStep::Kind::turn);
+  REQUIRE(step.currentNodeIndex==5);
+  REQUIRE(step.remainingDistance.has_value());
+  REQUIRE(step.remainingDistance->AsMeter()==160.0);
+
+  // The arrival is 340 m behind that turn: no hint.
+  REQUIRE(!step.nextNext);
 }
 
 TEST_CASE("List entries carry absolute values and the arrival is a step")

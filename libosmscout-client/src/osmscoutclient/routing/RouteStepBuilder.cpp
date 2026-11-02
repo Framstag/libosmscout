@@ -30,6 +30,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <vector>
 
 namespace osmscout::client {
 
@@ -91,6 +92,33 @@ namespace osmscout::client {
     }
 
     /**
+     * Whether a step describes a manoeuvre a driver acts on, rather than a fact of its node (a
+     * name, a way type, a max speed, lanes, a POI). `WayNamePostprocessor`/`WayTypePostprocessor`
+     * describe almost every route node, so the first collected step is normally no manoeuvre.
+     */
+    bool IsManoeuvre(const RouteStep& step)
+    {
+      return step.kind!=RouteStep::Kind::informative &&
+             step.kind!=RouteStep::Kind::unknown;
+    }
+
+    /**
+     * The index of the first manoeuvre of `steps` that lies strictly after `meters`, in route order.
+     * A manoeuvre that shares the passed node's position is behind the position, not ahead of it.
+     */
+    std::optional<size_t> FirstManoeuvreAfter(const std::vector<RouteStep>& steps, double meters)
+    {
+      for (size_t index=0; index<steps.size(); ++index) {
+        if (steps[index].distanceFromStart.AsMeter()>meters &&
+            IsManoeuvre(steps[index])) {
+          return index;
+        }
+      }
+
+      return std::nullopt;
+    }
+
+    /**
      * The progress facts of the step ahead: how far and how long it still is from the position.
      */
     void FillProgress(RouteStep& step,
@@ -145,34 +173,62 @@ namespace osmscout::client {
 
     RouteStepCollector collector;
 
-    RouteSteps         collected=collector.Collect(previous,
-                                                   last,
-                                                   previousDistance+
-                                                   Distance::Of<Meter>(CollectWindowMeters));
+    const double totalMeters=std::prev(last)->GetDistance().AsMeter();
+    const double remainderMeters=std::max(0.0, totalMeters-nodeMeters);
+
+    auto collectWithin=[&](double windowMeters) {
+      return collector.Collect(previous,
+                               last,
+                               previousDistance+Distance::Of<Meter>(windowMeters));
+    };
+
+    // Look ahead until the first manoeuvre after the position. The fixed window is only the first
+    // look: a long leg without a manoeuvre would otherwise fall through to the arrival, and a
+    // described node inside it would be published as the manoeuvre ahead.
+    double                windowMeters=std::min(CollectWindowMeters, remainderMeters);
+    RouteSteps            collected=collectWithin(windowMeters);
+    std::optional<size_t> manoeuvreIndex;
+
+    for (;;) {
+      manoeuvreIndex=FirstManoeuvreAfter(collected.steps, nodeMeters);
+
+      if (manoeuvreIndex || windowMeters>=remainderMeters) {
+        break;
+      }
+
+      windowMeters=std::min(windowMeters*2.0, remainderMeters);
+      collected=collectWithin(windowMeters);
+    }
 
     double   travelledMeters=TravelledMeters(previous, last, coord, abscissa);
     Duration timeAtPosition=TimeAtPosition(previous, last, abscissa);
 
-    // The first step that still lies ahead of the position.
-    size_t index=0;
-
-    while (index<collected.steps.size() &&
-           collected.steps[index].distanceFromStart.AsMeter()<=nodeMeters) {
-      ++index;
-    }
-
     RouteStep                step;
     std::optional<RouteStep> follower;
 
-    if (index<collected.steps.size()) {
-      step=collected.steps[index];
+    if (manoeuvreIndex) {
+      step=collected.steps[*manoeuvreIndex];
 
-      if (index+1<collected.steps.size()) {
-        double gap=collected.steps[index+1].distanceFromStart.AsMeter()-
-                    step.distanceFromStart.AsMeter();
+      // The follower is the next manoeuvre, not the next collected node, so the looked-ahead range
+      // has to reach the announce window beyond the step ahead.
+      double followerLimit=step.distanceFromStart.AsMeter()+NextNextWindowMeters;
+
+      if (collected.steps.back().distanceFromStart.AsMeter()<followerLimit &&
+          windowMeters<remainderMeters) {
+        windowMeters=std::min(std::max(windowMeters, followerLimit-nodeMeters),
+                              remainderMeters);
+        collected=collectWithin(windowMeters);
+        manoeuvreIndex=FirstManoeuvreAfter(collected.steps, nodeMeters);
+        step=collected.steps[*manoeuvreIndex];
+      }
+
+      if (auto followerIndex=FirstManoeuvreAfter(collected.steps,
+                                                 step.distanceFromStart.AsMeter())) {
+        double gap=collected.steps[*followerIndex].distanceFromStart.AsMeter()-
+                   step.distanceFromStart.AsMeter();
 
         if (gap>0.0 && gap<=NextNextWindowMeters) {
-          follower=collected.steps[index+1];
+          follower=collected.steps[*followerIndex];
         }
       }
     }
@@ -189,8 +245,7 @@ namespace osmscout::client {
           return RouteStep();
         }
 
-        index=collected.steps.size()-1;
-        step=collected.steps[index];
+        step=collected.steps.back();
       }
       else {
         step=*arrival;
