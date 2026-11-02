@@ -54,12 +54,16 @@ of `mapgen_image.yml`, which only runs on a main-branch commit.
 
 ## Findings that are not part of this change
 
+Filed as issues: #1927 (both MSYS jobs acknowledge the MINGW64 deprecation until they move to UCRT64),
+#1928 (the mapgen container base images are still on `ubuntu:noble` and `nginx:1.27-alpine`), #1929 (the
+two githubactions lint rules that are ignored for the workflow tree).
+
 - `msys2/setup-msys2@v2` started failing its own step with `MINGW64 is deprecated` on 2026-11-02, which
-  turned every pull request of the repository red; the second commit acknowledges the deprecation and
-  `TODO.md` §114 records the move to UCRT64.
+  turned every pull request of the repository red; the second commit acknowledges the deprecation, and
+  #1927 records the move to UCRT64.
 - The `githubactions:S8544`/`S7637` findings of SonarCloud report the dependency references of the
   whole workflow set (16 open findings on `master` before this change). A change that touches a
   dependency list or renames a workflow file turns them into new code and failed the quality gate on
   them; the second commit ignores both rules for `.github/workflows/**` with the reason recorded in
-  `sonar-project.properties`, as the project already does for the md5 usage of the map scripts. The
-  gate is `OK` afterwards.
+  `sonar-project.properties`, as the project already does for the md5 usage of the map scripts, and
+  #1929 asks whether they should be pinned instead. The gate is `OK` afterwards.
