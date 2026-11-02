@@ -1,4 +1,4 @@
-name: Ubuntu 24.04 for Qt on Android
+name: Ubuntu 26.04 for Qt on Android
 
 # See https://doc.qt.io/qt-5/android-getting-started.html
 # See https://github.com/jurplel/install-qt-action
@@ -21,7 +21,7 @@ on:
 jobs:
   build:
     name: Ubuntu+android - Build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
