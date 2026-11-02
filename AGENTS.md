@@ -163,6 +163,13 @@ GitHub Actions in `.github/workflows/`:
 
 Note: `build_and_test_on_vs2025.yml` caches vcpkg-built dependencies as NuGet packages in the GitHub Packages feed (`nuget.pkg.github.com/Framstag`), versioned by vcpkg ABI hash. The cache self-heals after runner image/toolchain updates; the workflow needs `packages: write` permission for the `GITHUB_TOKEN`.
 
+Note: the macOS jobs name their runner image version instead of a `-latest` alias — currently
+`macos-26`, the GA arm64 macOS image (Xcode 26) — so that an image move is a reviewed change. The
+macOS 14 image was retired on 2026-11-02 (`actions/runner-images#13518`), and a retired label fails
+every job that names it. The iOS job passes `CMAKE_OSX_DEPLOYMENT_TARGET=15` because that is the
+lowest deployment target Xcode 26 accepts; the shipped Apple projects declare lower values (see
+`TODO.md`).
+
 Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, and both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`). The font-dependent tests configure the bundled font file as the font name; a backend that resolves a font by family serves the face of that file (see the `font-management` capability), which is what makes them measure the repository font on every host instead of the fonts a runner happens to provide.
 
 ## Code Conventions

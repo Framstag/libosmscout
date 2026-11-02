@@ -16,7 +16,7 @@ on:
 jobs:
   build_cmake:
     name: cmake
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -45,10 +45,12 @@ jobs:
       - name: List Qt installation
         run:  ls -l ../Qt/5.15.2/ios/lib/cmake/Qt5
       - name: Configure build project
+        # 15 is the lowest deployment target the Xcode of this image accepts
+        # (Xcode 26 supports iOS 15 and later).
         run: "cmake -B build
                     -DCMAKE_SYSTEM_NAME=iOS
                     -DCMAKE_OSX_ARCHITECTURES=arm64
-                    -DCMAKE_OSX_DEPLOYMENT_TARGET=13
+                    -DCMAKE_OSX_DEPLOYMENT_TARGET=15
                     -DOSMSCOUT_BUILD_IMPORT=OFF
                     -DOSMSCOUT_BUILD_GPX=ON
                     -DOSMSCOUT_BUILD_DEMOS=OFF

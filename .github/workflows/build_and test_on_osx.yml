@@ -16,7 +16,7 @@ on:
 jobs:
   build_meson:
     name: meson
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -37,7 +37,7 @@ jobs:
 
   build_cmake:
     name: cmake
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v6
