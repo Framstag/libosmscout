@@ -24,10 +24,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         # mingw-w64-x86_64-cairo mingw-w64-x86_64-pango
+      # The action fails the step when the MINGW64 environment it defaults to is
+      # deprecated, so the deprecation is acknowledged here until the jobs move to
+      # UCRT64 (see TODO.md).
       - name: Setup MSYS/MINGW64
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          suppress-deprecation-warnings: msystem-mingw64
           install: "mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool
                     mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules mingw-w64-x86_64-ninja
                     jq
@@ -95,10 +99,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      # The action fails the step when the MINGW64 environment it defaults to is
+      # deprecated, so the deprecation is acknowledged here until the jobs move to
+      # UCRT64 (see TODO.md).
       - name: Setup MSYS/MINGW64
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          suppress-deprecation-warnings: msystem-mingw64
           install: "mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool
                     mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
                     jq

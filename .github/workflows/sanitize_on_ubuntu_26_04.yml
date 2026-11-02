@@ -16,7 +16,7 @@ on:
 jobs:
   sanitize_clang:
     name: clang address and undefined sanitizer
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -28,7 +28,7 @@ jobs:
         run: sudo apt-get -y install clang-20 libc++-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
-              catch2
+              libcatch2-dev
               libxml2-dev
               nlohmann-json3-dev
               libprotobuf-dev protobuf-compiler
@@ -90,16 +90,12 @@ jobs:
 
   sanitize_clang_memory:
     name: clang memory sanitizer
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Add LLVM 21 repo
-        run: |
-          sudo wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-21 main" \
-            | sudo tee /etc/apt/sources.list.d/apt.llvm.org-21.list
+      # clang-21 is part of the release this image runs on, so the toolchain needs no
+      # third-party package repository pinned to an older release.
       - name: Update package list
         run:  sudo apt-get update -qq
       - name: Install software-properties-common
@@ -196,7 +192,7 @@ jobs:
 
   sanitize_gcc:
     name: gcc address and undefined sanitizer
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -206,7 +202,7 @@ jobs:
         run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
-               catch2
+               libcatch2-dev
                libxml2-dev
                nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler

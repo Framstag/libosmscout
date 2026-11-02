@@ -11,7 +11,7 @@ on:
 jobs:
   webpage:
     name: webpage
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: SOURCEFORGE
     steps:
       - name: Checkout

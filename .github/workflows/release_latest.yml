@@ -15,7 +15,7 @@ env:
 jobs:
   create_latest_release:
     name: Create latest release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Checkout
