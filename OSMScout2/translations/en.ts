@@ -367,144 +367,182 @@
 <context>
     <name>TTSMessageGeneratorQt</name>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="91"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="123"/>
         <source>GPS signal found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="93"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="125"/>
         <source>GPS signal lost</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="96"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="128"/>
         <source>You have reached your destination</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="99"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="131"/>
         <source>Turn sharply left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="101"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="133"/>
         <source>Turn left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="103"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="135"/>
         <source>Continue straight ahead</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="105"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="137"/>
         <source>Turn right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="107"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="139"/>
         <source>Turn sharply right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="110"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="113"/>
         <source>Leave the motorway</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="112"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="90"/>
+        <source>Leave the motorway at exit %1 towards %2</source>
+        <extracomment>e.g. &quot;Leave the motorway at exit 42 towards Springfield&quot;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="96"/>
+        <source>Leave the motorway at exit %1</source>
+        <extracomment>e.g. &quot;Leave the motorway at exit 42&quot;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="101"/>
+        <source>Leave the motorway towards %1</source>
+        <extracomment>e.g. &quot;Leave the motorway towards Springfield&quot;</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="109"/>
         <source>Leave the motorway on the left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="114"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="111"/>
         <source>Leave the motorway on the right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="120"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="143"/>
+        <source>Motorway change from %1 to %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="148"/>
+        <source>Motorway change to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="163"/>
         <source>Take the first exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="121"/>
-        <source>At the roundabout, take the first exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="124"/>
-        <source>Take the second exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="125"/>
-        <source>At the roundabout, take the second exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="128"/>
-        <source>Take the third exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="129"/>
-        <source>At the roundabout, take the third exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="132"/>
-        <source>Take the fourth exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="133"/>
-        <source>At the roundabout, take the fourth exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="136"/>
-        <source>Take the fifth exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="137"/>
-        <source>At the roundabout, take the fifth exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="140"/>
-        <source>Take the sixth exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="141"/>
-        <source>At the roundabout, take the sixth exit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="177"/>
-        <source>meters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="178"/>
-        <source>yards</source>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="175"/>
+        <source>Take the %n. exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="181"/>
+        <source>At the roundabout, take the first exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="165"/>
+        <source>Take the second exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="183"/>
+        <source>At the roundabout, take the second exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="167"/>
+        <source>Take the third exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="185"/>
+        <source>At the roundabout, take the third exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="169"/>
+        <source>Take the fourth exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="187"/>
+        <source>At the roundabout, take the fourth exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="171"/>
+        <source>Take the fifth exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="189"/>
+        <source>At the roundabout, take the fifth exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="173"/>
+        <source>Take the sixth exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="191"/>
+        <source>At the roundabout, take the sixth exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="193"/>
+        <source>At the roundabout, take the %n. exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="218"/>
+        <source>meters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="219"/>
+        <source>yards</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="222"/>
         <source>After %1 %2</source>
         <extracomment>e.g. &quot;After 300 meters/yards&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="226"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="262"/>
         <source>%1, %2</source>
         <extracomment>combine distance and maneuver, e.g. &quot;After 300 meters, turn left&quot;</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="237"/>
+        <location filename="../../libosmscout-client-qt/src/osmscoutclientqt/TTSMessageGeneratorQt.cpp" line="273"/>
         <source>%1, then %2</source>
         <extracomment>%1 is the following maneuver, e.g. &quot;Turn left, then turn right&quot;.</extracomment>
         <translation type="unfinished"></translation>

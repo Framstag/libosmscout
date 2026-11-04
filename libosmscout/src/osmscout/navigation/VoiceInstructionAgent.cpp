@@ -22,7 +22,15 @@
 #include <osmscout/routing/RouteDescription.h>
 #include <osmscout/routing/RouteDescriptionPostprocessor.h>
 #include <osmscout/log/Logger.h>
+#include <osmscout/util/Distance.h>
+#include <osmscout/util/Time.h>
 #include <osmscout/system/Compiler.h>
+#include <osmscout/OSMScoutTypes.h>
+
+#include <list>
+#include <optional>
+#include <algorithm>
+#include <cstddef>
 
 namespace osmscout {
 
@@ -33,6 +41,8 @@ private:
   Distance stopAfter;
   Distance distance;
   std::optional<Distance> roundaboutEnter; //<! distance of roundabout enter before nextMessage
+  RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDescription;
+  RouteDescription::LaneDescriptionRef laneDescription;
 
 public:
   VoiceMessageStruct nextMessage;
@@ -50,11 +60,91 @@ public:
   void BeforeNode(const RouteDescription::Node& node) override
   {
     distance=node.GetDistance();
+    suggestedLaneDescription=node.GetDescription<RouteDescription::SuggestedLaneDescription>();
+    laneDescription=node.GetDescription<RouteDescription::LaneDescription>();
   }
 
-  void OnMotorwayLeave(const RouteDescription::DirectionDescription::Move& move)
+  void OnMotorwayLeave(VoiceMessageStruct::Type type,
+                       const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                       const RouteDescription::DestinationDescriptionRef& destinationDescription,
+                       const RouteDescription::NameDescriptionRef& fromDescription,
+                       const RouteDescription::NameDescriptionRef& toDescription)
   {
+    std::optional<std::string> exitRef = std::nullopt;
+    if (motorwayJunctionDescription &&
+        motorwayJunctionDescription->GetJunctionDescription() &&
+        !motorwayJunctionDescription->GetJunctionDescription()->GetRef().empty()) {
+        exitRef = motorwayJunctionDescription->GetJunctionDescription()->GetRef();
+    }
+
+    std::optional<std::string> destinationName;
+    if (destinationDescription && !destinationDescription->GetDescription().empty()) {
+      destinationName = destinationDescription->GetDescription();
+    }
+
+    auto GetRefOrName = [](const RouteDescription::NameDescriptionRef& nameDescription) -> std::optional<std::string> {
+      if (!nameDescription) {
+        return std::nullopt;
+      }
+      if (!nameDescription->GetRef().empty()) {
+        return nameDescription->GetRef();
+      }
+      if (!nameDescription->GetName().empty()) {
+        return nameDescription->GetName();
+      }
+      return std::nullopt;
+    };
+
+    auto ConstructMessage = [this, &type, &exitRef, &destinationName, &fromDescription, &toDescription, &GetRefOrName] {
+      VoiceMessageStruct message{type, distance};
+      message.exitRef = std::move(exitRef);
+      message.destinationName = std::move(destinationName);
+      message.fromName = GetRefOrName(fromDescription);;
+      message.toName = GetRefOrName(toDescription);
+
+      if (suggestedLaneDescription && laneDescription) {
+        message.laneSuggestion =  VoiceMessageStruct::LaneSuggestion(
+          laneDescription->GetLaneCount(),
+          suggestedLaneDescription->GetFrom(),
+          suggestedLaneDescription->GetTo()
+        );
+      }
+      return message;
+    };
+
+    if (!nextMessage){
+      nextMessage = ConstructMessage();
+    } else if (!thenMessage){
+      thenMessage = ConstructMessage();
+    }
+  }
+
+  void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
+                        const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                        [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
+                        const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
+  {
+    assert(motorwayChangeDescription);
+    if (motorwayChangeDescription->GetFromDescription() &&
+        motorwayChangeDescription->GetToDescription() &&
+        !motorwayChangeDescription->GetFromDescription()->GetRef().empty() &&
+        motorwayChangeDescription->GetFromDescription()->GetRef() == motorwayChangeDescription->GetToDescription()->GetRef()) {
+      // ignore motorway change with same ref, it usually indicates changes like: A7 "Bridge XYZ" -> A7 "Autobahn"
+      // it is not useful information for the driver
+      return;
+    }
+    OnMotorwayLeave(VoiceMessageStruct::Type::MotorwayChange, motorwayJunctionDescription, crossingDestinationDescription, motorwayChangeDescription->GetFromDescription(), motorwayChangeDescription->GetToDescription());
+  }
+
+  void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
+                       const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
+                       [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
+                       [[maybe_unused]] const RouteDescription::NameDescriptionRef& nameDescription,
+                       const RouteDescription::DestinationDescriptionRef& destinationDescription) override
+  {
+    assert(motorwayLeaveDescription);
     VoiceMessageStruct::Type type;
+    auto move=motorwayLeaveDescription->GetDirection();
     if (move==RouteDescription::DirectionDescription::sharpLeft ||
         move==RouteDescription::DirectionDescription::left ||
         move==RouteDescription::DirectionDescription::slightlyLeft) {
@@ -67,30 +157,7 @@ public:
       type=VoiceMessageStruct::Type::LeaveMotorway;
     }
 
-    if (!nextMessage){
-      nextMessage = VoiceMessageStruct{type, distance};
-    } else if (!thenMessage){
-      thenMessage = VoiceMessageStruct{type, distance};
-    }
-  }
-
-  void OnMotorwayChange(const RouteDescription::MotorwayChangeDescriptionRef& motorwayChangeDescription,
-                        [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                        [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
-                        [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& crossingDestinationDescription) override
-  {
-    assert(motorwayChangeDescription);
-    OnMotorwayLeave(motorwayChangeDescription->GetDirection());
-  }
-
-  void OnMotorwayLeave(const RouteDescription::MotorwayLeaveDescriptionRef& motorwayLeaveDescription,
-                       [[maybe_unused]] const RouteDescription::MotorwayJunctionDescriptionRef& motorwayJunctionDescription,
-                       [[maybe_unused]] const RouteDescription::DirectionDescriptionRef& directionDescription,
-                       [[maybe_unused]] const RouteDescription::NameDescriptionRef& nameDescription,
-                       [[maybe_unused]] const RouteDescription::DestinationDescriptionRef& destinationDescription) override
-  {
-    assert(motorwayLeaveDescription);
-    OnMotorwayLeave(motorwayLeaveDescription->GetDirection());
+    OnMotorwayLeave(type, motorwayJunctionDescription, destinationDescription, motorwayLeaveDescription->GetFromDescription(), nullptr);
   }
 
   void OnRoundaboutEnter([[maybe_unused]] const RouteDescription::RoundaboutEnterDescriptionRef &roundaboutEnterDescription,
@@ -115,35 +182,13 @@ public:
       return;
     }
 
-    MessageType type = MessageType::NoMessage;
-    switch (roundaboutLeaveDescription->GetExitCount()){
-      case 1:
-        type = MessageType::LeaveRbExit1;
-        break;
-      case 2:
-        type = MessageType::LeaveRbExit2;
-        break;
-      case 3:
-        type = MessageType::LeaveRbExit3;
-        break;
-      case 4:
-        type = MessageType::LeaveRbExit4;
-        break;
-      case 5:
-        type = MessageType::LeaveRbExit5;
-        break;
-      case 6:
-        type = MessageType::LeaveRbExit6;
-        break;
-      default:
-        // it is not correct, but what else we may say?
-        type = MessageType::LeaveRbExit6;
-    }
     // say the message before entering the roundabout
     if (!nextMessage){
-      nextMessage = VoiceMessageStruct{type, *roundaboutEnter};
+      nextMessage = VoiceMessageStruct{MessageType::LeaveRoundabout, *roundaboutEnter};
+      nextMessage.exitNumber = roundaboutLeaveDescription->GetExitCount();
     } else if (!thenMessage){
-      thenMessage = VoiceMessageStruct{type, *roundaboutEnter};
+      thenMessage = VoiceMessageStruct{MessageType::LeaveRoundabout, *roundaboutEnter};
+      thenMessage.exitNumber = roundaboutLeaveDescription->GetExitCount();
     }
     roundaboutEnter = std::nullopt;
   }
@@ -209,33 +254,41 @@ public:
   }
 };
 
-void VoiceInstructionAgent::toSamples(std::vector<SampleVoiceInstructionMessage::VoiceSample> &samples, const VoiceMessageStruct::Type &type, bool shortRoundaboutMessage)
+void VoiceInstructionAgent::toSamples(std::vector<SampleVoiceInstructionMessage::VoiceSample> &samples, const VoiceMessageStruct &message, bool shortRoundaboutMessage)
 {
   using VoiceSample = SampleVoiceInstructionMessage::VoiceSample;
 
-  if (!shortRoundaboutMessage && type>=VoiceMessageStruct::Type::LeaveRbExit1 && type<=VoiceMessageStruct::Type::LeaveRbExit6) {
+  if (!shortRoundaboutMessage && message.type==VoiceMessageStruct::Type::LeaveRoundabout) {
     samples.push_back(VoiceSample::RbCross);
   }
 
-  switch (type) {
+  switch (message.type) {
 
-    case VoiceMessageStruct::Type::LeaveRbExit1:
-      samples.push_back(VoiceSample::RbExit1);
-      break;
-    case VoiceMessageStruct::Type::LeaveRbExit2:
-      samples.push_back(VoiceSample::RbExit2);
-      break;
-    case VoiceMessageStruct::Type::LeaveRbExit3:
-      samples.push_back(VoiceSample::RbExit3);
-      break;
-    case VoiceMessageStruct::Type::LeaveRbExit4:
-      samples.push_back(VoiceSample::RbExit4);
-      break;
-    case VoiceMessageStruct::Type::LeaveRbExit5:
-      samples.push_back(VoiceSample::RbExit5);
-      break;
-    case VoiceMessageStruct::Type::LeaveRbExit6:
-      samples.push_back(VoiceSample::RbExit6);
+    case VoiceMessageStruct::Type::LeaveRoundabout:
+      switch (message.exitNumber) {
+        case 1:
+          samples.push_back(VoiceSample::RbExit1);
+          break;
+        case 2:
+          samples.push_back(VoiceSample::RbExit2);
+          break;
+        case 3:
+          samples.push_back(VoiceSample::RbExit3);
+          break;
+        case 4:
+          samples.push_back(VoiceSample::RbExit4);
+          break;
+        case 5:
+          samples.push_back(VoiceSample::RbExit5);
+          break;
+        case 6:
+          samples.push_back(VoiceSample::RbExit6);
+          break;
+        default:
+          // it is not correct, but what else we may say? (VoiceOfMarble project does not have samples for more than 6 exits)
+          samples.push_back(VoiceSample::RbExit6);
+          log.Warn() << "Roundabout exit number " << message.exitNumber << " is not handled!";
+      }
       break;
 
     case VoiceMessageStruct::Type::TargetReached:
@@ -269,7 +322,7 @@ void VoiceInstructionAgent::toSamples(std::vector<SampleVoiceInstructionMessage:
       break;
 
     default:
-      log.Error() << "Message type " << static_cast<int>(type) << " is not handled!";
+      log.Error() << "Message type " << static_cast<int>(message.type) << " is not handled!";
       assert(false);
   }
 }
@@ -288,7 +341,7 @@ std::vector<SampleVoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::t
   }
 
   // distance from our position to next message
-  Distance nextMessageDistance = (message.distance - distanceFromStart);
+  Distance nextMessageDistance = message.distance - distanceFromStart;
   double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
 
   if (distanceInUnits > 900){
@@ -296,7 +349,7 @@ std::vector<SampleVoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::t
   }
 
   // We are close to roundabout, we will use short roundabout message in such case.
-  bool shortRoundaboutMessage = message.type >= VoiceMessageStruct::Type::LeaveRbExit1 && message.type <= VoiceMessageStruct::Type::LeaveRbExit6 &&
+  bool shortRoundaboutMessage = message.type == VoiceMessageStruct::Type::LeaveRoundabout &&
     distanceInUnits < 120;
 
   if (bool skipDistanceInformation = (distanceInUnits < 80 && vehicle == vehicleCar);
@@ -327,12 +380,12 @@ std::vector<SampleVoiceInstructionMessage::VoiceSample> VoiceInstructionAgent::t
     samples.push_back(units == DistanceUnitSystem::Metrics ? VoiceSample::Meters : VoiceSample::Yards);
   }
 
-  toSamples(samples, message.type, shortRoundaboutMessage);
+  toSamples(samples, message, shortRoundaboutMessage);
   if (then){
     auto thenDistance = then.distance - message.distance;
     if (thenDistance <= Meters(200)) { // ignore then message otherwise
       samples.push_back(VoiceSample::Then);
-      toSamples(samples, then.type, true);
+      toSamples(samples, then, true);
     }
   }
   return samples;
@@ -347,6 +400,7 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
     // reset state
     lastMessage.type=VoiceMessageStruct::Type::NoMessage;
     lastMessagePosition=Distance::Zero();
+    announcedTriggers=0;
     vehicle=routeUpdateMessage->vehicle;
     if (ttsMessageGenerator) {
       ttsMessageGenerator->SetVehicle(vehicle);
@@ -447,13 +501,27 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
                                     callback);
 
   // distance from our position to next message
-  Distance nextMessageDistance = (callback.nextMessage.distance - distanceFromStart);
+  Distance nextMessageDistance = callback.nextMessage.distance - distanceFromStart;
   double distanceInUnits = (units == DistanceUnitSystem::Metrics) ? nextMessageDistance.AsMeter() : nextMessageDistance.As<Yard>();
 
-  if (callback.nextMessage && distanceInUnits < 900){
+  if (callback.nextMessage) {
+    const std::vector<double> triggers = TriggerDistances(callback.nextMessage.type, voiceType, vehicle);
 
-    if (callback.nextMessage != lastMessage){
+    // number of trigger distances already passed (triggers are sorted descending)
+    size_t active = 0;
+    while (active < triggers.size() && distanceInUnits <= triggers[active]) {
+      ++active;
+    }
 
+    bool sameMessage = callback.nextMessage == lastMessage;
+    if (!sameMessage) {
+      announcedTriggers = 0;
+    } else if ((distanceFromStart - lastMessagePosition) < Meters(-50)) {
+      // position jumped back, announce again
+      announcedTriggers = 0;
+    }
+
+    if (active > announcedTriggers) {
       if (voiceType==NavigationVoiceType::VoiceOfMarble) {
         result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
           positionMessage->timestamp,
@@ -465,35 +533,63 @@ std::list<NavigationMessageRef> VoiceInstructionAgent::Process(const NavigationM
             positionMessage->timestamp, std::move(*ttsMessage)));
         }
       }
-
-      lastMessage=callback.nextMessage;
-      lastMessagePosition=distanceFromStart;
-    } else {
-      Distance distFromLast = distanceFromStart - lastMessagePosition;
-      if (!lastMessage ||
-          distFromLast.AsMeter() < -50 ||
-          (distanceInUnits < 550 && distFromLast > Meters(300)) ||
-          (distanceInUnits < 150 && distFromLast > Meters(200)) ||
-          (distanceInUnits < 60 && distFromLast > Meters(100))) {
-
-        if (voiceType==NavigationVoiceType::VoiceOfMarble) {
-          result.push_back(std::make_shared<SampleVoiceInstructionMessage>(
-              positionMessage->timestamp,
-              toSamples(distanceFromStart, callback.nextMessage, callback.thenMessage)));
-        } else {
-          assert(voiceType==NavigationVoiceType::TextToSpeech);
-          if (auto ttsMessage=ttsMessageGenerator->GenerateMessage(distanceFromStart, callback.nextMessage, callback.thenMessage)) {
-            result.push_back(std::make_shared<TTSVoiceInstructionMessage>(
-              positionMessage->timestamp, std::move(*ttsMessage)));
-          }
-        }
-        lastMessage=callback.nextMessage;
-        lastMessagePosition=distanceFromStart;
-      }
+      announcedTriggers = active;
     }
+    lastMessage=callback.nextMessage;
+    lastMessagePosition=distanceFromStart;
   }
 
   return result;
+}
+
+std::vector<double> VoiceInstructionAgent::TriggerDistances(VoiceMessageStruct::Type type,
+                                                            NavigationVoiceType voiceType,
+                                                            Vehicle vehicle)
+{
+  using Type = VoiceMessageStruct::Type;
+  // Distances (in meters or yards, depending on units) in descending order,
+  // when the instruction should be voiced.
+  // VoiceOfMarble has only limited set of recorded distances (up to 800),
+  // TTS may use arbitrary distances.
+  if (vehicle==vehicleBicycle) {
+    switch (type) {
+      case Type::TargetReached:
+        return {40};
+      default:
+        return std::vector<double>{50, 10};
+    }
+  }
+  if (vehicle==vehicleFoot) {
+    switch (type) {
+      case Type::TargetReached:
+        return {40};
+      default:
+        return std::vector<double>{50, 10};
+    }
+  }
+  // vehicleCar
+  const bool tts = voiceType == NavigationVoiceType::TextToSpeech;
+  switch (type) {
+    case Type::LeaveMotorway:
+    case Type::LeaveMotorwayLeft:
+    case Type::LeaveMotorwayRight:
+      return tts ? std::vector<double>{1500, 1000, 500} : std::vector<double>{800, 500, 200};
+    case Type::MotorwayChange:
+      // there is no recorded sample for it
+      return tts ? std::vector<double>{500} : std::vector<double>{};
+    case Type::TargetReached:
+      return {40};
+    case Type::LeaveRoundabout:
+    case Type::SharpLeft:
+    case Type::TurnLeft:
+    case Type::StraightOn:
+    case Type::TurnRight:
+    case Type::SharpRight:
+      return tts ? std::vector<double>{1000, 500, 150, 60} : std::vector<double>{800, 500, 150, 60};
+    default:
+      return {};
+  }
+
 }
 
 }
