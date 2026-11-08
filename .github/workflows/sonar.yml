@@ -17,7 +17,7 @@ jobs:
     name: sonar, gcc and meson
     # secrets are not available for pull requests from forks
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: SONAR
     steps:
       - name: Checkout
@@ -34,7 +34,7 @@ jobs:
         run:  pip install --user meson ninja lcov gcovr --break-system-packages
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
-              catch2
+              libcatch2-dev
               libxml2-dev
               nlohmann-json3-dev
               libprotobuf-dev protobuf-compiler liblzma-dev

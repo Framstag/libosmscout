@@ -1,7 +1,6 @@
 /*
  * route_start.h — pure helpers for the position a calculated route publishes its
- * start at (NaviVeylin change "publish-requested-route-start"; tracker issue #82,
- * TODO §130).
+ * start at (change "client-java-route-start").
  *
  * The router uses the caller's start coordinate only to find a routable node and
  * then discards it: ResolveRoutePosition snaps it, TransformRouteDataToPoints
@@ -81,7 +80,7 @@ inline double RouteStartApproachMeters(double fromLat, double fromLon,
 // Whether the approach from the requested start to the snapped node is published as
 // the route's first segment. Strictly greater than the tolerance: a start exactly at
 // the tolerance is on the network and publishes the routed vertex (spec
-// `osmscout-jni` — "A start on the network is published unchanged").
+// `route-description` — "A start on the network is published unchanged").
 inline bool ShouldPrependRouteStart(double approachMeters)
 {
   return approachMeters > kRouteStartSnapToleranceMeters;

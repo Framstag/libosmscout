@@ -121,7 +121,7 @@ cd build-asan && ctest -j 2 --output-on-failure --exclude-regex "PerformanceTest
 Notes:
 - PerformanceTest is excluded because UI libraries leak on exit; run separately with `ASAN_OPTIONS=detect_leaks=0`
 - Works with both GCC and Clang
-- CI runs this on every PR (see `.github/workflows/sanitize_on_ubuntu_24_04.yml`)
+- CI runs this on every PR (see `.github/workflows/sanitize_on_ubuntu_26_04.yml`)
 - **A sanitizer runtime has to be the only allocator interposer in the binaries of this build.** The
   configuration therefore turns the heap profiler (gperftools' tcmalloc) off when it sees a sanitizer
   in the flags; the configure output names the profiler and the reason. Two interposers in one binary
@@ -149,19 +149,35 @@ GitHub Actions in `.github/workflows/`:
 
 | Workflow | Platform |
 |----------|----------|
-| `build_and_test_on_ubuntu_24_04.yml` | Linux (gcc/clang) |
+| `build_and_test_on_ubuntu_26_04.yml` | Linux (gcc/clang) |
 | `build_and_test_on_osx.yml` | macOS |
 | `build_and_test_on_ios.yml` | iOS |
 | `build_and_test_on_msys.yml` | Windows/MinGW |
 | `build_and_test_on_vs2025.yml` | Windows/MSVC |
-| `build_on_ubuntu_22_04_qt_android.yml` | Android NDK |
-| `sanitize_on_ubuntu_24_04.yml` | Sanitizer builds |
+| `build_on_ubuntu_26_04_qt_android.yml` | Android NDK |
+| `sanitize_on_ubuntu_26_04.yml` | Sanitizer builds |
 | `sonar.yml` | SonarQube analysis |
 | `mapgen_image.yml` | Map repository container images — build, smoke test, publish to GitHub Packages on main-branch commits, prune old builds |
 | `release.yml` / `release_latest.yml` | Release automation |
 | `webpage.yml` | Website build |
 
 Note: `build_and_test_on_vs2025.yml` caches vcpkg-built dependencies as NuGet packages in the GitHub Packages feed (`nuget.pkg.github.com/Framstag`), versioned by vcpkg ABI hash. The cache self-heals after runner image/toolchain updates; the workflow needs `packages: write` permission for the `GITHUB_TOKEN`.
+
+Note: the macOS jobs name their runner image version instead of a `-latest` alias — currently
+`macos-26`, the GA arm64 macOS image (Xcode 26) — so that an image move is a reviewed change. The
+macOS 14 image was retired on 2026-11-02 (`actions/runner-images#13518`), and a retired label fails
+every job that names it. The iOS job passes `CMAKE_OSX_DEPLOYMENT_TARGET=15` because that is the
+lowest deployment target Xcode 26 accepts; the shipped Apple projects declare lower values (see
+`TODO.md`).
+
+Note: the Linux jobs name their runner image version instead of a `-latest` alias — currently
+`ubuntu-26.04`, the GA Ubuntu image — for the same reason as the macOS jobs. The Ubuntu 22.04 images
+enter deprecation on 2026-09-17 and are unsupported from 2027-04-17
+(`actions/runner-images#14254`), and the `ubuntu-latest` alias moves to 26.04 in November 2026
+(`actions/runner-images#14748`). The Ubuntu 26.04 jobs install `libcatch2-dev` rather than the
+`catch2` name, which that release keeps only as a transitional package, and the memory sanitizer job
+installs `clang-21` from the release archive instead of adding the `apt.llvm.org` repository of an
+older release.
 
 Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, and both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`). The font-dependent tests configure the bundled font file as the font name; a backend that resolves a font by family serves the face of that file (see the `font-management` capability), which is what makes them measure the repository font on every host instead of the fonts a runner happens to provide.
 

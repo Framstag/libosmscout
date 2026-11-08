@@ -61,8 +61,8 @@ TEST_CASE("A start inside the snap tolerance is not prepended")
   REQUIRE_FALSE(naviveylin::ShouldPrependRouteStart(0.4));
 
   // Exactly at the tolerance is still "on the network" — the comparison is strict, so
-  // the boundary belongs to the unchanged geometry (spec `osmscout-jni` — a start on
-  // the network is published unchanged).
+  // the boundary belongs to the unchanged geometry (spec `route-description` — a
+  // start on the network is published unchanged).
   REQUIRE_FALSE(naviveylin::ShouldPrependRouteStart(naviveylin::kRouteStartSnapToleranceMeters));
 
   // Beyond it the requested start is published, so a drawn route can differ from the
@@ -90,8 +90,8 @@ TEST_CASE("The offset leaves the start node at zero and adds the approach to eve
   REQUIRE(naviveylin::RouteStartNodeDistanceMeters(0,0.0,approach)==0.0);
 
   // Every later node carries the approach, so the first leg's delta, the description
-  // total and the per-step sums all include it (spec `osmscout-jni` — a snapped start
-  // does not split one route into two lengths).
+  // total and the per-step sums all include it (spec `route-description` — a snapped
+  // start does not split one route into two lengths).
   REQUIRE(naviveylin::RouteStartNodeDistanceMeters(1,0.0,approach)==200.0);
   REQUIRE(naviveylin::RouteStartNodeDistanceMeters(2,350.0,approach)==550.0);
   REQUIRE(naviveylin::RouteStartNodeDistanceMeters(7,72000.0,approach)==72200.0);

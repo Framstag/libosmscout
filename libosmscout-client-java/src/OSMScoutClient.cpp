@@ -7074,26 +7074,12 @@ static osmscout::Vehicle JavaVehicleToCpp(JNIEnv *env, jobject vehicleObj)
 }
 
 /**
- * Speed factor per grade, index 0..4 meaning grade 1..5, applied when `avoidUnpaved` is requested.
- * Solid and gravel keep most of their type's speed; unpaved and worse lose most of it.
- *
- * A degraded road must stay routable: the parametrization prices a profile's cost limit from its
- * slowest road type, so a table close to zero makes the limit unreachable and the calculation
- * reports "no route" instead of a detour. Measured with four candidate tables on a Bremen
- * database — see openspec/changes/client-java-avoid-unpaved/evidence/.
- */
-static constexpr double kAvoidUnpavedGradeFactor[5] = {1.0, 0.85, 0.6, 0.3, 0.1};
-
-/** Floor for a degraded road, so avoiding an unpaved way never means being unable to route. */
-static constexpr double kAvoidUnpavedMinSpeedKmh = 3.0;
-
-/**
  * Re-price every routable type of [profile] with a per-grade speed table.
  *
  * Must be called *after* the vehicle parametrization: `FastestPathRoutingProfile::ParametrizeForCar`
  * (and the bicycle/foot counterparts) also enable the junction penalty and double the profile's cost
  * limit and factor (RoutingProfile.h). A profile whose type list is built by hand loses both, and then
- * every route that needs a high-grade way fails with "no route" — measured, same evidence file.
+ * every route that needs a high-grade way fails with "no route".
  *
  * [carSpeedMap] is the base speed per type name for a car and unused for the other vehicles;
  * [maxSpeedKmh] is the resolved vehicle speed (the flat speed for bicycle and foot, the ceiling
@@ -7128,9 +7114,11 @@ static void ApplyAvoidUnpavedGradeSpeeds(osmscout::FastestPathRoutingProfile &pr
       baseSpeed = std::min(entry->second, maxSpeedKmh);
     }
 
+    std::array<double,5> speeds = naviveylin::AvoidUnpavedGradeSpeedsKmh(baseSpeed);
+
     osmscout::SpeedVariant variant;
     for (size_t i = 0; i < 5; i++) {
-      variant.speed[i] = std::max(kAvoidUnpavedMinSpeedKmh, baseSpeed * kAvoidUnpavedGradeFactor[i]);
+      variant.speed[i] = speeds[i];
     }
 
     profile.AddType(type, variant);
@@ -7219,10 +7207,10 @@ static osmscout::RoutingProfileRef CreateRoutingProfile(
   if (avoidUnpaved) {
     ApplyAvoidUnpavedGradeSpeeds(*profile, *tc, vehicle, carSpeedMap, resolvedMaxSpeed);
     osmscout::log.Warn() << "  avoiding unpaved roads (per-grade speed table: grade 1/2/3/4/5 = "
-                         << kAvoidUnpavedGradeFactor[0] << "/" << kAvoidUnpavedGradeFactor[1] << "/"
-                         << kAvoidUnpavedGradeFactor[2] << "/" << kAvoidUnpavedGradeFactor[3] << "/"
-                         << kAvoidUnpavedGradeFactor[4] << " of the type speed, floor "
-                         << kAvoidUnpavedMinSpeedKmh << " km/h)";
+                         << naviveylin::kAvoidUnpavedGradeFactor[0] << "/" << naviveylin::kAvoidUnpavedGradeFactor[1] << "/"
+                         << naviveylin::kAvoidUnpavedGradeFactor[2] << "/" << naviveylin::kAvoidUnpavedGradeFactor[3] << "/"
+                         << naviveylin::kAvoidUnpavedGradeFactor[4] << " of the type speed, floor "
+                         << naviveylin::kAvoidUnpavedMinSpeedKmh << " km/h)";
   }
 
   if (avoidTolls) {
@@ -7361,7 +7349,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
-      // The published route begins at the requested start (spec: osmscout-jni - The published route
+      // The published route begins at the requested start (spec: route-description - The published route
       // starts at the requested start position; design D1/D2/D3). The router used the caller's
       // coordinate only to find a routable node, so the description's first node sits on that snapped
       // node. When the requested start lies off the network by more than the snap tolerance, the first
@@ -7381,8 +7369,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
             // The open the caller issued is registered by a queued DB-thread job, which clears and
             // repopulates this list; a calculation that starts before it ran sees this. That is not
             // the same fact as a database that cannot be opened, so it gets its own kind (spec
-            // `route-calculation` - A calculation that outruns the database open reports that, not
-            // unusable routing data).
+            // `routing-failure-reporting` - A calculation that outruns the database open reports
+            // that, not unusable routing data).
             osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
             errorMsg = "No databases loaded yet";
             errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
@@ -7531,7 +7519,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
             // Move the published start to the requested position before anything reads the
             // description: the step collector below, the copy kept for live navigation, and the
-            // polyline built further down then all speak of one start (design D1/D5).
+            // polyline built further down then all speak of one start (design D1/D2).
             if (!descResult.GetDescription()->Nodes().empty()) {
               const osmscout::GeoCoord snappedStart =
                   descResult.GetDescription()->Nodes().front().GetLocation();
@@ -7657,7 +7645,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsWit
 
       // When the start was snapped, the published polyline gains one vertex in front: the requested
       // start position. Everything else - the routed vertices, their order, the step list - is the
-      // routed geometry (spec: osmscout-jni - The published route starts at the requested start
+      // routed geometry (spec: route-description - The published route starts at the requested start
       // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
       const bool prependStart = startApproachMeters > 0.0;
       jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);
@@ -7871,7 +7859,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
       osmscout::RouteData routeData;
       osmscout::RouteDescriptionRef routeDescription;
       double totalDistance = 0.0;
-      // The published route begins at the requested start (spec: osmscout-jni - The published route
+      // The published route begins at the requested start (spec: route-description - The published route
       // starts at the requested start position; design D1/D2/D3). The router used the caller's
       // coordinate only to find a routable node, so the description's first node sits on that snapped
       // node. When the requested start lies off the network by more than the snap tolerance, the first
@@ -7889,7 +7877,8 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
         [&](const std::list<osmscout::DBInstanceRef> &databases) {
           if (databases.empty()) {
             // Twin of the branch in calculateRouteWithObjectsWithProfile: the list is empty because
-            // the queued set change has not run yet, which a retry clears (spec `route-calculation`).
+            // the queued set change has not run yet, which a retry clears (spec
+            // `routing-failure-reporting`).
             osmscout::log.Error() << "calculateRouteAsync: no databases loaded yet";
             errorMsg = "No databases loaded yet";
             errorKind = naviveylin::kRouteFailureDatabaseNotLoaded;
@@ -8115,7 +8104,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
             // Move the published start to the requested position before anything reads the
             // description: the step collector below, the copy kept for live navigation, and the
-            // polyline built further down then all speak of one start (design D1/D5).
+            // polyline built further down then all speak of one start (design D1/D2).
             if (!descResult.GetDescription()->Nodes().empty()) {
               const osmscout::GeoCoord snappedStart =
                   descResult.GetDescription()->Nodes().front().GetLocation();
@@ -8244,7 +8233,7 @@ Java_com_framstag_libosmscout_client_OSMScoutClient_calculateRouteWithObjectsAsy
 
       // When the start was snapped, the published polyline gains one vertex in front: the requested
       // start position. Everything else - the routed vertices, their order, the step list - is the
-      // routed geometry (spec: osmscout-jni - The published route starts at the requested start
+      // routed geometry (spec: route-description - The published route starts at the requested start
       // position; design D1/D2). polylineMeters below then measures the drawn line, approach included.
       const bool prependStart = startApproachMeters > 0.0;
       jsize count = static_cast<jsize>(points.size()) + (prependStart ? 1 : 0);

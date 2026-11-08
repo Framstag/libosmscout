@@ -69,7 +69,7 @@ TEST_CASE("A cause the bridge does not name is the unknown kind")
 
 TEST_CASE("The kind numbers are the ones the Java interface declares")
 {
-  // RouteCallback.java declares these seven values; the integer is what crosses the boundary, so a
+  // RouteCallback.java declares these eight values; the integer is what crosses the boundary, so a
   // constant that no longer matches the Java one is a runtime mismatch, not a compile error. The
   // numbers are written out here so that a change on either side fails this test.
   REQUIRE(naviveylin::kRouteFailureUnknown==0);

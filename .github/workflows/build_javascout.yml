@@ -11,7 +11,7 @@ on:
 jobs:
   cmake:
     name: cmake + maven
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -39,7 +39,7 @@ jobs:
       - name: Install C++ dependencies
         run: "sudo apt-get update && sudo apt-get install -y
                cmake ninja-build
-               catch2
+               libcatch2-dev
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
@@ -101,7 +101,7 @@ jobs:
 
   meson:
     name: meson + maven
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -129,7 +129,7 @@ jobs:
       - name: Install C++ dependencies
         run: "sudo apt-get update && sudo apt-get install -y
                python3-pip
-               catch2
+               libcatch2-dev
                libxml2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev

@@ -1,4 +1,4 @@
-name: Ubuntu 24.04
+name: Ubuntu 26.04
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ on:
 jobs:
   build_clang_meson:
     name: clang and meson
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -30,7 +30,7 @@ jobs:
         run: "pip3 install --only-binary :all: --break-system-packages meson ninja"
       - name: Install libosmscout dependencies
         run: "sudo apt-get install -y
-              catch2
+              libcatch2-dev
               libxml2-dev
               nlohmann-json3-dev
               libprotobuf-dev protobuf-compiler liblzma-dev
@@ -64,7 +64,7 @@ jobs:
 
   build_gcc_meson:
     name: gcc and meson
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -76,7 +76,7 @@ jobs:
         run: "pip3 install --only-binary :all: --break-system-packages meson ninja"
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
-               catch2
+               libcatch2-dev
                libxml2-dev
                nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
@@ -107,7 +107,7 @@ jobs:
 
   build_gcc_cmake:
     name: gcc and cmake
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -117,7 +117,7 @@ jobs:
         run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
-               catch2
+               libcatch2-dev
                libxml2-dev
                nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
@@ -154,7 +154,7 @@ jobs:
 
   build_gcc_meson_qt6:
     name: gcc and meson with Qt6
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -177,7 +177,7 @@ jobs:
         run: "pip3 install --only-binary :all: --break-system-packages meson ninja"
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
-               catch2
+               libcatch2-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
                libpng-dev
                nlohmann-json3-dev
@@ -195,7 +195,7 @@ jobs:
 
   build_gcc_cmake_qt6:
     name: gcc and cmake with Qt6
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -205,7 +205,7 @@ jobs:
         run:  sudo apt-get -y install gcc g++ libtbb-dev ccache libtool pkg-config cmake ninja-build
       - name: Install libosmscout dependencies
         run:  "sudo apt-get update && sudo apt-get install -y
-               catch2
+               libcatch2-dev
                libxml2-dev
                nlohmann-json3-dev
                libprotobuf-dev protobuf-compiler liblzma-dev
