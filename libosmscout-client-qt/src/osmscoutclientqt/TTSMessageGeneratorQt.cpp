@@ -23,6 +23,7 @@
 #include <osmscout/util/Distance.h>
 
 #include <QCoreApplication>
+#include <cmath>
 #include <QLocale>
 #include <QStandardPaths>
 
@@ -82,6 +83,37 @@ QString TTSMessageGeneratorQt::Translate(const char *sourceText) const
   return QString::fromUtf8(sourceText);
 }
 
+QString TTSMessageGeneratorQt::LeaveMotorwayPhrase(const VoiceMessageStruct &message) const
+{
+  if (message.exitRef.has_value() && message.destinationName.has_value()) {
+    //: e.g. "Leave the motorway at exit 42 towards Springfield"
+    return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway at exit %1 towards %2"))
+        .arg(QString::fromStdString(*message.exitRef))
+        .arg(QString::fromStdString(*message.destinationName));
+  }
+  if (message.exitRef.has_value()) {
+    //: e.g. "Leave the motorway at exit 42"
+    return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway at exit %1"))
+        .arg(QString::fromStdString(*message.exitRef));
+  }
+  if (message.destinationName.has_value() && !message.destinationName->empty()) {
+    //: e.g. "Leave the motorway towards Springfield"
+    return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway towards %1"))
+        .arg(QString::fromStdString(*message.destinationName));
+  }
+
+  using Type = VoiceMessageStruct::Type;
+
+  switch (message.type) {
+    case Type::LeaveMotorwayLeft:
+      return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway on the left"));
+    case Type::LeaveMotorwayRight:
+      return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway on the right"));
+    default:
+      return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway"));
+  }
+}
+
 QString TTSMessageGeneratorQt::Phrase(const VoiceMessageStruct &message, bool shortRoundaboutMessage) const
 {
   using Type = VoiceMessageStruct::Type;
@@ -106,39 +138,62 @@ QString TTSMessageGeneratorQt::Phrase(const VoiceMessageStruct &message, bool sh
     case Type::SharpRight:
       return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Turn sharply right"));
 
+    case Type::MotorwayChange:
+      if (message.fromName && message.toName) {
+        return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Motorway change from %1 to %2"))
+          .arg(QString::fromStdString(*message.fromName))
+          .arg(QString::fromStdString(*message.toName));
+      }
+      if (message.toName) {
+        return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Motorway change to %1"))
+          .arg(QString::fromStdString(*message.toName));
+      }
+      return "";
     case Type::LeaveMotorway:
-      return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway"));
     case Type::LeaveMotorwayLeft:
-      return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway on the left"));
     case Type::LeaveMotorwayRight:
-      return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Leave the motorway on the right"));
+      return this->LeaveMotorwayPhrase(message);
 
     // Roundabout exits: when close (or as a "then" maneuver) the
     // "At the roundabout" part is omitted.
-    case Type::LeaveRbExit1:
-      return shortRoundaboutMessage
-        ? Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the first exit"))
-        : Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the first exit"));
-    case Type::LeaveRbExit2:
-      return shortRoundaboutMessage
-        ? Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the second exit"))
-        : Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the second exit"));
-    case Type::LeaveRbExit3:
-      return shortRoundaboutMessage
-        ? Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the third exit"))
-        : Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the third exit"));
-    case Type::LeaveRbExit4:
-      return shortRoundaboutMessage
-        ? Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the fourth exit"))
-        : Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the fourth exit"));
-    case Type::LeaveRbExit5:
-      return shortRoundaboutMessage
-        ? Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the fifth exit"))
-        : Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the fifth exit"));
-    case Type::LeaveRbExit6:
-      return shortRoundaboutMessage
-        ? Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the sixth exit"))
-        : Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the sixth exit"));
+    case Type::LeaveRoundabout:
+      if (shortRoundaboutMessage) {
+        switch (message.exitNumber) {
+          case 1:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the first exit"));
+          case 2:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the second exit"));
+          case 3:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the third exit"));
+          case 4:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the fourth exit"));
+          case 5:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the fifth exit"));
+          case 6:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the sixth exit"));
+          default:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "Take the %n. exit"))
+              .arg(message.exitNumber);
+        }
+      } else {
+        switch (message.exitNumber) {
+          case 1:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the first exit"));
+          case 2:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the second exit"));
+          case 3:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the third exit"));
+          case 4:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the fourth exit"));
+          case 5:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the fifth exit"));
+          case 6:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the sixth exit"));
+          default:
+            return Translate(QT_TRANSLATE_NOOP("TTSMessageGeneratorQt", "At the roundabout, take the %n. exit"))
+              .arg(message.exitNumber);
+        }
+      }
 
     case Type::NoMessage:
     case Type::Silent:
@@ -149,28 +204,15 @@ QString TTSMessageGeneratorQt::Phrase(const VoiceMessageStruct &message, bool sh
 
 QString TTSMessageGeneratorQt::DistancePhrase(double distanceInUnits) const
 {
-  // Bucket the distance the same way the Voice of Marble messages do.
   int value;
-  if (distanceInUnits > 800) {
-    value = 800;
-  } else if (distanceInUnits > 700) {
-    value = 700;
-  } else if (distanceInUnits > 600) {
-    value = 600;
-  } else if (distanceInUnits > 500) {
-    value = 500;
-  } else if (distanceInUnits > 400) {
-    value = 400;
-  } else if (distanceInUnits > 300) {
-    value = 300;
-  } else if (distanceInUnits > 200) {
-    value = 200;
-  } else if (distanceInUnits > 100) {
-    value = 100;
-  } else if (distanceInUnits > 80) {
-    value = 80;
+  // in navigation it would make sense to use floor, but the message is triggered when we just pass the distance, so we round to the nearest bucket.
+  if (distanceInUnits < 100) {
+    value = std::round(distanceInUnits / 10) * 10;
+    if (value == 0) {
+      value = distanceInUnits;
+    }
   } else {
-    value = 50;
+    value = std::round(distanceInUnits / 100) * 100;
   }
 
   QString unit = (units == DistanceUnitSystem::Metrics)
@@ -200,14 +242,9 @@ std::optional<std::string> TTSMessageGeneratorQt::GenerateMessage(const Distance
       ? nextMessageDistance.AsMeter()
       : nextMessageDistance.As<Yard>();
 
-  if (distanceInUnits > 900) {
-    // too far away, nothing to announce yet
-    return std::nullopt;
-  }
 
   // when the roundabout is close, omit the "At the roundabout" part
-  bool shortRoundaboutMessage = message.type >= Type::LeaveRbExit1 &&
-                                message.type <= Type::LeaveRbExit6 &&
+  bool shortRoundaboutMessage = message.type == Type::LeaveRoundabout &&
                                 distanceInUnits < 120;
 
   QString maneuver = Phrase(message, shortRoundaboutMessage);
