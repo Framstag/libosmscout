@@ -361,12 +361,14 @@ constexpr bool debugRouting = false;
   class OSMSCOUT_API FastestPathRoutingProfile : public AbstractRoutingProfile
   {
   protected:
+    static constexpr double DefaultTollPenaltyFactor=3.0;
+
     bool applyJunctionPenalty=true;
     Distance penaltySameType=Meters(40);
     Distance penaltyDifferentType=Meters(250);
     HourDuration maxPenalty=std::chrono::seconds(10);
     bool avoidTolls=false;
-    double tollPenaltyFactor=3.0;
+    double tollPenaltyFactor=DefaultTollPenaltyFactor;
 
   public:
     explicit FastestPathRoutingProfile(const TypeConfigRef& typeConfig);
@@ -377,8 +379,13 @@ constexpr bool debugRouting = false;
      * routable, because a profile whose edge cost goes to zero prices its own cost limit out of reach and
      * the search then reports "no route" instead of a detour.
      */
+    void SetAvoidTolls(bool avoidTolls)
+    {
+      SetAvoidTolls(avoidTolls,DefaultTollPenaltyFactor);
+    }
+
     void SetAvoidTolls(bool avoidTolls,
-                       double tollPenaltyFactor=3.0)
+                       double tollPenaltyFactor)
     {
       this->avoidTolls=avoidTolls;
       this->tollPenaltyFactor=tollPenaltyFactor;
@@ -484,7 +491,7 @@ constexpr bool debugRouting = false;
 
       auto GetMaxSpeed = [&](const ObjectVariantData &variant) -> double {
         TypeInfoRef type=variant.type;
-        Grade grade=static_cast<Grade>(variant.GetGrade());
+        auto grade=static_cast<Grade>(variant.GetGrade());
         double speed=speeds[type->GetIndex()][grade];
         if (speed<=0){
           log.Warn() << "Infinite cost for type " << type->GetName();

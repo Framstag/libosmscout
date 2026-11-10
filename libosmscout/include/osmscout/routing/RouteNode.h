@@ -20,6 +20,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
 */
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -49,7 +50,15 @@ namespace osmscout {
      * database written by an older importer reads back as \"no toll information\", which is true, instead
      * of being misparsed. Every reader of [grade] must mask it.
      */
-    static constexpr uint8_t TollBit=0x80;
+    static constexpr std::byte TollBit{0x80};
+
+    /**
+     * The mask that leaves the grade of [grade] once [TollBit] is removed.
+     *
+     * The grade is the byte without its top bit, so the two constants are the complement of each
+     * other and every read of [grade] applies one of them.
+     */
+    static constexpr std::byte GradeMask{0x7F};
 
     TypeInfoRef type;     //!< The type of the object
     uint8_t     maxSpeed; //!< Maximum speed allowed on the way
@@ -63,12 +72,12 @@ namespace osmscout {
      */
     uint8_t GetGrade() const
     {
-      return grade & 0x7F;
+      return std::to_integer<uint8_t>(std::byte{grade} & GradeMask);
     }
 
     bool IsToll() const
     {
-      return (grade & TollBit)!=0;
+      return (std::byte{grade} & TollBit)!=std::byte{0};
     }
 
     bool operator==(const ObjectVariantData& other) const;

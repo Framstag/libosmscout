@@ -20,6 +20,7 @@
 #include <osmscoutimport/GenRouteDat.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <future>
 
 #include <osmscout/ObjectRef.h>
@@ -111,7 +112,7 @@ namespace osmscout {
     const TollFeatureValue *tollValue=tollReader->GetValue(way.GetFeatureValueBuffer());
 
     if (tollValue!=nullptr && tollValue->IsToll()) {
-      return ObjectVariantData::TollBit;
+      return std::to_integer<uint8_t>(ObjectVariantData::TollBit);
     }
 
     return 0;
