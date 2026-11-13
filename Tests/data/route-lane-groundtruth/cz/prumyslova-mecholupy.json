@@ -1,0 +1,3980 @@
+{
+  "database": "/home/karry/Maps/europe-czech-republic-20261018-110828",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.1036413021657,
+      "lon": 14.531802196292603,
+      "name": "Průmyslová",
+      "nodeIndex": 0,
+      "ref": "",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.06466346039895716,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.103177280002654,
+      "lon": 14.532346684726662,
+      "name": "Průmyslová",
+      "nodeIndex": 1,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.09095480067342276,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10298416095216,
+      "lon": 14.53255857924043,
+      "name": "Průmyslová",
+      "nodeIndex": 2,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.09992826730821473,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10291710572628,
+      "lon": 14.532628316675329,
+      "name": "Průmyslová",
+      "nodeIndex": 3,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.10892230485717659,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.102848709395886,
+      "lon": 14.532695371901212,
+      "name": "Průmyslová",
+      "nodeIndex": 4,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.117622923582357,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.102780313065495,
+      "lon": 14.532754380499966,
+      "name": "Průmyslová",
+      "nodeIndex": 5,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.1266299733939536,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10270789342155,
+      "lon": 14.532810706889705,
+      "name": "Průmyslová",
+      "nodeIndex": 6,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.13568771956277315,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.1026341326731,
+      "lon": 14.532864351070401,
+      "name": "Průmyslová",
+      "nodeIndex": 7,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.14465574412792453,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10255903082012,
+      "lon": 14.532909948623995,
+      "name": "Průmyslová",
+      "nodeIndex": 8,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.1532098821788333,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.102486611176175,
+      "lon": 14.532950181759531,
+      "name": "Průmyslová",
+      "nodeIndex": 9,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.16226938046957076,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.102408827114175,
+      "lon": 14.532987732685996,
+      "name": "Průmyslová",
+      "nodeIndex": 10,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.18018173703158305,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10225191788564,
+      "lon": 14.533044059075735,
+      "name": "Průmyslová",
+      "nodeIndex": 11,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.18908482778997493,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.1021727927191,
+      "lon": 14.533062834538981,
+      "name": "Průmyslová",
+      "nodeIndex": 12,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.19793814680333813,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.102093667552566,
+      "lon": 14.53307624558417,
+      "name": "Průmyslová",
+      "nodeIndex": 13,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.2067581284121436,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10201454238603,
+      "lon": 14.53308429221127,
+      "name": "Průmyslová",
+      "nodeIndex": 14,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.21541225745691225,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10193675832403,
+      "lon": 14.533086974420286,
+      "name": "Průmyslová",
+      "nodeIndex": 15,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.22899237316194285,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10181471781294,
+      "lon": 14.533081610002228,
+      "name": "Průmyslová",
+      "nodeIndex": 16,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.23393000176224601,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.101770461363856,
+      "lon": 14.53307624558417,
+      "name": "Průmyslová",
+      "nodeIndex": 17,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.2424867945113078,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10169401840636,
+      "lon": 14.533062834538981,
+      "name": "Průmyslová",
+      "nodeIndex": 18,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.25124245094629505,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10161623434436,
+      "lon": 14.533044059075735,
+      "name": "Průmyslová",
+      "nodeIndex": 19,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.2602114779209231,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.101537109177826,
+      "lon": 14.53301991919443,
+      "name": "Průmyslová",
+      "nodeIndex": 20,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.26878271126515013,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10146200732487,
+      "lon": 14.532993097104082,
+      "name": "Průmyslová",
+      "nodeIndex": 21,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.27784222508633755,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10138422326284,
+      "lon": 14.53295554617759,
+      "name": "Průmyslová",
+      "nodeIndex": 22,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.2866024045897601,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10131046251439,
+      "lon": 14.532912630833039,
+      "name": "Průmyslová",
+      "nodeIndex": 23,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.2956420339271545,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.101235360661406,
+      "lon": 14.532864351070401,
+      "name": "Průmyslová",
+      "nodeIndex": 24,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.31303701510727305,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10109588579161,
+      "lon": 14.532754380499966,
+      "name": "Průmyslová",
+      "nodeIndex": 25,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.321029871188247,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.101032853879275,
+      "lon": 14.53270073631927,
+      "name": "Průmyslová",
+      "nodeIndex": 26,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.3305052124807638,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10096043423533,
+      "lon": 14.532630998884372,
+      "name": "Průmyslová",
+      "nodeIndex": 27,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.3484523789403097,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10082632378359,
+      "lon": 14.532491524014546,
+      "name": "Průmyslová",
+      "nodeIndex": 28,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.37496729926619293,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10063320473307,
+      "lon": 14.53227426508272,
+      "name": "Průmyslová",
+      "nodeIndex": 29,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.41042696955350516,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.100377053770245,
+      "lon": 14.531979222088893,
+      "name": "Průmyslová",
+      "nodeIndex": 30,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.43694197374531873,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.10018393471975,
+      "lon": 14.531761963157066,
+      "name": "Průmyslová",
+      "nodeIndex": 31,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4455403950850828,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.100122243911926,
+      "lon": 14.531689543513124,
+      "name": "Průmyslová",
+      "nodeIndex": 32,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4809263553702497,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09986072853104,
+      "lon": 14.531407911564457,
+      "name": "Průmyslová",
+      "nodeIndex": 33,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.4979770012284603,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09973064139285,
+      "lon": 14.53128184773982,
+      "name": "Průmyslová",
+      "nodeIndex": 34,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5071268455620576,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09965956285342,
+      "lon": 14.531217474722979,
+      "name": "Průmyslová",
+      "nodeIndex": 35,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5251841470918744,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09951606467004,
+      "lon": 14.531099457525443,
+      "name": "Průmyslová",
+      "nodeIndex": 36,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.533268714677245,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09945035054869,
+      "lon": 14.531051177762834,
+      "name": "Průmyslová",
+      "nodeIndex": 37,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5425203595994322,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0993739075912,
+      "lon": 14.531000215791153,
+      "name": "Průmyslová",
+      "nodeIndex": 38,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5548255017498966,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09927064254336,
+      "lon": 14.530938524983355,
+      "name": "Průmyslová",
+      "nodeIndex": 39,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.569504692414066,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09914591982323,
+      "lon": 14.5308714697575,
+      "name": "Průmyslová",
+      "nodeIndex": 40,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5782797639527562,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09907081797027,
+      "lon": 14.530833918831007,
+      "name": "Průmyslová",
+      "nodeIndex": 41,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.5961454863665218,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09891659095075,
+      "lon": 14.530764181396108,
+      "name": "Průmyslová",
+      "nodeIndex": 42,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6413442695411883,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09852364732714,
+      "lon": 14.530603248853993,
+      "name": "Průmyslová",
+      "nodeIndex": 43,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.6679631846577716,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09829163624562,
+      "lon": 14.530512053746804,
+      "name": "Průmyslová",
+      "nodeIndex": 44,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.7129409070423995,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0978973515175,
+      "lon": 14.530372578877007,
+      "name": "Průmyslová",
+      "nodeIndex": 45,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.7406917172419576,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09765192939082,
+      "lon": 14.530302841442108,
+      "name": "Průmyslová",
+      "nodeIndex": 46,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8118148886796787,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.097016245849545,
+      "lon": 14.530195553080688,
+      "name": "Průmyslová",
+      "nodeIndex": 47,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.8579766009345341,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.096601844553675,
+      "lon": 14.530160684363238,
+      "name": "Průmyslová",
+      "nodeIndex": 48,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9106847573059953,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09612843465899,
+      "lon": 14.530192870871673,
+      "name": "Průmyslová",
+      "nodeIndex": 49,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.943646006977317,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09583339166517,
+      "lon": 14.530235786216224,
+      "name": "Průmyslová",
+      "nodeIndex": 50,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 0.9810289871302893,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09550079774485,
+      "lon": 14.53031088806921,
+      "name": "Průmyslová",
+      "nodeIndex": 51,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0010903641910986,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09532377194853,
+      "lon": 14.530364532249905,
+      "name": "Průmyslová",
+      "nodeIndex": 52,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0186693645664093,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.095169544929036,
+      "lon": 14.5304181764306,
+      "name": "Průmyslová",
+      "nodeIndex": 53,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0361460850942816,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09501665901405,
+      "lon": 14.53047450282034,
+      "name": "Průmyslová",
+      "nodeIndex": 54,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.071198174142066,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09471356939312,
+      "lon": 14.53060861327208,
+      "name": "Průmyslová",
+      "nodeIndex": 55,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.0886667115252031,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09456470679169,
+      "lon": 14.53068639733408,
+      "name": "Průmyslová",
+      "nodeIndex": 56,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.10668310914816,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09441182087667,
+      "lon": 14.530769545814167,
+      "name": "Průmyslová",
+      "nodeIndex": 57,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.128095735446234,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09423211287134,
+      "lon": 14.530876834175558,
+      "name": "Průmyslová",
+      "nodeIndex": 58,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.1509067894544802,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.094043017134396,
+      "lon": 14.531000215791153,
+      "name": "Průmyslová",
+      "nodeIndex": 59,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.168184632031421,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09390220116006,
+      "lon": 14.531102139734486,
+      "name": "Průmyslová",
+      "nodeIndex": 60,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.196094005060109,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.093676895601135,
+      "lon": 14.531273801112718,
+      "name": "Průmyslová",
+      "nodeIndex": 61,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.231683249025964,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09339526365247,
+      "lon": 14.53150983550779,
+      "name": "Průmyslová",
+      "nodeIndex": 62,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2498876719618803,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09325310657363,
+      "lon": 14.531635899332429,
+      "name": "Průmyslová",
+      "nodeIndex": 63,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.2724416044950553,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "merge_to_left"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09307876298635,
+      "lon": 14.531796831874516,
+      "name": "Průmyslová",
+      "nodeIndex": 64,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 2,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.3389750096993052,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09257182547876,
+      "lon": 14.532290358336951,
+      "name": "Průmyslová",
+      "nodeIndex": 65,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.524970343963791,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09115427800381,
+      "lon": 14.533669013780866,
+      "name": "Průmyslová",
+      "nodeIndex": 66,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.558592117873099,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09089812704099,
+      "lon": 14.533918459221098,
+      "name": "Průmyslová",
+      "nodeIndex": 67,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.6384278450987602,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.09028792448555,
+      "lon": 14.534505862999737,
+      "name": "Průmyslová",
+      "nodeIndex": 68,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.6828181328053053,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.089949966147174,
+      "lon": 14.534835774711041,
+      "name": "Průmyslová",
+      "nodeIndex": 69,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.7354717068282182,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08954495258291,
+      "lon": 14.535216648393998,
+      "name": "Průmyslová",
+      "nodeIndex": 70,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.7878309775802117,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08913591570507,
+      "lon": 14.535578746613709,
+      "name": "Průmyslová",
+      "nodeIndex": 71,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8246542731909852,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08884355492029,
+      "lon": 14.53582014542684,
+      "name": "Průmyslová",
+      "nodeIndex": 72,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8399745611921965,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0887215144092,
+      "lon": 14.53591938716113,
+      "name": "Průmyslová",
+      "nodeIndex": 73,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8632423840914525,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08853510088127,
+      "lon": 14.536066908658057,
+      "name": "Průmyslová",
+      "nodeIndex": 74,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.8788747934454295,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.088409037056635,
+      "lon": 14.536163468183304,
+      "name": "Průmyslová",
+      "nodeIndex": 75,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9183260620277098,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08808851307697,
+      "lon": 14.536399502578377,
+      "name": "Průmyslová",
+      "nodeIndex": 76,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9386603756432754,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.087922216116795,
+      "lon": 14.536517519775913,
+      "name": "Průmyslová",
+      "nodeIndex": 77,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9685640544633751,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08767411178107,
+      "lon": 14.536678452318,
+      "name": "Průmyslová",
+      "nodeIndex": 78,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 1.9951243813376753,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08745282953569,
+      "lon": 14.536817927187826,
+      "name": "Průmyslová",
+      "nodeIndex": 79,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.037541008598593,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08709475462953,
+      "lon": 14.537021775074464,
+      "name": "Průmyslová",
+      "nodeIndex": 80,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.07603698864847,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.086766184022764,
+      "lon": 14.537190754243653,
+      "name": "Průmyslová",
+      "nodeIndex": 81,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.0947832369544956,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08660525148068,
+      "lon": 14.537268538305682,
+      "name": "Průmyslová",
+      "nodeIndex": 82,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.1177515088585257,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0864067680121,
+      "lon": 14.537357051203827,
+      "name": "Průmyslová",
+      "nodeIndex": 83,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.141963680274777,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.086196214602865,
+      "lon": 14.537442881892929,
+      "name": "Průmyslová",
+      "nodeIndex": 84,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.1658388274673257,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08598834340265,
+      "lon": 14.537526030373016,
+      "name": "Průmyslová",
+      "nodeIndex": 85,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.1866861011894625,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08580595318827,
+      "lon": 14.5375930855989,
+      "name": "Průmyslová",
+      "nodeIndex": 86,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.204993819895887,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08564502064618,
+      "lon": 14.537646729779595,
+      "name": "Průmyslová",
+      "nodeIndex": 87,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.2299619526677974,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08542507950534,
+      "lon": 14.537716467214494,
+      "name": "Průmyslová",
+      "nodeIndex": 88,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.254821376365197,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08520513836447,
+      "lon": 14.537778158022292,
+      "name": "Průmyslová",
+      "nodeIndex": 89,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.2922915964873147,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08487254444415,
+      "lon": 14.537861306502379,
+      "name": "Průmyslová",
+      "nodeIndex": 90,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.311400096946251,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08470222417043,
+      "lon": 14.537896175219828,
+      "name": "Průmyslová",
+      "nodeIndex": 91,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.326713412760944,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "slight_right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.084565431509645,
+      "lon": 14.537920315101132,
+      "name": "Průmyslová",
+      "nodeIndex": 92,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.368565938451537,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08419126334928,
+      "lon": 14.537982005908958,
+      "name": "Průmyslová",
+      "nodeIndex": 93,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.382748973052408,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08406385842014,
+      "lon": 14.53799005253606,
+      "name": "Průmyslová",
+      "nodeIndex": 94,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.4174100706720973,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08375272217208,
+      "lon": 14.538016874626408,
+      "name": "Průmyslová",
+      "nodeIndex": 95,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.4514407756473693,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through;left",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08344695034211,
+      "lon": 14.53803296788061,
+      "name": "Průmyslová",
+      "nodeIndex": 96,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.497386137678714,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through;left",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.083033890150745,
+      "lon": 14.538035650089654,
+      "name": "Průmyslová",
+      "nodeIndex": 97,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.501716381502759,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through;left",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.082994998119744,
+      "lon": 14.53803296788061,
+      "name": "Průmyslová",
+      "nodeIndex": 98,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.5138008338404125,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08288636865382,
+      "lon": 14.538030285671567,
+      "name": "Průmyslová",
+      "nodeIndex": 99,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.521858405866011,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.082813949009875,
+      "lon": 14.538027603462552,
+      "name": "Průmyslová",
+      "nodeIndex": 100,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.5342456284618593,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08270263733493,
+      "lon": 14.538022239044466,
+      "name": "Průmyslová",
+      "nodeIndex": 101,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.6188751166884967,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.081942231073555,
+      "lon": 14.537982005908958,
+      "name": "Průmyslová",
+      "nodeIndex": 102,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.635885048968235,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "none",
+          "none",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08178934515857,
+      "lon": 14.537976641490872,
+      "name": "Průmyslová",
+      "nodeIndex": 103,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.697069931200725,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through;left",
+          "through",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.081239492306395,
+      "lon": 14.537952501609567,
+      "name": "Průmyslová",
+      "nodeIndex": 104,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.733336998720415,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08091360390867,
+      "lon": 14.537936408355364,
+      "name": "Průmyslová",
+      "nodeIndex": 105,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.800933947813327,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08030608356228,
+      "lon": 14.537912268474031,
+      "name": "Průmyslová",
+      "nodeIndex": 106,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.8158819882656183,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.08017197311054,
+      "lon": 14.537898857428871,
+      "name": "Průmyslová",
+      "nodeIndex": 107,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.8512544817097103,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "merge_to_right",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.079854131339886,
+      "lon": 14.537882764174668,
+      "name": "Průmyslová",
+      "nodeIndex": 108,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.883186495258453,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "merge_to_right",
+          "through",
+          "through",
+          "merge_to_left"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07956713497316,
+      "lon": 14.537872035338523,
+      "name": "Průmyslová",
+      "nodeIndex": 109,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.9112472275593975,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "merge_to_right",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.079315007323885,
+      "lon": 14.537858624293335,
+      "name": "Průmyslová",
+      "nodeIndex": 110,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 2.987067612749781,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "merge_to_right",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.078633726229015,
+      "lon": 14.537823755575886,
+      "name": "Průmyslová",
+      "nodeIndex": 111,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.01199779671591,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07840976177462,
+      "lon": 14.537810344530726,
+      "name": "Průmyslová",
+      "nodeIndex": 112,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.0464826853578764,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "through",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07809996663107,
+      "lon": 14.53779156906748,
+      "name": "Průmyslová",
+      "nodeIndex": 113,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.0993177697691765,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "through",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07762521563191,
+      "lon": 14.537767429186147,
+      "name": "Průmyslová",
+      "nodeIndex": 114,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.1627648964863053,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "through",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07705524621201,
+      "lon": 14.537732560468697,
+      "name": "Průmyslová",
+      "nodeIndex": 115,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.1823214859568805,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0768795615202,
+      "lon": 14.537721831632552,
+      "name": "Průmyslová",
+      "nodeIndex": 116,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.199336821197431,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.076726675605215,
+      "lon": 14.537713785005451,
+      "name": "Průmyslová",
+      "nodeIndex": 117,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.224573158483816,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07650002894178,
+      "lon": 14.537697691751248,
+      "name": "Průmyslová",
+      "nodeIndex": 118,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.3050777732942884,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.075777173606866,
+      "lon": 14.537641365361509,
+      "name": "Průmyslová",
+      "nodeIndex": 119,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.374410805633018,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07515490111078,
+      "lon": 14.537585038971798,
+      "name": "Průmyslová",
+      "nodeIndex": 120,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.3899294184783693,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07501542624098,
+      "lon": 14.537579674553712,
+      "name": "Průmyslová",
+      "nodeIndex": 121,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.398887956760729,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "slight_right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07493495996994,
+      "lon": 14.537585038971798,
+      "name": "Průmyslová",
+      "nodeIndex": 122,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.4256069495871055,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "slight_right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.074694902261314,
+      "lon": 14.537598450016958,
+      "name": "Průmyslová",
+      "nodeIndex": 123,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.4345593125929024,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "slight_right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07461443599027,
+      "lon": 14.537595767807915,
+      "name": "Průmyslová",
+      "nodeIndex": 124,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.4784762816189683,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.074220151262125,
+      "lon": 14.537563581299509,
+      "name": "Průmyslová",
+      "nodeIndex": 125,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.5391616204635343,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.073675662828066,
+      "lon": 14.537509937118813,
+      "name": "Průmyslová",
+      "nodeIndex": 126,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.54350461110471,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07363677079704,
+      "lon": 14.537504572700755,
+      "name": "Průmyslová",
+      "nodeIndex": 127,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.567409897920181,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.073422194074254,
+      "lon": 14.537485797237508,
+      "name": "Průmyslová",
+      "nodeIndex": 128,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.626136163885752,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "through",
+          "through",
+          "merge_to_left"
+        ],
+        "oneway": true
+      },
+      "lat": 50.072895139998906,
+      "lon": 14.53743751747487,
+      "name": "Průmyslová",
+      "nodeIndex": 129,
+      "ref": "601",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.656388513621058,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "through",
+          "through;right",
+          "merge_to_left"
+        ],
+        "oneway": true
+      },
+      "lat": 50.072624236886384,
+      "lon": 14.537399966548378,
+      "name": "Průmyslová",
+      "nodeIndex": 130,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.680927906039473,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "through",
+          "through;right",
+          "merge_to_left"
+        ],
+        "oneway": true
+      },
+      "lat": 50.072404295745514,
+      "lon": 14.53737314445803,
+      "name": "Průmyslová",
+      "nodeIndex": 131,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.7118279261393226,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "through",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.072126687110426,
+      "lon": 14.537357051203827,
+      "name": "Průmyslová",
+      "nodeIndex": 132,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.7318399719370983,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.071946979105064,
+      "lon": 14.537343640158639,
+      "name": "Průmyslová",
+      "nodeIndex": 133,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.7527381229469055,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07175922447263,
+      "lon": 14.537332911322522,
+      "name": "Průmyslová",
+      "nodeIndex": 134,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.776326790309277,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07154732995889,
+      "lon": 14.537319500277334,
+      "name": "Průmyslová",
+      "nodeIndex": 135,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.7824548731034726,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07149234467366,
+      "lon": 14.537314135859276,
+      "name": "Průmyslová",
+      "nodeIndex": 136,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_primary"
+    },
+    {
+      "distanceKm": 3.7958692909407183,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.071372986371614,
+      "lon": 14.537287313768928,
+      "name": "Průmyslová",
+      "nodeIndex": 137,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.8094598777367734,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.071252286965034,
+      "lon": 14.537257809469537,
+      "name": "Černokostelecká",
+      "nodeIndex": 138,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "left"
+      },
+      "turn": "Turn left",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.8255336740064716,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07123351150179,
+      "lon": 14.537480432819422,
+      "name": "Černokostelecká",
+      "nodeIndex": 139,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.8402757728767307,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07121473603854,
+      "lon": 14.537684280706088,
+      "name": "Černokostelecká",
+      "nodeIndex": 140,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.8656661143328512,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07120132499338,
+      "lon": 14.538038332298669,
+      "name": "Černokostelecká",
+      "nodeIndex": 141,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.887022448951193,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07118925505273,
+      "lon": 14.538336057501539,
+      "name": "Černokostelecká",
+      "nodeIndex": 142,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 2,
+        "to": 3,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.9303010693009095,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07116645627593,
+      "lon": 14.538939554534409,
+      "name": "Černokostelecká",
+      "nodeIndex": 143,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 2,
+        "to": 3,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.9446049062607256,
+      "lanes": {
+        "laneCount": 4,
+        "laneTurns": [
+          "left",
+          "left",
+          "through",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07115170412624,
+      "lon": 14.539138038002989,
+      "name": "Černokostelecká",
+      "nodeIndex": 144,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 2,
+        "to": 3,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.9609396510487227,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0711195176178,
+      "lon": 14.539360661352873,
+      "name": "Černokostelecká",
+      "nodeIndex": 145,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.976203861363222,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.071079284482295,
+      "lon": 14.53956450923954,
+      "name": "Černokostelecká",
+      "nodeIndex": 146,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.9844988912180983,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07105112128744,
+      "lon": 14.539671797600931,
+      "name": "Černokostelecká",
+      "nodeIndex": 147,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 3.997445032016069,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.0709947948977,
+      "lon": 14.539830047933975,
+      "name": "Černokostelecká",
+      "nodeIndex": 148,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.006651951295753,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07095187955315,
+      "lon": 14.53994001850441,
+      "name": "Černokostelecká",
+      "nodeIndex": 149,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.01569657949207,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.070906281999555,
+      "lon": 14.540044624656758,
+      "name": "Černokostelecká",
+      "nodeIndex": 150,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.06718944353046,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.07060989790119,
+      "lon": 14.540597159717947,
+      "name": "Černokostelecká",
+      "nodeIndex": 151,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.096777004045732,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.070440918732004,
+      "lon": 14.540916342593107,
+      "name": "Černokostelecká",
+      "nodeIndex": 152,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 2,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.229350861581043,
+      "lanes": {
+        "laneCount": 3,
+        "laneTurns": [
+          "left",
+          "left",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.06967917136609,
+      "lon": 14.542340595590616,
+      "name": "Černokostelecká",
+      "nodeIndex": 153,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 2,
+        "to": 2,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.263503070424824,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.06947532347942,
+      "lon": 14.542697329392269,
+      "name": "Kutnohorská",
+      "nodeIndex": 154,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.279537368276395,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.06937876395418,
+      "lon": 14.542863626352414,
+      "name": "Kutnohorská",
+      "nodeIndex": 155,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.296256861393513,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.06928488663797,
+      "lon": 14.543046016566791,
+      "name": "Kutnohorská",
+      "nodeIndex": 156,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.338472636807207,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.06904214672031,
+      "lon": 14.54349930989369,
+      "name": "Kutnohorská",
+      "nodeIndex": 157,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.38291382403012,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06880208901168,
+      "lon": 14.54399551856514,
+      "name": "Kutnohorská",
+      "nodeIndex": 158,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.478768973547849,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.068253577264045,
+      "lon": 14.545028169043576,
+      "name": "Kutnohorská",
+      "nodeIndex": 159,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.485860865998807,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.068212003024,
+      "lon": 14.545103270896533,
+      "name": "Kutnohorská",
+      "nodeIndex": 160,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.551242505381904,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06782844713203,
+      "lon": 14.545795280827548,
+      "name": "Kutnohorská",
+      "nodeIndex": 161,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.577619628923956,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.067675561217044,
+      "lon": 14.546076912776215,
+      "name": "Kutnohorská",
+      "nodeIndex": 162,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.691369451570605,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 50.06703987767577,
+      "lon": 14.54732145776839,
+      "name": "Kutnohorská",
+      "nodeIndex": 163,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.763175061319285,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06662815858891,
+      "lon": 14.54809393397042,
+      "name": "Kutnohorská",
+      "nodeIndex": 164,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.7857322172758625,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 50.06649002482362,
+      "lon": 14.548324603947435,
+      "name": "Kutnohorská",
+      "nodeIndex": 165,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.822070903835643,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 50.06625935484661,
+      "lon": 14.548684019958102,
+      "name": "Kutnohorská",
+      "nodeIndex": 166,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.8321583263801795,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 50.066194981829796,
+      "lon": 14.548783261692392,
+      "name": "Kutnohorská",
+      "nodeIndex": 167,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.859903979470128,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through"
+        ],
+        "oneway": false
+      },
+      "lat": 50.06601661492897,
+      "lon": 14.549054164804915,
+      "name": "Kutnohorská",
+      "nodeIndex": 168,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.885842194083994,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through"
+        ],
+        "oneway": false
+      },
+      "lat": 50.065854341282346,
+      "lon": 14.549314339081292,
+      "name": "Kutnohorská",
+      "nodeIndex": 169,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.927047740807015,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through"
+        ],
+        "oneway": false
+      },
+      "lat": 50.06558612037887,
+      "lon": 14.549711306018452,
+      "name": "Kutnohorská",
+      "nodeIndex": 170,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.936305887875048,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 50.065527111780085,
+      "lon": 14.54980250112564,
+      "name": "Kutnohorská",
+      "nodeIndex": 171,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 4.960961826914259,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [
+          "none"
+        ],
+        "oneway": false
+      },
+      "lat": 50.06535947371543,
+      "lon": 14.550027806684568,
+      "name": "Kutnohorská",
+      "nodeIndex": 172,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.047736922174872,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.064776093250345,
+      "lon": 14.550832469395033,
+      "name": "Kutnohorská",
+      "nodeIndex": 173,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.06124865394891,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06468892145671,
+      "lon": 14.550963897637757,
+      "name": "Kutnohorská",
+      "nodeIndex": 174,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.105399677816475,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.064400583985446,
+      "lon": 14.551387686665265,
+      "name": "Kutnohorská",
+      "nodeIndex": 175,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.178764789565533,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06392717409079,
+      "lon": 14.552101154268541,
+      "name": "Kutnohorská",
+      "nodeIndex": 176,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.2698156047889775,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through"
+        ],
+        "oneway": false
+      },
+      "lat": 50.063326359266995,
+      "lon": 14.55296482557776,
+      "name": "Kutnohorská",
+      "nodeIndex": 177,
+      "ref": "333",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.334793433804008,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06289318250785,
+      "lon": 14.553573687028688,
+      "name": "Kutnohorská",
+      "nodeIndex": 178,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.427718676119679,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06229370878856,
+      "lon": 14.554477591473443,
+      "name": "Kutnohorská",
+      "nodeIndex": 179,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.439679293860541,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06221592472653,
+      "lon": 14.554592926461936,
+      "name": "Kutnohorská",
+      "nodeIndex": 180,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.520844801892228,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06168350623312,
+      "lon": 14.55536808487301,
+      "name": "Kutnohorská",
+      "nodeIndex": 181,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.5834380049556485,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.061273128250775,
+      "lon": 14.555966217487793,
+      "name": "Kutnohorská",
+      "nodeIndex": 182,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.650178396150241,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06083592817811,
+      "lon": 14.556604583238084,
+      "name": "Kutnohorská",
+      "nodeIndex": 183,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.685796648734172,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.06060257599208,
+      "lon": 14.556945223785533,
+      "name": "Kutnohorská",
+      "nodeIndex": 184,
+      "ref": "333",
+      "turn": "Straight on",
+      "type": "highway_secondary"
+    },
+    {
+      "distanceKm": 5.685796648734172,
+      "lat": 50.06060257599208,
+      "lon": 14.556945223785533,
+      "nodeIndex": 185
+    }
+  ],
+  "start": {
+    "lat": 50.103551,
+    "lon": 14.531856
+  },
+  "target": {
+    "lat": 50.060297,
+    "lon": 14.557395
+  },
+  "version": 1
+}
