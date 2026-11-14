@@ -1,0 +1,38 @@
+bounding box: 42.3244,1.29122 .. 42.7822,1.82465
+object variants: 93  grade1=70 grade2=9 grade3=9 grade4=3 grade5=2 above-grade5=0
+1 km of highway_unclassified (seconds), baseline: g1=72.0 g2=72.0 g3=72.0 g4=72.0 g5=72.0
+1 km of highway_unclassified (seconds), aggressive  : g1=72.0 g2=84.7 g3=120.0 g4=240.0 g5=720.0
+1 km of highway_unclassified (seconds), moderate  : g1=72.0 g2=80.0 g3=96.0 g4=144.0 g5=240.0
+1 km of highway_unclassified (seconds), gentle  : g1=72.0 g2=72.0 g3=84.7 g4=120.0 g5=180.0
+1 km of highway_unclassified (seconds), very-gentle  : g1=72.0 g2=72.0 g3=80.0 g4=96.0 g5=144.0
+
+No route found!
+No route found!
+No route node found for target way
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+No route found!
+pairs: 400, routed by the baseline profile: 181
+  graded way 502990 type=Way 502990 grade=4 nodes=4
+  ways on the baseline routes: 61739 path objects, 652 ways read, 55 without a grade value, grades: g1=596 g2=0 g3=0 g4=1 g5=0
+graded-road pairs (a graded way the baseline route uses): 1
+  graded-road pair 0 (42.5,1.7 -> 42.5,1.7)
+  baseline     distance=54.2m duration=0.0s entries=3 types=[2 distinct 2xWay 502990,1xnone 0]
+  aggressive   distance=54.2m duration=0.0s entries=3 types=[2 distinct 2xWay 502990,1xnone 0]
+graded-road pairs lost with the table: 0/1
+aggressive: differing=0 of 181 routed pairs, lost (no route)=0
+
+moderate: differing=0 of 181 routed pairs, lost (no route)=0
+
+gentle: differing=0 of 181 routed pairs, lost (no route)=0
+
+very-gentle: differing=0 of 181 routed pairs, lost (no route)=0
+
