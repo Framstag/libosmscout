@@ -563,11 +563,17 @@ namespace {
   };
 
 /**
- * A motorway change from "A 45" onto "Ruhrschnellweg (A 40)" through one `highway_motorway_link`,
- * with the signposted destination of the way it leads onto on the node before the link - the
- * placement `DestinationPostprocessor` produces for a way whose first node intersects no object.
+ * A motorway change from "A 45" onto "Ruhrschnellweg (A 40)" through one `highway_motorway_link`.
+ *
+ * The fixture's nodes carry no objects, so `DestinationPostprocessor` attaches no record to any of
+ * them (it places one on the last node with intersecting objects only). The signposted destination
+ * of the way the manoeuvre leads onto is therefore put on the node before the link by hand, which is
+ * the shape that postprocessor leaves behind: the record on the junction, the manoeuvre on the link.
+ *
+ * `carriesDestinationRecord=false` describes the same route whose way carries no destination tag,
+ * so that neither the manoeuvre's node nor the node it was decided at carries a record.
  */
-  MotorwayChangeFixture MotorwayChangeThroughLink()
+  MotorwayChangeFixture MotorwayChangeThroughLink(bool carriesDestinationRecord=true)
   {
     MotorwayChangeFixture fixture;
 
@@ -578,7 +584,10 @@ namespace {
     motorway.AddDescription(std::make_shared<RouteDescription::StartDescription>("Home"));
     motorway.AddDescription(std::make_shared<RouteDescription::NameDescription>("A 45"));
     motorway.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_motorway"));
-    motorway.AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen;Bochum;Dortmund-Kley;Dortmund"));
+
+    if (carriesDestinationRecord) {
+      motorway.AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen;Bochum;Dortmund-Kley;Dortmund"));
+    }
 
     auto & link=AddNode(fixture.description, 1, 300.0, 15.0, GeoCoord(51.560, 7.42));
 
@@ -879,6 +888,33 @@ TEST_CASE("A motorway step keeps its own destination when its node carries one")
   REQUIRE(change!=steps.steps.end());
   REQUIRE(change->destination.has_value());
   REQUIRE(*change->destination=="Wuppertal");
+}
+
+TEST_CASE("A motorway change carries no destination when no node carries a record")
+{
+  // The same route through the same link, with no destination tag on any of its ways.
+  MotorwayChangeFixture fixture=MotorwayChangeThroughLink(false);
+
+  osmscout::RoutePostprocessor::InstructionPostprocessor placement;
+
+  placement.Process(fixture.context, fixture.description);
+
+  RouteStepCollector collector;
+
+  RouteSteps         steps=collector.Collect(fixture.description);
+
+  const auto change=std::find_if(steps.steps.begin(),
+                                 steps.steps.end(),
+                                 [](const RouteStep& step) {
+                                   return step.kind==RouteStep::Kind::motorwayChange;
+                                 });
+
+  // The manoeuvre itself is placed...
+  REQUIRE(change!=steps.steps.end());
+  REQUIRE(change->motorwayChange.has_value());
+
+  // ...and the step carries no record, not an empty one.
+  REQUIRE(!change->destination.has_value());
 }
 
 TEST_CASE("Live guidance extends the same step with progress")
