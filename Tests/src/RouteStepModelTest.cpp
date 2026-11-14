@@ -28,16 +28,20 @@
 #include <osmscout/navigation/PositionAgent.h>
 #include <osmscout/navigation/RouteInstructionAgent.h>
 #include <osmscout/routing/RouteDescription.h>
+#include <osmscout/routing/RoutePostprocessor.h>
 #include <osmscout/routing/DBFileOffset.h>
 #include <osmscout/system/Assert.h>
 #include <osmscout/util/Distance.h>
 #include <osmscout/util/Time.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <list>
+#include <map>
+#include <memory>
 #include <regex>
 #include <set>
 #include <string>
@@ -351,6 +355,251 @@ namespace {
 
     return description;
   }
+
+/**
+ * The kind of way a route node travels along. On a real route the postprocessors read it from the
+ * database; a description fixture has no database, so the fixture declares it.
+ */
+  enum class WayType
+  {
+    street,
+    motorway,
+    motorwayLink
+  };
+
+/**
+ * A postprocessor context that answers the questions manoeuvre placement asks out of the fixture's
+ * own way types. Every other question is one no placement path asks: it aborts, rather than answer
+ * a value the case would then only be asserting about itself.
+ */
+  class FixtureContext : public osmscout::PostprocessorContext
+  {
+  private:
+    std::map<std::uint64_t,WayType> wayTypes;
+
+  public:
+    void SetWayType(const ObjectFileRef& way, WayType type)
+    {
+      wayTypes[way.GetFileOffset()]=type;
+    }
+
+    WayType GetWayType(const RouteDescription::Node& node) const
+    {
+      auto entry=wayTypes.find(node.GetPathObject().GetFileOffset());
+
+      return entry==wayTypes.end() ? WayType::street : entry->second;
+    }
+
+    bool IsMotorway(const RouteDescription::Node& node) const override
+    {
+      return GetWayType(node)==WayType::motorway;
+    }
+
+    bool IsMotorwayLink(const RouteDescription::Node& node) const override
+    {
+      return GetWayType(node)==WayType::motorwayLink;
+    }
+
+    bool IsRoundabout(const RouteDescription::Node& /*node*/) const override
+    {
+      return false;
+    }
+
+    bool IsMiniRoundabout(const RouteDescription::Node& /*node*/) const override
+    {
+      return false;
+    }
+
+    osmscout::AreaRef GetArea(const osmscout::DBFileOffset& /*offset*/) const override
+    {
+      std::abort();
+    }
+
+    osmscout::WayRef GetWay(const osmscout::DBFileOffset& /*offset*/) const override
+    {
+      std::abort();
+    }
+
+    osmscout::NodeRef GetNode(const osmscout::DBFileOffset& /*offset*/) const override
+    {
+      std::abort();
+    }
+
+    const osmscout::LanesFeatureValueReader& GetLaneReader(const DatabaseId& /*dbId*/) const override
+    {
+      std::abort();
+    }
+
+    const osmscout::AccessFeatureValueReader& GetAccessReader(const DatabaseId& /*dbId*/) const override
+    {
+      std::abort();
+    }
+
+    Duration GetTime(DatabaseId /*dbId*/,
+                     const osmscout::Area& /*area*/,
+                     const Distance& /*deltaDistance*/) const override
+    {
+      std::abort();
+    }
+
+    Duration GetTime(DatabaseId /*dbId*/,
+                     const osmscout::Way& /*way*/,
+                     const Distance& /*deltaDistance*/) const override
+    {
+      std::abort();
+    }
+
+    RouteDescription::NameDescriptionRef
+    GetNameDescription(const RouteDescription::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    RouteDescription::NameDescriptionRef
+    GetNameDescription(DatabaseId /*dbId*/, const ObjectFileRef& /*object*/) const override
+    {
+      std::abort();
+    }
+
+    RouteDescription::NameDescriptionRef
+    GetNameDescription(DatabaseId /*dbId*/, const osmscout::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    RouteDescription::NameDescriptionRef
+    GetNameDescription(DatabaseId /*dbId*/, const osmscout::Area& /*area*/) const override
+    {
+      std::abort();
+    }
+
+    RouteDescription::NameDescriptionRef
+    GetNameDescription(DatabaseId /*dbId*/, const osmscout::Way& /*way*/) const override
+    {
+      std::abort();
+    }
+
+    bool IsClockwise(const RouteDescription::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    bool IsBridge(const RouteDescription::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    osmscout::NodeRef GetJunctionNode(const RouteDescription::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    RouteDescription::DestinationDescriptionRef
+    GetDestination(const RouteDescription::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    uint8_t GetMaxSpeed(const RouteDescription::Node& /*node*/) const override
+    {
+      std::abort();
+    }
+
+    size_t GetNodeIndex(const RouteDescription::Node& /*node*/, osmscout::Id /*nodeId*/) const override
+    {
+      std::abort();
+    }
+
+    bool CanUseBackward(const DatabaseId& /*dbId*/,
+                        osmscout::Id /*fromNodeId*/,
+                        const ObjectFileRef& /*object*/) const override
+    {
+      std::abort();
+    }
+
+    bool CanUseForward(const DatabaseId& /*dbId*/,
+                       osmscout::Id /*fromNodeId*/,
+                       const ObjectFileRef& /*object*/) const override
+    {
+      std::abort();
+    }
+
+    bool IsBackwardPath(const ObjectFileRef& /*object*/,
+                        size_t /*fromNodeIndex*/,
+                        size_t /*toNodeIndex*/) const override
+    {
+      std::abort();
+    }
+
+    bool IsForwardPath(const ObjectFileRef& /*object*/,
+                       size_t /*fromNodeIndex*/,
+                       size_t /*toNodeIndex*/) const override
+    {
+      std::abort();
+    }
+
+    bool IsNodeStartOrEndOfObject(const RouteDescription::Node& /*node*/,
+                                  const ObjectFileRef& /*object*/) const override
+    {
+      std::abort();
+    }
+
+    GeoCoord GetCoordinates(const RouteDescription::Node& /*node*/,
+                            size_t /*nodeIndex*/) const override
+    {
+      std::abort();
+    }
+
+    std::vector<osmscout::DatabaseRef> GetDatabases() const override
+    {
+      std::abort();
+    }
+  };
+
+  struct MotorwayChangeFixture
+  {
+    RouteDescription description;
+    FixtureContext   context;
+  };
+
+/**
+ * A motorway change from "A 45" onto "Ruhrschnellweg (A 40)" through one `highway_motorway_link`,
+ * with the signposted destination of the way it leads onto on the node before the link - the
+ * placement `DestinationPostprocessor` produces for a way whose first node intersects no object.
+ */
+  MotorwayChangeFixture MotorwayChangeThroughLink()
+  {
+    MotorwayChangeFixture fixture;
+
+    fixture.description.SetDatabaseMapping({{databaseId, "/maps/region"}});
+
+    auto & motorway=AddNode(fixture.description, 0, 0.0, 0.0, GeoCoord(51.57246, 7.46489));
+
+    motorway.AddDescription(std::make_shared<RouteDescription::StartDescription>("Home"));
+    motorway.AddDescription(std::make_shared<RouteDescription::NameDescription>("A 45"));
+    motorway.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_motorway"));
+    motorway.AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen;Bochum;Dortmund-Kley;Dortmund"));
+
+    auto & link=AddNode(fixture.description, 1, 300.0, 15.0, GeoCoord(51.560, 7.42));
+
+    link.AddDescription(std::make_shared<RouteDescription::NameDescription>("A 45"));
+    link.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_motorway_link"));
+
+    auto & targetMotorway=AddNode(fixture.description, 2, 900.0, 45.0, GeoCoord(51.550, 7.40));
+
+    targetMotorway.AddDescription(std::make_shared<RouteDescription::NameDescription>("Ruhrschnellweg", "A 40"));
+    targetMotorway.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_motorway"));
+
+    auto & target=AddNode(fixture.description, 3, 4200.0, 200.0, GeoCoord(51.45343, 6.99432));
+
+    target.AddDescription(std::make_shared<RouteDescription::TargetDescription>("Work"));
+
+    fixture.context.SetWayType(motorway.GetPathObject(), WayType::motorway);
+    fixture.context.SetWayType(link.GetPathObject(), WayType::motorwayLink);
+    fixture.context.SetWayType(targetMotorway.GetPathObject(), WayType::motorway);
+
+    return fixture;
+  }
 }
 
 TEST_CASE("The route step builder satisfies the instruction agent contract")
@@ -565,6 +814,71 @@ TEST_CASE("A route step carries data, not a sentence")
     INFO("Step carried the string '" << value << "'");
     REQUIRE(fixtureValues.contains(value));
   }
+}
+
+TEST_CASE("A motorway change through a link carries the destination of the way it leads onto")
+{
+  MotorwayChangeFixture fixture=MotorwayChangeThroughLink();
+
+  // The placement step the description build runs after the destinations were attached.
+  osmscout::RoutePostprocessor::InstructionPostprocessor placement;
+
+  placement.Process(fixture.context, fixture.description);
+
+  RouteStepCollector collector;
+
+  RouteSteps         steps=collector.Collect(fixture.description);
+
+  const auto change=std::find_if(steps.steps.begin(),
+                                 steps.steps.end(),
+                                 [](const RouteStep& step) {
+                                   return step.kind==RouteStep::Kind::motorwayChange;
+                                 });
+
+  REQUIRE(change!=steps.steps.end());
+
+  // The manoeuvre is placed on the link node, where the change happens...
+  REQUIRE(change->currentNodeIndex==1);
+  REQUIRE(change->motorwayChange.has_value());
+  REQUIRE(change->motorwayChange->from.name=="A 45");
+  REQUIRE(change->motorwayChange->to.name=="Ruhrschnellweg");
+  REQUIRE(change->motorwayChange->to.ref=="A 40");
+
+  // ...and it carries the signposted destination of the way it leads onto, which the description
+  // placed on the node the change was decided at.
+  REQUIRE(change->destination.has_value());
+  REQUIRE(*change->destination=="Essen;Bochum;Dortmund-Kley;Dortmund");
+}
+
+TEST_CASE("A motorway step keeps its own destination when its node carries one")
+{
+  MotorwayChangeFixture fixture=MotorwayChangeThroughLink();
+
+  // The node the manoeuvre is placed on carries a record of its own...
+  auto node=fixture.description.Nodes().begin();
+
+  std::advance(node, 1);
+
+  node->AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Wuppertal"));
+
+  // ...and the node the change was decided at carries a different one.
+  osmscout::RoutePostprocessor::InstructionPostprocessor placement;
+
+  placement.Process(fixture.context, fixture.description);
+
+  RouteStepCollector collector;
+
+  RouteSteps         steps=collector.Collect(fixture.description);
+
+  const auto change=std::find_if(steps.steps.begin(),
+                                 steps.steps.end(),
+                                 [](const RouteStep& step) {
+                                   return step.kind==RouteStep::Kind::motorwayChange;
+                                 });
+
+  REQUIRE(change!=steps.steps.end());
+  REQUIRE(change->destination.has_value());
+  REQUIRE(*change->destination=="Wuppertal");
 }
 
 TEST_CASE("Live guidance extends the same step with progress")
