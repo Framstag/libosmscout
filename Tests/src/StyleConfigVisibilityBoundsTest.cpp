@@ -344,3 +344,66 @@ TEST_CASE("The area border reach bound is the widest border and the largest offs
   REQUIRE(styleConfig->GetMaxAreaBorderWidthMM(Level(12))==2.5);
   REQUIRE(styleConfig->GetMaxAreaBorderWidthMM(Level(20))==0.0);
 }
+
+/**
+ * The painter resolves a level beyond the table of the area border styles with the last level of
+ * that table, so the area border reach of such a level has to cover that last level, even when the
+ * tables of the other families are longer (the way line styles reach level 22 here, the area styles
+ * level 19). Otherwise the width of a resolved border exceeds its bound.
+ */
+TEST_CASE("The area border reach bound covers levels beyond the area style tables",
+          "[StyleConfigVisibilityBounds]")
+{
+  const auto            types=MakeTypes();
+
+  auto                  styleConfig=std::make_shared<osmscout::StyleConfig>(types.typeConfig);
+
+  osmscout::TypeInfoSet wayTypes(*types.typeConfig);
+
+  wayTypes.Set(types.wayType);
+
+  osmscout::StyleFilter wayFilter;
+
+  wayFilter.SetTypes(wayTypes);
+  wayFilter.SetMinLevel(0);
+  wayFilter.SetMaxLevel(22);
+
+  osmscout::LinePartialStyle lineStyle;
+
+  lineStyle.SetColorValue(osmscout::LineStyle::attrLineColor,osmscout::Color(0.0,0.0,1.0));
+  lineStyle.SetDoubleValue(osmscout::LineStyle::attrWidth,1.0);
+  styleConfig->AddWayLineStyle(wayFilter,lineStyle);
+
+  osmscout::TypeInfoSet areaTypes(*types.typeConfig);
+
+  areaTypes.Set(types.areaType);
+
+  osmscout::StyleFilter fillFilter;
+
+  fillFilter.SetTypes(areaTypes);
+  fillFilter.SetMinLevel(18);
+
+  osmscout::FillPartialStyle fillStyle;
+
+  fillStyle.SetColorValue(osmscout::FillStyle::attrFillColor,osmscout::Color(0.0,1.0,0.0));
+  styleConfig->AddAreaFillStyle(fillFilter,fillStyle);
+
+  osmscout::StyleFilter borderFilter;
+
+  borderFilter.SetTypes(areaTypes);
+  borderFilter.SetMinLevel(0);
+
+  osmscout::BorderPartialStyle borderStyle;
+
+  borderStyle.SetDoubleValue(osmscout::BorderStyle::attrWidth,0.2);
+  borderStyle.SetColorValue(osmscout::BorderStyle::attrColor,osmscout::Color(1.0,0.0,0.0));
+  styleConfig->AddAreaBorderStyle(borderFilter,borderStyle);
+
+  styleConfig->Postprocess();
+
+  for (size_t level : {19,20,22}) {
+    INFO("level " << level);
+
+    REQUIRE(styleConfig->GetVisibilityBounds(Level(level)).maxAreaBorderWidth==0.2);
+  }
+}
