@@ -79,6 +79,8 @@ private:
    */
   QString Translate(const char *sourceText) const;
 
+  QString LeaveMotorwayPhrase(const VoiceMessageStruct &message) const;
+
   /**
    * Build a translated phrase for a single maneuver. Returns an empty string
    * for messages that should not be spoken (NoMessage, Silent).
