@@ -747,7 +747,7 @@
         ],
         "oneway": true
       },
-      "lat": 49.989777505321626,
+      "lat": 49.98977750532163,
       "lon": 14.593817551387986,
       "name": "",
       "nodeIndex": 35,
@@ -5070,9 +5070,9 @@
       "nodeIndex": 236,
       "ref": "243",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "through"
+        "turn": "right"
       },
       "turn": "Straight on",
       "type": "highway_secondary"
@@ -5093,9 +5093,9 @@
       "nodeIndex": 237,
       "ref": "243",
       "suggestedLanes": {
-        "from": 0,
+        "from": 1,
         "to": 1,
-        "turn": "through"
+        "turn": "right"
       },
       "turn": "Straight on",
       "type": "highway_secondary"

@@ -2182,6 +2182,11 @@ namespace osmscout {
     auto isRightTurn = [](LaneTurn t) {
       return t==LaneTurn::Right || t==LaneTurn::SlightRight || t==LaneTurn::SharpRight;
     };
+    constexpr uint32_t leftBits  = 0b00000111;
+    constexpr uint32_t rightBits = 0b01110000;
+    // maximal distance between a junction and a following turn, for which a "through" suggestion
+    // of the junction is replaced by lanes of the turn
+    const Distance throughOverrideDistance = Meters(100);
     for (size_t i=0; i<evals.size(); ++i) {
       const JunctionLaneEval &turnEval = evals[i];
       if (!turnEval.suggestion) {
@@ -2209,10 +2214,15 @@ namespace osmscout {
         if (turnEval.distance - prev.distance > distanceBefore) {
           break; // do not suggest the turn lane too far ahead
         }
+        const bool turnIsNear = turnEval.distance - prev.distance <= throughOverrideDistance;
         for (auto* nodePtr : prev.approachNodes) {
           auto existing = nodePtr->GetDescription<RouteDescription::SuggestedLaneDescription>();
-          // do not override an already resolved directional suggestion
-          if (existing && existing->GetTurn()!=LaneTurn::Unknown) {
+          // Do not override an already resolved directional suggestion. A "through" suggestion
+          // is only valid up to the next turn: when the route turns shortly after, the lanes
+          // for that turn have to be used already here.
+          if (existing &&
+              existing->GetTurn()!=LaneTurn::Unknown &&
+              (existing->GetTurn()!=LaneTurn::Through || !turnIsNear)) {
             continue;
           }
           auto lanes = GetLaneDescription(*nodePtr);
@@ -2229,6 +2239,28 @@ namespace osmscout {
           } else {
             to = laneCount-1;
             from = laneCount-1-w;
+          }
+          // keep just lanes that may be used for the turn (lanes without turn information stay)
+          const std::vector<LaneTurn> &laneTurns = lanes->GetLaneTurns();
+          const uint32_t turnBits = left ? leftBits : rightBits;
+          auto compatible = [&laneTurns, turnBits](uint8_t lane) {
+            if (lane >= laneTurns.size()) {
+              return true;
+            }
+            uint32_t bits = TurnToBits(laneTurns[lane]);
+            return bits==0 || (bits & turnBits)!=0;
+          };
+          bool anyCompatible = false;
+          for (uint8_t lane=from; lane<=to; lane++) {
+            anyCompatible = anyCompatible || compatible(lane);
+          }
+          if (anyCompatible) {
+            while (!compatible(from)) {
+              from++;
+            }
+            while (!compatible(to)) {
+              to--;
+            }
           }
           nodePtr->AddDescription(
             std::make_shared<RouteDescription::SuggestedLaneDescription>(from, to, turn));
