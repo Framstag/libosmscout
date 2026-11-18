@@ -1183,11 +1183,13 @@ namespace osmscout {
     {
       for (const auto& selectorsByRule : selectors) {
         for (const auto& selectorsForType : selectorsByRule) {
-          if (level>=selectorsForType.size()) {
+          if (selectorsForType.empty()) {
             continue;
           }
 
-          for (const auto& selector : selectorsForType[level]) {
+          // The painter resolves a level beyond the table of the area styles with the last level of
+          // that table, and the table of one family can be shorter than the one of another family
+          for (const auto& selector : selectorsForType[std::min(level,selectorsForType.size()-1)]) {
             if (!selector.style) {
               continue;
             }
