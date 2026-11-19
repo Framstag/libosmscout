@@ -39,8 +39,11 @@ jobs:
         with:
           update: true
           suppress-deprecation-warnings: msystem-mingw64
+          # No mingw-w64-x86_64-extra-cmake-modules: MSYS2 builds it for
+          # clang64, clangarm64 and ucrt64 only since MINGW64 is deprecated, and
+          # nothing in this repository uses ECM. The meson job never installed it.
           install: "mingw-w64-x86_64-toolchain mingw-w64-x86_64-libtool
-                    mingw-w64-x86_64-cmake mingw-w64-x86_64-extra-cmake-modules mingw-w64-x86_64-ninja
+                    mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
                     jq
                     mingw-w64-x86_64-catch
                     mingw-w64-x86_64-protobuf
