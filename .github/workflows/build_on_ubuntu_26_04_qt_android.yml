@@ -5,17 +5,24 @@ name: Ubuntu 26.04 for Qt on Android
 # See https://github.com/miurahr/aqtinstall/
 # See https://groups.google.com/g/android-ndk-announce?hl=de for released Android NDK versions
 
+# A change to this workflow's own file runs it: the negation keeps the other
+# workflows out, the last entry re-includes this file. Without it, a merge that
+# only touches this file would be skipped here and never be exercised.
 on:
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/build_on_ubuntu_26_04_qt_android.yml'
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/build_on_ubuntu_26_04_qt_android.yml'
   workflow_dispatch:
 
 jobs:

@@ -1,15 +1,22 @@
 name: Sonar
 
+# A change to this workflow's own file runs it: the negation keeps the other
+# workflows out, the last entry re-includes this file. Without it, a merge that
+# only touches this file would be skipped here and never be exercised.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/sonar.yml'
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/sonar.yml'
   workflow_dispatch:
 
 jobs:

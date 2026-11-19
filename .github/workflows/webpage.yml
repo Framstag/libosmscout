@@ -1,11 +1,16 @@
 name: Webpage
 
+# A change to this workflow's own file runs it: the negation keeps the other
+# workflows out, the last entry re-includes this file. Without it, a merge that
+# only touches this file would be skipped here and never be exercised.
 on:
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/webpage.yml'
   workflow_dispatch:
 
 jobs:

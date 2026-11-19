@@ -1,16 +1,23 @@
 name: OS X
 
+# A change to this workflow's own file runs it: the negation keeps the other
+# workflows out, the last entry re-includes this file. Without it, a merge that
+# only touches this file would be skipped here and never be exercised.
 on:
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/build_and test_on_osx.yml'
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/**'
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/build_and test_on_osx.yml'
   workflow_dispatch:
 
 jobs:
