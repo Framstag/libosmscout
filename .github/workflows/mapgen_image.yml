@@ -1,5 +1,15 @@
 name: Mapgen image
 
+# The path lists below are the inputs of the two images, and they are load
+# bearing twice over: a pull request touching any of them builds and smoke
+# tests the image, and a merge to master that touches any of them publishes.
+# An input missing here therefore means a merge that changes what the image
+# contains publishes nothing, so the list has to follow the Dockerfiles:
+# the CMake configure and the targets the build stage builds (CMakeLists.txt,
+# cmake/, libosmscout/, libosmscout-import/, Import/, BasemapImport/), every
+# type definition the runtime stage ships (stylesheets/*.ost - the modules
+# map.ost pulls in are part of the image as well), the version declarations
+# both build systems carry, and the scripts the images copy.
 on:
   pull_request:
     branches:
@@ -7,11 +17,13 @@ on:
     paths:
       - 'scripts/mapgen/**'
       - 'Import/**'
-      - 'libosmscout-import/**'
-      - 'libosmscout/**'
-      - 'stylesheets/map.ost'
-      - 'stylesheets/basemap.ost'
       - 'BasemapImport/**'
+      - 'libosmscout/**'
+      - 'libosmscout-import/**'
+      - 'stylesheets/*.ost'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'meson.build'
       - '.dockerignore'
       - '.github/workflows/mapgen_image.yml'
   push:
@@ -20,11 +32,13 @@ on:
     paths:
       - 'scripts/mapgen/**'
       - 'Import/**'
-      - 'libosmscout-import/**'
-      - 'libosmscout/**'
-      - 'stylesheets/map.ost'
-      - 'stylesheets/basemap.ost'
       - 'BasemapImport/**'
+      - 'libosmscout/**'
+      - 'libosmscout-import/**'
+      - 'stylesheets/*.ost'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'meson.build'
       - '.dockerignore'
       - '.github/workflows/mapgen_image.yml'
   workflow_dispatch:
