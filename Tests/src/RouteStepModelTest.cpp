@@ -563,6 +563,51 @@ namespace {
   };
 
 /**
+ * The entry onto a motorway through a `highway_trunk_link`, as `InstructionPostprocessor` places it:
+ * the ramp node carries the direction change *and* the enter, with the signposted destination of the
+ * way the route leads onto.
+ *
+ * On the route this shape was reported from (51.5726589 7.4649125 → 51.4918664 7.5045441) the ramp is
+ * OSM way 8609608 and the trunk it leads onto is `ref=B 236`, `destination=Dortmund;Schwerte`. The
+ * placement adds the turn before the enter on that one node, and the route description postprocessor
+ * fires the turn hook first (issue #993).
+ */
+  RouteDescription MotorwayEnterThroughLinkRoute()
+  {
+    RouteDescription description;
+
+    description.SetDatabaseMapping({{databaseId, "/maps/region"}});
+
+    auto & street=AddNode(description, 0, 0.0, 0.0, GeoCoord(51.5726589, 7.4649125));
+
+    street.AddDescription(std::make_shared<RouteDescription::StartDescription>("Home"));
+    street.AddDescription(std::make_shared<RouteDescription::NameDescription>("Ruhrtalstrasse"));
+    street.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_secondary"));
+
+    auto & enter=AddNode(description, 1, 2500.0, 120.0, GeoCoord(51.568, 7.469));
+
+    // The direction change the placement puts on the node before the enter, on the same node.
+    enter.AddDescription(std::make_shared<RouteDescription::TurnDescription>(
+                           RouteDescription::DirectionDescription::slightlyRight));
+    enter.AddDescription(std::make_shared<RouteDescription::DirectionDescription>(30.0, 20.0));
+    enter.AddDescription(std::make_shared<RouteDescription::MotorwayEnterDescription>(
+                           std::make_shared<RouteDescription::NameDescription>("", "B 236")));
+    enter.AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Dortmund;Schwerte"));
+    enter.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_trunk_link"));
+
+    auto & trunk=AddNode(description, 2, 9000.0, 400.0, GeoCoord(51.52, 7.49));
+
+    trunk.AddDescription(std::make_shared<RouteDescription::NameDescription>("", "B 236"));
+    trunk.AddDescription(std::make_shared<RouteDescription::TypeNameDescription>("highway_trunk"));
+
+    auto & target=AddNode(description, 3, 14000.0, 700.0, GeoCoord(51.4918664, 7.5045441));
+
+    target.AddDescription(std::make_shared<RouteDescription::TargetDescription>("Work"));
+
+    return description;
+  }
+
+/**
  * A motorway change from "A 45" onto "Ruhrschnellweg (A 40)" through one `highway_motorway_link`.
  *
  * The fixture's nodes carry no objects, so `DestinationPostprocessor` attaches no record to any of
@@ -915,6 +960,31 @@ TEST_CASE("A motorway change carries no destination when no node carries a recor
 
   // ...and the step carries no record, not an empty one.
   REQUIRE(!change->destination.has_value());
+}
+
+TEST_CASE("A motorway enter through a link is the entry, not the turn")
+{
+  RouteDescription description=MotorwayEnterThroughLinkRoute();
+
+  RouteStepCollector collector;
+
+  RouteSteps         steps=collector.Collect(description);
+
+  REQUIRE(steps.steps.size()==4);
+
+  // The node the enter was placed on carries the direction change as well: the entry is the manoeuvre
+  // the step describes, not the turn the placement added before it.
+  const RouteStep & enter=steps.steps[1];
+
+  REQUIRE(enter.currentNodeIndex==1);
+  REQUIRE(enter.kind==RouteStep::Kind::motorwayEnter);
+  REQUIRE(enter.motorwayEnter.has_value());
+  REQUIRE(enter.motorwayEnter->to.ref=="B 236");
+
+  // The signposted destination of the way the route leads onto reaches the step, which is what a
+  // surface words as "Enter onto B 236 towards Dortmund" and what the voice names.
+  REQUIRE(enter.destination.has_value());
+  REQUIRE(*enter.destination=="Dortmund;Schwerte");
 }
 
 TEST_CASE("Live guidance extends the same step with progress")
