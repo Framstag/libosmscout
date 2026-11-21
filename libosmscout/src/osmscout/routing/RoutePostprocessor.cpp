@@ -748,12 +748,31 @@ namespace osmscout {
     node.AddDescription(desc);
   }
 
-  void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayEnter(RouteDescription::Node& node,
+  void RoutePostprocessor::InstructionPostprocessor::CarryDestination(const RouteDescription::Node& decidedAtNode,
+                                                                      RouteDescription::Node& node)
+  {
+    // The record of the node the manoeuvre is placed on belongs to the way the manoeuvre leads
+    // onto and always wins.
+    if (node.HasDescription<RouteDescription::DestinationDescription>()) {
+      return;
+    }
+
+    RouteDescription::DestinationDescriptionRef destination=decidedAtNode.GetDescription<RouteDescription::DestinationDescription>();
+
+    if (destination) {
+      node.AddDescription(destination);
+    }
+  }
+
+  void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayEnter(const RouteDescription::Node& previousNode,
+                                                                               RouteDescription::Node& node,
                                                                                const RouteDescription::NameDescriptionRef& toName)
   {
     RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(toName);
 
     node.AddDescription(desc);
+
+    CarryDestination(previousNode, node);
   }
 
   void RoutePostprocessor::InstructionPostprocessor::HandleDirectMotorwayLeave(const RouteDescription::Node& previousNode,
@@ -798,6 +817,8 @@ namespace osmscout {
                                                                                                                         Direction(*lastNode, *node));
 
       node->AddDescription(desc);
+
+      CarryDestination(*lastNode, *node);
     }
     else if (originIsMotorway && !targetIsMotorway) {
       RouteDescription::MotorwayLeaveDescriptionRef desc=std::make_shared<RouteDescription::MotorwayLeaveDescription>(originName,
@@ -813,6 +834,8 @@ namespace osmscout {
       RouteDescription::MotorwayEnterDescriptionRef desc=std::make_shared<RouteDescription::MotorwayEnterDescription>(nextName);
 
       node->AddDescription(desc);
+
+      CarryDestination(*lastNode, *node);
     }
   }
 
@@ -1062,7 +1085,8 @@ namespace osmscout {
       if (!postprocessor.IsMotorwayLink(*lastNode) &&
           !postprocessor.IsMotorway(*lastNode) &&
           postprocessor.IsMotorway(*node)) {
-        HandleDirectMotorwayEnter(*node,
+        HandleDirectMotorwayEnter(*lastNode,
+                                  *node,
                                   targetName);
 
         lastNode=node++;
@@ -1104,6 +1128,8 @@ namespace osmscout {
         node->AddDescription(std::make_shared<RouteDescription::MotorwayChangeDescription>(originName,
                                                                                            targetName,
                                                                                            Direction(*lastNode, *node)));
+
+        CarryDestination(*lastNode, *node);
 
         lastNode=node++;
 

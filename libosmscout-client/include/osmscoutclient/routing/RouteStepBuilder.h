@@ -50,7 +50,9 @@ namespace osmscout::client {
     static constexpr double NextNextWindowMeters=200.0;
 
     /**
-     * How far ahead of the position the builder looks for the manoeuvre and its follower.
+     * The first distance ahead of the position the builder looks for the manoeuvre and its
+     * follower; it extends the look-ahead until the manoeuvre is found or the route ends, so a long
+     * leg without a manoeuvre is not replaced by the arrival.
      */
     static constexpr double CollectWindowMeters=2*NextNextWindowMeters;
 

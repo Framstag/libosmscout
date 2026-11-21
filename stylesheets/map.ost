@@ -220,6 +220,14 @@ FEATURES
     en: "slope"
     de: "Steigung"
 
+  // Present but NOT enabled (guidelines/FileFormatVersion.md, "A feature that exists but is not
+  // enabled"): listing it here and on a type makes databases built from this file unreadable for
+  // older library builds, which needs a FILE_FORMAT_VERSION bump and a provider re-import.
+  // FEATURE Toll
+  // DESC
+  //   en: "toll"
+  //   de: "Maut"
+
   FEATURE HighwayMilestone
   DESC
     en: "milestone"

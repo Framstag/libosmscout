@@ -66,6 +66,7 @@ set(HEADER_FILES_FEATURE
         include/osmscout/feature/FeeFeature.h
         include/osmscout/feature/FromToFeature.h
         include/osmscout/feature/GradeFeature.h
+        include/osmscout/feature/TollFeature.h
         include/osmscout/feature/IsInFeature.h
         include/osmscout/feature/LanesFeature.h
         include/osmscout/feature/LayerFeature.h
@@ -249,6 +250,7 @@ set(SOURCE_FILES
     src/osmscout/feature/FeeFeature.cpp
     src/osmscout/feature/FromToFeature.cpp
     src/osmscout/feature/GradeFeature.cpp
+    src/osmscout/feature/TollFeature.cpp
     src/osmscout/feature/IsInFeature.cpp
     src/osmscout/feature/LanesFeature.cpp
     src/osmscout/feature/LayerFeature.cpp

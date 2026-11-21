@@ -71,8 +71,47 @@ namespace osmscout::client {
     }
 
     /**
+     * The precedence of the manoeuvres a node can carry. Where more than one hook of
+     * `RouteDescriptionPostprocessor` reports a manoeuvre for the same node, the step describes the
+     * strongest one.
+     *
+     * `InstructionPostprocessor::HandleMotorwayLink` places the direction change *and* the motorway
+     * enter on the node at which the route enters a motorway through a link, and the postprocessor
+     * fires the turn hook before the motorway-enter hook. Under a first-hook-wins rule such an entry
+     * was published as a bare turn, and with the kind went the entry wording, the entry arrow and the
+     * signposted destination every surface keys on it (issue #993).
+     *
+     * The order below is the order the hooks fire in, and so keeps every kind a node publishes today,
+     * except that a motorway manoeuvre outranks a turn on the same node.
+     */
+    int Precedence(RouteStep::Kind kind)
+    {
+      switch (kind) {
+        case RouteStep::Kind::start:
+        case RouteStep::Kind::target:
+          return 6;
+        case RouteStep::Kind::informative:
+          return 5;
+        case RouteStep::Kind::roundaboutEnter:
+        case RouteStep::Kind::roundaboutLeave:
+          return 4;
+        case RouteStep::Kind::motorwayEnter:
+        case RouteStep::Kind::motorwayChange:
+        case RouteStep::Kind::motorwayLeave:
+          return 3;
+        case RouteStep::Kind::turn:
+          return 2;
+        case RouteStep::Kind::nameChange:
+          return 1;
+        default:
+          return 0;
+      }
+    }
+
+    /**
      * The kind of a node, derived from the descriptions it carries. Only used when no hook
-     * reported a manoeuvre for the node; the hooks are the authority on what a manoeuvre is.
+     * reported a manoeuvre for the node; the hooks are the authority on what a manoeuvre is. The
+     * order is `Precedence`, so the two rules agree on a node that carries more than one manoeuvre.
      */
     RouteStep::Kind DeriveKind(const RouteDescription::Node& node)
     {
@@ -96,10 +135,6 @@ namespace osmscout::client {
         return RouteStep::Kind::roundaboutLeave;
       }
 
-      if (node.HasDescription<RouteDescription::TurnDescription>()) {
-        return RouteStep::Kind::turn;
-      }
-
       if (node.HasDescription<RouteDescription::MotorwayEnterDescription>()) {
         return RouteStep::Kind::motorwayEnter;
       }
@@ -110,6 +145,10 @@ namespace osmscout::client {
 
       if (node.HasDescription<RouteDescription::MotorwayLeaveDescription>()) {
         return RouteStep::Kind::motorwayLeave;
+      }
+
+      if (node.HasDescription<RouteDescription::TurnDescription>()) {
+        return RouteStep::Kind::turn;
       }
 
       if (node.HasDescription<RouteDescription::NameChangedDescription>()) {
@@ -134,7 +173,7 @@ namespace osmscout::client {
 
   void RouteStepCollector::NoteKind(RouteStep::Kind kind)
   {
-    if (!pendingKindSet) {
+    if (!pendingKindSet || Precedence(kind)>Precedence(pendingKind)) {
       pendingKindSet=true;
       pendingKind=kind;
     }
