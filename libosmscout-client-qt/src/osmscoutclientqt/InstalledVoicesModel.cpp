@@ -277,9 +277,12 @@ void InstalledVoicesModel::playTTSSample([[maybe_unused]] const QModelIndex &ind
   // A handful of representative maneuver combinations, in the same spirit as
   // the "Voice of Marble" sample sets used above for pre-recorded voices.
   using Type = VoiceMessageStruct::Type;
+  auto roundaboutLeave = VoiceMessageStruct(Type::LeaveRoundabout, Meters(50));
+  roundaboutLeave.exitNumber = 3;
+
   static const std::array<std::pair<VoiceMessageStruct, VoiceMessageStruct>, 5> samples{{
     {VoiceMessageStruct(Type::TurnRight, Meters(500)), VoiceMessageStruct()},
-    {VoiceMessageStruct(Type::LeaveRbExit3, Meters(50)), VoiceMessageStruct(Type::StraightOn, Meters(100))},
+    {roundaboutLeave, VoiceMessageStruct(Type::StraightOn, Meters(100))},
     {VoiceMessageStruct(Type::LeaveMotorwayRight, Meters(800)), VoiceMessageStruct()},
     {VoiceMessageStruct(Type::TurnLeft, Meters(300)), VoiceMessageStruct()},
     {VoiceMessageStruct(Type::LeaveMotorwayLeft, Meters(1500)), VoiceMessageStruct()}

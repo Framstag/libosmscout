@@ -649,10 +649,11 @@ refresh gate pre-seeded so no network is needed). Publication depends on
 those checks and happens for
 
 - a merge or direct commit to `master` that changes an input of the image
-  (`scripts/mapgen/**`, `Import/**`, `libosmscout-import/**`,
-  `libosmscout/**`, `stylesheets/map.ost`, `.dockerignore`, the workflow
-  itself) - a commit that changes none of them cannot change the image
-  content and publishes nothing, and
+  (`scripts/mapgen/**`, `Import/**`, `BasemapImport/**`, `libosmscout/**`,
+  `libosmscout-import/**`, `CMakeLists.txt`, `cmake/**`, `meson.build`,
+  `stylesheets/*.ost`, `.dockerignore`, the workflow itself) - a commit that
+  changes none of them cannot change the image content and publishes nothing,
+  and
 - a manual run with publishing requested (`workflow_dispatch`).
 
 Pull requests never publish. After a publication the workflow prunes the
