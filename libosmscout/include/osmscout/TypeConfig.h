@@ -1171,6 +1171,7 @@ namespace osmscout {
     FeatureRef                                  featureWidth;
     FeatureRef                                  featureMaxSpeed;
     FeatureRef                                  featureGrade;
+    FeatureRef                                  featureToll;
     FeatureRef                                  featureBridge;
     FeatureRef                                  featureTunnel;
     FeatureRef                                  featureEmbankment;

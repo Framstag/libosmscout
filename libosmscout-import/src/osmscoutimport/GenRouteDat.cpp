@@ -94,6 +94,29 @@ namespace osmscout {
     return 1;
   }
 
+  /**
+   * The toll signal of a way, as the bit the object variant carries beside its grade.
+   *
+   * A type configuration that does not declare the Toll feature has no toll information — the feature
+   * exists in the library but is not enabled (guidelines/FileFormatVersion.md, "A feature that exists but
+   * is not enabled") — and its ways read as "no toll": the absence of the signal is never taken as a
+   * statement about price.
+   */
+  uint8_t RouteDataGenerator::TollBit(const Way& way) const
+  {
+    if (tollReader==nullptr) {
+      return 0;
+    }
+
+    const TollFeatureValue *tollValue=tollReader->GetValue(way.GetFeatureValueBuffer());
+
+    if (tollValue!=nullptr && tollValue->IsToll()) {
+      return ObjectVariantData::TollBit;
+    }
+
+    return 0;
+  }
+
   uint8_t RouteDataGenerator::CopyFlags(const Area::Ring& ring) const
   {
     uint8_t                            flags=0;
@@ -1604,7 +1627,7 @@ namespace osmscout {
               uint16_t objectVariantIndex=RegisterOrUseObjectVariantData(routeDataMap,
                                                                          way->GetType(),
                                                                          GetMaxSpeed(*way),
-                                                                         GetGrade(*way));
+                                                                         GetGrade(*way) | TollBit(*way));
 
               if (way->IsCircular()) {
                 // Circular way routing (similar to current area routing, but respecting isOneway())
@@ -1733,11 +1756,20 @@ namespace osmscout {
     AccessFeatureValueReader           accessReader(*typeConfig);
     MaxSpeedFeatureValueReader         maxSpeedReader(*typeConfig);
     GradeFeatureValueReader            gradeReader(*typeConfig);
+    // The Toll feature exists in the library but is not enabled in the type files, so a type config that
+    // declares it is the exception. Constructing a reader for a feature the config does not know asserts
+    // in FeatureValueReader, hence the guard; without it every way reads as "no toll".
+    std::unique_ptr<TollFeatureValueReader> tollReaderHolder;
+
+    if (typeConfig->GetFeature(TollFeature::NAME)) {
+      tollReaderHolder=std::make_unique<TollFeatureValueReader>(*typeConfig);
+    }
 
     this->accessRestrictedReader=&accessRestrictedReader;
     this->accessReader=&accessReader;
     this->maxSpeedReader=&maxSpeedReader;
     this->gradeReader=&gradeReader;
+    this->tollReader=tollReaderHolder.get();
 
     //
     // Handling of restriction relations

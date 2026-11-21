@@ -205,7 +205,7 @@ namespace osmscout {
     TypeInfoRef type=objectVariant.type;
 
     size_t typeIndex=type->GetIndex();
-    Grade grade=static_cast<Grade>(objectVariant.grade);
+    Grade grade=static_cast<Grade>(objectVariant.GetGrade());
 
     return typeIndex<speeds.size() && speeds[typeIndex][grade]>0.0;
   }
