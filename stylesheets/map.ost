@@ -13183,7 +13183,7 @@ TYPES
         de: "Oberleitungsbuslinie"
 
   TYPE route_bicycle
-    = RELATION ("type"=="route" AND "route"=="bicycle")
+    = RELATION ("type"=="route" AND "route"=="bicycle" AND !("state"=="proposed"))
       {Name, Ref, Operator, Network, Color}
       ROUTE
       DESC
