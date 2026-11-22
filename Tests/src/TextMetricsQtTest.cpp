@@ -22,18 +22,42 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #include <QApplication>
 #include <QPainter>
 #include <QPixmap>
 #include <QtGlobal>
 
+#include <osmscout/TypeConfig.h>
 #include <osmscout/projection/MercatorProjection.h>
+#include <osmscoutmap/MapData.h>
 #include <osmscoutmap/MapParameter.h>
+#include <osmscoutmap/StyleConfig.h>
 
 #include <osmscoutmapqt/MapPainterQt.h>
 
 namespace {
+
+  /**
+   * The one QApplication of this test process. Qt allows a single instance, while Catch2 runs every
+   * case of this binary in one process, so the cases share it instead of constructing their own.
+   */
+  QApplication& GetApplication()
+  {
+#if !defined(_WIN32)
+    // Run headless on Unix; the tests do not need a windowing system.
+    // On Windows the default platform plugin is used (runs in a desktop session).
+    qputenv("QT_QPA_PLATFORM", "offscreen");
+#endif
+
+    static int  argc=1;
+    static char arg0[]="TextMetricsQtTest";
+    static char *argv[1]={arg0};
+    static QApplication app(argc, argv);
+
+    return app;
+  }
 
   osmscout::MercatorProjection CreateProjection()
   {
@@ -57,21 +81,45 @@ namespace {
 
     return parameter;
   }
+
+  /**
+   * A painter with a drawing device, so that its font resolution and label layout can be exercised.
+   * The device is only what the layout measures through; nothing is drawn into it.
+   */
+  struct PainterFixture
+  {
+    QPixmap                      pixmap{800, 200};
+    QPainter                     qp{&pixmap};
+    osmscout::MercatorProjection projection{CreateProjection()};
+    osmscout::MapParameter       parameter{CreateParameter()};
+    osmscout::MapPainterQt       painter;
+
+    PainterFixture()
+    {
+      pixmap.fill(Qt::white);
+
+      painter.DrawMap(projection, parameter, {}, &qp);
+    }
+
+    ~PainterFixture()
+    {
+      qp.end();
+    }
+
+    /**
+     * The factor the painter scales a label font size with before it quantizes it to the pixel grid
+     * (see MapPainterQt::GetFont).
+     */
+    double Scale() const
+    {
+      return projection.ConvertWidthToPixel(parameter.GetFontSize());
+    }
+  };
 } // namespace
 
 TEST_CASE("Qt MeasureText glyph positions are relative to label origin", "[TextMetricsQt]")
 {
-#if !defined(_WIN32)
-  // Run headless on Unix; the test does not need a windowing system.
-  // On Windows the default platform plugin is used (runs in a desktop session).
-  qputenv("QT_QPA_PLATFORM", "offscreen");
-
-#endif
-
-  int          argc = 1;
-  char         arg0[] = "TextMetricsQtTest";
-  char         * argv[1] = {arg0};
-  QApplication app(argc, argv);
+  GetApplication();
 
   QPixmap      pixmap(800, 200);
 
@@ -126,4 +174,167 @@ TEST_CASE("Qt MeasureText glyph positions are relative to label origin", "[TextM
   REQUIRE(metrics.height == Catch::Approx(maxY-minY).margin(1.0));
 
   qp.end();
+}
+
+TEST_CASE("Qt painter shares one resolved font for sizes within a device pixel", "[TextMetricsQt]")
+{
+  GetApplication();
+
+  PainterFixture fixture;
+
+  const double scale=fixture.Scale();
+
+  REQUIRE(scale>0.0);
+
+  const size_t baseline=fixture.painter.GetResolvedFontCount();
+
+  // Both sizes scale to a value that truncates to the same device pixel
+  auto firstMetrics=fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", 60.1/scale);
+
+  const size_t afterFirst=fixture.painter.GetResolvedFontCount();
+
+  REQUIRE(afterFirst==baseline+1);
+
+  auto secondMetrics=fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", 60.9/scale);
+
+  REQUIRE(fixture.painter.GetResolvedFontCount()==afterFirst);
+
+  // Both labels are measured and drawn with the font the painter resolved for the first one
+  REQUIRE(secondMetrics.width==Catch::Approx(firstMetrics.width));
+  REQUIRE(secondMetrics.height==Catch::Approx(firstMetrics.height));
+  REQUIRE(secondMetrics.glyphs.size()==firstMetrics.glyphs.size());
+
+  for (size_t i=0; i<firstMetrics.glyphs.size(); i++) {
+    REQUIRE(secondMetrics.glyphs[i].position.GetX()==Catch::Approx(firstMetrics.glyphs[i].position.GetX()));
+    REQUIRE(secondMetrics.glyphs[i].box.width==Catch::Approx(firstMetrics.glyphs[i].box.width));
+    REQUIRE(secondMetrics.glyphs[i].box.height==Catch::Approx(firstMetrics.glyphs[i].box.height));
+  }
+}
+
+TEST_CASE("Qt painter resolves no font per label and none for a repeated frame", "[TextMetricsQt]")
+{
+  GetApplication();
+
+  PainterFixture fixture;
+
+  const double scale=fixture.Scale();
+
+  const size_t baseline=fixture.painter.GetResolvedFontCount();
+  const size_t baselineRetained=fixture.painter.GetRetainedFontCount();
+
+  // Twenty distinct label sizes spread over five device pixel steps: four labels per step, each with
+  // a sub-pixel difference inside the step
+  for (size_t i=0; i<20; i++) {
+    const double pixelSize=50.5+static_cast<double>(i%5)+0.02*static_cast<double>(i/5);
+
+    fixture.painter.MeasureText(fixture.projection,
+                                fixture.parameter,
+                                "Hello",
+                                pixelSize/scale);
+  }
+
+  // One font per device pixel step, not one per label
+  REQUIRE(fixture.painter.GetResolvedFontCount()==baseline+5);
+  REQUIRE(fixture.painter.GetRetainedFontCount()==baselineRetained+5);
+
+  // The repeated frame resolves no further font
+  for (size_t i=0; i<20; i++) {
+    const double pixelSize=50.5+static_cast<double>(i%5)+0.02*static_cast<double>(i/5);
+
+    fixture.painter.MeasureText(fixture.projection,
+                                fixture.parameter,
+                                "Hello",
+                                pixelSize/scale);
+  }
+
+  REQUIRE(fixture.painter.GetResolvedFontCount()==baseline+5);
+}
+
+TEST_CASE("Qt painter releases the resolved fonts it retains", "[TextMetricsQt]")
+{
+  GetApplication();
+
+  PainterFixture fixture;
+
+  const double scale=fixture.Scale();
+  const double fontSize=60.1/scale;
+
+  fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", fontSize);
+
+  const size_t afterFirst=fixture.painter.GetResolvedFontCount();
+
+  REQUIRE(afterFirst>=1);
+  REQUIRE(fixture.painter.GetRetainedFontCount()>=1);
+
+  fixture.painter.ReleaseFonts();
+
+  REQUIRE(fixture.painter.GetRetainedFontCount()==0);
+
+  fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", fontSize);
+
+  // The released font is resolved again rather than served from the cache
+  REQUIRE(fixture.painter.GetResolvedFontCount()==afterFirst+1);
+}
+
+TEST_CASE("Qt painter draws a label as before after releasing its fonts", "[TextMetricsQt]")
+{
+  GetApplication();
+
+  PainterFixture fixture;
+
+  const double scale=fixture.Scale();
+  const double fontSize=60.1/scale;
+
+  auto before=fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", fontSize);
+
+  fixture.painter.ReleaseFonts();
+
+  auto after=fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", fontSize);
+
+  REQUIRE(after.width==Catch::Approx(before.width));
+  REQUIRE(after.height==Catch::Approx(before.height));
+  REQUIRE(after.glyphs.size()==before.glyphs.size());
+
+  for (size_t i=0; i<before.glyphs.size(); i++) {
+    REQUIRE(after.glyphs[i].position.GetX()==Catch::Approx(before.glyphs[i].position.GetX()));
+    REQUIRE(after.glyphs[i].position.GetY()==Catch::Approx(before.glyphs[i].position.GetY()));
+    REQUIRE(after.glyphs[i].box.x==Catch::Approx(before.glyphs[i].box.x));
+    REQUIRE(after.glyphs[i].box.y==Catch::Approx(before.glyphs[i].box.y));
+    REQUIRE(after.glyphs[i].box.width==Catch::Approx(before.glyphs[i].box.width));
+    REQUIRE(after.glyphs[i].box.height==Catch::Approx(before.glyphs[i].box.height));
+  }
+}
+
+TEST_CASE("Qt painter releases the fonts of a replaced stylesheet", "[TextMetricsQt]")
+{
+  GetApplication();
+
+  PainterFixture fixture;
+
+  auto typeConfig=std::make_shared<osmscout::TypeConfig>();
+  auto firstStylesheet=std::make_shared<osmscout::StyleConfig>(typeConfig);
+  auto secondStylesheet=std::make_shared<osmscout::StyleConfig>(typeConfig);
+
+  const double scale=fixture.Scale();
+  const double fontSize=60.1/scale;
+
+  osmscout::MapData data;
+
+  data.styleConfig=firstStylesheet;
+
+  fixture.painter.DrawMap(fixture.projection, fixture.parameter, {data}, &fixture.qp);
+  fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", fontSize);
+
+  const size_t afterFirst=fixture.painter.GetResolvedFontCount();
+
+  REQUIRE(afterFirst>=1);
+
+  // Another stylesheet replaces the first one, so the painter releases the fonts of the replaced one
+  data.styleConfig=secondStylesheet;
+
+  fixture.painter.DrawMap(fixture.projection, fixture.parameter, {data}, &fixture.qp);
+  fixture.painter.MeasureText(fixture.projection, fixture.parameter, "Hello", fontSize);
+
+  // The font of the first stylesheet was released and is resolved again rather than served
+  REQUIRE(fixture.painter.GetResolvedFontCount()>afterFirst);
 }
