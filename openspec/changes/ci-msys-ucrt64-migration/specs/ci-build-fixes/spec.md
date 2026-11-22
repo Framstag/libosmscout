@@ -1,6 +1,34 @@
 # Spec Delta
 
+## REMOVED Requirements
+
+### Requirement: CI workflows install libpng
+
+**Reason**: The requirement named the libpng package of one MSYS2 environment, `mingw-w64-x86_64-libpng`. The MSYS jobs no longer select that environment, and the requirement as written would send a reader to a package the jobs do not install.
+
+**Migration**: Replaced by "CI workflows install the libpng package of their environment", which keeps the Ubuntu (`libpng-dev`) and macOS (`libpng`) entries and states the MSYS entry as the libpng package of the environment the job selects.
+
 ## ADDED Requirements
+
+### Requirement: CI workflows install the libpng package of their environment
+
+Every CI workflow that builds demos SHALL install libpng, named the way its package manager names it — `libpng-dev` on Ubuntu, `libpng` on macOS, and the libpng package of the MSYS2 environment the job selects (currently `mingw-w64-ucrt-x86_64-libpng`) — so that `PNG::PNG` is always available.
+
+#### Scenario: Ubuntu CI apt-get includes libpng-dev
+
+- **WHEN** inspecting the `apt-get install` commands in `.github/workflows/build_and test_on_ubuntu_26_04.yml`
+- **THEN** `libpng-dev` SHALL appear in every package list for jobs that build demos
+
+#### Scenario: macOS CI brew includes libpng
+
+- **WHEN** inspecting the `brew install` command in `.github/workflows/build_and test_on_osx.yml`
+- **THEN** `libpng` SHALL appear in the package list
+
+#### Scenario: MSYS CI includes the libpng package of its environment
+
+- **WHEN** inspecting the `setup-msys2` install list in `.github/workflows/build_and test_on_msys.yml`
+- **THEN** the libpng package of the environment the job selects SHALL appear in the package list
+- **AND** its entry SHALL carry that environment's prefix
 
 ### Requirement: An MSYS2 CI job selects an environment that carries every package it installs
 
@@ -32,6 +60,12 @@ list.
 - **WHEN** the change that responds to the removal is inspected
 - **THEN** the package SHALL be absent from the install list
 - **AND** the reason SHALL be stated next to the list
+
+#### Scenario: Every entry carries the prefix of the selected environment
+
+- **WHEN** the install list of a job that builds demos is inspected
+- **THEN** every entry SHALL carry the prefix of the environment that job selects
+- **AND** no entry SHALL name the prefix of an environment the job does not select
 
 ### Requirement: A deprecated MSYS2 environment is left, not acknowledged
 

@@ -41,6 +41,8 @@ acknowledgement has to give way to the migration.
   is what they follow.
 - The build-status table in `README.md` and the CI/CD notes in `AGENTS.md` name the environment the
   MSYS jobs build in.
+- The `ci-build-fixes` requirement that names the libpng package states it as the libpng package of
+  the environment a job selects, instead of naming the package of the environment the MSYS jobs leave.
 
 ## Capabilities
 
@@ -64,7 +66,7 @@ owns.
 - `README.md` - the build-status row for the MSYS workflow names UCRT64.
 - `AGENTS.md` (CI/CD section) - the workflow table and a new note record the environment, the reason
   and the package prefix.
-- `openspec/specs/ci-build-fixes/spec.md` - the requirements this change adds (via this directory's
-  spec delta).
+- `openspec/specs/ci-build-fixes/spec.md` - the requirements this change adds, and the libpng
+  requirement it restates, all via this directory's spec delta.
 - No `CMakeLists.txt`, `meson.build`, source or test file is part of the change: the environment
   prefix, not the project, is what moved.
