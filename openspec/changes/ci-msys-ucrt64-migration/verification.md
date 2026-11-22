@@ -3,8 +3,8 @@
 The MSYS jobs can only be verified on a Windows runner with MSYS2, so the verification is this
 change's own pull request: [#1938](https://github.com/Framstag/libosmscout/pull/1938), head
 `ci/msys-ucrt64-migration`. Two runs of the `MSYS` workflow cover it: `45049676443` on commit
-`1268b9e77` (the workflow and documentation change) and `45052006614` on commit `7f3c8edec` (this
-file and the spec delta), both pushed 2026-11-22.
+`1268b9e77` (the workflow and documentation change) and `45052006614` on commit `7f3c8edec` (the
+spec delta and this file), both pushed 2026-11-22.
 
 ## The image the jobs were scheduled on
 
@@ -86,7 +86,8 @@ Run `45049676443` (commit `1268b9e77`):
 | `gcc and cmake` | 17:28:59 -> 17:44:40 | 15m41s | success |
 | `gcc and meson` | 17:28:59 -> 17:47:56 | 18m57s | success |
 
-Run `45052006614` (commit `7f3c8edec`, the head):
+Run `45052006614` (commit `7f3c8edec`, its documentation follow-up; the workflow files are the ones
+of the commit above):
 
 | Job | Window (UTC) | Duration | Result |
 |-----|--------------|----------|--------|
@@ -134,8 +135,8 @@ libosmscout-map-skia       : false
 ```
 
 `3221225501` is `0xC000001D`, an illegal-instruction exception. The same check passes in the second
-run of the same head, on the same package (`Checking if "Skia runtime check" with dependency skia
-runs: YES`) and the `gcc and cmake` job of the first run passes the identical check:
+run with the same workflow files and the same package (`Checking if "Skia runtime check" with
+dependency skia runs: YES`), and the `gcc and cmake` job of the first run passes the identical check:
 
 ```
 -- Performing Test SKIA_RUNTIME_COMPATIBLE - Success
