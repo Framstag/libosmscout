@@ -2,7 +2,9 @@
 
 The MSYS jobs can only be verified on a Windows runner with MSYS2, so the verification is this
 change's own pull request: [#1938](https://github.com/Framstag/libosmscout/pull/1938), head
-`ci/msys-ucrt64-migration`, commit `1268b9e77`, pushed 2026-11-22.
+`ci/msys-ucrt64-migration`. Two runs of the `MSYS` workflow cover it: `45049676443` on commit
+`1268b9e77` (the workflow and documentation change) and `45052006614` on commit `7f3c8edec` (this
+file and the spec delta), both pushed 2026-11-22.
 
 ## The image the jobs were scheduled on
 
@@ -11,8 +13,8 @@ gcc and meson  Set up job  Image: windows-2025-vs2026
                            Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261116.315
 ```
 
-Both jobs of run `45049676443` (workflow `MSYS`) resolved the `windows-2025` label to that image, the
-same one the failing run `44886294206` was scheduled on, so the difference between the two runs is the
+Both jobs of both runs resolve the `windows-2025` label to that image, the same one the failing run
+`44886294206` was scheduled on, so the difference between those runs and the failing one is the
 environment the setup step selects and nothing else.
 
 ## The environment the setup step selects (tasks 1.3, 1.5, 3.1)
@@ -77,19 +79,31 @@ Liberation Sans resolves to: D:/a/libosmscout/libosmscout/libosmscout-map-opengl
 
 ## Runs and tests (tasks 3.3, 3.4)
 
+Run `45049676443` (commit `1268b9e77`):
+
 | Job | Window (UTC) | Duration | Result |
 |-----|--------------|----------|--------|
 | `gcc and cmake` | 17:28:59 -> 17:44:40 | 15m41s | success |
 | `gcc and meson` | 17:28:59 -> 17:47:56 | 18m57s | success |
 
-Every step of both jobs concludes `success`, including `Configure build project`, `Build project` and
-`Run tests`.
+Run `45052006614` (commit `7f3c8edec`, the head):
+
+| Job | Window (UTC) | Duration | Result |
+|-----|--------------|----------|--------|
+| `gcc and cmake` | 17:54:02 -> 18:06:38 | 12m36s | success |
+| `gcc and meson` | 17:54:03 -> 18:11:33 | 17m30s | success |
+
+Every step of every job concludes `success`, including `Configure build project`, `Build project` and
+`Run tests`. The test summaries:
 
 ```
-gcc and cmake  Run tests  100% tests passed out of 120
-                          Total Test time (real) =  95.40 sec
-gcc and meson  Run tests  Ok:                154
-                          Fail:              0
+45049676443  gcc and cmake  Run tests  100% tests passed out of 120
+             gcc and meson  Run tests  Ok:                154
+                                       Fail:              0
+
+45052006614  gcc and cmake  Run tests  100% tests passed out of 120
+             gcc and meson  Run tests  Ok:                156
+                                       Fail:              0
 ```
 
 The meson job runs the `PerformanceTest-cairo-*` cases (task 3.4), for example
@@ -100,16 +114,17 @@ The meson job runs the `PerformanceTest-cairo-*` cases (task 3.4), for example
 The last green MINGW64 run `44582212555` (2026-11-19 17:54 UTC) is the baseline. Comparing the meson
 feature block of both runs leaves two differences:
 
-| Feature | MINGW64 | UCRT64 |
-|---------|---------|--------|
-| `libosmscout-client-qt` | false | true |
-| `libosmscout-map-skia` | true | false |
+| Feature | MINGW64 | UCRT64, run `45049676443` | UCRT64, run `45052006614` |
+|---------|---------|------|------|
+| `libosmscout-client-qt` | false | true | true |
+| `libosmscout-map-skia` | true | false | true |
 
-`libosmscout-client-qt` compiles in the UCRT64 meson job, which it did not before — the Qt5 package
-there brings the modules that dependency asks for. That is coverage gained, not lost.
+`libosmscout-client-qt` compiles in the UCRT64 meson jobs, which it did not before — the Qt5 package
+there brings the modules that dependency asks for. That is coverage gained, not lost (the meson test
+count rises from 155 to 156).
 
-`libosmscout-map-skia` is switched off by the runtime check of `meson.build`, which exists because
-some Skia packages are built with CPU instructions that not every runner has:
+`libosmscout-map-skia` was switched off in the first run by the runtime check of `meson.build`, which
+exists because some Skia packages are built with CPU instructions that not every runner has:
 
 ```
 Run-time dependency skia found: YES 143.r77119.da51f0d6
@@ -118,20 +133,20 @@ meson.build:278: WARNING: Skia runtime check failed - disabling Skia backend
 libosmscout-map-skia       : false
 ```
 
-`3221225501` is `0xC000001D`, an illegal-instruction exception. The two jobs of the run are scheduled
-on different runners (`GitHub Actions 1000020861` and `1000020865`), and the `gcc and cmake` job of
-the same run passes the identical check on the same package:
+`3221225501` is `0xC000001D`, an illegal-instruction exception. The same check passes in the second
+run of the same head, on the same package (`Checking if "Skia runtime check" with dependency skia
+runs: YES`) and the `gcc and cmake` job of the first run passes the identical check:
 
 ```
 -- Performing Test SKIA_RUNTIME_COMPATIBLE - Success
 --  - Skia map drawing backend:     ON
 ```
 
-It then builds and links `libosmscout_map_skia.dll` and passes `MapPainterSkiaTest`,
-`SymbolRendererSkiaTest` and `SVGIconSkiaTest`. So the Skia backend stays covered by the matrix
-through the cmake job, and the meson job degrades exactly one test (155 -> 154) through the guard that
-is meant to degrade it instead of failing the job. Whether the guard trips is a property of the runner
-the meson job lands on, not of this change.
+That job builds and links `libosmscout_map_skia.dll` and passes `MapPainterSkiaTest`,
+`SymbolRendererSkiaTest` and `SVGIconSkiaTest`. So the Skia backend stays covered by the matrix, and
+whether the guard trips is a property of the runner a job lands on (the two jobs of a run are
+different runners), not of this change: it degrades one test instead of failing the job, as it is
+meant to.
 
 DirectX, OpenGL, Qt, SVG, GDI and cairo are configured in both jobs as before (`d2d1.h` is found,
 `libosmscout-map-directx : true`).
@@ -142,7 +157,8 @@ The diff contains no file under `Tests/`, `libosmscout*/`, `OSMScout*/`, `Apple/
 `CMakeLists.txt` or `meson.build`, so no test is required for this change; the existing suites run
 inside the two MSYS jobs above. No other job selects a MSYS2 environment.
 
-The same push ran the workflows this change does not touch, all green:
+The push that carries the workflow change (commit `1268b9e77`) ran the workflows this change does not
+touch, all green:
 
 | Workflow | Run | Result |
 |----------|-----|--------|
