@@ -277,7 +277,6 @@ static bool RenderJunctionImage(const std::string &databaseDir,
                                 const std::string &stylesheet,
                                 const SuggestionDiff &diff,
                                 const std::string &outputPath,
-                                bool useOldSuggestion,
                                 size_t width,
                                 size_t height)
 {
@@ -295,13 +294,19 @@ static bool RenderJunctionImage(const std::string &databaseDir,
     return false;
   }
 
+  // the image is split vertically: old state on the left half, new state on the right half
+  size_t halfWidth = width / 2;
+  if (halfWidth == 0) {
+    log.Error() << "Image width is too small: " << width;
+    return false;
+  }
   GeoCoord center=diff.coord;
 
   MercatorProjection projection;
   projection.Set(center,
                  Magnification(Magnification::magBlock),
                  192.0,
-                 width, height);
+                 halfWidth, height);
 
   MapParameter drawParameter;
   drawParameter.SetFontName("/usr/share/fonts/TTF/LiberationSans-Regular.ttf");
@@ -320,7 +325,7 @@ static bool RenderJunctionImage(const std::string &databaseDir,
   mapService->AddTileDataToMapData(tiles, data);
 
   cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24,
-                                                        static_cast<int>(width),
+                                                        static_cast<int>(2 * halfWidth),
                                                         static_cast<int>(height));
   if (surface == nullptr) {
     log.Error() << "Cannot create cairo surface";
@@ -338,14 +343,30 @@ static bool RenderJunctionImage(const std::string &databaseDir,
   dataVec.push_back(std::move(data));
 
   MapPainterCairo painter;
-  painter.DrawMap(projection, drawParameter, dataVec, cairo);
 
-  const auto &suggestion = useOldSuggestion ? diff.oldSuggestion : diff.newSuggestion;
-  const auto &routeNodes = useOldSuggestion ? diff.oldRouteNodes : diff.newRouteNodes;
-  std::string label = useOldSuggestion ? "OLD: " : "NEW: ";
-  label += FormatSuggestion(suggestion);
+  for (bool useOldSuggestion : {true, false}) {
+    const auto &suggestion = useOldSuggestion ? diff.oldSuggestion : diff.newSuggestion;
+    const auto &routeNodes = useOldSuggestion ? diff.oldRouteNodes : diff.newRouteNodes;
+    std::string label = useOldSuggestion ? "OLD: " : "NEW: ";
+    label += FormatSuggestion(suggestion);
 
-  RenderLaneOverlay(cairo, projection, diff, routeNodes, suggestion, label);
+    cairo_save(cairo);
+    cairo_translate(cairo, useOldSuggestion ? 0.0 : static_cast<double>(halfWidth), 0.0);
+    cairo_rectangle(cairo, 0.0, 0.0, static_cast<double>(halfWidth), static_cast<double>(height));
+    cairo_clip(cairo);
+
+    painter.DrawMap(projection, drawParameter, dataVec, cairo);
+    RenderLaneOverlay(cairo, projection, diff, routeNodes, suggestion, label);
+
+    cairo_restore(cairo);
+  }
+
+  // separator between the old and new half
+  cairo_set_source_rgba(cairo, 0.0, 0.0, 0.0, 1.0);
+  cairo_set_line_width(cairo, 2.0);
+  cairo_move_to(cairo, static_cast<double>(halfWidth), 0.0);
+  cairo_line_to(cairo, static_cast<double>(halfWidth), static_cast<double>(height));
+  cairo_stroke(cairo);
 
   if (cairo_surface_write_to_png(surface, outputPath.c_str()) != CAIRO_STATUS_SUCCESS) {
     log.Error() << "Cannot write PNG: " << outputPath;
@@ -422,14 +443,11 @@ static int CompareFile(const std::string &oldFile,
       std::filesystem::create_directories(options.imagesDir);
 
       std::string stem = basename.substr(0, basename.find_last_of('.'));
-      std::string oldImg = options.imagesDir + "/" + stem + "_node" + std::to_string(diff.nodeIndex) + "_old.png";
-      std::string newImg = options.imagesDir + "/" + stem + "_node" + std::to_string(diff.nodeIndex) + "_new.png";
+      std::string img = options.imagesDir + "/" + stem + "_node" + std::to_string(diff.nodeIndex) + ".png";
 
-      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, oldImg, true,
+      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, img,
                           options.imageWidth, options.imageHeight);
-      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, newImg, false,
-                          options.imageWidth, options.imageHeight);
-      std::cout << "    images: " << oldImg << ", " << newImg << std::endl;
+      std::cout << "    image: " << img << " (left: old, right: new)" << std::endl;
     }
 #endif
   }
