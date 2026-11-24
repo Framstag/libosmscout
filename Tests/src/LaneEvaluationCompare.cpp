@@ -26,6 +26,10 @@ struct SuggestionDiff
   std::optional<NodeLaneInfo> lanes;
   std::optional<NodeSuggestedLaneInfo> oldSuggestion;
   std::optional<NodeSuggestedLaneInfo> newSuggestion;
+  std::string oldTurn;
+  std::string newTurn;
+  bool suggestionChanged = false;
+  bool turnChanged = false;
   std::vector<RouteNodeInfo> oldRouteNodes;
   std::vector<RouteNodeInfo> newRouteNodes;
   size_t junctionLocalIndex = 0;
@@ -53,6 +57,11 @@ static std::string FormatSuggestion(const std::optional<NodeSuggestedLaneInfo> &
          " turn=" + s->turn;
 }
 
+static std::string FormatTurn(const std::string &turn)
+{
+  return turn.empty() ? "(none)" : turn;
+}
+
 static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
                                                       const RouteInfo &newRoute)
 {
@@ -64,7 +73,10 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
     const auto &oldNode = oldRoute.nodes[i];
     const auto &newNode = newRoute.nodes[i];
 
-    if (!SuggestedLanesEqual(oldNode.suggestedLanes, newNode.suggestedLanes)) {
+    bool suggestionChanged = !SuggestedLanesEqual(oldNode.suggestedLanes, newNode.suggestedLanes);
+    bool turnChanged = oldNode.turn != newNode.turn;
+
+    if (suggestionChanged || turnChanged) {
       SuggestionDiff diff;
       diff.nodeIndex = i;
       diff.coord = newNode.coord;
@@ -72,6 +84,10 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
       diff.lanes = newNode.lanes;
       diff.oldSuggestion = oldNode.suggestedLanes;
       diff.newSuggestion = newNode.suggestedLanes;
+      diff.oldTurn = oldNode.turn;
+      diff.newTurn = newNode.turn;
+      diff.suggestionChanged = suggestionChanged;
+      diff.turnChanged = turnChanged;
 
       constexpr size_t kNodeWindowRadius = 5;
       size_t windowStart = (i >= kNodeWindowRadius) ? (i - kNodeWindowRadius) : 0;
@@ -114,8 +130,8 @@ static void RenderLegend(cairo_t *cairo,
   if (!node.typeName.empty()) {
     lines.push_back("type: " + node.typeName);
   }
-  if (!node.turn.empty()) {
-    lines.push_back("turn: " + node.turn);
+  if (!node.turn.empty() || diff.turnChanged) {
+    lines.push_back("turn: " + FormatTurn(node.turn));
   }
   if (node.lanes.has_value()) {
     std::string lanesStr = "lanes: count=" + std::to_string(node.lanes->laneCount) +
@@ -416,6 +432,7 @@ static int CompareFile(const std::string &oldFile,
   int changed = 0;
   int added = 0;
   int removed = 0;
+  int turnsChanged = 0;
 
   for (const auto &diff : diffs) {
     std::cout << "  Node " << diff.nodeIndex
@@ -424,19 +441,38 @@ static int CompareFile(const std::string &oldFile,
       std::cout << " \"" << diff.name << "\"";
     }
 
-    if (!diff.oldSuggestion.has_value()) {
-      std::cout << ": suggested lanes ADDED" << std::endl;
-      added++;
-    } else if (!diff.newSuggestion.has_value()) {
-      std::cout << ": suggested lanes REMOVED" << std::endl;
-      removed++;
-    } else {
-      std::cout << ": suggested lanes CHANGED" << std::endl;
-      changed++;
+    std::vector<std::string> changes;
+    if (diff.suggestionChanged) {
+      if (!diff.oldSuggestion.has_value()) {
+        changes.emplace_back("suggested lanes ADDED");
+        added++;
+      } else if (!diff.newSuggestion.has_value()) {
+        changes.emplace_back("suggested lanes REMOVED");
+        removed++;
+      } else {
+        changes.emplace_back("suggested lanes CHANGED");
+        changed++;
+      }
+    }
+    if (diff.turnChanged) {
+      changes.emplace_back("turn CHANGED");
+      turnsChanged++;
     }
 
-    std::cout << "    old: " << FormatSuggestion(diff.oldSuggestion) << std::endl;
-    std::cout << "    new: " << FormatSuggestion(diff.newSuggestion) << std::endl;
+    std::cout << ": ";
+    for (size_t i = 0; i < changes.size(); i++) {
+      std::cout << (i > 0 ? ", " : "") << changes[i];
+    }
+    std::cout << std::endl;
+
+    if (diff.suggestionChanged) {
+      std::cout << "    old: " << FormatSuggestion(diff.oldSuggestion) << std::endl;
+      std::cout << "    new: " << FormatSuggestion(diff.newSuggestion) << std::endl;
+    }
+    if (diff.turnChanged) {
+      std::cout << "    old turn: " << FormatTurn(diff.oldTurn) << std::endl;
+      std::cout << "    new turn: " << FormatTurn(diff.newTurn) << std::endl;
+    }
 
 #ifdef HAVE_MAP_CAIRO
     if (!options.imagesDir.empty() && !options.databaseDir.empty() && !options.stylesheet.empty()) {
@@ -452,8 +488,9 @@ static int CompareFile(const std::string &oldFile,
 #endif
   }
 
-  std::cout << "  Summary: " << diffs.size() << " nodes with suggestion changes ("
-            << changed << " changed, " << added << " added, " << removed << " removed)"
+  std::cout << "  Summary: " << diffs.size() << " nodes with changes (suggestions: "
+            << changed << " changed, " << added << " added, " << removed << " removed; turns: "
+            << turnsChanged << " changed)"
             << std::endl;
 
   totalDiffs += static_cast<int>(diffs.size());
