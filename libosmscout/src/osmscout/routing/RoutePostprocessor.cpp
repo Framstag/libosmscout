@@ -859,7 +859,8 @@ namespace osmscout {
   {
     RouteDescription::SuggestedLaneDescriptionRef suggestedLaneDesc=node.GetDescription<RouteDescription::SuggestedLaneDescription>();
 
-    if (!suggestedLaneDesc) {
+    // lanes suggested for a turn at some later junction say nothing about the nearest one
+    if (!suggestedLaneDesc || suggestedLaneDesc->IsPropagated()) {
       return std::nullopt;
     }
 
@@ -2278,7 +2279,7 @@ namespace osmscout {
             }
           }
           nodePtr->AddDescription(
-            std::make_shared<RouteDescription::SuggestedLaneDescription>(from, to, turn));
+            std::make_shared<RouteDescription::SuggestedLaneDescription>(from, to, turn, true));
         }
       }
     }

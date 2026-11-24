@@ -660,9 +660,10 @@ namespace osmscout {
       uint8_t from = uint8_t(-1); //!< left-most suggested lane, inclusive
       uint8_t to = uint8_t(-1); //!< right-most suggested lane, inclusive
       LaneTurn turn{LaneTurn::None};
+      bool propagated=false; //!< the turn is made at some later junction, not at the one following this node
 
     public:
-      SuggestedLaneDescription(uint8_t from, uint8_t to, LaneTurn turn);
+      SuggestedLaneDescription(uint8_t from, uint8_t to, LaneTurn turn, bool propagated=false);
 
       std::string GetDebugString() const override;
 
@@ -679,6 +680,16 @@ namespace osmscout {
       LaneTurn GetTurn() const
       {
         return turn;
+      }
+
+      /**
+       * The suggested turn is not made at the junction following the node, but at some later one.
+       * The lanes are suggested in advance, so it must not be used as a turn instruction
+       * for the nearest junction.
+       */
+      bool IsPropagated() const
+      {
+        return propagated;
       }
 
       static constexpr std::string_view Key = "SuggestedLanes";
