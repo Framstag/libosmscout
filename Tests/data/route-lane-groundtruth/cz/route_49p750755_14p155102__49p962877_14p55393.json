@@ -344,11 +344,6 @@
       "name": "",
       "nodeIndex": 18,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -364,11 +359,6 @@
       "name": "",
       "nodeIndex": 19,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -384,11 +374,6 @@
       "name": "",
       "nodeIndex": 20,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -404,11 +389,6 @@
       "name": "",
       "nodeIndex": 21,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -424,11 +404,6 @@
       "name": "",
       "nodeIndex": 22,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -444,11 +419,6 @@
       "name": "",
       "nodeIndex": 23,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -464,11 +434,6 @@
       "name": "",
       "nodeIndex": 24,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -484,11 +449,6 @@
       "name": "",
       "nodeIndex": 25,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -504,11 +464,6 @@
       "name": "",
       "nodeIndex": 26,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -524,11 +479,6 @@
       "name": "",
       "nodeIndex": 27,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -544,11 +494,6 @@
       "name": "",
       "nodeIndex": 28,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -564,11 +509,6 @@
       "name": "",
       "nodeIndex": 29,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -584,11 +524,6 @@
       "name": "",
       "nodeIndex": 30,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -604,11 +539,6 @@
       "name": "",
       "nodeIndex": 31,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -624,11 +554,6 @@
       "name": "",
       "nodeIndex": 32,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -644,11 +569,6 @@
       "name": "",
       "nodeIndex": 33,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -664,11 +584,6 @@
       "name": "",
       "nodeIndex": 34,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -686,11 +601,6 @@
       "name": "",
       "nodeIndex": 35,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -708,11 +618,6 @@
       "name": "",
       "nodeIndex": 36,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -730,11 +635,6 @@
       "name": "",
       "nodeIndex": 37,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -752,11 +652,6 @@
       "name": "",
       "nodeIndex": 38,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -774,11 +669,6 @@
       "name": "",
       "nodeIndex": 39,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -796,11 +686,6 @@
       "name": "",
       "nodeIndex": 40,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -1416,11 +1301,6 @@
       "name": "Příbramská",
       "nodeIndex": 81,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1436,11 +1316,6 @@
       "name": "Příbramská",
       "nodeIndex": 82,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1456,11 +1331,6 @@
       "name": "Příbramská",
       "nodeIndex": 83,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1476,11 +1346,6 @@
       "name": "Příbramská",
       "nodeIndex": 84,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1496,11 +1361,6 @@
       "name": "Příbramská",
       "nodeIndex": 85,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1516,11 +1376,6 @@
       "name": "Příbramská",
       "nodeIndex": 86,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1536,11 +1391,6 @@
       "name": "Příbramská",
       "nodeIndex": 87,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_secondary"
     },
@@ -1556,11 +1406,6 @@
       "name": "Příbramská",
       "nodeIndex": 88,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1576,11 +1421,6 @@
       "name": "Příbramská",
       "nodeIndex": 89,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1596,11 +1436,6 @@
       "name": "Příbramská",
       "nodeIndex": 90,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1616,11 +1451,6 @@
       "name": "Příbramská",
       "nodeIndex": 91,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1636,11 +1466,6 @@
       "name": "Příbramská",
       "nodeIndex": 92,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1656,11 +1481,6 @@
       "name": "Příbramská",
       "nodeIndex": 93,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1676,11 +1496,6 @@
       "name": "Příbramská",
       "nodeIndex": 94,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1696,11 +1511,6 @@
       "name": "Příbramská",
       "nodeIndex": 95,
       "ref": "119",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1716,11 +1526,6 @@
       "name": "Tyršovo náměstí",
       "nodeIndex": 96,
       "ref": "114",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1736,11 +1541,6 @@
       "name": "Tyršovo náměstí",
       "nodeIndex": 97,
       "ref": "114",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -1756,11 +1556,6 @@
       "name": "Tyršovo náměstí",
       "nodeIndex": 98,
       "ref": "114",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -12384,11 +12179,6 @@
       "name": "Koněpruská",
       "nodeIndex": 803,
       "ref": "11533",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_tertiary"
     },
@@ -12404,11 +12194,6 @@
       "name": "Koněpruská",
       "nodeIndex": 804,
       "ref": "11533",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12424,11 +12209,6 @@
       "name": "Koněpruská",
       "nodeIndex": 805,
       "ref": "11533",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12444,11 +12224,6 @@
       "name": "Koněpruská",
       "nodeIndex": 806,
       "ref": "11533",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12740,11 +12515,6 @@
       "name": "Koněpruská",
       "nodeIndex": 819,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12760,11 +12530,6 @@
       "name": "Koněpruská",
       "nodeIndex": 820,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_tertiary"
     },
@@ -12780,11 +12545,6 @@
       "name": "Koněpruská",
       "nodeIndex": 821,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_tertiary"
     },
@@ -12800,11 +12560,6 @@
       "name": "Koněpruská",
       "nodeIndex": 822,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12820,11 +12575,6 @@
       "name": "Koněpruská",
       "nodeIndex": 823,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12840,11 +12590,6 @@
       "name": "Koněpruská",
       "nodeIndex": 824,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12860,11 +12605,6 @@
       "name": "Koněpruská",
       "nodeIndex": 825,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -12880,11 +12620,6 @@
       "name": "Koněpruská",
       "nodeIndex": 826,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -13040,11 +12775,6 @@
       "name": "Plzeňská",
       "nodeIndex": 833,
       "ref": "118;605",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn left",
       "type": "highway_secondary"
     },
@@ -13062,11 +12792,6 @@
       "name": "Plzeňská",
       "nodeIndex": 834,
       "ref": "118;605",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },

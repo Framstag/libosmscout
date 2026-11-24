@@ -228,11 +228,6 @@
       "name": "",
       "nodeIndex": 9,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -248,11 +243,6 @@
       "name": "",
       "nodeIndex": 10,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -268,11 +258,6 @@
       "name": "",
       "nodeIndex": 11,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -288,11 +273,6 @@
       "name": "",
       "nodeIndex": 12,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -308,11 +288,6 @@
       "name": "",
       "nodeIndex": 13,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -328,11 +303,6 @@
       "name": "",
       "nodeIndex": 14,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -348,11 +318,6 @@
       "name": "",
       "nodeIndex": 15,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -368,11 +333,6 @@
       "name": "",
       "nodeIndex": 16,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -388,11 +348,6 @@
       "name": "",
       "nodeIndex": 17,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -408,11 +363,6 @@
       "name": "",
       "nodeIndex": 18,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -428,11 +378,6 @@
       "name": "",
       "nodeIndex": 19,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -448,11 +393,6 @@
       "name": "",
       "nodeIndex": 20,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -468,11 +408,6 @@
       "name": "",
       "nodeIndex": 21,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -488,11 +423,6 @@
       "name": "",
       "nodeIndex": 22,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -508,11 +438,6 @@
       "name": "",
       "nodeIndex": 23,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -528,11 +453,6 @@
       "name": "",
       "nodeIndex": 24,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -548,11 +468,6 @@
       "name": "",
       "nodeIndex": 25,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -568,11 +483,6 @@
       "name": "",
       "nodeIndex": 26,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -588,11 +498,6 @@
       "name": "",
       "nodeIndex": 27,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -608,11 +513,6 @@
       "name": "",
       "nodeIndex": 28,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -628,11 +528,6 @@
       "name": "",
       "nodeIndex": 29,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -648,11 +543,6 @@
       "name": "",
       "nodeIndex": 30,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -668,11 +558,6 @@
       "name": "",
       "nodeIndex": 31,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -688,11 +573,6 @@
       "name": "",
       "nodeIndex": 32,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -708,11 +588,6 @@
       "name": "",
       "nodeIndex": 33,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -728,11 +603,6 @@
       "name": "",
       "nodeIndex": 34,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -748,11 +618,6 @@
       "name": "",
       "nodeIndex": 35,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_motorway_link"
     },
@@ -768,11 +633,6 @@
       "name": "",
       "nodeIndex": 36,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -788,11 +648,6 @@
       "name": "",
       "nodeIndex": 37,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },
@@ -808,11 +663,6 @@
       "name": "",
       "nodeIndex": 38,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway_link"
     },

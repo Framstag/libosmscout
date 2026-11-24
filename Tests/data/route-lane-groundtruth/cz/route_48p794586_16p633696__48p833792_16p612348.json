@@ -13,11 +13,6 @@
       "name": "",
       "nodeIndex": 0,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "type": "highway_primary"
     },
     {
@@ -32,11 +27,6 @@
       "name": "",
       "nodeIndex": 1,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -54,11 +44,6 @@
       "name": "",
       "nodeIndex": 2,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -74,11 +59,6 @@
       "name": "28. října",
       "nodeIndex": 3,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -94,11 +74,6 @@
       "name": "28. října",
       "nodeIndex": 4,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -234,11 +209,6 @@
       "name": "28. října",
       "nodeIndex": 10,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -256,11 +226,6 @@
       "name": "28. října",
       "nodeIndex": 11,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -345,11 +310,6 @@
       "name": "28. října",
       "nodeIndex": 15,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -365,11 +325,6 @@
       "name": "28. října",
       "nodeIndex": 16,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -385,11 +340,6 @@
       "name": "28. října",
       "nodeIndex": 17,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -405,11 +355,6 @@
       "name": "28. října",
       "nodeIndex": 18,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -425,11 +370,6 @@
       "name": "28. října",
       "nodeIndex": 19,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -445,11 +385,6 @@
       "name": "28. října",
       "nodeIndex": 20,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -467,11 +402,6 @@
       "name": "28. října",
       "nodeIndex": 21,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_primary"
     },
@@ -489,11 +419,6 @@
       "name": "28. října",
       "nodeIndex": 22,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -511,11 +436,6 @@
       "name": "28. října",
       "nodeIndex": 23,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -533,11 +453,6 @@
       "name": "28. října",
       "nodeIndex": 24,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -555,11 +470,6 @@
       "name": "28. října",
       "nodeIndex": 25,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -577,11 +487,6 @@
       "name": "28. října",
       "nodeIndex": 26,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -599,11 +504,6 @@
       "name": "28. října",
       "nodeIndex": 27,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -621,11 +521,6 @@
       "name": "28. října",
       "nodeIndex": 28,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -643,11 +538,6 @@
       "name": "28. října",
       "nodeIndex": 29,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -665,11 +555,6 @@
       "name": "28. října",
       "nodeIndex": 30,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -760,11 +645,6 @@
       "name": "28. října",
       "nodeIndex": 36,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -780,11 +660,6 @@
       "name": "28. října",
       "nodeIndex": 37,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -800,11 +675,6 @@
       "name": "28. října",
       "nodeIndex": 38,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -820,11 +690,6 @@
       "name": "28. října",
       "nodeIndex": 39,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -840,11 +705,6 @@
       "name": "28. října",
       "nodeIndex": 40,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -860,11 +720,6 @@
       "name": "28. října",
       "nodeIndex": 41,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -880,11 +735,6 @@
       "name": "28. října",
       "nodeIndex": 42,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -900,11 +750,6 @@
       "name": "28. října",
       "nodeIndex": 43,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -920,11 +765,6 @@
       "name": "28. října",
       "nodeIndex": 44,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -940,11 +780,6 @@
       "name": "28. října",
       "nodeIndex": 45,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -960,11 +795,6 @@
       "name": "28. října",
       "nodeIndex": 46,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -980,11 +810,6 @@
       "name": "28. října",
       "nodeIndex": 47,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1000,11 +825,6 @@
       "name": "28. října",
       "nodeIndex": 48,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1022,11 +842,6 @@
       "name": "",
       "nodeIndex": 49,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_primary"
     },
@@ -1044,11 +859,6 @@
       "name": "",
       "nodeIndex": 50,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1066,11 +876,6 @@
       "name": "",
       "nodeIndex": 51,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1088,11 +893,6 @@
       "name": "",
       "nodeIndex": 52,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1110,11 +910,6 @@
       "name": "",
       "nodeIndex": 53,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1132,11 +927,6 @@
       "name": "",
       "nodeIndex": 54,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1154,11 +944,6 @@
       "name": "",
       "nodeIndex": 55,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1176,11 +961,6 @@
       "name": "",
       "nodeIndex": 56,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1198,11 +978,6 @@
       "name": "",
       "nodeIndex": 57,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_primary"
     },
@@ -1220,11 +995,6 @@
       "name": "",
       "nodeIndex": 58,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_primary"
     },
@@ -1255,11 +1025,6 @@
       "name": "",
       "nodeIndex": 60,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1275,11 +1040,6 @@
       "name": "",
       "nodeIndex": 61,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1295,11 +1055,6 @@
       "name": "",
       "nodeIndex": 62,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1387,11 +1142,6 @@
       "name": "",
       "nodeIndex": 66,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_primary"
     },
@@ -1407,11 +1157,6 @@
       "name": "",
       "nodeIndex": 67,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1427,11 +1172,6 @@
       "name": "",
       "nodeIndex": 68,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1447,11 +1187,6 @@
       "name": "",
       "nodeIndex": 69,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1467,11 +1202,6 @@
       "name": "",
       "nodeIndex": 70,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1487,11 +1217,6 @@
       "name": "",
       "nodeIndex": 71,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1507,11 +1232,6 @@
       "name": "",
       "nodeIndex": 72,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1527,11 +1247,6 @@
       "name": "",
       "nodeIndex": 73,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1547,11 +1262,6 @@
       "name": "",
       "nodeIndex": 74,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1567,11 +1277,6 @@
       "name": "",
       "nodeIndex": 75,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1587,11 +1292,6 @@
       "name": "",
       "nodeIndex": 76,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1607,11 +1307,6 @@
       "name": "",
       "nodeIndex": 77,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1627,11 +1322,6 @@
       "name": "",
       "nodeIndex": 78,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -1897,11 +1587,6 @@
       "name": "",
       "nodeIndex": 93,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1917,11 +1602,6 @@
       "name": "",
       "nodeIndex": 94,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1937,11 +1617,6 @@
       "name": "",
       "nodeIndex": 95,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1957,11 +1632,6 @@
       "name": "",
       "nodeIndex": 96,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1977,11 +1647,6 @@
       "name": "",
       "nodeIndex": 97,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1999,11 +1664,6 @@
       "name": "",
       "nodeIndex": 98,
       "ref": "52",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },

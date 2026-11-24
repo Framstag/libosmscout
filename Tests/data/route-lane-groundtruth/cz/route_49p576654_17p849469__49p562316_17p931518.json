@@ -573,7 +573,7 @@
     {
       "distanceKm": 1.8134660166525034,
       "lanes": {
-        "laneCount": 1,
+        "laneCount": 3,
         "laneTurns": [
           "none",
           "none",
@@ -588,7 +588,7 @@
       "ref": "D48",
       "suggestedLanes": {
         "from": 0,
-        "to": 0,
+        "to": 1,
         "turn": "unknown"
       },
       "turn": "Straight on",
@@ -626,11 +626,6 @@
       "name": "",
       "nodeIndex": 33,
       "ref": "D48",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway"
     },
@@ -646,11 +641,6 @@
       "name": "",
       "nodeIndex": 34,
       "ref": "D48",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway"
     },
@@ -666,11 +656,6 @@
       "name": "",
       "nodeIndex": 35,
       "ref": "D48",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway"
     },
@@ -686,11 +671,6 @@
       "name": "",
       "nodeIndex": 36,
       "ref": "D48",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway"
     },
@@ -706,11 +686,6 @@
       "name": "",
       "nodeIndex": 37,
       "ref": "D48",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway"
     },
@@ -728,11 +703,6 @@
       "name": "",
       "nodeIndex": 38,
       "ref": "D48",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_motorway"
     },

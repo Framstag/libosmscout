@@ -49,6 +49,9 @@ namespace osmscout {
     if (lanesValue!=nullptr) {
       laneCount=std::max((uint8_t)1,forward ? lanesValue->GetForwardLanes() : lanesValue->GetBackwardLanes());
       laneTurns=forward ? lanesValue->GetTurnForward() : lanesValue->GetTurnBackward();
+      // turn tags describing more lanes than the lanes tags claim (inconsistent tagging,
+      // e.g. lanes=1 with turn:lanes=left|right): lane turns are more specific, trust them
+      laneCount=std::max(laneCount,(uint8_t)std::min<size_t>(laneTurns.size(),std::numeric_limits<uint8_t>::max()));
       while (laneTurns.size() < laneCount) {
         laneTurns.push_back(LaneTurn::None);
       }
@@ -2152,22 +2155,34 @@ namespace osmscout {
     evalRecord.rightExits = junctionRightExits.size();
     evalRecord.suggestion = suggested;
     evalRecord.distance = firstJunctionNode.GetDistance();
+    // Same criteria as the junction grouping and lane change detection in Process: the oneway
+    // flag is ignored, a way may change it (a junction with a oneway carriageway) while its
+    // lanes continue unchanged.
+    auto sameLaneConfig = [&prevLanes](const RouteDescription::LaneDescriptionRef &nodeLanes) {
+      return nodeLanes &&
+             nodeLanes->GetLaneCount() == prevLanes->GetLaneCount() &&
+             nodeLanes->GetLaneTurns() == prevLanes->GetLaneTurns();
+    };
+    // There is no choice of lanes on a single lane way: an unknown turn carries no information
+    const bool noInformation = prevLanes->GetLaneCount() <= 1 && suggestedTurn == LaneTurn::Unknown;
     for (auto it = backBuffer.rbegin(); it != backBuffer.rend(); it++) {
       auto* nodePtr = *it;
-      auto nodeLanes = GetLaneDescription(*nodePtr);
-      if (*prevLanes != *nodeLanes){
+      if (!sameLaneConfig(GetLaneDescription(*nodePtr))) {
         break;
       }
-      nodePtr->AddDescription(suggested);
+      if (!noInformation) {
+        nodePtr->AddDescription(suggested);
+      }
       evalRecord.approachNodes.push_back(nodePtr);
     }
     // Also write suggestion to grouped junction nodes that have the same lane config
     // as the approach. These nodes were removed from backBuffer during grouping but
     // still represent approach segments that need the suggestion.
     for (auto* jNode : junctionNodes) {
-      auto nodeLanes = GetLaneDescription(*jNode);
-      if (nodeLanes && *prevLanes == *nodeLanes) {
-        jNode->AddDescription(suggested);
+      if (sameLaneConfig(GetLaneDescription(*jNode))) {
+        if (!noInformation) {
+          jNode->AddDescription(suggested);
+        }
         evalRecord.approachNodes.push_back(jNode);
       }
     }

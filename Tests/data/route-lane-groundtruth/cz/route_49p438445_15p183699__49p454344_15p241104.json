@@ -117,11 +117,6 @@
       "name": "",
       "nodeIndex": 7,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -137,11 +132,6 @@
       "name": "",
       "nodeIndex": 8,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -157,11 +147,6 @@
       "name": "",
       "nodeIndex": 9,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -177,11 +162,6 @@
       "name": "",
       "nodeIndex": 10,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -197,11 +177,6 @@
       "name": "",
       "nodeIndex": 11,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -217,11 +192,6 @@
       "name": "",
       "nodeIndex": 12,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -237,11 +207,6 @@
       "name": "",
       "nodeIndex": 13,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -257,11 +222,6 @@
       "name": "",
       "nodeIndex": 14,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -277,11 +237,6 @@
       "name": "",
       "nodeIndex": 15,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -297,11 +252,6 @@
       "name": "",
       "nodeIndex": 16,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -317,11 +267,6 @@
       "name": "",
       "nodeIndex": 17,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -337,11 +282,6 @@
       "name": "",
       "nodeIndex": 18,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -357,11 +297,6 @@
       "name": "",
       "nodeIndex": 19,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -377,11 +312,6 @@
       "name": "",
       "nodeIndex": 20,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -399,11 +329,6 @@
       "name": "",
       "nodeIndex": 21,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -421,11 +346,6 @@
       "name": "",
       "nodeIndex": 22,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -443,11 +363,6 @@
       "name": "",
       "nodeIndex": 23,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -465,11 +380,6 @@
       "name": "",
       "nodeIndex": 24,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -487,11 +397,6 @@
       "name": "",
       "nodeIndex": 25,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -646,11 +551,6 @@
       "name": "",
       "nodeIndex": 32,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -668,11 +568,6 @@
       "name": "",
       "nodeIndex": 33,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -690,11 +585,6 @@
       "name": "",
       "nodeIndex": 34,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -712,11 +602,6 @@
       "name": "",
       "nodeIndex": 35,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -734,11 +619,6 @@
       "name": "",
       "nodeIndex": 36,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -756,11 +636,6 @@
       "name": "",
       "nodeIndex": 37,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -778,11 +653,6 @@
       "name": "",
       "nodeIndex": 38,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -800,11 +670,6 @@
       "name": "",
       "nodeIndex": 39,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -822,11 +687,6 @@
       "name": "",
       "nodeIndex": 40,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -844,11 +704,6 @@
       "name": "",
       "nodeIndex": 41,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -866,11 +721,6 @@
       "name": "",
       "nodeIndex": 42,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -888,11 +738,6 @@
       "name": "",
       "nodeIndex": 43,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -908,11 +753,6 @@
       "name": "",
       "nodeIndex": 44,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -928,11 +768,6 @@
       "name": "",
       "nodeIndex": 45,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -948,11 +783,6 @@
       "name": "",
       "nodeIndex": 46,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1208,11 +1038,6 @@
       "name": "",
       "nodeIndex": 61,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1230,11 +1055,6 @@
       "name": "",
       "nodeIndex": 62,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1252,11 +1072,6 @@
       "name": "",
       "nodeIndex": 63,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1274,11 +1089,6 @@
       "name": "",
       "nodeIndex": 64,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1296,11 +1106,6 @@
       "name": "",
       "nodeIndex": 65,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1318,11 +1123,6 @@
       "name": "",
       "nodeIndex": 66,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1340,11 +1140,6 @@
       "name": "",
       "nodeIndex": 67,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1362,11 +1157,6 @@
       "name": "",
       "nodeIndex": 68,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1384,11 +1174,6 @@
       "name": "",
       "nodeIndex": 69,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1406,11 +1191,6 @@
       "name": "",
       "nodeIndex": 70,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1428,11 +1208,6 @@
       "name": "",
       "nodeIndex": 71,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1450,11 +1225,6 @@
       "name": "",
       "nodeIndex": 72,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1472,11 +1242,6 @@
       "name": "",
       "nodeIndex": 73,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1492,11 +1257,6 @@
       "name": "",
       "nodeIndex": 74,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1512,11 +1272,6 @@
       "name": "",
       "nodeIndex": 75,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1532,11 +1287,6 @@
       "name": "",
       "nodeIndex": 76,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1552,11 +1302,6 @@
       "name": "",
       "nodeIndex": 77,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1572,11 +1317,6 @@
       "name": "",
       "nodeIndex": 78,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1592,11 +1332,6 @@
       "name": "",
       "nodeIndex": 79,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1612,11 +1347,6 @@
       "name": "",
       "nodeIndex": 80,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1632,11 +1362,6 @@
       "name": "",
       "nodeIndex": 81,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1652,11 +1377,6 @@
       "name": "",
       "nodeIndex": 82,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1672,11 +1392,6 @@
       "name": "",
       "nodeIndex": 83,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1692,11 +1407,6 @@
       "name": "",
       "nodeIndex": 84,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1712,11 +1422,6 @@
       "name": "",
       "nodeIndex": 85,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1847,11 +1552,6 @@
       "name": "",
       "nodeIndex": 91,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1867,11 +1567,6 @@
       "name": "",
       "nodeIndex": 92,
       "ref": "19",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -1979,11 +1674,6 @@
       "name": "",
       "nodeIndex": 97,
       "ref": "34",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -2022,11 +1712,6 @@
       "name": "",
       "nodeIndex": 99,
       "ref": "34",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -2044,11 +1729,6 @@
       "name": "",
       "nodeIndex": 100,
       "ref": "34",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -2066,11 +1746,6 @@
       "name": "",
       "nodeIndex": 101,
       "ref": "34",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },

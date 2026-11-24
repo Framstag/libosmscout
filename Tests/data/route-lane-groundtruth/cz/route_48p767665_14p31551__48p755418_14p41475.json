@@ -27,11 +27,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 1,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn left",
       "type": "highway_residential"
     },
@@ -47,11 +42,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 2,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -67,11 +57,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 3,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -87,11 +72,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 4,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -107,11 +87,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 5,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -127,11 +102,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 6,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -147,11 +117,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 7,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -167,11 +132,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 8,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -187,11 +147,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 9,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_residential"
     },
@@ -207,11 +162,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 10,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_residential"
     },
@@ -227,11 +177,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 11,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_residential"
     },
@@ -247,11 +192,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 12,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_residential"
     },
@@ -267,11 +207,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 13,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_residential"
     },
@@ -287,11 +222,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 14,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -307,11 +237,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 15,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -327,11 +252,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 16,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_residential"
     },
@@ -347,11 +267,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 17,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_residential"
     },
@@ -367,11 +282,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 18,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -387,11 +297,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 19,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_residential"
     },
@@ -407,11 +312,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 20,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_residential"
     },
@@ -427,11 +327,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 21,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_residential"
     },
@@ -447,11 +342,6 @@
       "name": "Na Výsluní",
       "nodeIndex": 22,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -467,11 +357,6 @@
       "name": "Volarská",
       "nodeIndex": 23,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn left",
       "type": "highway_primary"
     },
@@ -487,11 +372,6 @@
       "name": "Volarská",
       "nodeIndex": 24,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -507,11 +387,6 @@
       "name": "Volarská",
       "nodeIndex": 25,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -527,11 +402,6 @@
       "name": "Volarská",
       "nodeIndex": 26,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -547,11 +417,6 @@
       "name": "Volarská",
       "nodeIndex": 27,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -567,11 +432,6 @@
       "name": "Volarská",
       "nodeIndex": 28,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -587,11 +447,6 @@
       "name": "Volarská",
       "nodeIndex": 29,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -607,11 +462,6 @@
       "name": "Volarská",
       "nodeIndex": 30,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -627,11 +477,6 @@
       "name": "Volarská",
       "nodeIndex": 31,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -647,11 +492,6 @@
       "name": "Volarská",
       "nodeIndex": 32,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -667,11 +507,6 @@
       "name": "Volarská",
       "nodeIndex": 33,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -687,11 +522,6 @@
       "name": "Náměstí",
       "nodeIndex": 34,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_primary"
     },
@@ -707,11 +537,6 @@
       "name": "Náměstí",
       "nodeIndex": 35,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -727,11 +552,6 @@
       "name": "Náměstí",
       "nodeIndex": 36,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -747,11 +567,6 @@
       "name": "Náměstí",
       "nodeIndex": 37,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -767,11 +582,6 @@
       "name": "Náměstí",
       "nodeIndex": 38,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -787,11 +597,6 @@
       "name": "Náměstí",
       "nodeIndex": 39,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_primary"
     },
@@ -807,11 +612,6 @@
       "name": "Náměstí",
       "nodeIndex": 40,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_primary"
     },
@@ -827,11 +627,6 @@
       "name": "Náměstí",
       "nodeIndex": 41,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_primary"
     },
@@ -847,11 +642,6 @@
       "name": "Náměstí",
       "nodeIndex": 42,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -869,11 +659,6 @@
       "name": "Palackého",
       "nodeIndex": 43,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },
@@ -891,11 +676,6 @@
       "name": "Palackého",
       "nodeIndex": 44,
       "ref": "39",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_primary"
     },

@@ -252,11 +252,6 @@
       "name": "U Trojského zámku",
       "nodeIndex": 16,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -272,11 +267,6 @@
       "name": "U Trojského zámku",
       "nodeIndex": 17,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_residential"
     },
@@ -292,11 +282,6 @@
       "name": "Trojská",
       "nodeIndex": 18,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_tertiary"
     },
@@ -312,11 +297,6 @@
       "name": "Trojská",
       "nodeIndex": 19,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -332,11 +312,6 @@
       "name": "Trojská",
       "nodeIndex": 20,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_tertiary"
     },
@@ -352,11 +327,6 @@
       "name": "Trojská",
       "nodeIndex": 21,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -372,11 +342,6 @@
       "name": "Trojská",
       "nodeIndex": 22,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -392,11 +357,6 @@
       "name": "Trojská",
       "nodeIndex": 23,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -412,11 +372,6 @@
       "name": "Trojská",
       "nodeIndex": 24,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -432,11 +387,6 @@
       "name": "Trojská",
       "nodeIndex": 25,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -452,11 +402,6 @@
       "name": "Trojská",
       "nodeIndex": 26,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -472,11 +417,6 @@
       "name": "Trojská",
       "nodeIndex": 27,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -492,11 +432,6 @@
       "name": "Trojská",
       "nodeIndex": 28,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -512,11 +447,6 @@
       "name": "Trojská",
       "nodeIndex": 29,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -532,11 +462,6 @@
       "name": "Trojská",
       "nodeIndex": 30,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -552,11 +477,6 @@
       "name": "Trojská",
       "nodeIndex": 31,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -572,11 +492,6 @@
       "name": "Trojská",
       "nodeIndex": 32,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -592,11 +507,6 @@
       "name": "Trojská",
       "nodeIndex": 33,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -612,11 +522,6 @@
       "name": "Trojská",
       "nodeIndex": 34,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -632,11 +537,6 @@
       "name": "Trojská",
       "nodeIndex": 35,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -652,11 +552,6 @@
       "name": "Trojská",
       "nodeIndex": 36,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1090,11 +985,6 @@
       "name": "Trojská",
       "nodeIndex": 59,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1110,11 +1000,6 @@
       "name": "Trojská",
       "nodeIndex": 60,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1130,11 +1015,6 @@
       "name": "Trojská",
       "nodeIndex": 61,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1150,11 +1030,6 @@
       "name": "Trojská",
       "nodeIndex": 62,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1170,11 +1045,6 @@
       "name": "Trojská",
       "nodeIndex": 63,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1190,11 +1060,6 @@
       "name": "Trojská",
       "nodeIndex": 64,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1210,11 +1075,6 @@
       "name": "Trojská",
       "nodeIndex": 65,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1230,11 +1090,6 @@
       "name": "Trojská",
       "nodeIndex": 66,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1250,11 +1105,6 @@
       "name": "Trojská",
       "nodeIndex": 67,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1270,18 +1120,13 @@
       "name": "Trojská",
       "nodeIndex": 68,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
     {
       "distanceKm": 1.7737291545410578,
       "lanes": {
-        "laneCount": 1,
+        "laneCount": 2,
         "laneTurns": [
           "left",
           "right"
@@ -1294,9 +1139,9 @@
       "nodeIndex": 69,
       "ref": "",
       "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "left"
+        "from": 1,
+        "to": 1,
+        "turn": "right"
       },
       "turn": "Straight on",
       "type": "highway_tertiary"
@@ -1313,11 +1158,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 70,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn right",
       "type": "highway_tertiary"
     },
@@ -1333,11 +1173,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 71,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_tertiary"
     },
@@ -1353,11 +1188,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 72,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1373,11 +1203,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 73,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1393,11 +1218,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 74,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1413,11 +1233,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 75,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1433,11 +1248,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 76,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_tertiary"
     },
@@ -1453,11 +1263,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 77,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_tertiary"
     },
@@ -1473,11 +1278,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 78,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly left",
       "type": "highway_tertiary"
     },
@@ -1493,11 +1293,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 79,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1513,11 +1308,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 80,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1533,11 +1323,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 81,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_tertiary"
     },
@@ -1553,11 +1338,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 82,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_tertiary"
     },
@@ -1573,11 +1353,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 83,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_tertiary"
     },
@@ -1593,11 +1368,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 84,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_tertiary"
     },
@@ -1613,11 +1383,6 @@
       "name": "Pod Lisem",
       "nodeIndex": 85,
       "ref": "",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Turn slightly right",
       "type": "highway_tertiary"
     },

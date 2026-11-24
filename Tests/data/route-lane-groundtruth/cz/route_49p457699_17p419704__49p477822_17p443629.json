@@ -381,7 +381,7 @@
     {
       "distanceKm": 1.9230023286160483,
       "lanes": {
-        "laneCount": 2,
+        "laneCount": 3,
         "laneTurns": [
           "none",
           "none",
@@ -396,7 +396,7 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 1,
+        "to": 2,
         "turn": "unknown"
       },
       "turn": "Straight on",
@@ -405,7 +405,7 @@
     {
       "distanceKm": 1.958086758339596,
       "lanes": {
-        "laneCount": 2,
+        "laneCount": 3,
         "laneTurns": [
           "none",
           "none",
@@ -420,7 +420,7 @@
       "ref": "D1",
       "suggestedLanes": {
         "from": 0,
-        "to": 1,
+        "to": 2,
         "turn": "unknown"
       },
       "turn": "Straight on",
