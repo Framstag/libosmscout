@@ -277,7 +277,9 @@ static bool RenderJunctionImage(const std::string &databaseDir,
                                 const std::string &stylesheet,
                                 const SuggestionDiff &diff,
                                 const std::string &outputPath,
-                                bool useOldSuggestion)
+                                bool useOldSuggestion,
+                                size_t width,
+                                size_t height)
 {
   DatabaseParameter databaseParameter;
   auto database = std::make_shared<Database>(databaseParameter);
@@ -293,8 +295,6 @@ static bool RenderJunctionImage(const std::string &databaseDir,
     return false;
   }
 
-  size_t width = 1920;
-  size_t height = 1080;
   GeoCoord center=diff.coord;
 
   MercatorProjection projection;
@@ -425,8 +425,10 @@ static int CompareFile(const std::string &oldFile,
       std::string oldImg = options.imagesDir + "/" + stem + "_node" + std::to_string(diff.nodeIndex) + "_old.png";
       std::string newImg = options.imagesDir + "/" + stem + "_node" + std::to_string(diff.nodeIndex) + "_new.png";
 
-      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, oldImg, true);
-      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, newImg, false);
+      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, oldImg, true,
+                          options.imageWidth, options.imageHeight);
+      RenderJunctionImage(options.databaseDir, options.stylesheet, diff, newImg, false,
+                          options.imageWidth, options.imageHeight);
       std::cout << "    images: " << oldImg << ", " << newImg << std::endl;
     }
 #endif

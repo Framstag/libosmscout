@@ -226,6 +226,9 @@ static int Compare(int argc, char *argv[])
   std::string imagesDir;
   std::string stylesheet;
   std::string databaseDir;
+  CompareOptions options;
+  int imageWidth = static_cast<int>(options.imageWidth);
+  int imageHeight = static_cast<int>(options.imageHeight);
 
   argParser.AddOption(CmdLineFlag([&help](const bool &value) { help = value; }),
                       std::vector<std::string>{"h", "help"},
@@ -239,6 +242,12 @@ static int Compare(int argc, char *argv[])
 
   argParser.AddOption(CmdLineStringOption([&databaseDir](const std::string &value) { databaseDir = value; }),
                       "database", "Database directory for map rendering", false);
+
+  argParser.AddOption(CmdLineIntOption([&imageWidth](int value) { imageWidth = value; }),
+                      "image-width", "Width of comparison images in pixels (default: 3840)", false);
+
+  argParser.AddOption(CmdLineIntOption([&imageHeight](int value) { imageHeight = value; }),
+                      "image-height", "Height of comparison images in pixels (default: 2160)", false);
 
   argParser.AddPositional(CmdLineStringOption([&oldPath](const std::string &value) {
                             oldPath = value;
@@ -261,10 +270,16 @@ static int Compare(int argc, char *argv[])
     return 0;
   }
 
-  CompareOptions options;
+  if (imageWidth <= 0 || imageHeight <= 0) {
+    std::cerr << "ERROR: Image width and height must be positive" << std::endl;
+    return 1;
+  }
+
   options.imagesDir = imagesDir;
   options.stylesheet = stylesheet;
   options.databaseDir = databaseDir;
+  options.imageWidth = static_cast<size_t>(imageWidth);
+  options.imageHeight = static_cast<size_t>(imageHeight);
 
   return CompareRoutes(oldPath, newPath, options);
 }
