@@ -2277,6 +2277,10 @@ namespace osmscout {
             while (!compatible(to)) {
               to--;
             }
+          } else {
+            // No lane of the band is dedicated to the turn (the turn lane appears later).
+            // Suggest just the outermost lane, it is the closest one to the turn lane.
+            from = to = left ? 0 : laneCount-1;
           }
           nodePtr->AddDescription(
             std::make_shared<RouteDescription::SuggestedLaneDescription>(from, to, turn, true));

@@ -2788,7 +2788,7 @@
       "ref": "601",
       "suggestedLanes": {
         "from": 0,
-        "to": 1,
+        "to": 0,
         "turn": "left"
       },
       "turn": "Straight on",
