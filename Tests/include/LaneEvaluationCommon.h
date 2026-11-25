@@ -37,6 +37,7 @@ struct RouteNodeInfo
   std::string ref;
   std::string typeName;
   std::string turn;
+  std::string explicitTurn;
   std::optional<NodeLaneInfo> lanes;
   std::optional<NodeSuggestedLaneInfo> suggestedLanes;
 };

@@ -28,8 +28,11 @@ struct SuggestionDiff
   std::optional<NodeSuggestedLaneInfo> newSuggestion;
   std::string oldTurn;
   std::string newTurn;
+  std::string oldExplicitTurn;
+  std::string newExplicitTurn;
   bool suggestionChanged = false;
   bool turnChanged = false;
+  bool explicitTurnChanged = false;
   std::vector<RouteNodeInfo> oldRouteNodes;
   std::vector<RouteNodeInfo> newRouteNodes;
   size_t junctionLocalIndex = 0;
@@ -75,8 +78,9 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
 
     bool suggestionChanged = !SuggestedLanesEqual(oldNode.suggestedLanes, newNode.suggestedLanes);
     bool turnChanged = oldNode.turn != newNode.turn;
+    bool explicitTurnChanged = oldNode.explicitTurn != newNode.explicitTurn;
 
-    if (suggestionChanged || turnChanged) {
+    if (suggestionChanged || turnChanged || explicitTurnChanged) {
       SuggestionDiff diff;
       diff.nodeIndex = i;
       diff.coord = newNode.coord;
@@ -86,8 +90,11 @@ static std::vector<SuggestionDiff> CompareRouteInfos(const RouteInfo &oldRoute,
       diff.newSuggestion = newNode.suggestedLanes;
       diff.oldTurn = oldNode.turn;
       diff.newTurn = newNode.turn;
+      diff.oldExplicitTurn = oldNode.explicitTurn;
+      diff.newExplicitTurn = newNode.explicitTurn;
       diff.suggestionChanged = suggestionChanged;
       diff.turnChanged = turnChanged;
+      diff.explicitTurnChanged = explicitTurnChanged;
 
       constexpr size_t kNodeWindowRadius = 5;
       size_t windowStart = (i >= kNodeWindowRadius) ? (i - kNodeWindowRadius) : 0;
@@ -132,6 +139,9 @@ static void RenderLegend(cairo_t *cairo,
   }
   if (!node.turn.empty() || diff.turnChanged) {
     lines.push_back("turn: " + FormatTurn(node.turn));
+  }
+  if (!node.explicitTurn.empty() || diff.explicitTurnChanged) {
+    lines.push_back("explicit turn: " + FormatTurn(node.explicitTurn));
   }
   if (node.lanes.has_value()) {
     std::string lanesStr = "lanes: count=" + std::to_string(node.lanes->laneCount) +
@@ -433,6 +443,7 @@ static int CompareFile(const std::string &oldFile,
   int added = 0;
   int removed = 0;
   int turnsChanged = 0;
+  int explicitTurnsChanged = 0;
 
   for (const auto &diff : diffs) {
     std::cout << "  Node " << diff.nodeIndex
@@ -458,6 +469,10 @@ static int CompareFile(const std::string &oldFile,
       changes.emplace_back("turn CHANGED");
       turnsChanged++;
     }
+    if (diff.explicitTurnChanged) {
+      changes.emplace_back("explicit turn CHANGED");
+      explicitTurnsChanged++;
+    }
 
     std::cout << ": ";
     for (size_t i = 0; i < changes.size(); i++) {
@@ -472,6 +487,10 @@ static int CompareFile(const std::string &oldFile,
     if (diff.turnChanged) {
       std::cout << "    old turn: " << FormatTurn(diff.oldTurn) << std::endl;
       std::cout << "    new turn: " << FormatTurn(diff.newTurn) << std::endl;
+    }
+    if (diff.explicitTurnChanged) {
+      std::cout << "    old explicit turn: " << FormatTurn(diff.oldExplicitTurn) << std::endl;
+      std::cout << "    new explicit turn: " << FormatTurn(diff.newExplicitTurn) << std::endl;
     }
 
 #ifdef HAVE_MAP_CAIRO
@@ -490,7 +509,7 @@ static int CompareFile(const std::string &oldFile,
 
   std::cout << "  Summary: " << diffs.size() << " nodes with changes (suggestions: "
             << changed << " changed, " << added << " added, " << removed << " removed; turns: "
-            << turnsChanged << " changed)"
+            << turnsChanged << " changed; explicit turns: " << explicitTurnsChanged << " changed)"
             << std::endl;
 
   totalDiffs += static_cast<int>(diffs.size());
