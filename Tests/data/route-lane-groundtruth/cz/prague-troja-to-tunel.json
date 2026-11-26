@@ -1,0 +1,1826 @@
+{
+  "database": "/home/karry/Maps/europe-czech-republic-20261018-110828/",
+  "nodes": [
+    {
+      "distanceKm": 0.0,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1146075138048,
+      "lon": 14.411360281790508,
+      "name": "",
+      "nodeIndex": 0,
+      "ref": "",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 0.014175712662848464,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11465311135839,
+      "lon": 14.411175209367087,
+      "name": "",
+      "nodeIndex": 1,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 0.017588516403966494,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11466652240355,
+      "lon": 14.411132294022536,
+      "name": "",
+      "nodeIndex": 2,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_service"
+    },
+    {
+      "distanceKm": 0.02164940485384546,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.114682615657756,
+      "lon": 14.411081332050856,
+      "name": "",
+      "nodeIndex": 3,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.04520950019141853,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11488512243989,
+      "lon": 14.41117789157613,
+      "name": "U Trojského zámku",
+      "nodeIndex": 4,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.04671351340644061,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.114898533485075,
+      "lon": 14.411180573785145,
+      "name": "U Trojského zámku",
+      "nodeIndex": 5,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.05546913252423686,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.114976317547075,
+      "lon": 14.411199349248392,
+      "name": "U Trojského zámku",
+      "nodeIndex": 6,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.05994842580653119,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11501655068261,
+      "lon": 14.411202031457435,
+      "name": "U Trojského zámku",
+      "nodeIndex": 7,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.06457675941355608,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.115058124922655,
+      "lon": 14.411199349248392,
+      "name": "U Trojského zámku",
+      "nodeIndex": 8,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.07402234391063649,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11514127340274,
+      "lon": 14.411172527158044,
+      "name": "U Trojského zámku",
+      "nodeIndex": 9,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.07895997556819004,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1151855298518,
+      "lon": 14.411167162739986,
+      "name": "U Trojského zámku",
+      "nodeIndex": 10,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.08418454613204503,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1152324685099,
+      "lon": 14.411169844949029,
+      "name": "U Trojského zámku",
+      "nodeIndex": 11,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.21381487793702428,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.116357655200034,
+      "lon": 14.411641913739146,
+      "name": "U Trojského zámku",
+      "nodeIndex": 12,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.21848719751436665,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11639788833557,
+      "lon": 14.411660689202392,
+      "name": "U Trojského zámku",
+      "nodeIndex": 13,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.22652609423455133,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11646762577047,
+      "lon": 14.411690193501784,
+      "name": "U Trojského zámku",
+      "nodeIndex": 14,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.25064278011799196,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11667683807519,
+      "lon": 14.411778706399929,
+      "name": "U Trojského zámku",
+      "nodeIndex": 15,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.29540796919600626,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11706575838525,
+      "lon": 14.411939638942016,
+      "name": "U Trojského zámku",
+      "nodeIndex": 16,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.29791505166368115,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11708721605754,
+      "lon": 14.41195036777816,
+      "name": "U Trojského zámku",
+      "nodeIndex": 17,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_residential"
+    },
+    {
+      "distanceKm": 0.30334941724823045,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1171314725066,
+      "lon": 14.411982554286595,
+      "name": "Trojská",
+      "nodeIndex": 18,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.4253545563067662,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.116827041781136,
+      "lon": 14.413621384006888,
+      "name": "Trojská",
+      "nodeIndex": 19,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.4510841330703325,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11677742091399,
+      "lon": 14.413972753390453,
+      "name": "Trojská",
+      "nodeIndex": 20,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.46300137703290145,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.116784126436585,
+      "lon": 14.414139050350627,
+      "name": "Trojská",
+      "nodeIndex": 21,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.4749443411361444,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.116805584108874,
+      "lon": 14.414302665101758,
+      "name": "Trojská",
+      "nodeIndex": 22,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.486039181660645,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11683642951277,
+      "lon": 14.414450186598685,
+      "name": "Trojská",
+      "nodeIndex": 23,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.510016825661093,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11690750805221,
+      "lon": 14.414766687264802,
+      "name": "Trojská",
+      "nodeIndex": 24,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.5818651514786181,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11717841116473,
+      "lon": 14.415678638336658,
+      "name": "Trojská",
+      "nodeIndex": 25,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.618658884294244,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11733800260228,
+      "lon": 14.416129249454514,
+      "name": "Trojská",
+      "nodeIndex": 26,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.6357521263447201,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.117409081141716,
+      "lon": 14.416341143968253,
+      "name": "Trojská",
+      "nodeIndex": 27,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.6524510356936329,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11746406642692,
+      "lon": 14.41655840290008,
+      "name": "Trojská",
+      "nodeIndex": 28,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.6632733731381459,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1174922296218,
+      "lon": 14.416703242187964,
+      "name": "Trojská",
+      "nodeIndex": 29,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.6677257181039616,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11749759403986,
+      "lon": 14.416764932995761,
+      "name": "Trojská",
+      "nodeIndex": 30,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.6738662155492909,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1174989351444,
+      "lon": 14.416850763684891,
+      "name": "Trojská",
+      "nodeIndex": 31,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.6794313986590208,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11749759403986,
+      "lon": 14.416928547746892,
+      "name": "Trojská",
+      "nodeIndex": 32,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.7007583806397591,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.117486865203716,
+      "lon": 14.417226272949762,
+      "name": "Trojská",
+      "nodeIndex": 33,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.7111560097026003,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.117478818576615,
+      "lon": 14.417371112237646,
+      "name": "Trojská",
+      "nodeIndex": 34,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.7238486508147733,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11747077194951,
+      "lon": 14.417548138033965,
+      "name": "Trojská",
+      "nodeIndex": 35,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.7582261302154099,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11745601979982,
+      "lon": 14.418028253451212,
+      "name": "Trojská",
+      "nodeIndex": 36,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.7672472665967717,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11745870200886,
+      "lon": 14.41815431727585,
+      "name": "Trojská",
+      "nodeIndex": 37,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.7798519479526991,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.117426515500455,
+      "lon": 14.418323296445038,
+      "name": "Trojská",
+      "nodeIndex": 38,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.8054192261882738,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11733800260228,
+      "lon": 14.418653208156314,
+      "name": "Trojská",
+      "nodeIndex": 39,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.8121194909440553,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11731386272098,
+      "lon": 14.418739038845445,
+      "name": "Trojská",
+      "nodeIndex": 40,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.868175567088696,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "none",
+          "none"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11713415471564,
+      "lon": 14.419471281911967,
+      "name": "Trojská",
+      "nodeIndex": 41,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 1,
+        "turn": "unknown"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.8994429000755265,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11702418414521,
+      "lon": 14.419873613267185,
+      "name": "Trojská",
+      "nodeIndex": 42,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.9320887562877701,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11691957799286,
+      "lon": 14.420300084503737,
+      "name": "Trojská",
+      "nodeIndex": 43,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.9367145243034938,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11691555467931,
+      "lon": 14.420364457520577,
+      "name": "Trojská",
+      "nodeIndex": 44,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Turn slightly left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.9413402923190409,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11691957799286,
+      "lon": 14.420428830537418,
+      "name": "Trojská",
+      "nodeIndex": 45,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.9471262287608863,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11692494241092,
+      "lon": 14.420509296808461,
+      "name": "Trojská",
+      "nodeIndex": 46,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.9514120259242264,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through;right"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11693164793351,
+      "lon": 14.420568305407215,
+      "name": "Trojská",
+      "nodeIndex": 47,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "through"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.956168243093053,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11694237676966,
+      "lon": 14.420632678424056,
+      "name": "Trojská",
+      "nodeIndex": 48,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 0.9702008527429739,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11695042339676,
+      "lon": 14.420828479683621,
+      "name": "Trojská",
+      "nodeIndex": 49,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.0366017912442693,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11699870315937,
+      "lon": 14.421753841800637,
+      "name": "Trojská",
+      "nodeIndex": 50,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.0559723822715175,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1170228430407,
+      "lon": 14.422022062704116,
+      "name": "Trojská",
+      "nodeIndex": 51,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.0727935029203166,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11705234734009,
+      "lon": 14.42225273268113,
+      "name": "Trojská",
+      "nodeIndex": 52,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.0970605458805092,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11711001483434,
+      "lon": 14.422579962183391,
+      "name": "Trojská",
+      "nodeIndex": 53,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.1204876139623658,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1171703645376,
+      "lon": 14.422893780640464,
+      "name": "Trojská",
+      "nodeIndex": 54,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.1317649663577998,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11720120994153,
+      "lon": 14.423043984346407,
+      "name": "Trojská",
+      "nodeIndex": 55,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.1593096660210054,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11726960627189,
+      "lon": 14.423414129193219,
+      "name": "Trojská",
+      "nodeIndex": 56,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.2187246641440443,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11740237561912,
+      "lon": 14.424218791903684,
+      "name": "Trojská",
+      "nodeIndex": 57,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.2701574702733236,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1174922296218,
+      "lon": 14.424924212879858,
+      "name": "Trojská",
+      "nodeIndex": 58,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.2939576593863225,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1175311216528,
+      "lon": 14.42525144238212,
+      "name": "Trojská",
+      "nodeIndex": 59,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.3143057134035205,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.1175378271754,
+      "lon": 14.42553575653983,
+      "name": "Trojská",
+      "nodeIndex": 60,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.3369911985780387,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11752441613021,
+      "lon": 14.425852257205946,
+      "name": "Trojská",
+      "nodeIndex": 61,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.3794674322301534,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11746808974047,
+      "lon": 14.426439660984585,
+      "name": "Trojská",
+      "nodeIndex": 62,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.4213612619260534,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11739298788751,
+      "lon": 14.427013653718035,
+      "name": "Trojská",
+      "nodeIndex": 63,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.4481170138807398,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11735811917006,
+      "lon": 14.427383798564847,
+      "name": "Trojská",
+      "nodeIndex": 64,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.4721630494353148,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11734202591583,
+      "lon": 14.42771907469421,
+      "name": "Trojská",
+      "nodeIndex": 65,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.483289452619836,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11734202591583,
+      "lon": 14.427874642818239,
+      "name": "Trojská",
+      "nodeIndex": 66,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.5611744166746249,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11734336702037,
+      "lon": 14.428963619686385,
+      "name": "Trojská",
+      "nodeIndex": 67,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.6703299025479792,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": false
+      },
+      "lat": 50.11733800260228,
+      "lon": 14.430489796627228,
+      "name": "Trojská",
+      "nodeIndex": 68,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.7737291545410578,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "right"
+        ],
+        "oneway": false
+      },
+      "lat": 50.117340684811325,
+      "lon": 14.431935507297027,
+      "name": "Trojská",
+      "nodeIndex": 69,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 1,
+        "to": 1,
+        "turn": "right"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.8410868807981429,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11732459155712,
+      "lon": 14.432876962668274,
+      "name": "Pod Lisem",
+      "nodeIndex": 70,
+      "ref": "",
+      "turn": "Turn right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.855171976604255,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11721730319573,
+      "lon": 14.432981568820622,
+      "name": "Pod Lisem",
+      "nodeIndex": 71,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.8654934648442878,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.117124766984006,
+      "lon": 14.432992297656767,
+      "name": "Pod Lisem",
+      "nodeIndex": 72,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.9544767687676492,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.116326809796135,
+      "lon": 14.433080810554912,
+      "name": "Pod Lisem",
+      "nodeIndex": 73,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.9637386594477504,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.116245002420584,
+      "lon": 14.433104950436245,
+      "name": "Pod Lisem",
+      "nodeIndex": 74,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.9680711943899938,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11620745149409,
+      "lon": 14.433121043690448,
+      "name": "Pod Lisem",
+      "nodeIndex": 75,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.9759392103895734,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11614307847725,
+      "lon": 14.433166641244043,
+      "name": "Pod Lisem",
+      "nodeIndex": 76,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.9813567979005058,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11610418644625,
+      "lon": 14.433212238797637,
+      "name": "Pod Lisem",
+      "nodeIndex": 77,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 1.9894686260508403,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.116058588892656,
+      "lon": 14.433300751695782,
+      "name": "Pod Lisem",
+      "nodeIndex": 78,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.005606854443587,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11599287477131,
+      "lon": 14.433501917373405,
+      "name": "Pod Lisem",
+      "nodeIndex": 79,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.0497638293643137,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.115865469842134,
+      "lon": 14.434086638943,
+      "name": "Pod Lisem",
+      "nodeIndex": 80,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.0756629698074995,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.115762204794294,
+      "lon": 14.434411186236218,
+      "name": "Pod Lisem",
+      "nodeIndex": 81,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.08741226307679,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.115692467359395,
+      "lon": 14.434534567851841,
+      "name": "Pod Lisem",
+      "nodeIndex": 82,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.0961524244177974,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11564016428321,
+      "lon": 14.434625762959001,
+      "name": "Pod Lisem",
+      "nodeIndex": 83,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.108877276905078,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11554762807151,
+      "lon": 14.434730369111378,
+      "name": "Pod Lisem",
+      "nodeIndex": 84,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.115412271819008,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11549264278631,
+      "lon": 14.434762555619784,
+      "name": "Pod Lisem",
+      "nodeIndex": 85,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.155509248009012,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11513725008916,
+      "lon": 14.434856432936016,
+      "name": "Pod Lisem",
+      "nodeIndex": 86,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.1971648279350586,
+      "lanes": {
+        "laneCount": 2,
+        "laneTurns": [
+          "left",
+          "through"
+        ],
+        "oneway": true
+      },
+      "lat": 50.11476710524235,
+      "lon": 14.434944945834161,
+      "name": "Pod Lisem",
+      "nodeIndex": 87,
+      "ref": "",
+      "suggestedLanes": {
+        "from": 0,
+        "to": 0,
+        "turn": "left"
+      },
+      "turn": "Straight on",
+      "type": "highway_tertiary"
+    },
+    {
+      "distanceKm": 2.2083097933224005,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11466786350806,
+      "lon": 14.43496640350645,
+      "name": "",
+      "nodeIndex": 88,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_secondary_link"
+    },
+    {
+      "distanceKm": 2.2105915522674904,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.1146544524629,
+      "lon": 14.434990543387755,
+      "name": "",
+      "nodeIndex": 89,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_secondary_link"
+    },
+    {
+      "distanceKm": 2.213530576938956,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114643723626756,
+      "lon": 14.435028094314248,
+      "name": "",
+      "nodeIndex": 90,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_secondary_link"
+    },
+    {
+      "distanceKm": 2.2160423476832745,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11464104141771,
+      "lon": 14.435062963031697,
+      "name": "",
+      "nodeIndex": 91,
+      "ref": "",
+      "turn": "Turn slightly left",
+      "type": "highway_secondary_link"
+    },
+    {
+      "distanceKm": 2.2255005860983412,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11465042914935,
+      "lon": 14.435194391274422,
+      "name": "",
+      "nodeIndex": 92,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.232216828058581,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11465177025386,
+      "lon": 14.435288268590625,
+      "name": "",
+      "nodeIndex": 93,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.2468344127719977,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114661157985495,
+      "lon": 14.435492116477292,
+      "name": "",
+      "nodeIndex": 94,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.2606545177518647,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114665181299046,
+      "lon": 14.435685235527785,
+      "name": "",
+      "nodeIndex": 95,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.2698739571778233,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114661157985495,
+      "lon": 14.435813981561466,
+      "name": "",
+      "nodeIndex": 96,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.2782363824593745,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11464104141771,
+      "lon": 14.435926634340916,
+      "name": "",
+      "nodeIndex": 97,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.2858795966491257,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.1146155604319,
+      "lon": 14.436025876075206,
+      "name": "",
+      "nodeIndex": 98,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.293141187913779,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11458069171445,
+      "lon": 14.436111706764336,
+      "name": "",
+      "nodeIndex": 99,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.299943002287327,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11453911747441,
+      "lon": 14.436181444199235,
+      "name": "",
+      "nodeIndex": 100,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3079522415851024,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11448144998016,
+      "lon": 14.436248499425119,
+      "name": "",
+      "nodeIndex": 101,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3160178066692843,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11441439475428,
+      "lon": 14.43629141476967,
+      "name": "",
+      "nodeIndex": 102,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3228285566843305,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11435404505099,
+      "lon": 14.436307508023873,
+      "name": "",
+      "nodeIndex": 103,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3300119424062853,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11428967203415,
+      "lon": 14.436299461396771,
+      "name": "",
+      "nodeIndex": 104,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3356500869470453,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114240051167,
+      "lon": 14.436283368142568,
+      "name": "",
+      "nodeIndex": 105,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3419798705561927,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11418774809084,
+      "lon": 14.436248499425119,
+      "name": "",
+      "nodeIndex": 106,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.347426508685568,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.1141461738508,
+      "lon": 14.436208266289583,
+      "name": "",
+      "nodeIndex": 107,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3534480075370654,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11410594071526,
+      "lon": 14.436151939899872,
+      "name": "",
+      "nodeIndex": 108,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3610215086019575,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114061684266204,
+      "lon": 14.4360714736288,
+      "name": "",
+      "nodeIndex": 109,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.368610309976306,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.114026815548726,
+      "lon": 14.43598027852164,
+      "name": "",
+      "nodeIndex": 110,
+      "ref": "",
+      "turn": "Turn slightly right",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3771035352012437,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.11400267566742,
+      "lon": 14.435867625742162,
+      "name": "",
+      "nodeIndex": 111,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3985877220813485,
+      "lanes": {
+        "laneCount": 1,
+        "laneTurns": [],
+        "oneway": true
+      },
+      "lat": 50.113966465845465,
+      "lon": 14.435572582748335,
+      "name": "",
+      "nodeIndex": 112,
+      "ref": "",
+      "turn": "Straight on",
+      "type": "highway_trunk_link"
+    },
+    {
+      "distanceKm": 2.3985877220813485,
+      "lat": 50.113966465845465,
+      "lon": 14.435572582748335,
+      "nodeIndex": 113
+    }
+  ],
+  "start": {
+    "lat": 50.114806,
+    "lon": 14.4114
+  },
+  "target": {
+    "lat": 50.113924,
+    "lon": 14.435125
+  },
+  "version": 1
+}
