@@ -42,9 +42,34 @@ namespace osmscout {
   struct OSMSCOUT_API ObjectVariantData
   {
   public:
+    /**
+     * The bit in [grade] that records that using the object costs a toll.
+     *
+     * It shares the byte with the grade because the object variant file carries no version header: a
+     * database written by an older importer reads back as \"no toll information\", which is true, instead
+     * of being misparsed. Every reader of [grade] must mask it.
+     */
+    static constexpr uint8_t TollBit=0x80;
+
     TypeInfoRef type;     //!< The type of the object
     uint8_t     maxSpeed; //!< Maximum speed allowed on the way
-    uint8_t     grade;    //!< Quality of road/track 1 (good)...5 (bad)
+    uint8_t     grade;    //!< Quality of road/track 1 (good)...5 (bad), plus the [TollBit]
+
+    /**
+     * The recorded grade, with the toll bit removed.
+     *
+     * Returns the raw value because `Grade` is declared in the routing profile header, which includes
+     * this one; readers cast it.
+     */
+    uint8_t GetGrade() const
+    {
+      return grade & 0x7F;
+    }
+
+    bool IsToll() const
+    {
+      return (grade & TollBit)!=0;
+    }
 
     bool operator==(const ObjectVariantData& other) const;
     bool operator<(const ObjectVariantData& other) const;
