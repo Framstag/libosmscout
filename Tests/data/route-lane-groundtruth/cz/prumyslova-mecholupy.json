@@ -1,5 +1,5 @@
 {
-  "database": "/home/karry/Maps/europe-czech-republic-20261018-110828",
+  "database": "/home/karry/Maps/europe-czech-republic-20261018-110828/",
   "nodes": [
     {
       "distanceKm": 0.0,
@@ -2302,7 +2302,7 @@
     {
       "distanceKm": 2.883186495258453,
       "lanes": {
-        "laneCount": 3,
+        "laneCount": 4,
         "laneTurns": [
           "merge_to_right",
           "through",
@@ -2318,8 +2318,8 @@
       "ref": "601",
       "suggestedLanes": {
         "from": 1,
-        "to": 2,
-        "turn": "through"
+        "to": 3,
+        "turn": "unknown"
       },
       "turn": "Straight on",
       "type": "highway_primary"
@@ -2788,7 +2788,7 @@
       "ref": "601",
       "suggestedLanes": {
         "from": 0,
-        "to": 1,
+        "to": 0,
         "turn": "left"
       },
       "turn": "Straight on",
@@ -3067,7 +3067,7 @@
     {
       "distanceKm": 3.8656661143328512,
       "lanes": {
-        "laneCount": 2,
+        "laneCount": 3,
         "laneTurns": [
           "left",
           "through",
@@ -3082,7 +3082,7 @@
       "ref": "333",
       "suggestedLanes": {
         "from": 1,
-        "to": 1,
+        "to": 2,
         "turn": "through"
       },
       "turn": "Straight on",
@@ -3444,11 +3444,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 158,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3464,11 +3459,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 159,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3484,11 +3474,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 160,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3504,11 +3489,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 161,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3524,11 +3504,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 162,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3546,11 +3521,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 163,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3566,11 +3536,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 164,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3588,11 +3553,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 165,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3610,11 +3570,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 166,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3632,11 +3587,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 167,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3723,11 +3673,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 171,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3745,11 +3690,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 172,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3765,11 +3705,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 173,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3785,11 +3720,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 174,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3805,11 +3735,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 175,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },
@@ -3825,11 +3750,6 @@
       "name": "Kutnohorská",
       "nodeIndex": 176,
       "ref": "333",
-      "suggestedLanes": {
-        "from": 0,
-        "to": 0,
-        "turn": "unknown"
-      },
       "turn": "Straight on",
       "type": "highway_secondary"
     },

@@ -432,6 +432,7 @@ void NavigationModule::playerStateChanged(VoicePlayer::PlaybackState state)
       auto sampleUrl = QUrl::fromLocalFile(voice.getDir().filePath(sampleFile(sample)));
       urls.append(sampleUrl);
     }
+    nextMessage.clear();
     playAudio(urls);
   }
 }

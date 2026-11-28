@@ -1,5 +1,5 @@
 {
-  "database": "/home/lukas.karas/Downloads/Maps/europe-czech-republic-20260819-010856",
+  "database": "/home/karry/Maps/europe-czech-republic-20261018-110828/",
   "nodes": [
     {
       "distanceKm": 0.0,
@@ -16,7 +16,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.031248793942164576,
+      "distanceKm": 0.03124879394091566,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -31,7 +31,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.08085811995726204,
+      "distanceKm": 0.08085811995569418,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -46,7 +46,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.1340876147079344,
+      "distanceKm": 0.13408761470603958,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -61,7 +61,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.19460884177533536,
+      "distanceKm": 0.1946088417741115,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -76,7 +76,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.24190476314708997,
+      "distanceKm": 0.24190476314688641,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -91,7 +91,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.2748244280369023,
+      "distanceKm": 0.2748244280394671,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -106,7 +106,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.3125413925407815,
+      "distanceKm": 0.3125413925423018,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -121,7 +121,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.3418177311946854,
+      "distanceKm": 0.34181773119550674,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -136,7 +136,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.366451473782739,
+      "distanceKm": 0.36645147378356036,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -151,7 +151,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.38965252168894066,
+      "distanceKm": 0.38965252169117137,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -166,7 +166,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.42580217552736366,
+      "distanceKm": 0.4258021755292413,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -181,7 +181,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.46011250369225865,
+      "distanceKm": 0.46011250369519696,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -196,7 +196,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.5121889185539757,
+      "distanceKm": 0.5121889185565607,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -211,7 +211,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.566424042044289,
+      "distanceKm": 0.566424042046168,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -226,7 +226,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.6420378129826799,
+      "distanceKm": 0.6420378129859678,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -241,7 +241,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.7318370507376759,
+      "distanceKm": 0.7318370507399068,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -256,7 +256,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.7875614929568437,
+      "distanceKm": 0.7875614929587215,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -271,7 +271,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.8535030202395325,
+      "distanceKm": 0.8535030202424708,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -286,7 +286,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.9015484161847644,
+      "distanceKm": 0.9015484161880561,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -301,7 +301,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.9500169584612802,
+      "distanceKm": 0.9500169584663347,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -316,7 +316,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 0.9856711055734967,
+      "distanceKm": 0.9856711055771489,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -336,7 +336,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.0193110397715908,
+      "distanceKm": 1.0193110397759422,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -356,7 +356,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.0611624541335027,
+      "distanceKm": 1.0611624541368108,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -376,7 +376,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.113695203944309,
+      "distanceKm": 1.1136952039486472,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -396,7 +396,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.1523227866072578,
+      "distanceKm": 1.1523227866122756,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -416,7 +416,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.2105830906981667,
+      "distanceKm": 1.2105830907031845,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -436,7 +436,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.2659631002514098,
+      "distanceKm": 1.265963100257083,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -456,7 +456,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.3151353280643314,
+      "distanceKm": 1.3151353280700047,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -476,7 +476,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.345982526220277,
+      "distanceKm": 1.3459825262268938,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -496,7 +496,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.3793148007961427,
+      "distanceKm": 1.37931480080338,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -516,7 +516,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.42817733540998,
+      "distanceKm": 1.428177335416017,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -536,7 +536,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.4790284324977414,
+      "distanceKm": 1.4790284325031915,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -560,7 +560,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.5225680584258234,
+      "distanceKm": 1.5225680584307137,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -584,7 +584,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.5658933859148723,
+      "distanceKm": 1.5658933859213984,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -608,7 +608,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.6434552614000488,
+      "distanceKm": 1.6434552614068356,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -632,7 +632,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.7027631431037669,
+      "distanceKm": 1.7027631431105537,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -652,7 +652,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.8028135150658202,
+      "distanceKm": 1.8028135150738143,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -676,7 +676,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.8423454852212244,
+      "distanceKm": 1.842345485229947,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -700,7 +700,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 1.9132478766193886,
+      "distanceKm": 1.913247876626665,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -724,7 +724,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.0094417064091212,
+      "distanceKm": 2.0094417064176393,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -748,7 +748,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.090305455107183,
+      "distanceKm": 2.090305455114673,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -768,7 +768,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.1619395247166757,
+      "distanceKm": 2.1619395247239055,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -788,7 +788,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.2487100226655197,
+      "distanceKm": 2.248710022673566,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -812,7 +812,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.3422806821921154,
+      "distanceKm": 2.3422806822009936,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -836,7 +836,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.4570903166961777,
+      "distanceKm": 2.4570903167056195,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -860,7 +860,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.4979157592357684,
+      "distanceKm": 2.4979157592446466,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -875,7 +875,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.5459400941315837,
+      "distanceKm": 2.545940094141027,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -890,7 +890,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.6384419651953515,
+      "distanceKm": 2.6384419652033944,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -905,7 +905,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.6835154766801526,
+      "distanceKm": 2.6835154766907334,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -920,7 +920,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.773121766787435,
+      "distanceKm": 2.7731217667977446,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -935,7 +935,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.808412020301405,
+      "distanceKm": 2.808412020311454,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -950,7 +950,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.849191176310355,
+      "distanceKm": 2.8491911763211566,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -965,7 +965,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.894506154405608,
+      "distanceKm": 2.8945061544168915,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -980,7 +980,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.9388631055111802,
+      "distanceKm": 2.9388631055220045,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -995,7 +995,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 2.994752531936011,
+      "distanceKm": 2.99475253194705,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1010,7 +1010,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.0520204012914407,
+      "distanceKm": 3.052020401302879,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1025,7 +1025,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.0913167775652584,
+      "distanceKm": 3.0913167775765156,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1040,7 +1040,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.135586361847125,
+      "distanceKm": 3.135586361857677,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1055,7 +1055,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.182590157355743,
+      "distanceKm": 3.182590157367086,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1070,7 +1070,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.224208882101222,
+      "distanceKm": 3.224208882112709,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1085,7 +1085,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.2599884885599737,
+      "distanceKm": 3.259988488571328,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1100,7 +1100,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.2939163917840792,
+      "distanceKm": 3.2939163917962935,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1115,7 +1115,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.3474935471150684,
+      "distanceKm": 3.3474935471273883,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1130,7 +1130,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.5059898883683656,
+      "distanceKm": 3.505989888379916,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1145,7 +1145,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.602585939276986,
+      "distanceKm": 3.6025859392889314,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1160,7 +1160,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.697032541607236,
+      "distanceKm": 3.6970325416191816,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1175,7 +1175,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.8249634860116473,
+      "distanceKm": 3.8249634860238606,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1190,7 +1190,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.902499902911313,
+      "distanceKm": 3.902499902923994,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1205,7 +1205,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 3.977724151429764,
+      "distanceKm": 3.9777241514417914,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1220,7 +1220,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.036316971428879,
+      "distanceKm": 4.0363169714416225,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1235,7 +1235,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.093342790626736,
+      "distanceKm": 4.09334279063948,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1250,7 +1250,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.156506896019071,
+      "distanceKm": 4.156506896031421,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1265,7 +1265,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.201647009241109,
+      "distanceKm": 4.201647009254277,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1285,7 +1285,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.243457525703592,
+      "distanceKm": 4.2434575257159075,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1305,7 +1305,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.324316110180612,
+      "distanceKm": 4.324316110194484,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1325,7 +1325,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.4458132822561875,
+      "distanceKm": 4.445813282269825,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1345,7 +1345,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.502953975597341,
+      "distanceKm": 4.5029539756109775,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1365,7 +1365,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.560651471113994,
+      "distanceKm": 4.560651471127372,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1385,7 +1385,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.615761657906598,
+      "distanceKm": 4.615761657921074,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1405,7 +1405,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.6575479089211465,
+      "distanceKm": 4.657547908935623,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1424,7 +1424,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.720240037761604,
+      "distanceKm": 4.720240037775792,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1443,7 +1443,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.767608067409327,
+      "distanceKm": 4.7676080674244075,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1462,7 +1462,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.793482962982298,
+      "distanceKm": 4.793482962997679,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1481,7 +1481,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.810063779903992,
+      "distanceKm": 4.810063779919065,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1500,7 +1500,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.881125820678202,
+      "distanceKm": 4.881125820693891,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1519,7 +1519,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 4.9601944968752125,
+      "distanceKm": 4.960194496891542,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1538,7 +1538,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.01952866148251,
+      "distanceKm": 5.019528661499498,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1557,7 +1557,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.0616192330171055,
+      "distanceKm": 5.061619233034426,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1576,7 +1576,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.093091834093272,
+      "distanceKm": 5.0930918341122675,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1595,7 +1595,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.135443994440252,
+      "distanceKm": 5.135443994457554,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1614,7 +1614,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.1758455942411326,
+      "distanceKm": 5.175845594258776,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1633,7 +1633,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.258348538031904,
+      "distanceKm": 5.258348538050585,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1652,7 +1652,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.329501066532162,
+      "distanceKm": 5.329501066551192,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1671,7 +1671,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.423543086957753,
+      "distanceKm": 5.42354308697538,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1690,7 +1690,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.550986545037403,
+      "distanceKm": 5.5509865450578415,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1709,7 +1709,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.6037062120647025,
+      "distanceKm": 5.60370621208479,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1728,7 +1728,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.672301808885985,
+      "distanceKm": 5.67230180890432,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1747,7 +1747,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.752944610353081,
+      "distanceKm": 5.752944610371415,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1766,7 +1766,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.802011067689076,
+      "distanceKm": 5.802011067707411,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1785,7 +1785,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.854587087183525,
+      "distanceKm": 5.8545870872015175,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1809,7 +1809,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.894896736714851,
+      "distanceKm": 5.894896736734204,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1833,7 +1833,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 5.951131846558987,
+      "distanceKm": 5.951131846577337,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1857,7 +1857,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.034212328762427,
+      "distanceKm": 6.0342123287817575,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1881,7 +1881,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.108890791057781,
+      "distanceKm": 6.108890791076481,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1905,7 +1905,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.165978659888707,
+      "distanceKm": 6.165978659907408,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1929,7 +1929,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.237916129058024,
+      "distanceKm": 6.237916129076429,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1953,7 +1953,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.280394256491279,
+      "distanceKm": 6.280394256511106,
       "lanes": {
         "laneCount": 3,
         "laneTurns": [
@@ -1977,7 +1977,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.322980301084413,
+      "distanceKm": 6.322980301103403,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -1992,7 +1992,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.363836089514774,
+      "distanceKm": 6.3638360895340345,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2007,7 +2007,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.424123889438961,
+      "distanceKm": 6.424123889457162,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2022,7 +2022,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.440325289534115,
+      "distanceKm": 6.440325289552843,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2037,7 +2037,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.449358360651605,
+      "distanceKm": 6.449358360670583,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2052,7 +2052,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.789782522999447,
+      "distanceKm": 6.789782523018426,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2067,7 +2067,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.838092534646633,
+      "distanceKm": 6.83809253466587,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2082,7 +2082,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 6.924986167510714,
+      "distanceKm": 6.924986167530481,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2097,7 +2097,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 7.010193086708265,
+      "distanceKm": 7.010193086728578,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2112,7 +2112,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 7.092545256960131,
+      "distanceKm": 7.092545256979895,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2127,7 +2127,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 7.207561534737401,
+      "distanceKm": 7.2075615347574455,
       "lanes": {
         "laneCount": 2,
         "laneTurns": [],
@@ -2142,7 +2142,7 @@
       "type": "highway_motorway"
     },
     {
-      "distanceKm": 7.207561534737401,
+      "distanceKm": 7.2075615347574455,
       "lat": 49.89568024796009,
       "lon": 14.744965394921337,
       "nodeIndex": 119

@@ -475,8 +475,8 @@ namespace osmscout {
     return !((*this)==o);
   }
 
-  RouteDescription::SuggestedLaneDescription::SuggestedLaneDescription(uint8_t from, uint8_t to, LaneTurn turn):
-      from(from), to(to), turn(turn)
+  RouteDescription::SuggestedLaneDescription::SuggestedLaneDescription(uint8_t from, uint8_t to, LaneTurn turn, bool propagated):
+      from(from), to(to), turn(turn), propagated(propagated)
   {}
 
   std::string RouteDescription::SuggestedLaneDescription::GetDebugString() const
@@ -489,6 +489,9 @@ namespace osmscout {
     ss << ", ";
     ss << (int)to;
     ss << ">";
+    if (propagated) {
+      ss << " (ahead)";
+    }
     return ss.str();
   }
 

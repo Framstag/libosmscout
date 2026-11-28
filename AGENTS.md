@@ -152,7 +152,7 @@ GitHub Actions in `.github/workflows/`:
 | `build_and_test_on_ubuntu_26_04.yml` | Linux (gcc/clang) |
 | `build_and_test_on_osx.yml` | macOS |
 | `build_and_test_on_ios.yml` | iOS |
-| `build_and_test_on_msys.yml` | Windows/MinGW |
+| `build_and_test_on_msys.yml` | Windows/MinGW (UCRT64) |
 | `build_and_test_on_vs2025.yml` | Windows/MSVC |
 | `build_on_ubuntu_26_04_qt_android.yml` | Android NDK |
 | `sanitize_on_ubuntu_26_04.yml` | Sanitizer builds |
@@ -178,6 +178,16 @@ enter deprecation on 2026-09-17 and are unsupported from 2027-04-17
 `catch2` name, which that release keeps only as a transitional package, and the memory sanitizer job
 installs `clang-21` from the release archive instead of adding the `apt.llvm.org` repository of an
 older release.
+
+Note: both `build_and_test_on_msys.yml` jobs run in the MSYS2 UCRT64 environment, which each
+setup step names with `msystem: UCRT64`, and every package they install carries the
+`mingw-w64-ucrt-x86_64-` prefix. The action defaults to MINGW64, which MSYS2 marks deprecated and
+whose repository MSYS2 keeps dropping leaf packages from (glfw and skia went on 2026-11-18,
+`MINGW-packages#33705` and `#33714`), so a MINGW64 install list aborts with
+`error: target not found` before anything is configured. The package prefix follows from the
+environment: `MINGW_PREFIX` is `/ucrt64`, and the `DXSDK_DIR`, font-configuration and test-`PATH`
+steps read it rather than naming an environment. `suppress-deprecation-warnings` is therefore gone
+from both jobs instead of acknowledging the deprecated environment.
 
 Note: both `build_and_test_on_msys.yml` jobs provision the repository's Liberation font ("Provide the font the font-dependent tests measure against") and verify the font and locale environment ("Verify the font and locale environment") before the build, and both test steps declare the same locale (`LANG: en_US.utf8`, `LC_ALL=C`). The font-dependent tests configure the bundled font file as the font name; a backend that resolves a font by family serves the face of that file (see the `font-management` capability), which is what makes them measure the repository font on every host instead of the fonts a runner happens to provide.
 

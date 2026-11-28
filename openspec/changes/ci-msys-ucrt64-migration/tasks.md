@@ -1,0 +1,30 @@
+# Tasks
+
+Spec: `specs/ci-build-fixes/spec.md` (delta to the `ci-build-fixes` capability). Design: `design.md`.
+
+## 1. The environment of the MSYS jobs
+
+- [x] 1.1 Record what the failure is and when it started: run `44886294206` (PR #1934) fails both jobs at `Setup MSYS/MINGW64` with `error: target not found: mingw-w64-x86_64-glfw` and `mingw-w64-x86_64-skia` after MSYS2 dropped both packages on 2026-11-18, and the last green run is `44582212555` of 2026-11-19 17:54 UTC. Verify: the run ids, the two package names and the removal dates are written down in `proposal.md` - Why and `design.md` - Context. (Spec: "An MSYS2 CI job selects an environment that carries every package it installs".)
+- [x] 1.2 Check every package of both install lists for a UCRT64 build, and confirm `glfw`, `skia`, `qt5` (5.15.19), `cairo`, `pango`, `catch`, `protobuf`, `libxml2`, `nlohmann-json`, `glew`, `glm`, `libpng`, `directx-headers`, `libtool`, `cmake`, `meson`, `ninja` and the `toolchain` group are published there. Verify: `packages.msys2.org` names `ucrt64` in the `repos` of each, and `design.md` - Context carries the table. (Spec: "The install list resolves in the selected environment".)
+- [x] 1.3 Select UCRT64 in both setup steps of `.github/workflows/build_and test_on_msys.yml` and move both install lists to the `mingw-w64-ucrt-x86_64-` prefix; name the two steps `Setup MSYS/UCRT64`. Verify: `grep -n "msystem\|mingw-w64-" .github/workflows/build_and\ test_on_msys.yml` names `UCRT64` twice, no `mingw-w64-x86_64-` entry remains, and the file parses as YAML. (Spec: "The environment is stated where it is selected".)
+- [x] 1.4 State why the jobs run there, above the cmake job's setup step: MSYS2 deprecates MINGW64 and keeps dropping leaf packages from it (`MINGW-packages#33705`, `#33714`), so a MINGW64 install list aborts before anything is configured. Verify: the comment names both pull requests and the error, and the meson job's step points at it. (Spec: "The environment is stated where it is selected".)
+- [x] 1.5 Remove `suppress-deprecation-warnings: msystem-mingw64` from both jobs. Verify: `grep -n "suppress-deprecation-warnings" .github/workflows/build_and\ test_on_msys.yml` prints nothing. (Spec: "No MSYS2 job suppresses a deprecation warning".)
+- [x] 1.6 Keep the steps that read the installation prefix as they are (`MINGW_PREFIX/etc/fonts/conf.d`, `DXSDK_DIR=${MINGW_PREFIX}/${MINGW_CHOST}`, `${MINGW_PREFIX}/bin` in the test `PATH`) and confirm they still resolve in the new environment. Verify: the steps in the file are unchanged by the diff, and the config `DXSDK_DIR`/font/`PATH` steps of the pull request's runs print `/ucrt64` paths. (Spec: "The steps that need the prefix read it from the environment".)
+- [x] 1.7 Confirm no package the jobs install was itself removed from UCRT64, and that re-adding `extra-cmake-modules` stays out of scope (nothing in the repository uses ECM). Verify: the install lists carry the same package set as before the change, minus nothing, plus nothing. (Spec: "A package the project does not use may leave the list".)
+
+## 2. Documentation
+
+- [x] 2.1 Name the environment in the build-status table of `README.md` (`Windows, MSYS/UCRT64`). Verify: `grep -n "MSYS" README.md` names UCRT64 and no longer MINGW64.
+- [x] 2.2 Add a note to the CI/CD section of `AGENTS.md`: the jobs select UCRT64 with `msystem`, every entry carries the `mingw-w64-ucrt-x86_64-` prefix, MINGW64 is deprecated and loses leaf packages, `MINGW_PREFIX` is what the prefix-dependent steps follow, and `suppress-deprecation-warnings` is gone. Verify: the note exists, names the package prefix and both MSYS2 pull requests, and the workflow table row names UCRT64.
+- [x] 2.3 Validate the change: `openspec validate ci-msys-ucrt64-migration --strict`. Verify: the command reports the change as valid.
+- [x] 2.4 Restate the libpng requirement of `openspec/specs/ci-build-fixes/spec.md`, which names `mingw-w64-x86_64-libpng`: it becomes the libpng package of the environment a job selects (removed and re-added in the delta, because the scenario that named the old package no longer holds). Verify: the delta carries both blocks, no requirement of it names `mingw-w64-x86_64-libpng` as the MSYS entry, and `openspec validate ci-msys-ucrt64-migration --strict` reports the change as valid.
+
+## 3. Build and test verification (the pull request's own runs, the only environment with a MSYS2 runner)
+
+- [x] 3.1 Confirm both setup steps install the package list without `error: target not found` and report the UCRT64 environment. Verify: the `Setup MSYS/UCRT64` step of both jobs concludes `success`, and the job output names the environment.
+- [x] 3.2 Confirm the font and locale verification steps pass in both jobs, and that the resolved font is the repository's `LiberationSans-Regular.ttf` under `/ucrt64`. Verify: the verification step of both jobs concludes `success` and its `Liberation Sans resolves to:` line names the repository file.
+- [x] 3.3 Confirm the `gcc and cmake` job configures (including `d2d1.h` for the DirectX backend), builds and runs `ctest` green. Verify: the run's step conclusions and its `ctest` summary.
+- [x] 3.4 Confirm the `gcc and meson` job configures, builds and runs `meson test` green, including the `PerformanceTest-cairo-*` cases. Verify: the run's step conclusions and its `meson test` summary.
+- [x] 3.5 Confirm no unit test is required for this change: it modifies workflow configuration, `README.md` and `AGENTS.md` only, so no new Catch2 test is added and the existing suites run inside the MSYS jobs (tasks 3.3, 3.4). Verify: the diff contains no file under `Tests/`, `libosmscout*/`, `OSMScout*/`, `Apple/` or `Android/`.
+- [x] 3.6 Confirm no other workflow is affected: no other job selects an MSYS2 environment, and no `CMakeLists.txt` or `meson.build` changes. Verify: `git diff --stat` against the base revision lists the MSYS workflow, `README.md`, `AGENTS.md` and the files of this change only.
+- [x] 3.7 Record the outcome in `verification.md` and point #1927 at it. Verify: the file carries the run ids, the step conclusions and the test summaries.

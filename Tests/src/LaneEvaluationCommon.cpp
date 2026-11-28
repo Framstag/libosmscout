@@ -199,6 +199,8 @@ void WriteRouteJson(const RouteDescription &description,
         nodeObj["type"] = typeNameDesc->GetName();
       } else if (auto directionDesc = dynamic_cast<RouteDescription::DirectionDescription *>(desc.get())) {
         nodeObj["turn"] = MoveToTurnCommand(directionDesc->GetTurn());
+      } else if (auto turnDesc = dynamic_cast<RouteDescription::TurnDescription *>(desc.get())) {
+        nodeObj["explicitTurn"] = MoveToTurnCommand(turnDesc->GetDirection());
       }
     }
 
@@ -255,6 +257,7 @@ RouteInfo ReadRouteJson(const std::string &inputPath)
     nodeInfo.ref = nodeJson.value("ref", "");
     nodeInfo.typeName = nodeJson.value("type", "");
     nodeInfo.turn = nodeJson.value("turn", "");
+    nodeInfo.explicitTurn = nodeJson.value("explicitTurn", "");
 
     if (nodeJson.contains("lanes")) {
       NodeLaneInfo lanes;

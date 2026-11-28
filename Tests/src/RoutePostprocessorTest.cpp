@@ -1176,6 +1176,13 @@ TEST_CASE("Propagate turn lane suggestion backward across preceding junctions")
     REQUIRE(suggestedB->GetTurn() == LaneTurn::Left);
     REQUIRE(suggestedB->GetFrom() == 0);
     REQUIRE(suggestedB->GetTo() == 0);
+    // The lanes are suggested in advance, the route goes straight through B
+    REQUIRE_FALSE(nodeIt->HasDescription<RouteDescription::TurnDescription>());
+    // The turn instruction belongs to the junction C
+    ++nodeIt;
+    auto turnDesc = nodeIt->GetDescription<RouteDescription::TurnDescription>();
+    REQUIRE(turnDesc);
+    REQUIRE(turnDesc->GetDirection() == RouteDescription::DirectionDescription::left);
   }
 }
 
