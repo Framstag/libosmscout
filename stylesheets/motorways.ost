@@ -2,6 +2,11 @@ OST
 
 TYPES
 
+  // The Toll feature is present in the library but not enabled here, and it must not be: listing it on
+  // a type makes every database built from this file unreadable for older library builds, which is a
+  // FILE_FORMAT_VERSION bump and a coordinated release with the map provider
+  // (guidelines/FileFormatVersion.md, "A feature that exists but is not enabled").
+
   // Types marked PARKED-NEW-TYPE are inactive. They are kept here, commented, so
   // enabling them later is a local edit instead of a restore from history.
   // See TODO.md and openspec/changes/park-new-types-and-styles/ for the reason,

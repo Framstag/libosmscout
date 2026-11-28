@@ -194,6 +194,19 @@ Routing = executable('Routing',
                      install: true,
                      install_dir: demoInstallDir)
 
+# The diagnostic that prints a route's description nodes beside the published step model, so a
+# manoeuvre that words no signposted destination can be told from a record that sits on another
+# node. It links the client library for the step collector the app itself reads.
+if buildClient
+  RouteSteps = executable('RouteSteps',
+                          'src/RouteSteps.cpp',
+                          include_directories: [osmscoutIncDir, osmscoutclientIncDir],
+                          dependencies: [mathDep, openmpDep],
+                          link_with: [osmscout, osmscoutclient],
+                          install: true,
+                          install_dir: demoInstallDir)
+endif
+
 LookupPOI = executable('LookupPOI',
                        'src/LookupPOI.cpp',
                        include_directories: [osmscoutIncDir],

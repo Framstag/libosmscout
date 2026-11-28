@@ -341,7 +341,8 @@ namespace osmscout {
                                 ObjectFileRef incomingPath,
                                 size_t incomingNode);
 
-      void HandleDirectMotorwayEnter(RouteDescription::Node& node,
+      void HandleDirectMotorwayEnter(const RouteDescription::Node& previousNode,
+                                     RouteDescription::Node& node,
                                      const RouteDescription::NameDescriptionRef& toName);
       void HandleDirectMotorwayLeave(const RouteDescription::Node& previousNode,
                                      RouteDescription::Node& node,
@@ -351,6 +352,12 @@ namespace osmscout {
                               const std::list<RouteDescription::Node>::const_iterator &lastNode,
                               const std::list<RouteDescription::Node>::iterator &node,
                               const std::list<RouteDescription::Node>::const_iterator &end);
+      /**
+       * Attach the destination description of the node a motorway enter or change was decided at to
+       * the node that carries the manoeuvre, when that node carries no record of its own.
+       */
+      void CarryDestination(const RouteDescription::Node& decidedAtNode,
+                            RouteDescription::Node& node);
       bool NameChanged(const RouteDescription::NameDescriptionRef &lastName,
                        const RouteDescription::NameDescriptionRef &nextName);
       std::optional<RouteDescription::DirectionDescription::Move> DirectionFromLane(const RouteDescription::Node &node);
@@ -377,6 +384,17 @@ namespace osmscout {
     public:
       bool Process(const PostprocessorContext& context,
                    RouteDescription& description) override;
+
+      /**
+       * Whether a turn at `node` must not be described: the motorway link run the route is on has
+       * already produced its enter/change, the node is still on that run, and it carries the
+       * destination record the manoeuvre words. A bend of a link is not a second instruction — a turn
+       * there replaces the sign the manoeuvre already names with a bare instruction (definition and
+       * measurement in `RoutePostprocessor.cpp`).
+       */
+      static bool SuppressesTurnOnLinkBend(const PostprocessorContext& context,
+                                           const RouteDescription::Node& node,
+                                           bool motorwayLinkDecisionPlaced);
 
     };
 

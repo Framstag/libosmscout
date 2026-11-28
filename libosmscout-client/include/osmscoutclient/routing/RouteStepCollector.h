@@ -65,6 +65,11 @@ namespace osmscout::client {
   private:
     void Reset();
 
+    /**
+     * Note a manoeuvre hook for the node being collected. Where more than one hook fires for a node,
+     * the strongest manoeuvre is the step's kind — a motorway enter placed on a node together with
+     * the turn of the link that leads onto it keeps the entry.
+     */
     void NoteKind(RouteStep::Kind kind);
 
   public:
