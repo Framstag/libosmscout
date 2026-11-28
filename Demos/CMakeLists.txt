@@ -47,6 +47,14 @@ osmscout_demo_project(NAME ReverseLocationLookup SOURCES src/ReverseLocationLook
 #---- Routing
 osmscout_demo_project(NAME Routing SOURCES src/Routing.cpp TARGET OSMScout::OSMScout)
 
+#---- RouteSteps
+# The diagnostic that prints a route's description nodes beside the published step model, so a
+# manoeuvre that words no signposted destination can be told from a record that sits on another
+# node. It links the client library for the step collector the app itself reads.
+if(${OSMSCOUT_BUILD_CLIENT})
+	osmscout_demo_project(NAME RouteSteps SOURCES src/RouteSteps.cpp TARGET OSMScout::OSMScout OSMScout::Client)
+endif()
+
 #---- RoutingAnimation
 if(${OSMSCOUT_BUILD_MAP_QT})
 	osmscout_demo_project(NAME RoutingAnimation SOURCES src/RoutingAnimation.cpp TARGET OSMScout::OSMScout OSMScout::Map OSMScout::MapQt Qt::Widgets)

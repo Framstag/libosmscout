@@ -1552,3 +1552,132 @@ TEST_CASE("Suggest through lanes at a virtual junction where a new lane appears"
   REQUIRE(suggestedLanes->GetTo() == 1);
   REQUIRE(suggestedLanes->GetTurn() == LaneTurn::Through);
 }
+
+
+/**
+ * A bend on a motorway link is not a second instruction (measured on the A 45 -> A 40 link at Kreuz
+ * Dortmund-West, 2026-11-28: a `MOTORWAY_CHANGE` at 13.0 km worded "A 40 towards Essen", then a
+ * `TURN` at 13.3 km carrying the same destination record — which words nothing, because only a
+ * motorway manoeuvre words a sign).
+ *
+ * The placement that produced it sits in `InstructionPostprocessor::Process` and needs a node with a
+ * usable exit, which this mock cannot build; the rule it consults is `SuppressesTurnOnLinkBend`, and
+ * the placement itself is proven on the real route (`tools/route-steps.sh`: the turn is gone from the
+ * description, the change keeps its record).
+ */
+TEST_CASE("A bend on a motorway link is suppressed only where the link already decided")
+{
+  using namespace osmscout;
+
+  MockDatabaseBuilder databaseBuilder;
+
+  ObjectFileRef linkRef=databaseBuilder.AddMotorwayLink(
+    {GeoCoord(51.5600, 7.42000), GeoCoord(51.5550, 7.40500)},
+    [](AccessFeatureValue* access, LanesFeatureValue*, NameFeatureValue* name){
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("A 40");
+    });
+
+  ObjectFileRef streetRef=databaseBuilder.AddHighway(
+    {GeoCoord(51.5550, 7.40500), GeoCoord(51.5150, 7.36000)},
+    [](AccessFeatureValue* access, LanesFeatureValue*, NameFeatureValue* name){
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Kruppstraße");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  // On the link, carrying the record the manoeuvre words: the bend this rule exists for.
+  RouteDescription  onLink;
+
+  onLink.AddNode(0, 0, {linkRef}, linkRef, 1);
+  onLink.AddNode(0, 1, {linkRef}, ObjectFileRef(), 0);
+
+  auto bend=onLink.Nodes().begin();
+
+  bend->AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen"));
+
+  REQUIRE(RoutePostprocessor::InstructionPostprocessor::SuppressesTurnOnLinkBend(context, *bend, true));
+
+  // Before the run decided anything, the same node keeps its turn.
+  REQUIRE_FALSE(RoutePostprocessor::InstructionPostprocessor::SuppressesTurnOnLinkBend(context, *bend, false));
+
+  // On the link without a record: a fork inside the run, which the driver may still need.
+  RouteDescription  withoutRecord;
+
+  withoutRecord.AddNode(0, 0, {linkRef}, linkRef, 1);
+  withoutRecord.AddNode(0, 1, {linkRef}, ObjectFileRef(), 0);
+
+  REQUIRE_FALSE(RoutePostprocessor::InstructionPostprocessor::SuppressesTurnOnLinkBend(context,
+                                                                                       *withoutRecord.Nodes().begin(),
+                                                                                       true));
+
+  // Off the link run: an ordinary junction, whatever it carries.
+  RouteDescription  offLink;
+
+  offLink.AddNode(0, 0, {streetRef}, streetRef, 1);
+  offLink.AddNode(0, 1, {streetRef}, ObjectFileRef(), 0);
+
+  auto streetNode=offLink.Nodes().begin();
+
+  streetNode->AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen"));
+
+  REQUIRE_FALSE(RoutePostprocessor::InstructionPostprocessor::SuppressesTurnOnLinkBend(context, *streetNode, true));
+}
+
+/**
+ * The guard on the other side: a turn off the motorway link run keeps its description, a record or
+ * not — the rule above is about a link's own bend, never about ordinary junctions.
+ */
+TEST_CASE("A turn off a motorway link run keeps its description")
+{
+  using namespace osmscout;
+
+  MockDatabaseBuilder databaseBuilder;
+
+  ObjectFileRef a40Ref=databaseBuilder.AddMotorway(
+    {GeoCoord(51.5520, 7.40400), GeoCoord(51.5300, 7.38000)},
+    [](AccessFeatureValue* access, LanesFeatureValue*, NameFeatureValue* name){
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Ruhrschnellweg (A 40)");
+    });
+
+  // The exit ramp: the route leaves the motorway here, so the link run is over at the next node.
+  ObjectFileRef rampRef=databaseBuilder.AddMotorwayLink(
+    {GeoCoord(51.5300, 7.38000), GeoCoord(51.5250, 7.37200)},
+    [](AccessFeatureValue* access, LanesFeatureValue*, NameFeatureValue* name){
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("A 40");
+    });
+
+  ObjectFileRef streetRef=databaseBuilder.AddHighway(
+    {GeoCoord(51.5250, 7.37200), GeoCoord(51.5150, 7.36000)},
+    [](AccessFeatureValue* access, LanesFeatureValue*, NameFeatureValue* name){
+      access->SetAccess(AccessFeatureValue::carForward);
+      name->SetName("Kruppstraße");
+    });
+
+  MockContext context(databaseBuilder.Build());
+
+  RouteDescription description;
+
+  description.AddNode(0, 0, {a40Ref}, a40Ref, 1);
+  description.AddNode(0, 0, {a40Ref, rampRef}, rampRef, 1);
+  description.AddNode(0, 0, {rampRef, streetRef}, streetRef, 1);
+  description.AddNode(0, 1, {streetRef}, ObjectFileRef(), 0);
+
+  auto node=description.Nodes().begin();
+  ++node;
+  node->AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen-Zentrum"));
+  ++node;
+  node->AddDescription(std::make_shared<RouteDescription::DestinationDescription>("Essen-Zentrum"));
+
+  Postprocess(description, context);
+
+  auto turn=description.Nodes().begin();
+  ++turn;
+  ++turn;
+
+  // The run ended, so this node is an ordinary junction: its turn is described as before.
+  REQUIRE(turn->HasDescription<RouteDescription::DirectionDescription>());
+}

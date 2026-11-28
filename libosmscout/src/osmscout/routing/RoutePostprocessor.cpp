@@ -1010,6 +1010,24 @@ namespace osmscout {
     return true;
   }
 
+  bool RoutePostprocessor::InstructionPostprocessor::SuppressesTurnOnLinkBend(const PostprocessorContext& postprocessor,
+                                                                            const RouteDescription::Node& node,
+                                                                            bool motorwayLinkDecisionPlaced)
+  {
+    // A motorway link is one decision: the enter/change is placed where the route joins the link, and
+    // a bend further along the same run is not a second instruction. The bend carries the destination
+    // record the manoeuvre already words, and a turn placed there replaces "A 40 towards Essen" with a
+    // bare turn on every surface that reads the step model — only a motorway manoeuvre words a sign
+    // (measured on the A 45 -> A 40 link at Kreuz Dortmund-West, 2026-11-28: a MOTORWAY_CHANGE at
+    // 13.0 km, then a TURN at 13.3 km carrying the same record, which words nothing).
+    //
+    // The record is part of the rule on purpose: a turn that inherits no sign is one the driver may
+    // still need (a fork inside a link run), and it keeps its description.
+    return motorwayLinkDecisionPlaced &&
+           postprocessor.IsMotorwayLink(node) &&
+           node.HasDescription<RouteDescription::DestinationDescription>();
+  }
+
   bool RoutePostprocessor::InstructionPostprocessor::Process(const PostprocessorContext& postprocessor,
                                                              RouteDescription& description)
   {
@@ -1033,6 +1051,16 @@ namespace osmscout {
 
     std::list<RouteDescription::Node>::iterator       node=description.Nodes().begin();
     std::list<RouteDescription::Node>::const_iterator lastNode=description.Nodes().end();
+
+    // Whether the motorway link run the route is currently on has already produced its manoeuvre.
+    // A link is one decision: the enter/change is placed where the route joins the link, and a bend
+    // further along the same run is not a second instruction — it carries the destination record the
+    // manoeuvre already words, and a turn placed there replaces "A 40 towards Essen" with a bare turn
+    // on every surface that reads the step model (measured on the A 45 -> A 40 link at Kreuz
+    // Dortmund-West, 2026-11-28: a MOTORWAY_CHANGE at 13.0 km, then a TURN at 13.3 km carrying the
+    // same record, which words nothing because only a motorway manoeuvre words a sign).
+    bool motorwayLinkDecisionPlaced=false;
+
     while (node!=description.Nodes().end()) {
       RouteDescription::NameDescriptionRef originName;
       RouteDescription::NameDescriptionRef targetName;
@@ -1043,6 +1071,11 @@ namespace osmscout {
           node->GetPathObject().Invalid()) {
         lastNode=node++;
         continue;
+      }
+
+      // Off the links the run is over, and the next link is a new decision.
+      if (!postprocessor.IsMotorwayLink(*node)) {
+        motorwayLinkDecisionPlaced=false;
       }
 
       originName=lastNode->GetDescription<RouteDescription::NameDescription>();
@@ -1119,6 +1152,8 @@ namespace osmscout {
                            node,
                            description.Nodes().end());
 
+        motorwayLinkDecisionPlaced=true;
+
         lastNode=node++;
 
         continue;
@@ -1143,7 +1178,8 @@ namespace osmscout {
       if (inRoundabout) {
         HandleRoundaboutNode(*node);
       }
-      else if (HandleDirectionChange(postprocessor, node, description.Nodes().end())) {
+      else if (!SuppressesTurnOnLinkBend(postprocessor, *node, motorwayLinkDecisionPlaced) &&
+               HandleDirectionChange(postprocessor, node, description.Nodes().end())) {
         lastNode=node++;
 
         continue;

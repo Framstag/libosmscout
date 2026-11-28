@@ -385,6 +385,17 @@ namespace osmscout {
       bool Process(const PostprocessorContext& context,
                    RouteDescription& description) override;
 
+      /**
+       * Whether a turn at `node` must not be described: the motorway link run the route is on has
+       * already produced its enter/change, the node is still on that run, and it carries the
+       * destination record the manoeuvre words. A bend of a link is not a second instruction — a turn
+       * there replaces the sign the manoeuvre already names with a bare instruction (definition and
+       * measurement in `RoutePostprocessor.cpp`).
+       */
+      static bool SuppressesTurnOnLinkBend(const PostprocessorContext& context,
+                                           const RouteDescription::Node& node,
+                                           bool motorwayLinkDecisionPlaced);
+
     };
 
     using InstructionPostprocessorRef = std::shared_ptr<InstructionPostprocessor>;
